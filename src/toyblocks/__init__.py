@@ -40,7 +40,7 @@ FRANKA_ROBOTIQ_URDF_FILEPATH = (
     ROBOT_ASSET_DIR / "franka_droid" / "usd" / "fr3_franka_hand.urdf"
 )
 
-# NOTE(wilbert): for now, these scene json files will be tracked on the repo instead of the
+# NOTE: for now, these scene json files will be tracked on the repo instead of the
 # resources manager, which for now it's the simplest move. Note that the assets are still under
 # the resources manager, but the json is not, so we just have to use the right paths from now on
 

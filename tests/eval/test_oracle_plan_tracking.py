@@ -229,7 +229,7 @@ def test_unstack_waits_for_the_block_to_reach_the_table(make_oracle: Any, tmp_pa
         ("pnp_block_table", ["(on_table block_a workspace_table)"]),
         ("pnp_table_block", ["(on block_b block_a)"]),  # the last step has effects now
     ]
-    # Upstream (TAMP >= 7a0eff62) no longer passes an on_table check that cannot run.
+    # Upstream (newer TAMP) no longer passes an on_table check that cannot run.
     upstream = type(oracle).__mro__[1]._evaluate_effect_predicates
     assert upstream(oracle, 0) is False
     assert oracle._evaluate_effect_predicates(0) is False

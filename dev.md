@@ -1,7 +1,7 @@
 # Development Setup (wip)
 
 
-stao: I can't get isaac lab automatically discovered by python language servers so I add this to .vscode/settings.json
+Isaac Lab isn't automatically discovered by Python language servers, so add this to .vscode/settings.json
 
 ```
 {

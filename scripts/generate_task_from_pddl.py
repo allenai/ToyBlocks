@@ -160,7 +160,7 @@ def generate_env_from_pddl(args: Args, pddl_path: str, output_dir: str):
     # seeded here, as generate_plans.py and execute_plans.py already do.
     np.random.seed(args.seed)
 
-    # TODO (rmh) - shared boilerplate with generate_task_from_dataset.py; extract helper
+    # TODO - shared boilerplate with generate_task_from_dataset.py; extract helper
     env_info = generate_environment_code(
         domain_path=args.domain_path,
         task_name=task_slug,

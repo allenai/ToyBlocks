@@ -412,7 +412,9 @@ class IsaacDataRecorderLeRobot:
         # comes from the base, but the actual dataset is written into the first
         # collision-free shard dir so a resumed run never overwrites a shard a
         # previous (preempted) run already finalized.
-        self._shard_base_dir = data_dir if data_dir else "/home/jason/TMP3/datasets_test"
+        if not data_dir:
+            raise ValueError("IsaacDataRecorderLeRobot needs data_dir, the directory to write the dataset to")
+        self._shard_base_dir = data_dir
         self._source_problem = _problem_name_from_data_dir(self._shard_base_dir)
         self._enable_sharding = enable_sharding
         if enable_sharding:

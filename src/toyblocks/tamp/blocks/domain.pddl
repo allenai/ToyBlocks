@@ -493,7 +493,7 @@
   ; and under TMP3_MOTION_UNIFORM_STIFFNESS with the medium profile (used for the
   ; scripted flips) it pushed obstructors off the table (5/20 in a local test,
   ; Oct 2026); with its own soft profile it worked. Re-enable once RL skills keep
-  ; their training gains under uniform stiffness. Since cd0ea2fb the executor feeds
+  ; their training gains under uniform stiffness. The executor now feeds
   ; the policy the 5 blocks nearest the isolated one, so >5-block scenes no longer crash.
   ; (:action isolate
   ;   :parameters(?g - gripper ?b1 - block ?table - table)

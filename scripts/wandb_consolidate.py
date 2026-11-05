@@ -131,7 +131,7 @@ _OFFLINE_DIAGNOSTICS_SCRIPT = Path(__file__).resolve().parent / "plot_diagnostic
 _OFFLINE_DIAGNOSTICS_SUBDIR = "control_diagnostics_offline"
 
 # One rollout only, still rendered online and flat under the worker's
-# output_dir root -- unaffected by the offline-diagnostics move (96ddd7641).
+# output_dir root -- unaffected by the offline-diagnostics move.
 # hl_conditioning_staleness.png comes from toyblocks.eval.hl_staleness under
 # --save_diagnostic_plots.
 _DIAGNOSTIC_PLOT_NAMES = [

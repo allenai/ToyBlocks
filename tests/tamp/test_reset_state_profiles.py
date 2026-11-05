@@ -1,5 +1,5 @@
 """Reset states are matched to envs by profile *value* (reset_states_io, ported with the env
-packages of naman/datagen-revamp fdf4933f; the vecgen half of its tests needs toyblocks.vecgen).
+packages of the datagen revamp; the vecgen half of its tests needs toyblocks.vecgen).
 
 A scene profile (per-block sizes, friction) is fixed per env at spawn, so a
 reset state or recorded episode is only valid in an env spawned with the same

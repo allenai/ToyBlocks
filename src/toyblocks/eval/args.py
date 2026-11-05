@@ -421,8 +421,8 @@ class Args(BaseArgs):
     itself; see ``instrument_ptmap_saturation``.
 
     The per-step joint-position / velocity / EE / fingertip / camera comparison
-    plots this flag used to render online do not exist anymore (moved offline
-    in commit 96ddd7641) and do not need this flag at all — only
+    plots this flag used to render online do not exist anymore (they moved
+    offline) and do not need this flag at all — only
     ``--save_lerobot``. Run ``scripts/plot_diagnostics_from_eval_run.py
     --eval-dir <output_dir>`` by hand for every recorded episode, or rely on
     ``wandb_consolidate.py``, which runs it automatically for one

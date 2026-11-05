@@ -264,9 +264,9 @@ class FlipEnv(BaseEnv):
 
     def _get_obs_goal(self) -> dict:
         return dict(
-            # TODO (stao): might not need this one hot thing anyway, and if we do, it should be part of intermediate values (computed from some given goal condition)
+            # TODO: might not need this one hot thing anyway, and if we do, it should be part of intermediate values (computed from some given goal condition)
             # goal_orientation_one_hot=self.goal_orientation_one_hot,
-            # TODO (sumeet): maybe add these back after merging with TAMP?
+            # TODO: maybe add these back after merging with TAMP?
             # goal_corner_pts=self.goal_corner_pts.reshape(self.num_envs, -1),
             # block_corner_pts_to_goal_corner_pts=(self.block_corner_pts - self.goal_corner_pts).reshape(self.num_envs, -1),
             block_corners_in_goal_frame=self.block_corners_in_goal_frame,
@@ -332,7 +332,7 @@ class FlipEnv(BaseEnv):
             self.block.write_root_pose_to_sim(block_pose, env_ids=env_ids)
             self.block.write_root_velocity_to_sim(torch.zeros(b, 6), env_ids=env_ids)
 
-            # TODO (sumeet): xy offset and discrete orientation are sampled independently. Maybe they should be sampled in sync? 
+            # TODO: xy offset and discrete orientation are sampled independently. Maybe they should be sampled in sync? 
             # e.g. flip front should translate +x, flip right should translate -y etc. 
 
             # sample goal xy offset in a radius around the block center 
@@ -370,7 +370,7 @@ class FlipEnv(BaseEnv):
             self.goal.write_root_pose_to_sim(goal_pose, env_ids=env_ids)
 
             # set the IK target to above the block 
-            # TODO (stao): we might want to standardize the initial robot state joint object distributions for TAMP parts later
+            # TODO: we might want to standardize the initial robot state joint object distributions for TAMP parts later
             ee_pose = block_pose.clone()
             ee_xy_offset = torch.empty(b, 2, device=self.device).uniform_(-0.04, 0.04)
             ee_pose[:, :2] += ee_xy_offset

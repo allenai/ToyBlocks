@@ -447,7 +447,7 @@ class BaseEnv(DirectRLEnv):
             cfg.camera_cfgs.pop(name, None)
         self._merge_instance_layout_json_into_cfg(cfg)
         common_utils.apply_camera_overrides_json(cfg)
-        # TODO (stao): debatable whether we should stuff robot config into the main env config.
+        # TODO: debatable whether we should stuff robot config into the main env config.
         isaac_utils.replace_env_regex_ns(cfg)
         isaac_utils.replace_env_regex_ns(self._robot_cfg)
         isaac_utils.replace_env_regex_ns(self._scene_preset_cfg)
@@ -577,7 +577,7 @@ class BaseEnv(DirectRLEnv):
     def set_robot_control_mode(self, control_mode: str):
         self.robot.control_mode = control_mode
         self.update_action_space()
-        # NOTE (stao): If someone modifies action space with wrappers, we can't easily track it here, someone needs to manually update action space
+        # NOTE: If someone modifies action space with wrappers, we can't easily track it here, someone needs to manually update action space
         # for each action wrapper
 
     def update_action_space(self):
@@ -856,7 +856,7 @@ class BaseEnv(DirectRLEnv):
         create the environment (e.g. _get_observations). Now a user just needs to remake the _compute_goals function themselves, and make sure
         any scene assets referenced by _compute_intermediate_values are referenced in some way.
 
-        NOTE (stao): In reality this is also just a work around the fact we cannot create two isaac environment instances in the same process. If we could,
+        NOTE: In reality this is also just a work around the fact we cannot create two isaac environment instances in the same process. If we could,
         then we would simply set the other instance's sim state and re-use functionalities.
         """
 
@@ -929,7 +929,7 @@ class BaseEnv(DirectRLEnv):
         Returns:
             A tuple containing the observations and extras.
         """
-        # NOTE (stao): changes to original reset are to include computing intermediate values and evaluate/update extras before returning
+        # NOTE: changes to original reset are to include computing intermediate values and evaluate/update extras before returning
         # set the seed
         if seed is not None:
             self.seed(seed)
@@ -1396,7 +1396,7 @@ class BaseEnv(DirectRLEnv):
             self.scene.rigid_objects["workspace_table"].write_root_pose_to_sim(
                 table_pose_w, env_ids=env_ids
             )
-            # TODO (sumeetb) I think we can get rid of this, but commenting it out just for now.
+            # TODO I think we can get rid of this, but commenting it out just for now.
             # self.scene.rigid_objects["table_collider"].write_root_pose_to_sim(table_pose_w, env_ids=env_ids)
         self.table_height_offset[env_ids] = table_dz
 
@@ -1555,7 +1555,7 @@ class BaseEnv(DirectRLEnv):
                 self.scene.update(self.physics_dt)
 
     ### some additional functions pulled from IsaacLabSimulator ###
-    # TODO (stao): these functions are not batched. They should be, but predicates assume not batched at the moment
+    # TODO: these functions are not batched. They should be, but predicates assume not batched at the moment
     def get_pose(self, obj_name: str, is_relative: bool = False) -> torch.Tensor:
         try:
             obj = self.scene[obj_name]
@@ -1569,7 +1569,7 @@ class BaseEnv(DirectRLEnv):
                 pose[:, :3] -= self.scene.env_origins
             return pose
         else:
-            # NOTE (stao): Is there a better way to access pose data without having to add a new get_pose function...?
+            # NOTE: Is there a better way to access pose data without having to add a new get_pose function...?
             # why do some assets only have pose data stored like this? this makes it not possible for an object oriented way to access some data
             pos = obj.get_local_poses()[0]
             if not is_relative:

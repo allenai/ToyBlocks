@@ -44,9 +44,6 @@ scratchpad/
 
 checkpoints/
 
-# sim2real: local checkouts, run artifacts and recordings
-/robot-control-stack/
-/vlagents/
 *.parquet
 checkpoint/*
 outputs/*

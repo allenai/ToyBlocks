@@ -1,4 +1,4 @@
-# Datagen revamp (`naman/datagen-revamp`)
+# Datagen revamp
 
 Goal: one vectorized simulation process per GPU that samples scenes, plans symbolically
 per env, executes skills as batched tensor operations over hundreds of envs, verifies

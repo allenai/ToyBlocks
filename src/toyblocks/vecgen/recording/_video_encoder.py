@@ -298,7 +298,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
 
     # --extra_depth variants: an ADDITIONAL depth video written alongside the main one, into
     # videos/observation.depth.<cam>_<variant>/. Matches the layout and encode of the reference
-    # dataset (yejink aug07_color_pnp_rendering_textrand_only_updated_N1), whose files carry
+    # dataset (aug07_color_pnp_rendering_textrand_only_updated_N1), whose files carry
     # x264 settings `qp=0 keyint=1` at 224x224 -- i.e. the SAME rg8 codec config as the main
     # rg8 path, only downscaled. Kept lossless + GOP 1 on purpose: every frame is an intra
     # keyframe so a loader can random-access any episode index without keyframe seeking.

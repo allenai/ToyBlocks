@@ -274,7 +274,7 @@ class PushStackedEnv(BaseEnv):
         masked_pos_delta = self.distractor_pos_delta * self.active_distractor_mask.unsqueeze(-1)
         masked_rot_delta = self.distractor_rot_delta * self.active_distractor_mask.unsqueeze(-1)
         return dict(
-            # (sumeetb) WARNING: distractors_corner_pts_rel_ee must be the first obs here for attention agent to work. Don't change the order!
+            # WARNING: distractors_corner_pts_rel_ee must be the first obs here for attention agent to work. Don't change the order!
             distractors_corner_pts_rel_ee=self.distractors_corner_pts_rel_ee.reshape(self.num_envs, -1),
             object_pos=self.object_pos,
             # object_quat=self.object_quat,

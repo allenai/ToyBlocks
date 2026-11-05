@@ -217,10 +217,10 @@ def rollout(obs, done):
                 batch_size=(args.num_envs,),
             )
         )
-        # NOTE (stao): change here for gpu env
+        # NOTE: change here for gpu env
         obs = next_obs = next_obs
         done = next_done
-    # NOTE (stao): need to do .to(device) i think? otherwise container.device is None, not sure if this affects anything
+    # NOTE: need to do .to(device) i think? otherwise container.device is None, not sure if this affects anything
     container = torch.stack(ts, 0).to(device)
     return next_obs, done, container, final_values
 
@@ -303,7 +303,7 @@ if __name__ == "__main__":
     # if args.control_mode is not None:
     #     env_kwargs["control_mode"] = args.control_mode
     
-    # TODO (stao): usually it's good to have a separate eval env for recording parallel videos for debugging/inspection
+    # TODO: usually it's good to have a separate eval env for recording parallel videos for debugging/inspection
     # however Isaac lab doesn't support this. In the future we can add a way to spawn a new python process just for evaluations (with cameras turned on)
     # envs: BaseEnv = gym.make(args.env_id, num_envs=args.num_envs if not args.evaluate else 1, reconfiguration_freq=args.reconfiguration_freq, **env_kwargs)
     # eval_envs = gym.make(args.env_id, num_envs=args.num_eval_envs, reconfiguration_freq=args.eval_reconfiguration_freq, human_render_camera_configs=dict(shader_pack="default"), **env_kwargs)
@@ -324,7 +324,7 @@ if __name__ == "__main__":
         ))
         viewer.hook_to_env(envs)
     if args.capture_video or args.save_trajectory:
-        # TODO (stao): support back video recording in some way
+        # TODO: support back video recording in some way
         eval_output_dir = f"runs/{run_name}/videos"
         if args.evaluate:
             eval_output_dir = f"{os.path.dirname(args.checkpoint)}/test_videos"
@@ -378,7 +378,7 @@ if __name__ == "__main__":
     # Register step as a special op not to graph break
     # @torch.library.custom_op("mylib::step", mutates_args=())
     def step_func(action: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        # NOTE (stao): change here for gpu env
+        # NOTE: change here for gpu env
         next_obs, reward, terminations, truncations, info = envs.step(action)
         next_done = torch.logical_or(terminations, truncations)
         return next_obs, reward, next_done, info

@@ -1,7 +1,7 @@
 """The simulator view render drives: a ToyBlocks autogen env, without TAMP.
 
 Render used TAMP's ``tmp3.Backends.IsaacLabVectorized.simulator.IsaacLabSimulatorVectorized``
-(pinned ea570fd2) as a wrapper around the gym env, but only ever touched a small part of it.
+as a wrapper around the gym env, but only ever touched a small part of it.
 :class:`RenderSim` is that part, with the same behaviour:
 
 - ``env`` / ``base_env`` / ``sim`` (the ``SimulationContext``) / ``scene`` / ``device`` /

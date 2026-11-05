@@ -1732,7 +1732,7 @@ def _row_to_setup(
     # on an empty cell. Poses / HL state / PD mode come from ``row``.
     prompt_row = row if task_row is None else task_row
 
-    # TODO (rmh) - hardcoded 7-DOF; derive from env config
+    # TODO - hardcoded 7-DOF; derive from env config
     joints = _to_list(table.column(_COL_JOINT_POS)[row].as_py())
     if len(joints) < 7:
         raise ValueError(f"{source}: {_COL_JOINT_POS} has {len(joints)} entries, expected >= 7")

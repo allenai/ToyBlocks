@@ -44,7 +44,7 @@ FLIP_X_RANGE = (0.2, 0.65)
 ROTATE_X_RANGE = (0.325, 0.825)
 ROTATE_Y_RANGE = (-0.3, 0.3)
 ROTATE_DX, ROTATE_DY = 0.07, 0.04
-# OnTablePlacePoseGenerator (naman/dev 02b9a693): neighbour clearance a relocated block needs
+# As TAMP's OnTablePlacePoseGenerator: neighbour clearance a relocated block needs
 # for its own rotate (RotatePoseGenerator.validate_pose), and 3x the place candidates when ranked
 PLACE_ROTATE_CLEARANCE = 0.10
 SKILL_AWARE_SAMPLE_FACTOR = 3
@@ -157,7 +157,7 @@ def relocation_scores(
 
     ``cand`` ``[B, C, 3]`` are candidate block centres (base frame), ``edge`` ``[B]`` the
     held block's edge, ``others`` ``[B, K, 3]`` the other blocks' centres with ``other_mask``
-    ``[B, K]`` (False for the held block). The score counts, as in naman/dev's
+    ``[B, K]`` (False for the held block). The score counts, as in TAMP's
     OnTablePlacePoseGenerator.skill_score, the skills this block is moved for that the spot
     allows: each flip direction in ``own_flip`` ``[B, 4]`` (landing x in range, landing in
     the front view, no neighbour in the flip band within 10 cm of z) and the rotate in

@@ -587,7 +587,7 @@ def prim_to_trimesh(prim_path: str, stage: Usd.Stage, visual_only: bool = True):
         if prim.GetAttribute("visibility").Get() == "invisible":
             continue
         if visual_only and prim.GetAttribute("purpose").Get() == "guide":
-            # NOTE (stao): 0 clue where the "guide" purpose differentiation of collision vs not collision meshes is documented
+            # NOTE: 0 clue where the "guide" purpose differentiation of collision vs not collision meshes is documented
             # wp says its from some tutorial https://www.youtube.com/playlist?list=PLn0vmt2OawcHgWDFBOzCg9djAXplYx0EW
             continue
         mesh = usd_geom_to_mesh(prim)
