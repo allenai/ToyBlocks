@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="ToyBlocksLogo_latest.svg" alt="ToyBlocks" width="720">
+  <img src="ToyBlocksLogo_new.svg" alt="ToyBlocks" width="720">
 </p>
 
 # ToyBlocks
