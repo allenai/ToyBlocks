@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Pre-training ManiFlow Policies on Automatically Generated Data &#8212; ToyBlocks  documentation</title>
+    <title>Training ManiFlow Policies on Automatically Generated Data &#8212; ToyBlocks  documentation</title>
   
   
   
@@ -281,7 +281,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datagen/local.html">Running the pipeline on this machine</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Pre-training ManiFlow Policies on Automatically Generated Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Training ManiFlow Policies on Automatically Generated Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
 <li class="toctree-l3"><a class="reference internal" href="imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
 </ul>
@@ -341,7 +341,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Workflows</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Pre-training ManiFlow Policies on Automatically Generated Data</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Training ManiFlow Policies on Automatically Generated Data</span></li>
   </ul>
 </nav>
 </div>
@@ -358,8 +358,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pre-training-maniflow-policies-on-automatically-generated-data">
-<h1>Pre-training ManiFlow Policies on Automatically Generated Data<a class="headerlink" href="#pre-training-maniflow-policies-on-automatically-generated-data" title="Link to this heading">#</a></h1>
+  <section id="training-maniflow-policies-on-automatically-generated-data">
+<h1>Training ManiFlow Policies on Automatically Generated Data<a class="headerlink" href="#training-maniflow-policies-on-automatically-generated-data" title="Link to this heading">#</a></h1>
 <p>ManiFlow policies are trained with the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> submodule
 (<a class="reference external" href="https://github.com/allenai/maniflow-tb">allenai/maniflow-tb</a>, Python package <code class="docutils literal notranslate"><span class="pre">hvla</span></code>) and
 its local launcher, <code class="docutils literal notranslate"><span class="pre">scripts/train_maniflow.py</span></code>. The script turns its flags into a single
@@ -371,7 +371,7 @@ training command,</p>
 <p>and runs it on this machine: <code class="docutils literal notranslate"><span class="pre">accelerate</span> <span class="pre">launch</span></code> on all visible GPUs by default, or
 <code class="docutils literal notranslate"><span class="pre">torchrun</span></code> across several nodes. It trains on a merged LeRobot dataset, the output of the
 <a class="reference internal" href="data_generation.html"><span class="std std-doc">data generation pipeline</span></a>. Every flag is listed in the
-<a class="reference internal" href="imitation_learning/train_maniflow.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</span></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> <a class="reference internal" href="imitation_learning/train_maniflow.html"><span class="std std-doc">Reference</span></a>.</p>
 <section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">#</a></h2>
 <p>These docs describe maniflow-tb commit <code class="docutils literal notranslate"><span class="pre">7b10edf</span></code> (“toyblocks release”), the commit the
@@ -392,30 +392,23 @@ its logs stay in the run directory.</p>
 </section>
 <section id="training-on-a-generated-dataset">
 <h2>Training on a generated dataset<a class="headerlink" href="#training-on-a-generated-dataset" title="Link to this heading">#</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>maniflow-tb/scripts/train_maniflow.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--data_root_dir<span class="w"> </span>data/datasets/merged/train/oct06_stack3_1000x32<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--goal_action_filter<span class="w"> </span><span class="s1">'pick,place on table,place,flip backward,flip forward,flip left,flip right,rotate ccw,rotate cw,done'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--rgb_224
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>maniflow-tb/scripts/train_maniflow.py<span class="w">  </span>--data_root_dir<span class="w"> </span>data/datasets/merged/train/my_dataset<span class="w"> </span>
 </pre></div>
 </div>
 <p>Relative <code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">--run_root_dir</span></code> paths are resolved against the directory you run
 the script from; the training command itself runs inside <code class="docutils literal notranslate"><span class="pre">maniflow-tb/</span></code>.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code>: the merged LeRobot dataset (by default the pipeline writes it to
-<code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;</span></code>). Pass several directories to co-train
-on them; <code class="docutils literal notranslate"><span class="pre">--dataset_ratio</span></code> sets their sampling ratio.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--goal_action_filter</span></code>: training samples only start on frames whose <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> is in
-this list. With several datasets, give one <code class="docutils literal notranslate"><span class="pre">;</span></code>-separated group per dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--rgb_224</span></code>: read the pre-resized <code class="docutils literal notranslate"><span class="pre">&lt;camera&gt;_224</span></code> videos instead of decoding the native
-640x360 ones. The run fails if a dataset has no 224 videos; the
+<li><p><code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code>: the merged LeRobot dataset (by default the pipeline writes it to<br />
+<code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;</span></code>). Pass several directories to co-train<br />
+on them; <code class="docutils literal notranslate"><span class="pre">--dataset_ratio</span></code> sets their sampling ratio.<br />
 <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">re-render step</span></a> writes them.</p></li>
 </ul>
 <p>Everything else keeps its default, which gives:</p>
 <ul class="simple">
-<li><p>absolute 9-D joint actions (7 joints, gripper, PD mode), predicting chunks of 50 actions
+<li><p>absolute 9-D joint actions (7 joints, gripper, Play mode), predicting chunks of 50 actions<br />
 and executing 25;</p></li>
-<li><p>a 9-D state (joint positions, gripper, PD mode);</p></li>
-<li><p>front and gripper RGB through a fine-tuned CLIP ViT-B/16, no depth;</p></li>
+<li><p>a 9-D state (joint positions, gripper, Play mode); The play mode is used my Maniflow to indicate that it has completed the task and request the next instruction.</p></li>
+<li><p>front and gripper RGB through a fine-tuned CLIP ViT-B/16. Depth is supported but off by default.</p></li>
 <li><p>the target heatmap as cross-attention tokens through the shared RGB encoder (dropped
 with probability 0.1, sigma 0.8 patches);</p></li>
 <li><p>T5-small language conditioning on the action string only (<code class="docutils literal notranslate"><span class="pre">action_only</span></code>);</p></li>
@@ -424,8 +417,7 @@ with probability 0.1, sigma 0.8 patches);</p></li>
 </ul>
 <p>The script prints the run ID, the run directory and the full command before it starts;
 <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code> prints them and exits. The run ID is built from the dataset name and the flags,
-plus a timestamp, for example
-<code class="docutils literal notranslate"><span class="pre">rgb224_oct06_stack3_1000x32_50_25_abs_token_shared_rgb_mask0.1_sigma0.8_lang_t5-small_action_only-11-05-09-30-00</span></code>.
+plus a timestamp.
 <code class="docutils literal notranslate"><span class="pre">--user_prefix</span></code> puts a prefix in front of it, and <code class="docutils literal notranslate"><span class="pre">--run_id</span></code> replaces it.</p>
 </section>
 <section id="choosing-gpus-and-nodes">
@@ -435,7 +427,7 @@ them. A short debug run on one GPU:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="nv">WANDB_MODE</span><span class="o">=</span>offline<span class="w"> </span>python<span class="w"> </span>maniflow-tb/scripts/train_maniflow.py<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--run_root_dir<span class="w"> </span>/tmp/maniflow_debug<span class="w"> </span>--duration<span class="w"> </span><span class="m">100</span><span class="w"> </span>--save_interval<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--logging_frequency<span class="w"> </span><span class="m">10</span><span class="w"> </span>--dbs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_workers<span class="w"> </span><span class="m">0</span><span class="w"> </span>--max_episodes<span class="w"> </span><span class="m">500</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--data_root_dir<span class="w"> </span>data/datasets/merged/train/my_dataset<span class="w"> </span>--rgb_224
+<span class="w">    </span>--data_root_dir<span class="w"> </span>data/datasets/merged/train/my_dataset
 </pre></div>
 </div>
 <p>For several nodes, run the script on every node with the same flags, plus
