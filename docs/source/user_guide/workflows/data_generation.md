@@ -63,7 +63,7 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
   launch it on, spreading problems over the visible GPUs. The same command works on a
   single-GPU workstation and on a multi-GPU node (see [Running on this machine](datagen/local.md)).
 
-## What you can do with the datagen pipeline?
+## What can you do with the datagen pipeline?
 
 - **Generate a demonstration dataset for a task family**, such as 3-block stacking,
   flipping, rotating or pick-and-place: pick a generator in `scripts/task_gen/` and run
@@ -115,7 +115,7 @@ If you simply want to generate some example datasets with already tested scripts
 
 
 
-## Full-Pipeline Data Generation
+## Full Data Generation Pipeline
 
 The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in [Running on this machine](datagen/local.md).
 
