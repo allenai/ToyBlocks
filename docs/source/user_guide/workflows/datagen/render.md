@@ -125,7 +125,7 @@ episode. See [Render passes](#render-passes) for the rules and
 
 Every pass names a YAML, and the pipeline records that file in the problem's
 `render_params.json`, so a dataset always says which look it was made with. With no other render
-flags the pass above renders `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`
+flags the pass above renders [`render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml)
 once per episode, with `left_camera` skipped, failure episodes skipped, and the 224-px RGB and
 `rg8_55_224` depth sidecars
 (`--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 --rgb_GOP 2`). Override most
@@ -155,8 +155,8 @@ The pipeline flags for this stage are:
 | `--render-flags` | none | The YAML `--render-randomized` uses, as a path readable on the machine you launch the run from. On its own it adds no pass, and `--render-randomized` without it is an error. |
 | `--render-randomized` | off | Shorthand. With `--render-flags F.yaml` and `--render-n N` it is the same as `--render-pass F.yaml:N`. |
 | `--render-n` | 1 | Copies per source episode for `--render-randomized`. |
-| `--render-non-randomized` | off | Shorthand for `--render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`, which needs no YAML of your own. |
-| `--render-non-randomized-flags` | `render_flags_plain.yaml` | Makes that shorthand `--render-pass OTHER.yaml` instead. |
+| `--render-non-randomized` | off | Shorthand for `--render-pass` [`src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml), which needs no YAML of your own. |
+| `--render-non-randomized-flags` | [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | Makes that shorthand `--render-pass OTHER.yaml` instead. |
 | `--render-schedule` | `coupled` | `coupled` runs each render inside the problem's execution job, `pipelined` queues it in the shared GPU-slot pool. Identical pixels either way. |
 | `--render-skip-cameras` | `left_camera` | Cameras not to render. Pass the flag with no names to render every camera. |
 | `--render-skip-failure-episodes` | on | Render only successful episodes. The merge keeps only those anyway. `--no-render-skip-failure-episodes` renders both splits. |
@@ -246,11 +246,11 @@ Five flags YAMLs ship in `src/toyblocks/domain_randomization/flags/`:
 
 | File | Use |
 |---|---|
-| `render_flags_plain.yaml` | One fixed look, nothing sampled. The baseline, and what `--render-non-randomized` uses. |
-| `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | All-random lighting, materials and cameras, plus the train glyph split (symmetry-preserving) and per-env block colours. |
-| `render_flags_allrand_texcache.yaml` | All-random lighting, materials and cameras, without glyph or colour swaps. |
-| `render_flags_camtest.yaml` | A small camera preset for quick tests. It randomizes nothing. See [Common pitfalls](#common-pitfalls). |
-| `render_flags_open_hybrid_camera_rand_only.yaml` | Camera randomization only. |
+| [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | One fixed look, nothing sampled. The baseline, and what `--render-non-randomized` uses. |
+| [`render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml) | All-random lighting, materials and cameras, plus the train glyph split (symmetry-preserving) and per-env block colours. |
+| [`render_flags_allrand_texcache.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml) | All-random lighting, materials and cameras, without glyph or colour swaps. |
+| [`render_flags_camtest.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml) | A small camera preset for quick tests. It randomizes nothing. See [Common pitfalls](#common-pitfalls). |
+| [`render_flags_open_hybrid_camera_rand_only.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_open_hybrid_camera_rand_only.yaml) | Camera randomization only. |
 
 The two `allrand` files sample HDRI backdrops from the `polyhaven` and `indoor-2018` pools. See
 [HDRI backdrops](local.md#hdri-backdrops).
@@ -296,7 +296,7 @@ would contribute 3 copies where 4 were promised and nothing would report it.
 randomized passes is that they are comparable: same backdrop, same renderer, only the sampling
 gone. That is why it takes a YAML rather than rendering with no flags at all. Dropping the YAML
 would bring the backdrop geometry back and change the render mode, giving a different scene
-rather than the same one unrandomized. `render_flags_plain.yaml` is that baseline, and
+rather than the same one unrandomized. [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) is that baseline, and
 `--render-non-randomized-flags` replaces it when you want a different one.
 
 ### N copies within one pass
@@ -396,7 +396,7 @@ on after parsing, so passing them changes nothing.
 | `-N`, `--renders_per_episode` | `1` | The number of renders per source episode. See [render passes](#render-passes). |
 | `--dr_seeding` | `hash` | How per-episode draws are seeded: `hash` (the default), `indexed`, or the legacy `stream`. |
 | `--material_baseline_revert` | off | Reset every writable material key to the asset's own value before each draw. Without it, a key the chosen material leaves out keeps the previous episode's value, so materials bleed across episodes. Off by default because it changes the rendered output. |
-| `--enable_gi` | off | Turn on RTX global illumination and reflections. Enabled automatically when the YAML has a `skybox` block, which `render_flags_plain.yaml` and both `allrand` files have. |
+| `--enable_gi` | off | Turn on RTX global illumination and reflections. Enabled automatically when the YAML has a `skybox` block, which [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) and both `allrand` files have. |
 
 The seeding modes differ in how an episode's values are derived. `stream` seeds one RNG over the
 whole episode list, so an episode's values depend on how many episodes come before it. `indexed`
@@ -417,7 +417,7 @@ missing episode.
 | `--disable_dlss` | off | A shortcut for `--antialiasing FXAA`. Ignored if `--antialiasing` is given. |
 | `--skip_initial_step` | off | Skip the physics settle at construction time. Safe, because the replay overrides all state on every frame. |
 | `--physics_step` | off | Run one physics step per frame instead of rendering only. This removes occasional duplicate frames at the cost of slight drift. The default is to place everything and render, with no physics. |
-| `--env_spacing` | `None` (5.0) | Override the scene's env spacing. Larger spacing stops a neighbouring env's backdrop from leaking into a camera's peripheral view when a skybox is used. **A YAML `env_spacing` wins over this flag**, so a file that sets one, as `render_flags_plain.yaml` and both `allrand` files do, decides the spacing. |
+| `--env_spacing` | `None` (5.0) | Override the scene's env spacing. Larger spacing stops a neighbouring env's backdrop from leaking into a camera's peripheral view when a skybox is used. **A YAML `env_spacing` wins over this flag**, so a file that sets one, as [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) and both `allrand` files do, decides the spacing. |
 
 ### Resume, integrity and debugging
 
@@ -460,16 +460,16 @@ videos that fail with `moov atom not found`, inside a dataset whose `render_para
 says `completed: true`. Always run `validate_dataset_videos.py`, shown under [Output](#output),
 before using a rendered dataset.
 
-### `render_flags_camtest.yaml` produces identical copies
+### [`render_flags_camtest.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml) produces identical copies
 
-`render_flags_camtest.yaml` has **no random section at all**. A `:4` pass with it produces four
+[`render_flags_camtest.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml) has **no random section at all**. A `:4` pass with it produces four
 copies of the same look, identical in depth and differing in RGB only by renderer noise, while
 every size-based check still reports 4x. Use it only to test the camera rig, never to check that
 randomization works.
 
 ### `--antialiasing` has no effect under the shipped path-tracing files
 
-`render_flags_plain.yaml` and both `allrand` files select RTX Real-Time 2.0 path tracing through
+[`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) and both `allrand` files select RTX Real-Time 2.0 path tracing through
 their `carb_settings`, and that renderer does not let antialiasing be turned off.
 `--antialiasing` and `--disable_dlss` set the simulation's antialiasing mode, which the YAML's
 render mode then overrides, so the log prints the mode you asked for and the pixels do not

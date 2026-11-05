@@ -228,8 +228,8 @@ Turn it on with `--render-pass`:
 | `--render-schedule` | `coupled` (default) appends each render to its execution job, holding one slot across both, and with `--local-gpu-workers 2` that is the faster choice. `pipelined` queues each render as its own item in the GPU-slot pool so it can overlap the next execution, at some throughput cost. |
 
 There is no default YAML, so every pass names the look it renders, and the pipeline records that
-file in the problem's `render_params.json`. `src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`
-is the plain baseline and `src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`
+file in the problem's `render_params.json`. [`src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml)
+is the plain baseline and [`src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml)
 adds lighting, material, camera, glyph and colour randomization. `--render-randomized` with
 `--render-flags`, and `--render-non-randomized`, are shorthand for those two passes.
 

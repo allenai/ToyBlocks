@@ -105,8 +105,8 @@ looks cannot share a wave. [Render passes](render.md#render-passes) covers this 
 | `--render-flags FLAGS.yaml` | none | Names the YAML that the two shorthand flags below use. It adds no pass on its own. |
 | `--render-randomized` | off | Shorthand for one pass of `--render-flags`, repeated `--render-n` times. |
 | `--render-n N` | `1` | Copies per source episode for `--render-randomized`. |
-| `--render-non-randomized` | off | Shorthand for one pass of `render_flags_plain.yaml`, which needs no YAML of your own. |
-| `--render-non-randomized-flags` | `render_flags_plain.yaml` | A different YAML for that pass. |
+| `--render-non-randomized` | off | Shorthand for one pass of [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml), which needs no YAML of your own. |
+| `--render-non-randomized-flags` | [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | A different YAML for that pass. |
 
 The two shorthands name the common cases, and they compose with each other and with
 `--render-pass` exactly as further `--render-pass` entries would. These two commands are
@@ -303,8 +303,8 @@ Everything else lands under `<base>` = `<output-root>/datasets/<dataset-folder>/
 └── run_datagen_pipeline_config_<timestamp>.json
 ```
 
-A pass run with `render_flags_plain.yaml` lands in `render/out/job_plain`, and one run with
-`render_flags_allrand_texcache.yaml` lands in `render/out/job_allrand_texcache`. The merged
+A pass run with [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) lands in `render/out/job_plain`, and one run with
+[`render_flags_allrand_texcache.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml) lands in `render/out/job_allrand_texcache`. The merged
 dataset gets a copy of the run config and a plot of its first episode, `episode_0.png`.
 
 ## What counts as "rendered"
