@@ -166,11 +166,10 @@ between the two, or a first finished problem early rather than at the end of a c
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--render-local-num-envs` | `8` | Envs per render wave, under either schedule. A **floor**, not a preference: the render spawns env *i* at block-size slot *i* % *profiles*, so a value below `--num-scene-profiles` leaves the high slots without an env and **every problem is skipped**. The pipeline refuses that pairing up front. 8 keeps the encoder's memory use survivable beside Isaac. |
-| `--render-local-stall-timeout` | `3600` | SIGKILL the render if it prints nothing for this many seconds. |
-| `--render-local-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and `scripts/render/fast_patch.py` fills video holes afterwards. |
+| `--render-num-envs` | `8` | Envs per render wave, under either schedule. A **floor**, not a preference: the render spawns env *i* at block-size slot *i* % *profiles*, so a value below `--num-scene-profiles` leaves the high slots without an env and **every problem is skipped**. The pipeline refuses that pairing up front. 8 keeps the encoder's memory use survivable beside Isaac. |
+| `--render-stall-timeout` | `3600` | SIGKILL the render if it prints nothing for this many seconds. |
+| `--render-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and `scripts/render/fast_patch.py` fills video holes afterwards. |
 
-Despite their names, the `--render-local-*` flags apply to both schedules.
 `--render-skip-cameras` and `--render-extra` are described in [Rendering](render.md).
 
 ### Render arguments the pipeline pins for you
@@ -185,7 +184,7 @@ against one you ran by hand:
 | `--camera_base` | `scene` | `data` |
 | `--rtx_warmup_frames` | `16` | `1` |
 
-`--num_envs` comes from `--render-local-num-envs`. `--render-extra` is appended after these and
+`--num_envs` comes from `--render-num-envs`. `--render-extra` is appended after these and
 wins over them, apart from the exceptions noted under
 [`--render-extra` needs the `=` form](#troubleshooting).
 
@@ -236,7 +235,7 @@ at the end, and the next stage works with the problems that succeeded.
 
 ### How much fits
 
-Measured on one RTX 5090 (32,607 MiB) at `--render-local-num-envs 8`:
+Measured on one RTX 5090 (32,607 MiB) at `--render-num-envs 8`:
 
 | | peak VRAM | peak GPU util | mean util while busy |
 |---|---|---|---|

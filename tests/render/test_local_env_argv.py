@@ -138,7 +138,7 @@ def test_profiles_above_the_render_floor_are_refused():
         "--num-scene-profiles", "16", "--num-envs", "16", "--exec-num-envs", "16",
     )
     assert rc != 0
-    assert "--render-local-num-envs" in out and "at least" in out
+    assert "--render-num-envs" in out and "at least" in out
 
 
 def test_the_default_pairing_is_not_refused():

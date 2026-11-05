@@ -549,7 +549,7 @@ def test_a_coupled_run_can_resume_into_the_render(mod, tmp_path):
         return next((k for k, v in enabled.items() if v), None)
 
     assert resume_point(False) == "merge", "the old behaviour; kept here as the contrast"
-    assert resume_point(True) == "render", "--render-local must be resumable"
+    assert resume_point(True) == "render", "a coupled render must be resumable"
 
 
 def test_coupled_mode_never_arms_the_scheduler(mod):

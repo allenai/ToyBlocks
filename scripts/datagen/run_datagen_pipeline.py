@@ -298,7 +298,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         "--output", str(out_dir),
         "--envs_dir", envs_dir,
         "-N", str(renders_per_episode),
-        "--num_envs", str(args.render_local_num_envs),
+        "--num_envs", str(args.render_num_envs),
         "--skip_initial_step",
         "--resume",
         "--rtx_warmup_frames", "16",
@@ -320,7 +320,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
     argv += ["--env_spacing", "60"]
     if args.render_skip_failure_episodes:
         argv.append("--skip_failure_episodes")
-    if args.render_local_fail_on_video_defects:
+    if args.render_fail_on_video_defects:
         argv.append("--fail_on_video_defects")
     if enable_gi:
         # The source yaml had a `skybox:` block, whose mere PRESENCE switches GI and reflections
@@ -379,7 +379,7 @@ def render_extra_tokens(args) -> list[str]:
                     toks[i + 1] if i + 1 < len(toks) else "")
                 if val == "data":
                     log.warning(
-                        "Render (local): ignoring --camera_base data from --render-extra. "
+                        "Render: ignoring --camera_base data from --render-extra. "
                         "The local execution stage records no observation.camera_pose.* (it "
                         "spawns no cameras), so there is no recorded pose to base on; the "
                         "pipeline's --camera_base scene is used",
@@ -389,7 +389,7 @@ def render_extra_tokens(args) -> list[str]:
             if name in RENDER_EXTRA_DENIED:
                 skip = 1 if "=" in tok else 2
                 log.warning(
-                    "Render (local): ignoring %s from --render-extra; the pipeline owns it "
+                    "Render: ignoring %s from --render-extra; the pipeline owns it "
                     "(a different value silently breaks merge or the episode accounting)", name,
                 )
                 i += skip
@@ -473,7 +473,7 @@ def local_render_steps(args, base: str, envs_dir: str, slug: str,
         # (observed: 16/16 episodes finalized, then 53 minutes of nothing).
         *(shlex.join([
             sys.executable, "-u", str(RUN_LOCAL_RENDER),
-            "--stall-timeout", str(args.render_local_stall_timeout), "--",
+            "--stall-timeout", str(args.render_stall_timeout), "--",
             *local_render_argv(args, src_root, d, envs_dir, **kw),
         ]) for d, (_job, kw) in zip(out_dirs, passes)),
     ]
@@ -618,7 +618,7 @@ class LocalRenderScheduler:
         """
         one = [[
             sys.executable, "-u", str(RUN_LOCAL_RENDER),
-            "--stall-timeout", str(self._args.render_local_stall_timeout), "--",
+            "--stall-timeout", str(self._args.render_stall_timeout), "--",
             *local_render_argv(self._args, self._src_root / slug, d, self._envs_dir, **kw),
         ] for d, (_job, kw) in zip(self._out_dirs, self._passes)]
         if len(one) == 1:
@@ -634,12 +634,12 @@ class LocalRenderScheduler:
         self._seen.add(slug)
         linked = stage_render_source(self._execution, self._src_root / slug, [slug])
         if not linked:
-            log.warning("Render (local): %s has no finalized dataset; not rendering", slug)
+            log.warning("Render: %s has no finalized dataset; not rendering", slug)
             self._skipped.append(slug)
             return False
         self._staged += linked
         if all(self._state_of(d) != RENDER_ABSENT for d in linked):
-            log.info("Render (local): %s is already rendered; skipping", slug)
+            log.info("Render: %s is already rendered; skipping", slug)
             return False
         self._pending += 1
         self.feed.add(f"{RENDER_ITEM_PREFIX}{slug}", self.render_cmd(slug), first=first)
@@ -678,14 +678,14 @@ class LocalRenderScheduler:
                         # `missing`, report() claims success, the stage marker is set, and merge
                         # -- which reads ONLY render/out -- silently drops it.
                         log.warning(
-                            "Render (local): execution of %s failed; not rendering it", name
+                            "Render: execution of %s failed; not rendering it", name
                         )
                         self._seen.add(name)
                         self._skipped.append(name)
                 self._pending -= 1
                 drained = self._pending == 0
         except Exception:
-            log.exception("Render (local): scheduling failed after %s", name)
+            log.exception("Render: scheduling failed after %s", name)
             with self._lock:
                 self._pending -= 1
                 drained = self._pending == 0
@@ -709,12 +709,12 @@ class LocalRenderScheduler:
                     except OSError:
                         # Staging touches the filesystem; one bad symlink must not abort the
                         # run after the execution stage has already been marked complete.
-                        log.exception("Render (local): could not stage %s", slug)
+                        log.exception("Render: could not stage %s", slug)
                         self._skipped.append(slug)
             if self._pending == 0:
                 self.feed.close()
                 return
-        run_local_stage("Render (local)", self.feed, slots, log_dir, on_done=self.on_done)
+        run_local_stage("Render", self.feed, slots, log_dir, on_done=self.on_done)
 
     def _state_of(self, problem: str) -> str:
         """Worst state across every pass this run owes for *problem*.
@@ -1379,7 +1379,7 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "Neither has a dedicated --render-* flag.",
     )
     parser.add_argument(
-        "--render-local-num-envs",
+        "--render-num-envs",
         type=int,
         default=8,
         help="Envs per render wave, in every pass. This is a FLOOR, not a preference: "
@@ -1387,7 +1387,7 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "package (8 by default). 8 keeps the encoder's RSS survivable beside Isaac",
     )
     parser.add_argument(
-        "--render-local-stall-timeout",
+        "--render-stall-timeout",
         type=int,
         default=3600,
         help="SIGKILL a render that prints nothing for this long. Success is "
@@ -1395,7 +1395,7 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "because render.py hangs in Isaac teardown after finishing its work",
     )
     parser.add_argument(
-        "--render-local-fail-on-video-defects",
+        "--render-fail-on-video-defects",
         action="store_true",
         help="Fail a problem whose encoder could not publish every video "
              "(default: off). Without it the problem finalizes as completed with "
@@ -1483,7 +1483,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=1,
         metavar="N",
         help="Concurrent problems per GPU (default 1, a strict no-op). Applies to "
-        "every local stage. Measured on one RTX 5090 at --render-local-num-envs 8: a "
+        "every local stage. Measured on one RTX 5090 at --render-num-envs 8: a "
         "render peaks at 7.7 GiB of VRAM and 76%% GPU utilisation, so 2 fits a 32 GiB card "
         "and leaves compute headroom. Host RAM, not VRAM, is the binding constraint, and an "
         "OOM mid-encode corrupts videos behind a completed=true marker -- so raise this only "
@@ -1793,19 +1793,19 @@ def main() -> int:
                     flags,
                 )
                 return 1
-        # --render-local-num-envs is a FLOOR: render maps env i to block-size slot
+        # --render-num-envs is a FLOOR: render maps env i to block-size slot
         # i % len(table), so fewer envs than the package has profiles leaves the high slots
         # without an env and plan_block_sizes SKIPS the problem -- every problem, silently
         # enough that the run just produces no videos. Refuse up front instead.
-        if args.render_local_num_envs < args.num_scene_profiles:
+        if args.render_num_envs < args.num_scene_profiles:
             log.error(
-                "--render-local-num-envs (%d) must be at least --num-scene-profiles (%d): "
+                "--render-num-envs (%d) must be at least --num-scene-profiles (%d): "
                 "the render spawns env i at block-size slot i %% %d, so %d envs leave the "
                 "remaining slots without an env and every problem is skipped",
-                args.render_local_num_envs,
+                args.render_num_envs,
                 args.num_scene_profiles,
                 args.num_scene_profiles,
-                args.render_local_num_envs,
+                args.render_num_envs,
             )
             return 1
 
@@ -2162,7 +2162,7 @@ def main() -> int:
     if enabled["exec"]:
         mark_stage_complete(base, "exec")
 
-    # ── Render (local): render anything the execution stage did not hand over ───
+    # ── Render: render anything the execution stage did not hand over ───
     if local_render is not None:
         log.info("=" * 60)
         log.info("Render: Render finished execution locally")
@@ -2187,20 +2187,20 @@ def main() -> int:
         lost = [d for d in absent if d in expected]
         no_loss = [d for d in absent if d not in expected]
         log.info(
-            "Render (local): %d problem(s) rendered, %d unrenderable, %d missing",
+            "Render: %d problem(s) rendered, %d unrenderable, %d missing",
             len(shipped), len(unrenderable), len(lost),
         )
         if unrenderable:
             # Terminal and acknowledged -- render.py finalized these empty on purpose and a
             # re-run will produce the same result, so failing on them would wedge the pipeline.
             log.warning(
-                "Render (local): %d problem(s) can never render (empty source or block size "
+                "Render: %d problem(s) can never render (empty source or block size "
                 "not in the size table) and carry no episodes: %s",
                 len(unrenderable), " ".join(unrenderable[:20]),
             )
         if no_loss:
             log.info(
-                "Render (local): %d problem dir(s) had nothing the merge would ship; ignoring:"
+                "Render: %d problem dir(s) had nothing the merge would ship; ignoring:"
                 " %s", len(no_loss), " ".join(no_loss[:20]),
             )
         if not shipped:
@@ -2209,14 +2209,14 @@ def main() -> int:
                 # means the execution stage produced no mergeable dataset at all, and telling
                 # the operator to re-run the render would send them in the wrong direction.
                 log.error(
-                    "Render (local): %s holds no finalized blocks_success dataset, so there "
+                    "Render: %s holds no finalized blocks_success dataset, so there "
                     "is nothing to render or merge. The execution stage produced no usable "
                     "episodes; check its logs under %s",
                     execution_data_dir, local_logs_dir / "execution",
                 )
             else:
                 log.error(
-                    "Render (local): nothing was rendered, though %d problem(s) executed. "
+                    "Render: nothing was rendered, though %d problem(s) executed. "
                     "Merge reads only render/out once this stage is marked complete, so "
                     "there is no dataset to ship. Re-run to render them; to merge the raw "
                     "un-rendered execution tree on purpose, re-run without "
@@ -2229,18 +2229,18 @@ def main() -> int:
             # dataset. Exiting non-zero and leaving the marker unset makes a later --resume
             # render them instead of shipping a quietly truncated dataset.
             log.error(
-                "Render (local): %d of %d problem(s) have a finalized execution dataset but "
+                "Render: %d of %d problem(s) have a finalized execution dataset but "
                 "no render, and would be MISSING from the merge: %s",
                 len(lost), len(expected), " ".join(lost[:20]),
             )
             if not args.merge_allow_missing_problems:
                 log.error(
-                    "Render (local): refusing to mark the stage complete; re-run to finish "
+                    "Render: refusing to mark the stage complete; re-run to finish "
                     "them, or pass --merge-allow-missing-problems to merge what rendered"
                 )
                 return 1
             log.warning(
-                "Render (local): --merge-allow-missing-problems is set, merging %d problem(s) "
+                "Render: --merge-allow-missing-problems is set, merging %d problem(s) "
                 "and dropping %d", len(shipped), len(lost)
             )
         mark_stage_complete(base, "render")

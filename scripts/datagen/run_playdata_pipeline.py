@@ -362,9 +362,9 @@ def main() -> int:
     # -- validate -------------------------------------------------------------
     # As in the datagen pipeline: render.py spawns env i at block-size slot i % profiles, so fewer
     # envs than profiles leaves slots without an env and every problem is skipped.
-    if enabled["render"] and args.render_local_num_envs < args.num_scene_profiles:
-        log.error("--render-local-num-envs (%d) must be at least --num-scene-profiles (%d)",
-                  args.render_local_num_envs, args.num_scene_profiles)
+    if enabled["render"] and args.render_num_envs < args.num_scene_profiles:
+        log.error("--render-num-envs (%d) must be at least --num-scene-profiles (%d)",
+                  args.render_num_envs, args.num_scene_profiles)
         return 1
     if enabled["env"] and args.env_per_pddl % args.num_envs != 0:
         log.error("env-per-pddl (%d) must be divisible by num-envs (%d)", args.env_per_pddl, args.num_envs)

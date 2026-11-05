@@ -152,16 +152,15 @@ The pipeline flags for this stage are:
 | `--render-skip-cameras` | `left_camera` | Cameras not to render. Pass the flag with no names to render every camera. |
 | `--render-skip-failure-episodes` | on | Render only successful episodes. The merge keeps only those anyway. `--no-render-skip-failure-episodes` renders both splits. |
 | `--render-extra` | none | Extra `render.py` options, appended after the pipeline's own defaults so they override them, written as one quoted `=` string. Three exceptions: `--output`, `--envs_dir`, `--episodes_file`, `--episode_offset` and `--max_episodes` are dropped with a warning because the pipeline owns them, `--camera_base data` is dropped because the execution stage records no camera pose, and the pass's own `--flags` and `-N` are re-applied afterwards so an extra cannot rewrite one pass into another. |
-| `--render-local-num-envs` | 8 | Envs per render wave. Must be at least `--num-scene-profiles`. |
-| `--render-local-stall-timeout` | 3600 | Kill a render that prints nothing for this many seconds. |
-| `--render-local-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video, instead of finalizing it as `incomplete_videos`. |
+| `--render-num-envs` | 8 | Envs per render wave. Must be at least `--num-scene-profiles`. |
+| `--render-stall-timeout` | 3600 | Kill a render that prints nothing for this many seconds. |
+| `--render-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video, instead of finalizing it as `incomplete_videos`. |
 
 Every flag above except `--render-pass` applies to **every** pass, so one run cannot give two
 passes different cameras, sidecars or schedules. Only the YAML and the copy count vary per pass,
 and both live in the `--render-pass` value itself.
 
-A render cannot be combined with `--vecgen-record-videos`. Despite their names, the
-`--render-local-*` flags apply to both schedules.
+A render cannot be combined with `--vecgen-record-videos`.
 
 ## Output
 
