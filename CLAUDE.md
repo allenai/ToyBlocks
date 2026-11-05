@@ -53,6 +53,7 @@ tmux ls
   - `curobo/`: NVIDIA CuRobo motion planning (editable dependency).
   - `maniflow-tb/`: ManiFlow low-level policy (installs as the `hvla` package; submodule of allenai/maniflow-tb).
   - `molmo2/`: Molmo2 high-level policy model (installs as `ai2-molmo2`, package `olmo`; submodule of allenai/molmo2).
+  - `agentic_robotics/`: LLM agents driving the robot through MCP skill tools (installs as `agentic-robotics`, `agentic-robotics` CLI; submodule of allenai/agentic_robotics). Its scripted skills run vecgen's skills via `toyblocks.eval.ll_oracle`'s engine wiring, so changes there can affect it.
   - `data/`: Default pipeline output root (`--output-root`): `data/datasets/<folder>/<exp>`, merged sets under `data/datasets/merged/train/<exp>`.
 
 ## Critical Files & Data Flow
@@ -93,6 +94,7 @@ Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`
 - **Install with Isaac Lab**: `uv pip install -e .[dev,isaac,torch-cu128]`
 - **Install for datagen (vecgen, builds cuRobo v2 from `./curobo`, no CUDA toolkit needed)**: `uv pip install -e .[dev,isaac,torch-cu128,vecgen]`
 - **Install with ManiFlow**: `uv pip install -e .[dev,isaac,torch-cu128,maniflow]` (extras combine in one command)
+- **Install agentic robotics**: `uv pip install -e .[dev,isaac,torch-cu128,vecgen,agentic]` (needs the `agentic_robotics` submodule and the user's own OpenRouter key; see `docs/source/user_guide/workflows/agentic_robotics.md`)
 - **Linting**: `ruff check` / `ruff format` (config in `pyproject.toml`).
 
 ### Running the Datagen Pipeline Locally
@@ -160,6 +162,7 @@ python scripts/task_gen/search.py --count 5 --out-dir outputs/search/tasks --see
 - **FF**: Symbolic planner, vendored (with its binary) in `src/toyblocks/vecgen/symbolic/ff_planner/`.
 - **CuRobo**: Motion planning in `./curobo/` (editable install as `nvidia-curobo`).
 - **ManiFlow**: Molmo2 HL in `./molmo2/`, ManiFlow LL in `./maniflow-tb/` (`hvla` package).
+- **Agentic robotics**: `./agentic_robotics/` (`agentic-robotics` package): episodes, web UI (`agentic-robotics menu` / `portal`), task packages in `agentic_robotics/data/tasks/`.
 
 ## Key Entry Points
 

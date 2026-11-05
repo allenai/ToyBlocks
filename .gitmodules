@@ -8,3 +8,7 @@
 [submodule "molmo2"]
 	path = molmo2
 	url = https://github.com/allenai/molmo2.git
+[submodule "agentic_robotics"]
+	path = agentic_robotics
+	url = https://github.com/allenai/agentic_robotics.git
+	ignore = untracked

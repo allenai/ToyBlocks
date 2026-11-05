@@ -63,8 +63,8 @@ The documentation linked from each step covers the full-scale versions.
 [installation guide](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html)
 for more details.
 
-**Note:** this guide assumes that all of the repository's submodules (`curobo`, `maniflow-tb` and
-`molmo2`) are available to you. Step 1 fetches them with `git submodule update`. `curobo` and
+**Note:** this guide assumes that the `curobo`, `maniflow-tb` and
+`molmo2` submodules are available to you. Step 1 fetches them with `git submodule update`. `curobo` and
 `molmo2` are public, but `maniflow-tb` is currently internal to Ai2. The guide never
 runs the Molmo2 model, but the `maniflow` install extra and the evaluation launcher both expect
 the `molmo2` submodule to be present.
@@ -204,10 +204,12 @@ All source code in `src/toyblocks/`
 - `src/toyblocks/utils`: utilities for ToyBlocks
 - `src/toyblocks/utils/rigid_objects`: utilities for working with rigid objects (e.g. creating them more easily)
 
-The ManiFlow and Molmo2 policy code is in the `maniflow-tb/` and `molmo2/` submodules
+The ManiFlow and Molmo2 policy code is in the `maniflow-tb/` and `molmo2/` submodules; the agentic
+robotics loop (LLM agents with the skills as MCP tools) is the `agentic_robotics/` submodule, see
+[Agentic Robotics](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html).
 
 ## License
 
 ToyBlocks is licensed under the [Apache License 2.0](LICENSE).
-The `curobo`, `maniflow-tb` and `molmo2` submodules and the downloaded assets (e.g. the HDRI pools) are
+The `curobo`, `maniflow-tb`, `molmo2` and `agentic_robotics` submodules and the downloaded assets (e.g. the HDRI pools) are
 distributed under their own licenses.
