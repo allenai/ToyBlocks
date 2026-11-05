@@ -1611,6 +1611,11 @@ def build_parser() -> argparse.ArgumentParser:
     # Dead flag, kept only to fail loudly rather than be ignored. Nothing reads it: the env
     # stage passes --env-per-problem through to the generator as its --num-reset-states.
     parser.add_argument("--num-reset-states", type=int, default=None, help=argparse.SUPPRESS)
+    # Removed with the Beaker backend: the pipeline is local-only now, so there is nothing
+    # to switch. Registered as an exact option because argparse's prefix matching otherwise
+    # answers a bare --local with "ambiguous option: --local could match --local-gpus,
+    # --local-gpu-workers", which reads like a typo rather than a removal.
+    parser.add_argument("--local", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
         "--block-x-range",
         type=str,
@@ -1791,6 +1796,13 @@ def main() -> int:
         exp = args.experiment_id
 
     # ── Validate parameters ──────────────────────────────────────────
+    if args.local:
+        log.error(
+            "--local has been removed: this pipeline only runs locally, so there is no "
+            "backend to select. Drop the flag. (--local-gpus and --local-gpu-workers still "
+            "choose which GPUs to use and how many problems to run on each.)"
+        )
+        return 1
     if args.num_reset_states is not None:
         log.error(
             "--num-reset-states has never had an effect and has been removed: the env stage "

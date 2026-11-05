@@ -57,7 +57,11 @@ jobs:
           # pin numpy==1.26.4, which turned every PR red: "pyarrow requires NumPy 2.0
           # or newer, found 1.26.4" at import. Keep this in step with pyproject, or
           # drop the numpy pin.
-          uv pip install omegaconf pillow websockets msgpack "pyarrow<26" matplotlib
+          # av (PyAV) is carried only by the tamp/vecgen extras, which this lane cannot
+          # install. tests/rerender/test_extra_rgb.py and test_extra_depth_g12.py import
+          # it at module scope, so without it collection ERRORS and the whole lane exits
+          # 2 before running anything -- not a skip. Same rule as matplotlib above.
+          uv pip install omegaconf pillow websockets msgpack "pyarrow<26" matplotlib av
 
       - name: Run CPU unit tests
         run: |
