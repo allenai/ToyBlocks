@@ -346,7 +346,8 @@ Pass the `dr_seeding` mode recorded in the dataset's own `render_params.json`.
 
 These are `render.py`'s own options. `datasets_dir` is positional and `--output` is required,
 and everything else has a default. Isaac Lab's `AppLauncher` adds its own on top, such as
-`--device` and `--headless`.
+`--device`, `--kit_args` and `--rendering_mode`. `--headless` and `--enable_cameras` are forced
+on after parsing, so passing them changes nothing.
 
 ### Source and output
 
@@ -368,7 +369,7 @@ and everything else has a default. Isaac Lab's `AppLauncher` adds its own on top
 | `--episodes_file` | `None` | Render only the listed episodes, for a targeted patch. Output episodes are renumbered per split, but each records its `src_episode_index`. Refused when the flags YAML sets `randomize_task_letters`, as the `glyphs` file does. Use `--episode_offset` there. |
 | `--episode_offset` | `None` | Select a fragment for parallel rendering: the global slice `[offset, offset+max_episodes)`. Overrides `--episodes_file`. |
 | `--fragment_invariant` | **on** | Keep the full per-problem episode list inside a fragment, so render-uids, wave grouping and randomization draws match a single-process run. Reassembling the fragments then gives a merge that is byte-identical to one big run. |
-| `--split_groups` | off | Render each member of a vecgen `problem_grp_*` directory as its own unit. Must match how execution was run. |
+| `--split_groups` | off | Render each member of a vecgen `problem_grp_*` directory as its own unit, and a no-op on a source that has none. Alongside `--episode_offset` it must match the enumeration the offsets were planned with, or every slice misaligns. |
 
 ### Cameras and video streams
 
