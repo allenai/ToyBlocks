@@ -224,7 +224,7 @@ class _OneShotQueueClient:
     Implements only what :meth:`TemplateEnv._reset_idx` and the verification
     path touch, so the diagnostic exercises the exact same ``apply_setup`` code
     the live queue eval runs (table + blocks + joints + goal) and the reset obs
-    reflects it (cameras re-render during reset).
+    reflects it (cameras render during reset).
 
     ``setups`` is per env: an env whose entry is ``None`` keeps its default
     reset. Only envs spawned at a setup's cube_scale may receive it, since

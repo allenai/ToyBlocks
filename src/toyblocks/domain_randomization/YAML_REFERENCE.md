@@ -8,30 +8,30 @@ In this repository it is consumed by:
 
 | Consumer | How it is named |
 |---|---|
-| `scripts/rerender/rerender.py` | `--flags` |
-| `scripts/rerender/rerender_from_params.py` | reads the recorded flags back |
-| `scripts/datagen/run_datagen_pipeline.py`, `scripts/datagen/run_playdata_pipeline.py` | `--rerender-flags` (default: `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`, the RI training set's) |
+| `scripts/render/render.py` | `--flags` |
+| `scripts/render/render_from_params.py` | reads the recorded flags back |
+| `scripts/datagen/run_datagen_pipeline.py`, `scripts/datagen/run_playdata_pipeline.py` | `--render-flags` (default: `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`, the RI training set's) |
 | the library itself | `DRSession`, for in-process consumers |
 
 The presets live in `src/toyblocks/domain_randomization/flags/`:
 
 | preset | use |
 |---|---|
-| `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | the RI training set's render and the pipeline default: `allrand_texcache` plus the train glyph split (symmetry-preserving) and per-env block colours |
-| `rerender_flags_allrand_texcache.yaml` | the production all-random lighting / materials / camera render, without glyph or colour swaps |
-| `rerender_flags_camtest.yaml` | fixed camera overrides for quick local tests of the camera rig; randomizes nothing |
-| `rerender_flags_open_hybrid_camera_rand_only.yaml` | camera randomization only |
+| `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | the RI training set's render and the pipeline default: `allrand_texcache` plus the train glyph split (symmetry-preserving) and per-env block colours |
+| `render_flags_allrand_texcache.yaml` | the production all-random lighting / materials / camera render, without glyph or colour swaps |
+| `render_flags_camtest.yaml` | fixed camera overrides for quick local tests of the camera rig; randomizes nothing |
+| `render_flags_open_hybrid_camera_rand_only.yaml` | camera randomization only |
 
 The `allrand` presets sample backdrops from `polyhaven` and the 44 GB `indoor-2018` pool, installed
-under `assets/environments/` (or `RERENDER_HDRI_DIR`). Where to get each pool and what happens when
-one is missing: [HDRI backdrops](../../../docs/rerender/README_local.md#hdri-backdrops).
+under `assets/environments/` (or `RENDER_HDRI_DIR`). Where to get each pool and what happens when
+one is missing: [HDRI backdrops](../../../docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops).
 
 For what the renderer does with this file, see
-[the re-rendering guide](../../../docs/source/user_guide/workflows/datagen/rerender.md);
+[the rendering guide](../../../docs/source/user_guide/workflows/datagen/render.md);
 for reproducibility guarantees, see
-[DETERMINISM.md](../../../docs/rerender/DETERMINISM.md).
+[DETERMINISM.md](../../../docs/render/DETERMINISM.md).
 
-**Beware `rerender_flags_camtest.yaml`:** it is the one shipped preset with no random section at
+**Beware `render_flags_camtest.yaml`:** it is the one shipped preset with no random section at
 all, so an `-N 4` run with it produces four pixel-identical copies while every size-based check
 still reports 4x. Use it to test the camera rig, never to validate that randomization works.
 
@@ -228,7 +228,7 @@ A materials entry takes five keys, not two:
 | key | default | meaning |
 |---|---|---|
 | `object` | the entry's own label | the scene prim to apply to |
-| `library` | `toyblocks.TABLE_MATERIALS_FILEPATH` (override with the `RERENDER_TABLE_MATERIALS` env var) | the materials JSON to draw from |
+| `library` | `toyblocks.TABLE_MATERIALS_FILEPATH` (override with the `RENDER_TABLE_MATERIALS` env var) | the materials JSON to draw from |
 | `seed` | `0` | per-entry seed |
 | `randomize` | — | a dict of ± jitter ranges, restricted to the eight jitter keys |
 | `overrides` | — | per-material-**name** jitter overrides, mirroring `randomize.cameras.<cam>` |
@@ -238,7 +238,7 @@ A materials entry takes five keys, not two:
 `texture_rotate`, `texture_translate`, roughness, metallic. Each env has its own shader prim, so
 every env in a batch can differ.
 
-⚠️ A key a draw omits keeps the **previous episode's** value (materials bleed). `rerender.py
+⚠️ A key a draw omits keeps the **previous episode's** value (materials bleed). `render.py
 --material_baseline_revert` reverts to the asset's baseline first; it is opt-in because it changes
 existing output.
 
@@ -310,7 +310,7 @@ unions them. Rejected at load with a specific message: `[0]` and `[0-5]` (no 0 t
 
 #### Train and test glyph splits
 
-`rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` restricts the swap to the task
+`render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` restricts the swap to the task
 generator's TRAIN split (the 20 letters A-Z minus A, B, I, O, R, T, and the digits 1, 3, 5) and maps
 every glyph only to a glyph of its own symmetry class, so goals that accept several orientations stay
 correct; it also randomizes block colours over the train palette. The classes are the ones
@@ -329,8 +329,8 @@ glyph.
 The symmetric split exists because a glyph's symmetry class decides which orientations read as
 "the same character", so swapping across classes silently changes what an orientation goal means.
 
-The preset is `rerender_flags_allrand_texcache.yaml` plus those keys, so it differs from an
-unswapped re-render only in the block faces and the text. A list preset is constrained, so two
+The preset is `render_flags_allrand_texcache.yaml` plus those keys, so it differs from an
+unswapped render only in the block faces and the text. A list preset is constrained, so two
 blocks can show the same glyph.
 
 #### What gets rewritten and recorded
@@ -343,7 +343,7 @@ anything — the trajectory, the poses and the physics are untouched.
 How it works: every block in `train_blocks_large` is the SAME USD with the decal mesh's `st`
 shifted to a different 3×2 quadrant of one 16×16 atlas, and the decals material is `OmniPBR`,
 which exposes `inputs:texture_translate`. So the glyph is one shader input per env — no USD
-swapping, no extra materials. Applied in the same pre-render window as camera DR, so the RTX
+swapping, no extra materials. Applied in the same prender window as camera DR, so the RTX
 warm-up sees the final letters.
 
 | carrier | what happens |
@@ -360,11 +360,11 @@ Notes:
   shard renders the same glyphs as a full run.
 - **Sharding must be problem-aligned.** Each process rebuilds the `meta/tasks.parquet` of every
   problem it touches; two processes holding parts of one problem would each write it, and the last
-  writer wins. `rerender.py` refuses a slice that splits a problem (`randomize_task_letters needs
+  writer wins. `render.py` refuses a slice that splits a problem (`randomize_task_letters needs
   PROBLEM-ALIGNED sharding`). The pipeline renders whole problems, so its slices are always
   problem-aligned.
 - Widening the pool from 35 to 36 (when `10` became assignable) changed the unconstrained draw for
-  a given seed; datasets rendered before it do not re-render with identical letters. Each episode
+  a given seed; datasets rendered before it do not render with identical letters. Each episode
   is still self-consistent, because its recorded map drives both the pixels and the text.
 - Only `type: usd` blocks with an authored glyph are swapped. If a block's decal shader is not
   found the run logs a **text/pixel mismatch** naming the blocks, because the strings are rewritten
@@ -412,8 +412,8 @@ env-sphere pick. If `skybox` also defines a pool the two stay independent and th
 ## Debugging
 
 - `[dr] WARNING skybox bucket resolved 0 textures` → your HDRI root is wrong; the backdrop will be
-  black. Fix it with `rerender.py --assets_paths <root> [<root> ...]` (ordered extra roots, the
-  repo default searched last) or the `RERENDER_HDRI_DIR` environment variable. Each root may be an
+  black. Fix it with `render.py --assets_paths <root> [<root> ...]` (ordered extra roots, the
+  repo default searched last) or the `RENDER_HDRI_DIR` environment variable. Each root may be an
   assets-root or an environments-root; the resolver auto-detects which.
 - An unknown key is only a warning in most blocks — if a section seems to do nothing, check its
   spelling. Inside `randomize_task_letters` and `randomize_block_colors` it is an error instead,

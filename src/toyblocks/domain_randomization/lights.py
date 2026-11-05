@@ -1,5 +1,5 @@
 """Scene light randomization -- per-env local lights (sphere/disk) + a shared distant sun, plus
-color/temperature sampling. Moved verbatim from rerender.py (pure samplers + USD/pxr appliers for one
+color/temperature sampling. Moved verbatim from render.py (pure samplers + USD/pxr appliers for one
 concern). No module globals. pxr imports are function-local so this imports without a launched Isaac
 app (pure samplers usable anywhere; the _setup_*/_apply_* functions require a live stage)."""
 from __future__ import annotations
@@ -186,7 +186,7 @@ def _setup_local_lights(sim, spec: dict):
             row.append(lt.GetPrim())
         prims.append(row)
     mode = f"{len(spec['lights'])} independent light(s)" if spec.get("lights") else f"count {spec.get('count', 1)}"
-    print(f"[rerender] local_lights: {len(slot_types)} slot(s) ({mode}) x {sim.num_envs} env(s)"
+    print(f"[render] local_lights: {len(slot_types)} slot(s) ({mode}) x {sim.num_envs} env(s)"
           f"{' [link_per_env]' if link_per_env else ''}")
     return prims
 
@@ -323,7 +323,7 @@ def _setup_global_sun(spec: dict):
     lt.CreateAngleAttr(1.0)
     xf = UsdGeom.Xformable(lt.GetPrim()); xf.ClearXformOpOrder(); xf.AddRotateXYZOp()
     lt.GetIntensityAttr().Set(0.0)
-    print("[rerender] global sun: 1 shared DistantLight (per-wave; no per-env cross-contamination)")
+    print("[render] global sun: 1 shared DistantLight (per-wave; no per-env cross-contamination)")
     return lt.GetPrim()
 
 

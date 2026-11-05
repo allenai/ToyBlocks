@@ -9,7 +9,7 @@
 import sys
 from pathlib import Path
 
-# This checkout's package even when the venv's ToyBlocks is another checkout (TAMP's rerender
+# This checkout's package even when the venv's ToyBlocks is another checkout (TAMP's render
 # orchestrator runs this script from its --code_dir). Spawned merge workers inherit sys.path.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 

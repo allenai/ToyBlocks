@@ -10,7 +10,7 @@ For each sampled episode this renders one frame with every block circled and lab
 glyph the dataset CLAIMS it carries, and prints the rewritten pddl_goal / task beside it. A
 human (or a vision model) then confirms the labels match what is drawn on the blocks.
 
-    python scripts/datagen/verify_glyph_swap.py --dataset <rerendered dataset> --out-dir out/
+    python scripts/datagen/verify_glyph_swap.py --dataset <rendered dataset> --out-dir out/
 """
 import argparse
 import json

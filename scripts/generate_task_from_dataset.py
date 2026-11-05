@@ -124,7 +124,7 @@ def read_task_spec_from_dataset(
     across all parquet files. Multi-goal datasets are supported: the generated env
     evaluates all goals and selects per sub-env based on the queue setup's
     ``pddl_goal`` field (see :meth:`BaseEnv.set_episode_goal`). On glyph/colour
-    rerenders each goal is mapped back to source block names through the row's
+    renders each goal is mapped back to source block names through the row's
     ``block_variable_map``, matching the grading goal the queue sends.
 
     ``goal_episode_counts`` maps each goal text to the number of episodes
@@ -203,7 +203,7 @@ def read_task_spec_from_dataset(
     # -- Goal + cube-scale scan: column projection + optional episode filter --
     first_schema = pq.read_schema(str(scan_files[0])).names
     has_cube_scale = _COL_CUBE_SCALE in first_schema
-    # Glyph/colour rerenders record goals in rendered names; the queue grades on the
+    # Glyph/colour renders record goals in rendered names; the queue grades on the
     # source names (episode_dataset._row_to_setup), so compile those.
     has_block_variable_map = _COL_BLOCK_VARIABLE_MAP in first_schema
     read_columns = [_COL_PDDL_GOAL, _COL_EPISODE_INDEX]

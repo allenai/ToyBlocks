@@ -1,4 +1,4 @@
-"""RTX post-process EXPOSURE + carb settings + render-mode -- moved verbatim from rerender.py.
+"""RTX post-process EXPOSURE + carb settings + render-mode -- moved verbatim from render.py.
 Pure carb/USD appliers (no module globals). carb imports are function-local so this imports without a
 launched Isaac app; the _apply_*/_set_* functions require a running kit process to take effect."""
 from __future__ import annotations
@@ -33,12 +33,12 @@ def _dump_exposure_settings(tag: str = "") -> dict:
         keys = ["/rtx/post/histogram/enabled", "/rtx/post/tonemap/op",
                 "/rtx/post/tonemap/filmIso", "/rtx/post/tonemap/fNumber",
                 "/rtx/post/tonemap/cameraShutter", "/rtx/post/tonemap/cameraExposure"]
-        print(f"[rerender] RTX exposure settings {tag}:")
+        print(f"[render] RTX exposure settings {tag}:")
         for k in keys:
             out[k] = s.get(k)
             print(f"    {k} = {out[k]}")
     except Exception as e:
-        print(f"[rerender] could not read RTX settings: {e}")
+        print(f"[render] could not read RTX settings: {e}")
     return out
 
 
@@ -55,7 +55,7 @@ def _apply_exposure(auto: Optional[bool] = None, iso=None, fstop=None, shutter=N
             if val is not None:
                 s.set_float(key, float(val))
     except Exception as e:
-        print(f"[rerender] could not set exposure: {e}")
+        print(f"[render] could not set exposure: {e}")
 
 
 def _apply_carb_settings(settings: Optional[dict]) -> None:
@@ -77,9 +77,9 @@ def _apply_carb_settings(settings: Optional[dict]) -> None:
                 s.set_float(k, v)
             else:
                 s.set_string(k, str(v))
-            print(f"[rerender] carb setting {k} = {v} (now {s.get(k)})")
+            print(f"[render] carb setting {k} = {v} (now {s.get(k)})")
     except Exception as e:
-        print(f"[rerender] could not apply carb_settings: {e}")
+        print(f"[render] could not apply carb_settings: {e}")
 
 
 def _set_render_mode(mode: Optional[str]) -> None:
@@ -93,6 +93,6 @@ def _set_render_mode(mode: Optional[str]) -> None:
         s = carb.settings.get_settings()
         before = s.get("/rtx/rendermode")
         s.set("/rtx/rendermode", str(mode))
-        print(f"[rerender] render mode: {before} -> {s.get('/rtx/rendermode')}")
+        print(f"[render] render mode: {before} -> {s.get('/rtx/rendermode')}")
     except Exception as e:
-        print(f"[rerender] WARNING could not set render mode: {e}")
+        print(f"[render] WARNING could not set render mode: {e}")

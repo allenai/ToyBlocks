@@ -22,7 +22,7 @@ scene-reconstruction keys:
   height when there's no absolute table pose.
 - ``scene_id`` / ``robot_id``: top-level per-step scene-identity columns (constant
   per dataset; see :func:`~toyblocks.utils.dataset_provenance.read_dataset_provenance`).
-- ``block_identity`` / ``policy_pddl_goal``: on glyph/colour rerenders, the
+- ``block_identity`` / ``policy_pddl_goal``: on glyph/colour renders, the
   recorded ``block_variable_map`` / ``glyph_map``; ``pddl_goal`` is then mapped
   back to source block names and the recorded (rendered) goal kept as
   ``policy_pddl_goal``.
@@ -77,7 +77,7 @@ _COL_PDDL_GOAL = "pddl_goal"
 # the policy / wandb prompt as-is; otherwise parse_prompt_for_setup derives
 # English from pddl_goal. Read into setup["hl_prompt"] by _row_to_setup.
 _COL_HL_PROMPT = "goal.hl_prompt"
-# Glyph/colour rerenders rename pddl_goal into the rendered identities while the
+# Glyph/colour renders rename pddl_goal into the rendered identities while the
 # pose columns keep the source block names. These per-episode maps (see
 # toyblocks.domain_randomization.block_variables) let _row_to_setup grade on the
 # source names (setup["pddl_goal"]) and keep the rendered goal for the policy
@@ -115,7 +115,7 @@ _COL_EPISODE_INDEX = "episode_index"
 _COL_IS_FIRST = "is_first"
 _COL_OBJ_POSE_PREFIX = "observation.state.object_pose."
 _COL_IMAGE_PREFIX = "observation.images."
-# Per-camera first-frame 3x3 K (row-major 9-vector). Randomized-camera rerenders
+# Per-camera first-frame 3x3 K (row-major 9-vector). Randomized-camera renders
 # vary K across episodes; eval applies this per env at reset instead of one
 # dataset-wide matrix. Short name is the segment after the last ':' (same
 # convention as dataset_provenance.camera_short_name).

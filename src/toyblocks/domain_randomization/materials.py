@@ -1,5 +1,5 @@
-"""Table (object) material randomization -- moved verbatim from rerender.py so this DR concern
-(pure samplers + USD/pxr appliers) is importable outside the rerender pipeline. No module globals:
+"""Table (object) material randomization -- moved verbatim from render.py so this DR concern
+(pure samplers + USD/pxr appliers) is importable outside the render pipeline. No module globals:
 the former DEFAULT_TABLE_MATERIALS fallback is now the explicit `default_table_materials` argument of
 _resolve_material_specs. pxr imports are function-local, so this module imports without a launched
 Isaac app (pure samplers usable anywhere; the _apply_* functions require a live stage)."""
@@ -162,10 +162,10 @@ def _resolve_material_specs(flags: dict, default_table_materials: str) -> Dict[s
         try:
             materials, lib_dir = _load_material_library(lib_path)
         except Exception as e:
-            print(f"[rerender] materials: '{key}' failed to load library {lib_path}: {e}")
+            print(f"[render] materials: '{key}' failed to load library {lib_path}: {e}")
             continue
         if not materials:
-            print(f"[rerender] materials: '{key}' library {lib_path} is empty; skipping")
+            print(f"[render] materials: '{key}' library {lib_path} is empty; skipping")
             continue
         rz = spec.get("randomize") or {}
         out[key] = {
@@ -176,7 +176,7 @@ def _resolve_material_specs(flags: dict, default_table_materials: str) -> Dict[s
             "overrides": spec.get("overrides") or {},
             "seed": int(spec.get("seed", 0)),
         }
-        print(f"[rerender] materials: '{key}' -> object={out[key]['object']}, "
+        print(f"[render] materials: '{key}' -> object={out[key]['object']}, "
               f"{len(materials)} material(s) from {lib_path}, "
               f"randomize={out[key]['randomize']}")
     return out
@@ -202,7 +202,7 @@ def _resolve_object_shader_prims(object_name: str, num_envs: int) -> List[Any]:
     prims = [_find_shader_prim(f"/World/envs/env_{i}/{object_name}") for i in range(num_envs)]
     missing = sum(1 for p in prims if p is None)
     if missing:
-        print(f"[rerender] materials: object '{object_name}' shader not found in "
+        print(f"[render] materials: object '{object_name}' shader not found in "
               f"{missing}/{num_envs} env(s)")
     return prims
 
@@ -335,7 +335,7 @@ def _resolve_material_texture(value: str, lib_dir: str) -> str:
     alt = os.path.join(lib_dir, os.path.basename(value))
     if os.path.exists(alt):
         return os.path.abspath(alt)
-    print(f"[rerender] materials: WARNING texture not found: '{value}' (tried {cand}, {alt})")
+    print(f"[render] materials: WARNING texture not found: '{value}' (tried {cand}, {alt})")
     return os.path.abspath(cand)
 
 
@@ -413,7 +413,7 @@ def dump_applied_materials(specs: Dict[str, dict], shader_prims: Dict[str, list]
                            max_envs: int = 8) -> dict:
     """Read back what is ACTUALLY authored on the stage, per material label and per env.
 
-    The DR *values* the samplers draw are already known to match between rerender and any other
+    The DR *values* the samplers draw are already known to match between render and any other
     consumer. This answers the different question: did the same values actually land on the same
     shader, with the same textures bound? A wrong texture path, a texture that failed to resolve,
     or a value written to a prim that is not the one being rendered would all look like "the table

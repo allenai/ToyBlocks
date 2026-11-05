@@ -64,7 +64,7 @@ The assets are downloaded from a public R2 bucket (about 280 MB, no credentials 
 get-toyblocks-assets --asset-manifest asset_manifest.json
 ```
 
-This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/polyhaven`) that re-rendering uses for backdrops. The second pool the default render flags use, the Laval Indoor HDR Dataset (`indoor-2018`), is licensed for research use and has to be requested from Université Laval. See [HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops) in `docs/rerender/README_local.md` for how to install it.
+This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/polyhaven`) that rendering uses for backdrops. The second pool the default render flags use, the Laval Indoor HDR Dataset (`indoor-2018`), is licensed for research use and has to be requested from Université Laval. See [HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops) in `docs/source/user_guide/workflows/datagen/local.md` for how to install it.
 
 ## Verify the installation
 

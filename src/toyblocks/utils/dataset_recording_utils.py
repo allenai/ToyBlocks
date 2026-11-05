@@ -476,7 +476,7 @@ def _make_env(
     env_cfg.track_ee_metrics = args.track_ee_metrics or args.track_metrics
     render_mode = None
 
-    # --use_render_params: the rerender's build-time scene config has to land before
+    # --use_render_params: the render's build-time scene config has to land before
     # the sim exists; the per-episode records are applied by apply_setup at each reset.
     render_replay = None
     if getattr(args, "use_render_params", False) and getattr(args, "dataset_path", None):
@@ -492,8 +492,8 @@ def _make_env(
             )
         else:
             render_replay.configure_build(env_cfg)
-            env_cfg.num_rerenders_on_reset = max(
-                int(env_cfg.num_rerenders_on_reset), int(args.render_replay_warmup_frames)
+            env_cfg.num_renders_on_reset = max(
+                int(env_cfg.num_renders_on_reset), int(args.render_replay_warmup_frames)
             )
 
     env = gym.make(id=args.task, cfg=env_cfg, render_mode=render_mode)
@@ -507,7 +507,7 @@ def _make_env(
         base_env.render_replay_wave = bool(getattr(args, "wave_resets", False))
         print(
             "[INFO]: render replay on: recorded camera pose + appearance per episode "
-            f"(warm-up {env_cfg.num_rerenders_on_reset} renders, "
+            f"(warm-up {env_cfg.num_renders_on_reset} renders, "
             f"wave_resets={base_env.render_replay_wave})",
             flush=True,
         )
@@ -527,6 +527,15 @@ def _make_env(
     video_fps = args.video_fps if args.video_fps is not None else _env_control_hz(base_env)
 
     if args.obs_mode == "state":
+        # The policy-server protocol sends a dict of named observations; obs_mode "state"
+        # flattens them into a single tensor, so the two cannot be combined.
+        if getattr(args, "policy_host", None):
+            raise ValueError(
+                "--obs_mode state cannot be used with a policy server (--policy_host): the "
+                "server protocol needs a dict of named observations, and --obs_mode state "
+                "flattens them into one tensor. Pass --obs_mode rgb+state (add "
+                "--obs_transform none if your policy wants the raw keys)."
+            )
         env = FlattenObservationWrapper(env)
 
     any_tracking = (

@@ -1,13 +1,13 @@
 """Replaying a recorded episode frame back into a live sim.
 
-Moved verbatim out of scripts/rerender/rerender.py (the robot joint constants,
+Moved verbatim out of scripts/render/render.py (the robot joint constants,
 ``_resolve_joint_ids`` and ``_set_table_height``) so that dagger -- and any other consumer
-of this package -- can reproduce rerender's render-only replay without duplicating it.
-rerender.py imports these names back under their original spellings, so
-``rerender_from_params``'s ``T._resolve_joint_ids`` / ``T._set_table_height`` keep working.
+of this package -- can reproduce render's render-only replay without duplicating it.
+render.py imports these names back under their original spellings, so
+``render_from_params``'s ``T._resolve_joint_ids`` / ``T._set_table_height`` keep working.
 
-``apply_recorded_frame`` is NEW and is not used by rerender: it composes exactly what
-rerender's per-frame loop writes (arm joints, gripper drive + passive mimic linkage, object
+``apply_recorded_frame`` is NEW and is not used by render: it composes exactly what
+render's per-frame loop writes (arm joints, gripper drive + passive mimic linkage, object
 poses in the LOCAL frame, and the per-episode table height) for callers that want one frame
 rather than a whole render loop.
 """
@@ -100,9 +100,9 @@ def park_inactive_objects(sim: Any, wave: Sequence[Dict[str, Any]],
 
 
 def _robot_articulation(sim: Any) -> Any:
-    """The robot articulation, whether given rerender's sim wrapper or a bare env.
+    """The robot articulation, whether given render's sim wrapper or a bare env.
 
-    rerender always holds a wrapper exposing ``.base_env``; dagger drives the env object
+    render always holds a wrapper exposing ``.base_env``; dagger drives the env object
     directly. Accept both rather than making the caller know which it has.
     """
     base = getattr(sim, "base_env", sim)
@@ -158,15 +158,15 @@ def apply_recorded_frame(sim: Any, wave: Sequence[Dict[str, Any]], t: int = 0, *
     """Write frame ``t`` of each episode in ``wave`` into the sim. Returns the slots written.
 
     ``wave[i]`` is an episode record from :mod:`toyblocks.domain_randomization.episodes`
-    and lands in env slot ``i``. This mirrors rerender's render-only replay body:
+    and lands in env slot ``i``. This mirrors render's render-only replay body:
 
       * arm joints          <- wave[i]["joint"][t]
       * gripper drive       <- wave[i]["gripper"][t], plus the passive mimic joints
       * object poses        <- wave[i]["objects"][name][t], LOCAL frame (wxyz)
       * table height        <- wave[i]["table_height_delta"] (once, all slots)
 
-    Velocities are written as zeros, exactly as rerender does -- this is a pose replay, not
-    a physics rollout. Objects absent from the scene are skipped, which is what rerender does
+    Velocities are written as zeros, exactly as render does -- this is a pose replay, not
+    a physics rollout. Objects absent from the scene are skipped, which is what render does
     (``if name in sim.scene.keys()``).
     """
     if active is None:
@@ -227,7 +227,7 @@ def _moving_cameras(episodes: List[Dict[str, Any]], cam_keys) -> set:
 # Angles are camera-local degrees; vertical_fov_deg perturbs the VERTICAL field of view.
 # HDRI/skybox pool + table-material defaults, the pure HDRI resolver, and the SkyBuckets picker now
 # live in the reusable toyblocks.domain_randomization package (shared with eval; no module globals).
-# rerender keeps the old private names as thin adapters so every call site is unchanged -- a render
+# render keeps the old private names as thin adapters so every call site is unchanged -- a render
 # render_params diff confirms byte-identical DR sampling.
 from toyblocks.domain_randomization import resolve as _dr_resolve
 from toyblocks.domain_randomization.assets import (
@@ -255,13 +255,13 @@ _shuffled_texture_order = _dr_resolve.shuffled_texture_order
 def select_override_cameras(sim: Any, episodes: Sequence[Dict[str, Any]],
                             flag_camera_names: Sequence[str] = (),
                             match_all: bool = False) -> Dict[str, Any]:
-    """The cameras to drive from the RECORDED pose, exactly as rerender chooses them.
+    """The cameras to drive from the RECORDED pose, exactly as render chooses them.
 
-    Mirrors rerender.replay_job: a camera qualifies when the scene has it as a sensor with
+    Mirrors render.replay_job: a camera qualifies when the scene has it as a sensor with
     ``set_world_poses``, the flags yaml does NOT override it, and at least one episode records
     a pose for it. Of those, MOVING (link-mounted, e.g. the gripper) cameras are always driven
     -- otherwise they lag the gripper and start at a default pose on frame 0 -- and the static
-    ones only under ``match_all`` (rerender's --match_recorded_cameras).
+    ones only under ``match_all`` (render's --match_recorded_cameras).
     """
     flag_keys = {f"camera:{n}" for n in (flag_camera_names or ())}
     scene_cam_keys = [k for k, s in sim.scene.sensors.items()

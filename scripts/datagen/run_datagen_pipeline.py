@@ -5,8 +5,8 @@ Pipeline:
   task-gen            Generate PDDL tasks              (task_gen/rotate.py)
   env                 Build the env packages + reset states (generate_task_from_pddl.py)
   execution           Run vecgen per problem (scripts/vecgen/run.py)
-  rerender            Re-render finished execution (opt-in): --rerender pipelined into the
-                      GPU-slot pool, or --rerender-local coupled inside each execution job
+  render            Render finished execution (opt-in): --render pipelined into the
+                      GPU-slot pool, or --render-local coupled inside each execution job
   merge               Merge successful datasets        (scripts/datagen/merge_datasets.py)
   annotate            Annotate the merged dataset      (annotate_target_xy.py)
 
@@ -16,8 +16,8 @@ and records the LeRobot dataset (Parquet only unless --vecgen-record-videos) int
 execution/<slug>/. --exec-num-envs and --seed apply; episodes
 per problem default to --env-per-problem (the reset states). The flow needs no TAMP checkout.
 
-With --rerender / --rerender-local each finished problem is re-rendered
-(scripts/rerender/rerender.py) and the merge consumes the re-rendered episodes instead of the
+With --render / --render-local each finished problem is rendered
+(scripts/render/render.py) and the merge consumes the rendered episodes instead of the
 execution data. The render defaults are the RI training set's: the
 glyphs_trainsplit_symmetric flags, one copy per episode, the 224 RGB and rg8_55_224 depth
 sidecars, left_camera skipped and failure episodes skipped.
@@ -32,17 +32,17 @@ Usage:
   python run_datagen_pipeline.py --experiment-id jun23_rotate --interactive
   python run_datagen_pipeline.py --experiment-id jun23_rotate --local-gpus 0 1
   python run_datagen_pipeline.py --experiment-id jun23_rotate --resume
-  python run_datagen_pipeline.py --experiment-id jun23_rotate --rerender-local
-  python run_datagen_pipeline.py --experiment-id jun23_rotate --rerender-local \
-      --rerender-extra="--extra_depth g12_224"
+  python run_datagen_pipeline.py --experiment-id jun23_rotate --render-local
+  python run_datagen_pipeline.py --experiment-id jun23_rotate --render-local \
+      --render-extra="--extra_depth g12_224"
 
-The video sidecars have no dedicated --rerender-* flag; RI's (--extra_rgb 224 --extra_depth
-rg8_55_224) are on by default and --rerender-extra overrides them. --extra_rgb 224 writes videos/observation.images.<cam>_224/ (the HVLA training
+The video sidecars have no dedicated --render-* flag; RI's (--extra_rgb 224 --extra_depth
+rg8_55_224) are on by default and --render-extra overrides them. --extra_rgb 224 writes videos/observation.images.<cam>_224/ (the HVLA training
 sidecar, Pillow BILINEAR, byte-compatible with reencode_to_224_batch.py). --extra_depth
 g12_224 writes the depth equivalent as lossless gray12le HEVC with a short per-camera GOP
 -- ~0.16x the bytes of the older rg8_224 and far cheaper to read cold; both decode to
 identical depth values, so prefer g12_224 for new datasets. Both emit ONE sidecar per RENDERED camera, so
---rerender-skip-cameras reduces their cost too.
+--render-skip-cameras reduces their cost too.
 
 The defaults are the settings the Nov 2026 stack-3 training set (RI) was generated with:
 stack_three.py --train (1000 problems), randomized scenes, 32 reset states per problem,
@@ -114,20 +114,20 @@ def run(cmd: list[str] | str, *, check: bool = True, **kwargs) -> subprocess.Com
     return result
 
 
-# ── Rerendering ──────────────────────────────────────────────────────
-# rerender.py fingerprints its whole source dir and indexes episodes into it, so it must never
+# ── Rendering ──────────────────────────────────────────────────────
+# render.py fingerprints its whole source dir and indexes episodes into it, so it must never
 # point at execution/ while sibling jobs are still writing there: each render instead gets a
 # frozen directory of symlinks to its finished problem dirs.
-RERENDER_SPLITS = ("blocks_success", "blocks_failure")
+RENDER_SPLITS = ("blocks_success", "blocks_failure")
 
 
-def stage_rerender_source(execution_dir: Path, staging_dir: Path, slugs: list[str]) -> list[str]:
+def stage_render_source(execution_dir: Path, staging_dir: Path, slugs: list[str]) -> list[str]:
     """Symlink the finalized problem dirs for *slugs* into *staging_dir*.
 
     Includes the ``<slug>__sNNN`` shard siblings written by preempted-and-resumed
     execution jobs; the renderer resolves their env from the base problem.
     Returns the directory names linked.
-    The rerender planner only enumerates ``problem_*`` dirs holding a
+    The render planner only enumerates ``problem_*`` dirs holding a
     ``blocks_success``/``blocks_failure`` dataset.
     """
     staging_dir.mkdir(parents=True, exist_ok=True)
@@ -139,13 +139,13 @@ def stage_rerender_source(execution_dir: Path, staging_dir: Path, slugs: list[st
         ]
         for src in candidates:
             finalized = any(
-                (src / split / "meta" / "info.json").exists() for split in RERENDER_SPLITS
+                (src / split / "meta" / "info.json").exists() for split in RENDER_SPLITS
             )
             if not finalized:
                 continue
             if not src.name.startswith("problem_"):
                 log.warning(
-                    "Rerender: skipping %s (the renderer only picks up problem_* dirs)", src
+                    "Render: skipping %s (the renderer only picks up problem_* dirs)", src
                 )
                 continue
             link = staging_dir / src.name
@@ -167,10 +167,10 @@ SHARD_SUFFIX = re.compile(r"__s\d{3}$")
 def base_problem_slugs(slugs: Iterable[str]) -> list[str]:
     """Collapse ``<slug>__sNNN`` preemption shards onto their base slug, order preserved.
 
-    ``stage_rerender_source`` already pulls a slug's shard siblings into that slug's staging
+    ``stage_render_source`` already pulls a slug's shard siblings into that slug's staging
     dir, so feeding it both ``problem_x`` and ``problem_x__s001`` stages -- and renders --
     ``problem_x__s001`` TWICE, into one output dir. With two slots both run at once and
-    ``rerender.py --resume`` ``shutil.rmtree``s the one that has not finalized yet, destroying
+    ``render.py --resume`` ``shutil.rmtree``s the one that has not finalized yet, destroying
     a live writer's output. A disk glob for ``problem_*`` matches shards; a job list never did,
     which is why only the local sweep needs this.
     """
@@ -183,86 +183,31 @@ def base_problem_slugs(slugs: Iterable[str]) -> list[str]:
     return out
 
 
-#: Where a local re-render writes. The basename matters twice: merge globs ``out/job_*``
+#: Where a local render writes. The basename matters twice: merge globs ``out/job_*``
 #: (so it must start with ``job_``), and the per-problem output directory name is the DR salt
 #: (``seeds._stable_seed_salt``), so it must not change or a rerun of the same problem draws
 #: different randomization.
-LOCAL_RERENDER_JOB = "job_local"
 #: The ORIGINAL (un-randomized) pass writes here. A sibling of job_local, because
-#: rerender.py --resume skips a problem whose render_params says completed -- so a second pass
-#: into the SAME dir renders nothing and exits 0. Merge globs rerender/out/job_*, so a sibling
+#: render.py --resume skips a problem whose render_params says completed -- so a second pass
+#: into the SAME dir renders nothing and exits 0. Merge globs render/out/job_*, so a sibling
 #: is picked up with no change to the merge stage.
-LOCAL_RERENDER_JOB_NONRAND = "job_local_nonrand"
 
-#: Flags-yaml sections that describe the SCENE rather than a random draw. The original pass keeps
-#: these, so it is the same rig, the same geometry and the same camera as its augmentations and
-#: differs only in that nothing was sampled. Everything else in config.TOP_LEVEL -- skybox,
-#: exposure, scene_lights, env_sphere, scenarios, materials, randomize, randomize_task_letters,
-#: randomize_block_colors, lighting_intensity -- is a draw and is dropped.
-DETERMINISTIC_FLAG_KEYS = ("carb_settings", "hide_objects", "env_spacing", "render_mode",
-                           "cameras", "texture_cache")
-
-
-def derive_non_randomized_flags(src_yaml: Path, dest: Path) -> bool:
-    """Write *dest*: *src_yaml* with every randomized section removed. Returns had_skybox.
-
-    "Without domain randomization" has two readings and they look different. Dropping the yaml
-    entirely also brings the backdrop geometry back, turns GI and reflections off (they are on
-    only because a `skybox:` block is PRESENT), and reverts render_mode and env_spacing -- that is
-    a different scene, not the same scene unrandomized. Keeping the deterministic half means the
-    original is directly comparable to the N copies it ships beside: same cameras, same hidden
-    objects, same env spacing, same RTX mode.
-
-    GI is the one implicit coupling, which is why the caller gets `had_skybox` back and passes
-    --enable_gi: otherwise stripping the skybox block silently relights the original pass.
-    """
-    import yaml  # noqa: PLC0415  (only needed when the original pass is enabled)
-    with open(src_yaml) as f:
-        flags = yaml.safe_load(f) or {}
-    kept = {k: v for k, v in flags.items() if k in DETERMINISTIC_FLAG_KEYS}
-    dropped = sorted(k for k in flags if k not in DETERMINISTIC_FLAG_KEYS)
-    # hide_objects is only scene-describing while something still BACKS the scene. The shipped
-    # randomized yamls pair `hide_objects: [backdrop]` with skybox/env_sphere -- the backdrop is
-    # hidden because an HDRI replaces it. Those are draws and get dropped, so keeping
-    # hide_objects would render the baseline against nothing at all.
-    if kept.get("hide_objects") and not ({"skybox", "env_sphere"} & set(flags)):
-        pass  # nothing was providing a background anyway; the hide stands
-    elif kept.get("hide_objects"):
-        log.warning(
-            "Rerender (local): non-randomized flags drop skybox/env_sphere, so hide_objects %s "
-            "is dropped too -- hiding the backdrop is only valid while one of them puts a "
-            "background back", kept["hide_objects"],
-        )
-        kept.pop("hide_objects")
-        dropped = sorted({*dropped, "hide_objects"})
-    body = ("# GENERATED by run_datagen_pipeline.py --render-non-randomized.\n"
-            f"# {src_yaml} with the randomized sections removed: "
-            f"{', '.join(dropped) if dropped else '(none to remove)'}.\n"
-            "# Kept, because they describe the scene rather than a draw: "
-            f"{', '.join(sorted(kept)) if kept else '(nothing)'}.\n"
-            + yaml.safe_dump(kept, sort_keys=True))
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    # Called once per problem AND once for the scheduler, so write (and log) only on a change.
-    if not dest.exists() or dest.read_text() != body:
-        dest.write_text(body)
-        log.info("Rerender (local): non-randomized flags -> %s (dropped: %s)",
-                 dest, " ".join(dropped) or "nothing")
-    return "skybox" in flags
-
-#: Prefix that marks a re-render item in the shared local slot pool, so the completion
+#: Prefix that marks a render item in the shared local slot pool, so the completion
 #: callback can tell "an execution just finished, queue its render" from "a render finished".
-RERENDER_ITEM_PREFIX = "rerender:"
+RENDER_ITEM_PREFIX = "render:"
 
-#: rerender.py prints "all jobs done" and then hangs in Isaac teardown, so every local render
+#: render.py prints "all jobs done" and then hangs in Isaac teardown, so every local render
 #: goes through this wrapper, which keys completion on the marker and SIGKILLs the group.
-RUN_LOCAL_RENDER = Path(__file__).resolve().parents[2] / "scripts" / "rerender" / "run_local_render.py"
+RUN_LOCAL_RENDER = Path(__file__).resolve().parents[2] / "scripts" / "render" / "run_local_render.py"
 #: The RI training set's domain-randomization flags (glyph + colour train split, symmetric).
-RERENDER_FLAGS_DEFAULT = (
+PLAIN_RENDER_FLAGS = "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+
+RENDER_FLAGS_DEFAULT = (
     "src/toyblocks/domain_randomization/flags/"
-    "rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"
+    "render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"
 )
-#: RI's video sidecars and GOPs; --rerender-extra (appended after) overrides any of them.
-RERENDER_RI_SIDECARS = ("--extra_rgb", "224", "--extra_depth", "rg8_55_224",
+#: RI's video sidecars and GOPs; --render-extra (appended after) overrides any of them.
+RENDER_RI_SIDECARS = ("--extra_rgb", "224", "--extra_depth", "rg8_55_224",
                         "--extra_rgb_GOP", "2", "--rgb_GOP", "2")
 
 
@@ -270,7 +215,7 @@ def local_env_argv(args, pddl, envs_dir: str) -> list[str]:
     """argv for one problem's LOCAL env-generation job (scripts/generate_task_from_pddl.py).
 
     A module-level builder so the composed argv is testable without running the stage, like
-    :func:`local_rerender_argv` and :func:`robot_init_flags`.
+    :func:`local_render_argv` and :func:`robot_init_flags`.
 
     Spellings are UNDERSCORED here because the target is generate_task_from_pddl.py. It is a
     tyro CLI and accepts either form, but every other flag in this argv is underscored. Do NOT
@@ -325,40 +270,39 @@ def local_env_argv(args, pddl, envs_dir: str) -> list[str]:
     return cmd
 
 
-def local_rerender_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
+def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
                         flags_path: Path | None = None, renders_per_episode: int | None = None,
                         enable_gi: bool = False) -> list[str]:
-    """The rerender.py command for one problem, with the settings the RI training set used.
+    """The render.py command for one problem, with the settings the RI training set used.
 
-    Four of these differ from ``rerender.py``'s OWN argparse defaults and silently change the
+    Four of these differ from ``render.py``'s OWN argparse defaults and silently change the
     pixels when omitted:
 
-      --env_spacing 60        rerender.py default None -> 5.0; at 5.0 neighbouring envs are
+      --env_spacing 60        render.py default None -> 5.0; at 5.0 neighbouring envs are
                               close enough to appear in each other's cameras. render_params.json
                               records it under args.env_spacing, but only when a run passes it
                               explicitly.
-      --camera_base scene     rerender.py default "data" -- a different pose source.
-      --rtx_warmup_frames 16  rerender.py default 1 -- fewer warmup frames, different exposure.
+      --camera_base scene     render.py default "data" -- a different pose source.
+      --rtx_warmup_frames 16  render.py default 1 -- fewer warmup frames, different exposure.
       --num_envs              A FLOOR, not taste: plan_block_sizes
                               errors and SKIPS the problem unless num_envs covers every size slot
                               in the env package, and the generated table has
                               MAX_NON_SIM_STATE_RANDOMIZATIONS (8) of them.
 
-    The RI video sidecars (RERENDER_RI_SIDECARS) come before ``--rerender-extra``, which can
-    override them (rerender.py is last-wins).
+    The RI video sidecars (RENDER_RI_SIDECARS) come before ``--render-extra``, which can
+    override them (render.py is last-wins).
 
-    rerender.py is run BY ABSOLUTE PATH with -u, never ``-m`` and never imported: it sibling-imports
+    render.py is run BY ABSOLUTE PATH with -u, never ``-m`` and never imported: it sibling-imports
     ``scene_swap`` and ``render_sources`` from its own directory.
     """
-    rr = Path(__file__).resolve().parents[2] / "scripts" / "rerender" / "rerender.py"
+    rr = Path(__file__).resolve().parents[2] / "scripts" / "render" / "render.py"
     argv = [
         sys.executable, "-u", str(rr),
         str(src_dir),
         "--output", str(out_dir),
         "--envs_dir", envs_dir,
-        "--flags", str((flags_path or Path(args.rerender_flags)).resolve()),
-        "-N", str(args.rerender_n if renders_per_episode is None else renders_per_episode),
-        "--num_envs", str(args.rerender_local_num_envs),
+        "-N", str(args.render_n if renders_per_episode is None else renders_per_episode),
+        "--num_envs", str(args.render_local_num_envs),
         "--skip_initial_step",
         "--resume",
         "--rtx_warmup_frames", "16",
@@ -368,18 +312,23 @@ def local_rerender_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         "--dr_seeding", "hash",
         "--camera_base", "scene",
     ]
-    # ONE flag with every camera after it. rerender.py declares --skip_cameras as a plain
+    # ONE flag with every camera after it. render.py declares --skip_cameras as a plain
     # nargs="*" store, so a repeated flag OVERWRITES: passing it twice keeps only the last camera
     # and silently renders the rest.
-    if args.rerender_skip_cameras:
-        argv += ["--skip_cameras", *args.rerender_skip_cameras]
-    # ALWAYS after --skip_cameras, and never the last thing before --rerender-extra: nargs="*"
+    # Without a YAML render.py uses its own defaults, which sample nothing: that is how
+    # --render-non-randomized renders with no visual DR.
+    _flags = flags_path or (Path(args.render_flags) if args.render_flags else None)
+    if _flags is not None:
+        argv += ["--flags", str(_flags.resolve())]
+    if args.render_skip_cameras:
+        argv += ["--skip_cameras", *args.render_skip_cameras]
+    # ALWAYS after --skip_cameras, and never the last thing before --render-extra: nargs="*"
     # would absorb a stray bare token from the extra into the camera list instead of failing
     # with "unrecognized arguments", silently re-enabling a camera the run meant to skip.
     argv += ["--env_spacing", "60"]
-    if args.rerender_skip_failure_episodes:
+    if args.render_skip_failure_episodes:
         argv.append("--skip_failure_episodes")
-    if args.rerender_local_fail_on_video_defects:
+    if args.render_local_fail_on_video_defects:
         argv.append("--fail_on_video_defects")
     if enable_gi:
         # The source yaml had a `skybox:` block, whose mere PRESENCE switches GI and reflections
@@ -387,10 +336,10 @@ def local_rerender_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         # the un-randomized copy is lit differently from the copies it ships beside -- which
         # would look like an augmentation rather than the baseline.
         argv.append("--enable_gi")
-    argv += list(RERENDER_RI_SIDECARS)
-    argv += rerender_extra_tokens(args)
-    # A pass's IDENTITY goes after the extra. rerender.py is last-wins, so a shared
-    # --rerender-extra carrying -N or --flags would otherwise rewrite the non-randomized pass
+    argv += list(RENDER_RI_SIDECARS)
+    argv += render_extra_tokens(args)
+    # A pass's IDENTITY goes after the extra. render.py is last-wins, so a shared
+    # --render-extra carrying -N or --flags would otherwise rewrite the non-randomized pass
     # into N randomized copies sitting in a directory named non_randomized -- and every count
     # would still read (N+1)x. The normal pass passes neither, so an extra still wins there.
     if flags_path is not None:
@@ -400,18 +349,18 @@ def local_rerender_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
     return argv
 
 
-#: Flags that --rerender-extra must not set locally: each one silently breaks the pipeline's own
-#: accounting rather than the render. --output steers a problem out of rerender/out/job_local, so
+#: Flags that --render-extra must not set locally: each one silently breaks the pipeline's own
+#: accounting rather than the render. --output steers a problem out of render/out/job_local, so
 #: merge never ships it and the gate reports it unrendered; the episode selectors make the
 #: rendered episode set disagree with what the sweep and the parity checks expect.
-RERENDER_EXTRA_DENIED = ("--output", "--envs_dir", "--episodes_file", "--episode_offset",
+RENDER_EXTRA_DENIED = ("--output", "--envs_dir", "--episodes_file", "--episode_offset",
                          "--max_episodes")
 
 
-def rerender_extra_tokens(args) -> list[str]:
-    """--rerender-extra, shlex-split, for the LOCAL rerender.py argv.
+def render_extra_tokens(args) -> list[str]:
+    """--render-extra, shlex-split, for the LOCAL render.py argv.
 
-    Appended last so a user override beats the hardcodes above: rerender.py declares no append,
+    Appended last so a user override beats the hardcodes above: render.py declares no append,
     extend or count actions, so every repeated option is last-wins.
 
     Denied options are dropped with a warning rather than failing the run -- dropping them
@@ -419,10 +368,10 @@ def rerender_extra_tokens(args) -> list[str]:
     the right data in the right place.
 
     """
-    if not getattr(args, "rerender_extra", None):
+    if not getattr(args, "render_extra", None):
         return []
     out: list[str] = []
-    for chunk in args.rerender_extra:
+    for chunk in args.render_extra:
         toks = shlex.split(chunk)
         i = 0
         while i < len(toks):
@@ -441,17 +390,17 @@ def rerender_extra_tokens(args) -> list[str]:
                     toks[i + 1] if i + 1 < len(toks) else "")
                 if val == "data":
                     log.warning(
-                        "Rerender (local): ignoring --camera_base data from --rerender-extra. "
+                        "Render (local): ignoring --camera_base data from --render-extra. "
                         "The local execution stage records no observation.camera_pose.* (it "
                         "spawns no cameras), so there is no recorded pose to base on; the "
                         "pipeline's --camera_base scene is used",
                     )
                     i += 1 if "=" in tok else 2
                     continue
-            if name in RERENDER_EXTRA_DENIED:
+            if name in RENDER_EXTRA_DENIED:
                 skip = 1 if "=" in tok else 2
                 log.warning(
-                    "Rerender (local): ignoring %s from --rerender-extra; the pipeline owns it "
+                    "Render (local): ignoring %s from --render-extra; the pipeline owns it "
                     "(a different value silently breaks merge or the episode accounting)", name,
                 )
                 i += skip
@@ -461,32 +410,65 @@ def rerender_extra_tokens(args) -> list[str]:
     return out
 
 
-def local_rerender_passes(args, base: str) -> list[tuple[str, dict]]:
+def render_job_name(flags: str | Path) -> str:
+    """Output directory for one pass, named after its flags YAML.
+
+    Merge globs ``render/out/job_*``, so each pass lands in its own sibling directory and the
+    directory name says which look it holds.
+    """
+    stem = Path(flags).stem
+    for prefix in ("render_flags_", "rerender_flags_"):
+        if stem.startswith(prefix):
+            stem = stem[len(prefix):]
+    return f"job_{stem}"
+
+
+def parse_render_pass(spec: str) -> tuple[str, int]:
+    """``FLAGS.yaml`` or ``FLAGS.yaml:N`` -> (path, copies per source episode)."""
+    path, sep, count = spec.rpartition(":")
+    return (path, int(count)) if sep and count.isdigit() else (spec, 1)
+
+
+def resolve_render_passes(args) -> list[tuple[str, int]]:
+    """Every pass this run should produce, as (flags YAML, copies per source episode).
+
+    ``--render-pass`` names them. ``--render-randomized`` and ``--render-non-randomized`` are
+    shorthand for the two most common ones.
+    """
+    passes = [parse_render_pass(s) for s in (getattr(args, "render_pass", None) or [])]
+    if getattr(args, "render_randomized", False) and args.render_flags:
+        passes.append((args.render_flags, args.render_n))
+    if getattr(args, "render_non_randomized", False):
+        passes.append((args.render_non_randomized_flags or PLAIN_RENDER_FLAGS, 1))
+    seen, unique = {}, []
+    for flags, copies in passes:
+        name = render_job_name(flags)
+        if name in seen:
+            log.warning("Render: %s and %s would both write to %s; keeping the first",
+                        seen[name], flags, name)
+            continue
+        seen[name] = flags
+        unique.append((flags, copies))
+    return unique
+
+
+def local_render_passes(args, base: str) -> list[tuple[str, dict]]:
     """The render passes one problem needs: [(job_dir_name, argv_kwargs), ...].
 
-    One entry normally; two with --render-non-randomized. The original pass is a SEPARATE
-    rerender.py invocation into a sibling job dir rather than an extra -N iteration, and that is
-    forced by three things: one process has one flags dict applied before the sim is built; the
-    per-wave levers (dome, skybox, exposure) are scene-global and the wave packers interleave
-    iters, so an "un-randomized" unit sharing a wave is still lit by that wave's draw; and
-    --resume skips a problem whose render_params says completed, so a second pass into the same
-    dir renders nothing and exits 0.
+    Each pass is a SEPARATE render.py invocation into its own sibling job dir rather than extra
+    -N iterations, because one process applies one flags dict before the sim is built, and the
+    per-wave levers (dome, skybox, exposure) are scene-global: a differently-flagged unit
+    sharing a wave would still be lit by that wave's draw.
     """
-    passes: list[tuple[str, dict]] = [(LOCAL_RERENDER_JOB, {})]
-    if getattr(args, "render_non_randomized", False):
-        orig = Path(base) / "rerender" / "non_randomized_flags.yaml"
-        if args.render_non_randomized_flags:
-            orig, had_skybox = Path(args.render_non_randomized_flags), False
-        else:
-            had_skybox = derive_non_randomized_flags(Path(args.rerender_flags), orig)
-        passes.append((LOCAL_RERENDER_JOB_NONRAND,
-                       {"flags_path": orig, "renders_per_episode": 1, "enable_gi": had_skybox}))
-    return passes
+    return [
+        (render_job_name(flags), {"flags_path": Path(flags), "renders_per_episode": copies})
+        for flags, copies in resolve_render_passes(args)
+    ]
 
 
-def local_rerender_steps(args, base: str, envs_dir: str, slug: str,
+def local_render_steps(args, base: str, envs_dir: str, slug: str,
                          source_dir: Path | None = None) -> list[str]:
-    """Shell steps that stage *slug* and re-render it, appended to its local execution job.
+    """Shell steps that stage *slug* and render it, appended to its local execution job.
 
     *source_dir* is the problem's recorded dataset dir (default ``<base>/execution/<slug>``; the
     play pipeline passes ``<base>/play/<slug>``).
@@ -494,28 +476,28 @@ def local_rerender_steps(args, base: str, envs_dir: str, slug: str,
     Staging is a one-entry directory of symlinks because ``discover_jobs`` enumerates the
     ``problem_*`` CHILDREN of the path it is given -- it cannot be pointed at a single problem.
     """
-    src_root = Path(base) / "rerender" / "src" / slug
-    passes = local_rerender_passes(args, base)
-    out_dirs = [Path(base) / "rerender" / "out" / job for job, _ in passes]
+    src_root = Path(base) / "render" / "src" / slug
+    passes = local_render_passes(args, base)
+    out_dirs = [Path(base) / "render" / "out" / job for job, _ in passes]
     link = src_root / slug
     return [
         shlex.join(["mkdir", "-p", str(src_root), *(str(d) for d in out_dirs)]),
         shlex.join(["ln", "-sfn", str(source_dir or Path(base) / "execution" / slug), str(link)]),
-        # Through run_local_render.py, never rerender.py directly: rerender.py prints
+        # Through run_local_render.py, never render.py directly: render.py prints
         # "all jobs done" and then hangs in Isaac teardown. Inside a `bash -c a && b` chain
         # that hang blocks run_local_stage forever and the pipeline never reaches merge
         # (observed: 16/16 episodes finalized, then 53 minutes of nothing).
         *(shlex.join([
             sys.executable, "-u", str(RUN_LOCAL_RENDER),
-            "--stall-timeout", str(args.rerender_local_stall_timeout), "--",
-            *local_rerender_argv(args, src_root, d, envs_dir, **kw),
+            "--stall-timeout", str(args.render_local_stall_timeout), "--",
+            *local_render_argv(args, src_root, d, envs_dir, **kw),
         ]) for d, (_job, kw) in zip(out_dirs, passes)),
     ]
 
 
-def rerender_problem_complete(out_dir: Path, problem: str) -> bool:
+def render_problem_complete(out_dir: Path, problem: str) -> bool:
     """True iff the renderer finalized *problem* in *out_dir* (as completion.problem_complete)."""
-    for split in RERENDER_SPLITS:
+    for split in RENDER_SPLITS:
         rp = out_dir / problem / split / "meta" / "render_params.json"
         if not rp.exists():
             continue
@@ -535,12 +517,12 @@ RENDER_SHIPPED, RENDER_UNRENDERABLE, RENDER_ABSENT = "shipped", "unrenderable", 
 def local_render_state(out_dir: Path, problem: str) -> str:
     """Classify *problem* the way merge sees it, not the way the renderer reports it.
 
-    ``rerender_problem_complete`` asks render_params for ``completed``, but completed means
-    TERMINAL, not HAS DATA. rerender.py finalizes a problem with ``episodes_recorded: 0``
+    ``render_problem_complete`` asks render_params for ``completed``, but completed means
+    TERMINAL, not HAS DATA. render.py finalizes a problem with ``episodes_recorded: 0``
     (the payload writes the ``total_episodes`` argument out under the key ``episodes_total``;
     there is no ``total_episodes`` key on disk) and an
     ``empty_reason`` when the recorded block size is not in the problem's size table
-    (rerender.py plan_block_sizes -> "bad_size") or when every source parquet is unreadable,
+    (render.py plan_block_sizes -> "bad_size") or when every source parquet is unreadable,
     so that a re-run does not retry it forever. Both write
     ``blocks_success/meta/render_params.json`` and no ``info.json`` -- so the problem reports
     complete while ``merge.get_dataset_paths`` skips it, which is the silent drop every gate
@@ -552,7 +534,7 @@ def local_render_state(out_dir: Path, problem: str) -> str:
     """
     completed = None
     completed_split = None
-    for split in RERENDER_SPLITS:
+    for split in RENDER_SPLITS:
         rp = out_dir / problem / split / "meta" / "render_params.json"
         if not rp.exists():
             continue
@@ -573,7 +555,7 @@ def local_render_state(out_dir: Path, problem: str) -> str:
     # treated as permanent; anything else is ABSENT so the sweep retries it.
     if completed.get("empty_reason") or completed.get("episodes_recorded") == 0:
         return RENDER_UNRENDERABLE
-    # A problem that rendered only failures finalizes with blocks_failure alone -- rerender.py
+    # A problem that rendered only failures finalizes with blocks_failure alone -- render.py
     # builds job["sources"] from the splits that exist, so no blocks_success/ is created and
     # render_params lands under blocks_failure. merge reads blocks_success only, so this can
     # never ship, and re-running cannot change it: the SOURCE has no successful episodes.
@@ -608,18 +590,18 @@ def merge_shipped_problems(base_dir: Path) -> list[str]:
     return [problem_name_from_dataset_path(p) for p in get_dataset_paths(base_dir)]
 
 
-class LocalRerenderScheduler:
-    """Queues each problem's local re-render the moment its execution finalizes.
+class LocalRenderScheduler:
+    """Queues each problem's local render the moment its execution finalizes.
 
-    The coupled mode (``--rerender-local``) appends the render to the execution job's own
+    The coupled mode (``--render-local``) appends the render to the execution job's own
     shell chain, so the render holds the slot its execution just used. This pipelined mode
-    (``--rerender``) makes the render an independent item in the SAME slot pool,
+    (``--render``) makes the render an independent item in the SAME slot pool,
     eligible as soon as execution N finalizes, so it can start while execution N+1 is still
     running whenever a slot is free.
 
     Dispatch is exactly-once in-process: ``_seen`` means a problem is enqueued at most once,
     so two renders can never share an output dir. That is load-bearing, not tidiness --
-    ``rerender.py --resume`` ``shutil.rmtree``s a non-finalized ``<out>/<problem>``, so a
+    ``render.py --resume`` ``shutil.rmtree``s a non-finalized ``<out>/<problem>``, so a
     double dispatch would delete a live writer's output instead of failing.
     """
 
@@ -628,32 +610,32 @@ class LocalRerenderScheduler:
         args: argparse.Namespace,
         envs_dir: str,
         execution_dir: Path,
-        rerender_dir: Path,
+        render_dir: Path,
     ) -> None:
         self._args = args
         self._envs_dir = envs_dir
         self._execution = execution_dir
-        self._src_root = rerender_dir / "src"
-        self._passes = local_rerender_passes(args, str(rerender_dir.parent))
-        self._out_dirs = [rerender_dir / "out" / job for job, _ in self._passes]
+        self._src_root = render_dir / "src"
+        self._passes = local_render_passes(args, str(render_dir.parent))
+        self._out_dirs = [render_dir / "out" / job for job, _ in self._passes]
         #: The DR pass. Kept as a scalar because the rest of the class, and the tests, key on it.
         self.out_dir = self._out_dirs[0]
         self.feed = JobFeed()
         self._lock = threading.Lock()
         self._pending = 0             # queued-or-running items that still owe an on_done
         self._seen: set[str] = set()  # slugs already dealt with (queued, or already rendered)
-        self._staged: list[str] = []  # staged problem dir names == rerender.py output names
+        self._staged: list[str] = []  # staged problem dir names == render.py output names
         self._skipped: list[str] = []  # deliberately not rendered; still must be REPORTED
 
     def render_cmd(self, slug: str) -> list[str]:
-        """One problem's command: the hang guard wrapping the shared re-render argv.
+        """One problem's command: the hang guard wrapping the shared render argv.
 
         The single seam the tests override, so they can exercise the scheduler without Isaac.
         """
         one = [[
             sys.executable, "-u", str(RUN_LOCAL_RENDER),
-            "--stall-timeout", str(self._args.rerender_local_stall_timeout), "--",
-            *local_rerender_argv(self._args, self._src_root / slug, d, self._envs_dir, **kw),
+            "--stall-timeout", str(self._args.render_local_stall_timeout), "--",
+            *local_render_argv(self._args, self._src_root / slug, d, self._envs_dir, **kw),
         ] for d, (_job, kw) in zip(self._out_dirs, self._passes)]
         if len(one) == 1:
             return one[0]
@@ -666,29 +648,29 @@ class LocalRerenderScheduler:
         if slug in self._seen:
             return False
         self._seen.add(slug)
-        linked = stage_rerender_source(self._execution, self._src_root / slug, [slug])
+        linked = stage_render_source(self._execution, self._src_root / slug, [slug])
         if not linked:
-            log.warning("Rerender (local): %s has no finalized dataset; not re-rendering", slug)
+            log.warning("Render (local): %s has no finalized dataset; not rendering", slug)
             self._skipped.append(slug)
             return False
         self._staged += linked
         if all(self._state_of(d) != RENDER_ABSENT for d in linked):
-            log.info("Rerender (local): %s is already rendered; skipping", slug)
+            log.info("Render (local): %s is already rendered; skipping", slug)
             return False
         self._pending += 1
-        self.feed.add(f"{RERENDER_ITEM_PREFIX}{slug}", self.render_cmd(slug), first=first)
+        self.feed.add(f"{RENDER_ITEM_PREFIX}{slug}", self.render_cmd(slug), first=first)
         return True
 
     def arm(self, exec_jobs: list[tuple[str, Any]], slugs: list[str]) -> JobFeed:
-        """Load the execution items, plus re-renders for problems an EARLIER run executed."""
+        """Load the execution items, plus renders for problems an EARLIER run executed."""
         with self._lock:
             for name, build in exec_jobs:
                 self._pending += 1
                 self.feed.add(name, build)
             running = {name for name, _ in exec_jobs}
             # Problems the execution stage skipped because .execution_complete already exists
-            # would otherwise never be rendered -- and once rerender_ran is set, merge reads
-            # ONLY rerender/out/job_*, so they would vanish from the dataset with no error.
+            # would otherwise never be rendered -- and once render_ran is set, merge reads
+            # ONLY render/out/job_*, so they would vanish from the dataset with no error.
             for slug in slugs:
                 if slug not in running and (self._execution / slug).is_dir():
                     self._enqueue(slug, first=False)
@@ -700,7 +682,7 @@ class LocalRerenderScheduler:
         """``run_local_stage`` worker-thread callback. Enqueues only; never renders inline."""
         try:
             with self._lock:
-                if not name.startswith(RERENDER_ITEM_PREFIX):
+                if not name.startswith(RENDER_ITEM_PREFIX):
                     if ok:
                         # Increment happens inside the same lock hold as the decrement below,
                         # so _pending cannot transiently hit zero while a render is still owed.
@@ -710,16 +692,16 @@ class LocalRerenderScheduler:
                         # whose execution finalized its dataset and then exited non-zero (the
                         # routine Isaac teardown failure) is absent from both `done` and
                         # `missing`, report() claims success, the stage marker is set, and merge
-                        # -- which reads ONLY rerender/out -- silently drops it.
+                        # -- which reads ONLY render/out -- silently drops it.
                         log.warning(
-                            "Rerender (local): execution of %s failed; not re-rendering it", name
+                            "Render (local): execution of %s failed; not rendering it", name
                         )
                         self._seen.add(name)
                         self._skipped.append(name)
                 self._pending -= 1
                 drained = self._pending == 0
         except Exception:
-            log.exception("Rerender (local): scheduling failed after %s", name)
+            log.exception("Render (local): scheduling failed after %s", name)
             with self._lock:
                 self._pending -= 1
                 drained = self._pending == 0
@@ -734,7 +716,7 @@ class LocalRerenderScheduler:
             for slug in base_problem_slugs(slugs):
                 # Shards are collapsed for DISPATCH, so the base dir may not exist at all:
                 # an execution preempted on its first attempt leaves only problem_x__s001.
-                # stage_rerender_source globs the siblings, so staging still works.
+                # stage_render_source globs the siblings, so staging still works.
                 if (self._execution / slug).is_dir() or any(
                     self._execution.glob(f"{slug}__s[0-9][0-9][0-9]")
                 ):
@@ -743,18 +725,18 @@ class LocalRerenderScheduler:
                     except OSError:
                         # Staging touches the filesystem; one bad symlink must not abort the
                         # run after the execution stage has already been marked complete.
-                        log.exception("Rerender (local): could not stage %s", slug)
+                        log.exception("Render (local): could not stage %s", slug)
                         self._skipped.append(slug)
             if self._pending == 0:
                 self.feed.close()
                 return
-        run_local_stage("Rerender (local)", self.feed, slots, log_dir, on_done=self.on_done)
+        run_local_stage("Render (local)", self.feed, slots, log_dir, on_done=self.on_done)
 
     def _state_of(self, problem: str) -> str:
         """Worst state across every pass this run owes for *problem*.
 
         With --render-non-randomized a problem is only SHIPPED when BOTH the randomized and
-        the original dataset are on disk: merge globs rerender/out/job_*, so a half-finished
+        the original dataset are on disk: merge globs render/out/job_*, so a half-finished
         problem would otherwise contribute N copies where (N+1) were promised and nothing would
         report it. ABSENT beats UNRENDERABLE beats SHIPPED.
         """
@@ -839,15 +821,15 @@ class JobFeed:
     """A job list :func:`run_local_stage` may keep pulling from while the stage is running.
 
     A plain list is still accepted everywhere; this exists for the one case where finishing a
-    job creates another one -- the local re-render of a problem whose execution just finalized.
+    job creates another one -- the local render of a problem whose execution just finalized.
 
-    Re-render items are served BEFORE queued execution items. At one slot that reproduces the
+    Render items are served BEFORE queued execution items. At one slot that reproduces the
     coupled chain's exec/render interleaving, so at most one un-rendered execution dataset sits
     on disk at a time; at two slots the render simply takes the free slot while the next
     execution keeps running.
     """
 
-    _RERENDER, _EXECUTION, _SENTINEL = 0, 1, 2
+    _RENDER, _EXECUTION, _SENTINEL = 0, 1, 2
 
     def __init__(self, jobs: Iterable[tuple[str, Any]] = ()) -> None:
         self._q: queue.PriorityQueue = queue.PriorityQueue()
@@ -874,7 +856,7 @@ class JobFeed:
                 return False
             self._seq += 1
             self._total += 1
-            prio = (self._RERENDER if first else self._EXECUTION, self._seq)
+            prio = (self._RENDER if first else self._EXECUTION, self._seq)
         self._q.put((*prio, name, build))
         return True
 
@@ -1030,7 +1012,7 @@ def run_local_stage(
 
         Deliberately NOT `for job in feed: pool.submit(...)`: submitting eagerly drains the
         whole feed into the pool's own FIFO queue at once, which both destroys the feed's
-        priority ordering (a re-render queued later lands behind every execution already
+        priority ordering (a render queued later lands behind every execution already
         submitted) and removes all back-pressure. Pulling per-slot is what makes `first=True`
         mean anything.
         """
@@ -1055,8 +1037,8 @@ STEPS = [
     ("task_gen", "Generate PDDL tasks"),
     ("env", "Generate env packages + reset states"),
     ("exec", "Run vecgen execution"),
-    ("rerender", "Re-render finished execution"),
-    ("merge", "Merge successful datasets (re-rendered if rerender ran)"),
+    ("render", "Render finished execution"),
+    ("merge", "Merge successful datasets (rendered if render ran)"),
     ("annotate", "Annotate merged dataset (target xy)"),
 ]
 
@@ -1207,14 +1189,14 @@ PARAM_GROUPS: list[tuple[str, str | None, list[tuple[str, str, str]]]] = [
         ],
     ),
     (
-        "Rerender",
-        "rerender",
+        "Render",
+        "render",
         [
-            ("rerender_flags", "rerender-flags", "str"),
-            ("rerender_n", "rerender-n", "int"),
-            ("rerender_skip_cameras", "rerender-skip-cameras", "[str]"),
-            ("rerender_skip_failure_episodes", "rerender-skip-failure-episodes", "bool"),
-            ("rerender_extra", "rerender-extra", "[str]"),
+            ("render_flags", "render-flags", "str"),
+            ("render_n", "render-n", "int"),
+            ("render_skip_cameras", "render-skip-cameras", "[str]"),
+            ("render_skip_failure_episodes", "render-skip-failure-episodes", "bool"),
+            ("render_extra", "render-extra", "[str]"),
         ],
     ),
     (
@@ -1349,37 +1331,54 @@ def prompt_params(
             print(f"  (invalid value: {exc})")
 
 
-def add_rerender_args(parser: argparse.ArgumentParser) -> None:
-    """The ``--rerender*`` flags (shared with run_playdata_pipeline.py)."""
+def add_render_args(parser: argparse.ArgumentParser) -> None:
+    """The ``--render*`` flags (shared with run_playdata_pipeline.py)."""
     parser.add_argument(
+        "--render-randomized",
         "--rerender",
         action="store_true",
-        help="Re-render each problem on this machine and merge the re-rendered episodes instead "
-        "of the execution data: each problem's re-render is queued into the "
-        "shared local GPU-slot pool the moment that problem's execution finalizes, so it can "
-        "overlap the next execution when a slot is free (--rerender-local instead renders "
-        "inside the execution job)"
+        dest="render_randomized",
+        help="Render each problem's recorded episodes with visual domain randomization and "
+        "merge those instead of the execution data. Requires --render-flags, the "
+        "randomization YAML. Execution records no cameras, so this is the pass that produces "
+        "the images. --render is the old spelling. Use --render-schedule to choose how the "
+        "renders are scheduled against the executions",
     )
     parser.add_argument(
+        "--render-schedule",
+        "--rerender-schedule",
+        choices=["pipelined", "coupled"],
+        default=None,
+        help="How each render is scheduled against the executions. Both run on this machine "
+        "and produce identical pixels, so this is a throughput and observability choice. "
+        "'coupled' (default) appends the render to that problem's execution job, holding one "
+        "slot across both phases: faster with more than one worker. 'pipelined' queues the "
+        "render as its own item in the shared GPU-slot pool as soon as that problem's execution "
+        "finalizes, so it can overlap the next execution and gets its own log, timing and exit "
+        "status, at some throughput cost",
+    )
+    parser.add_argument(
+        "--render-local-stall-timeout",
         "--rerender-local-stall-timeout",
         type=int,
         default=3600,
-        help="Rerender (local): SIGKILL the render if it prints nothing for this long. Success is "
+        help="Render (local): SIGKILL the render if it prints nothing for this long. Success is "
         "decided by the 'all jobs done' marker and the on-disk result, never by exit status, "
-        "because rerender.py hangs in Isaac teardown after finishing its work",
+        "because render.py hangs in Isaac teardown after finishing its work",
     )
     parser.add_argument(
+        "--render-local-num-envs",
         "--rerender-local-num-envs",
         type=int,
         default=8,
-        help="Rerender (local): envs per render wave. This is a FLOOR, not a preference: "
+        help="Render (local): envs per render wave. This is a FLOOR, not a preference: "
         "plan_block_sizes skips the problem unless this covers every block-size slot in the env "
         "package (8 by default). 8 keeps the encoder's RSS survivable beside Isaac",
     )
     parser.add_argument(
         "--render-non-randomized",
         action="store_true",
-        help="Rerender: ALSO render each source episode once with the randomized sections of the "
+        help="Render: ALSO render each source episode once with the randomized sections of the "
              "flags YAML removed -- the same scene and cameras, nothing sampled. Multiplexes the "
              "dataset: with -N the merged result is (N+1)x the source instead of Nx. Off by "
              "default. Writes a sibling job dir that merge picks up automatically",
@@ -1387,73 +1386,95 @@ def add_rerender_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--render-non-randomized-flags",
         default=None,
-        help="Rerender: flags YAML for the --render-non-randomized pass. Default: derived "
-             "from --rerender-flags by dropping every randomized section and keeping the scene "
+        help="Render: flags YAML for the --render-non-randomized pass. Default: derived "
+             "from --render-flags by dropping every randomized section and keeping the scene "
              "(cameras, hide_objects, env_spacing, render_mode, carb_settings, texture_cache). "
              "Pass one explicitly to control exactly what 'the original' looks like",
     )
     parser.add_argument(
+        "--render-local-fail-on-video-defects",
         "--rerender-local-fail-on-video-defects",
         action="store_true",
-        help="Rerender (local): fail a problem whose encoder could not publish every video "
+        help="Render (local): fail a problem whose encoder could not publish every video "
              "(default: off). Without it the problem finalizes as completed with "
              "status=incomplete_videos and merges with parquet rows whose mp4 is absent, which a "
              "path-resolving dataloader reads as zeros. Off by default because a failed problem "
-             "re-renders whole (scripts/rerender/fast_patch.py fills video holes afterwards)",
+             "renders whole (scripts/render/fast_patch.py fills video holes afterwards)",
     )
+    # Exact option so a bare --render reports the choice instead of argparse answering
+    # "ambiguous option: --render could match --render-randomized, --render-schedule, ...".
+    parser.add_argument("--render", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
+        "--render-local",
         "--rerender-local",
         action="store_true",
-        help="Re-render each problem on THIS machine as an extra step in the SAME local "
-        "execution job, so the render holds the slot its execution just used. The coupled "
-        "alternative to --rerender, which instead queues the render as its own item "
-        "in the shared slot pool. vecgen stays parquet-only and the videos "
-        "come from the re-render, so it cannot be combined with --vecgen-record-videos",
+        dest="render_local",
+        help="Deprecated spelling of --render-randomized --render-schedule coupled. Every "
+        "render "
+        "is local, so the name described the wrong thing: what it selects is the schedule. "
+        "Still accepted, and still turns the stage on",
     )
     parser.add_argument(
+        "--render-pass",
+        action="append",
+        metavar="FLAGS.yaml[:N]",
+        help="Render one pass with this flags YAML, optionally N copies of every source "
+        "episode. Repeat the flag for more looks: each pass renders the same episodes and "
+        "lands in its own job_<name> directory, and the merge takes them all.",
+    )
+    parser.add_argument(
+        "--render-flags",
         "--rerender-flags",
-        default=RERENDER_FLAGS_DEFAULT,
-        help="Rerender: domain-randomization flags YAML (default: the RI training set's, "
-             f"{RERENDER_FLAGS_DEFAULT})",
+        dest="render_flags",
+        default=None,
+        help="The render flags YAML, as a path readable on this machine. Required whenever a "
+             "render runs: it describes how the scene is set up and drawn, and it is recorded "
+             "in every problem's render_params.json. The deterministic keys alone give a plain "
+             "render (render_flags_plain.yaml); adding the sampled sections makes it a visual "
+             f"domain-randomization YAML ({RENDER_FLAGS_DEFAULT} is the RI training set's)",
     )
     parser.add_argument(
+        "--render-n",
         "--rerender-n",
         type=int,
         default=1,
-        help="Rerender: re-rendered copies per source episode (default: 1)",
+        help="Render: rendered copies per source episode (default: 1)",
     )
     parser.add_argument(
+        "--render-skip-cameras",
         "--rerender-skip-cameras",
         nargs="*",
         default=["left_camera"],
-        help="Rerender: camera names not to render (default: left_camera, as in RI; pass the flag "
+        help="Render: camera names not to render (default: left_camera, as in RI; pass the flag "
              "with no names to render every camera)",
     )
     parser.add_argument(
+        "--render-skip-failure-episodes",
         "--rerender-skip-failure-episodes",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Rerender: render only blocks_success, as the merge keeps only that split anyway "
+        help="Render: render only blocks_success, as the merge keeps only that split anyway "
              "(default: on, as in RI)",
     )
     parser.add_argument(
+        "--render-extra",
         "--rerender-extra",
         nargs="*",
         default=[],
         metavar="ARG",
-        help="Rerender: extra arguments appended to the rerender.py command line; they override "
+        help="Render: extra arguments appended to the render.py command line; they override "
         "the RI defaults (--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 --rgb_GOP 2). "
         "Use the = FORM, "
-        "quoted as one string: --rerender-extra=\"--extra_rgb 224 --extra_depth g12_224 "
+        "quoted as one string: --render-extra=\"--extra_rgb 224 --extra_depth g12_224 "
         "--depth_gop 1000\". The '=' is not optional for a BARE flag -- argparse reads a "
         "space-separated value starting with '-' as an option of its own, so "
-        "--rerender-extra \"--skip_failure_episodes\" is REJECTED while "
-        "--rerender-extra=\"--skip_failure_episodes\" works. "
+        "--render-extra \"--skip_failure_episodes\" is REJECTED while "
+        "--render-extra=\"--skip_failure_episodes\" works. "
         "This is how the video sidecars are requested: --extra_rgb 224 writes a 224x224 RGB "
         "copy per camera (the HVLA training sidecar), --extra_depth g12_224 the depth one "
         "(lossless gray12le HEVC, short per-camera GOP; rg8_224 is the older, ~6x larger "
         "variant -- both decode to identical depth). "
-        "Neither has a dedicated --rerender-* flag.",
+        "Neither has a dedicated --render-* flag.",
     )
 
 
@@ -1465,11 +1486,11 @@ def add_merge_args(parser: argparse.ArgumentParser) -> None:
         default=["all"],
         help="Cameras to keep during merge; 'all' keeps every video feature any problem declares. "
              "The old default was an explicit six-key list, which SILENTLY DROPPED the sidecars "
-             "--rerender-extra had just produced: --extra_rgb 224 / --extra_depth rg8_224 write "
+             "--render-extra had just produced: --extra_rgb 224 / --extra_depth rg8_224 write "
              "observation.images.camera:<cam>_224 and observation.depth.camera:<cam>_rg8_224, "
              "neither of which was on the list, so the merged dataset lost exactly the streams "
              "HVLA trains on. merge.wants_all_cameras carries the same warning. The list "
-             "also named left_camera, which --rerender-skip-cameras left_camera never renders. "
+             "also named left_camera, which --render-skip-cameras left_camera never renders. "
              "Name keys explicitly only when you intend to drop everything else.",
     )
     parser.add_argument(
@@ -1480,15 +1501,16 @@ def add_merge_args(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Merge: ship the dataset even though problems that executed are absent from it "
              "(default: off -- the run fails instead). Their episodes are gone from the merged "
-             "dataset for good, because once the rerender stage is complete merge reads only "
-             "rerender/out/job_*",
+             "dataset for good, because once the render stage is complete merge reads only "
+             "render/out/job_*",
     )
     parser.add_argument(
         "--merge-union-schema",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=True,
         help="merge_datasets.py --union_schema: declare the union of the problems' columns (e.g. "
-        "object poses of blocks only some scenes have) so LeRobotDataset can load the merged "
-        "dataset (always on in run_datagen_pipeline.py)",
+        "object poses of blocks only some scenes have) so LeRobotDataset can load a merge whose "
+        "problems differ in their blocks. --no-merge-union-schema merges on the intersection.",
     )
     parser.add_argument(
         "--merge-output-dir",
@@ -1535,8 +1557,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=1,
         metavar="N",
         help="Concurrent problems per GPU (default 1, a strict no-op). Applies to "
-        "every local stage. Measured on one RTX 5090 at --rerender-local-num-envs 8: a "
-        "re-render peaks at 7.7 GiB of VRAM and 76%% GPU utilisation, so 2 fits a 32 GiB card "
+        "every local stage. Measured on one RTX 5090 at --render-local-num-envs 8: a "
+        "render peaks at 7.7 GiB of VRAM and 76%% GPU utilisation, so 2 fits a 32 GiB card "
         "and leaves compute headroom. Host RAM, not VRAM, is the binding constraint, and an "
         "OOM mid-encode corrupts videos behind a completed=true marker -- so raise this only "
         "with the output validated afterwards",
@@ -1563,7 +1585,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip annotation of the merged dataset (annotate_target_xy.py)",
     )
-    add_rerender_args(parser)
+    add_render_args(parser)
     parser.add_argument(
         "--output-root",
         default="data",
@@ -1608,7 +1630,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--num-distractors", type=int, default=0, help="Number of distractors per problem"
     )
-    parser.add_argument("--num-reset-states", type=int, default=32)
+    # Removed: use --env-per-problem. Kept registered so passing it reports that.
+    parser.add_argument("--num-reset-states", type=int, default=None, help=argparse.SUPPRESS)
+    # Removed: the pipeline only runs locally. Registered as an exact option so a bare
+    # --local reports that instead of matching --local-gpus by prefix.
+    parser.add_argument("--local", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
         "--block-x-range",
         type=str,
@@ -1778,7 +1804,7 @@ def main() -> int:
         "task_gen": not args.skip_task_gen,
         "env": not args.skip_env,
         "exec": not args.skip_execution,
-        "rerender": args.rerender,
+        "render": bool(resolve_render_passes(args)),
         "merge": not args.skip_merge,
         "annotate": not args.skip_annotate,
     }
@@ -1789,67 +1815,105 @@ def main() -> int:
         exp = args.experiment_id
 
     # ── Validate parameters ──────────────────────────────────────────
-    if args.rerender_local:
-        if enabled["rerender"]:
-            log.error("--rerender and --rerender-local are alternatives; pass one")
+    if args.local:
+        log.error(
+            "--local has been removed: this pipeline only runs locally, so there is no "
+            "backend to select. Drop the flag. (--local-gpus and --local-gpu-workers still "
+            "choose which GPUs to use and how many problems to run on each.)"
+        )
+        return 1
+    if args.render:
+        log.error("--render is ambiguous: pass --render-non-randomized for a plain render, or "
+                  "--render-randomized for one with visual domain randomization")
+        return 1
+    if args.num_reset_states is not None:
+        log.error(
+            "--num-reset-states has never had an effect and has been removed: the env stage "
+            "passes --env-per-problem to the generator as its reset-state count. Use "
+            "--env-per-problem (default %d) instead.", parser.get_default("env_per_problem"),
+        )
+        return 1
+    # --render-local is the old spelling of --render-schedule coupled. Resolve both into
+    # one derived boolean so nothing downstream has to know two spellings.
+    if args.render_local:
+        if args.render_schedule == "pipelined":
+            log.error("--render-local is the coupled schedule, so it contradicts "
+                      "--render-schedule pipelined. Pass --render --render-schedule <mode>")
             return 1
+        log.warning("--render-local is deprecated; prefer "
+                    "--render-randomized --render-schedule coupled")
+        args.render_schedule = "coupled"
+        args.render_randomized = True
         # The coupled render is a STAGE, not merely a step inside the execution job, even though
         # that is where it runs. Three things follow, and all three are load-bearing:
-        #   * LocalRerenderScheduler is constructed below on `enabled["rerender"]`,
+        #   * LocalRenderScheduler is constructed below on `enabled["render"]`,
         #     so the post-stage sweep -- the only place either local mode decides what was
         #     rendered -- covers this mode too;
-        #   * apply_resume can select 'rerender' as the resume point, so a run interrupted after
+        #   * apply_resume can select 'render' as the resume point, so a run interrupted after
         #     its executions finalized can be finished instead of silently merging raw parquet;
-        #   * rerender_ran is true from argv, so the base/execution merge fallback is unreachable.
+        #   * render_ran is true from argv, so the base/execution merge fallback is unreachable.
         # It must stay HERE, after prompt_steps: flipped any earlier, an interactive run could
         # untick the stage while the execution chains still carry the render -- burning the GPU
-        # and then merging the un-rendered tree. The guard above keys on enabled["rerender"],
-        # which is still args.rerender at this point, so mutual exclusion is unaffected.
-        enabled["rerender"] = True
+        # and then merging the un-rendered tree. The guard above keys on enabled["render"],
+        # which is still args.render_randomized at this point.
+        enabled["render"] = True
 
-    # Both modes render on this machine: --rerender-local inside each execution job,
-    # --rerender as its own item in the shared GPU-slot pool. The preconditions are
+    if args.render_schedule is None:
+        args.render_schedule = "coupled"
+    # The one thing the rest of the run branches on.
+    args.render_coupled = args.render_schedule == "coupled"
+
+    # Both modes render on this machine: --render-local inside each execution job,
+    # --render as its own item in the shared GPU-slot pool. The preconditions are
     # the same, so they are checked once for both rather than only for the coupled mode.
-    # The flags YAML defaults to RI's and is recorded in every problem's render_params.json; an
-    # explicitly empty one would render with rerender.py's built-in defaults instead.
-    if enabled["rerender"] and not args.rerender_flags:
-        log.error("--rerender-flags is empty; pass a domain-randomization YAML or drop the flag "
-                  "for the default (%s)", RERENDER_FLAGS_DEFAULT)
+    # The YAML decides what the rendered data looks like and is recorded in every problem's
+    # render_params.json, so it is named explicitly rather than defaulted.
+    # Asking for a render that resolves to no pass would otherwise skip the stage in silence.
+    if (args.render_pass or args.render_randomized) and not resolve_render_passes(args):
+        log.error("--render-randomized needs --render-flags <YAML>: it describes how the scene "
+                  "is set up and drawn, and is recorded in every problem's render_params.json. "
+                  "The shipped set is in src/toyblocks/domain_randomization/flags/ -- "
+                  "%s for a plain render, %s for the RI training set's randomization. "
+                  "--render-pass FLAGS.yaml[:N] names one directly",
+                  PLAIN_RENDER_FLAGS, RENDER_FLAGS_DEFAULT)
         return 1
 
-    if enabled["rerender"]:
-        # Recording in-physics video and then overwriting it with a re-render pays the slow
+    if enabled["render"]:
+        # Recording in-physics video and then overwriting it with a render pays the slow
         # physics-render cost for frames nothing reads.
         if args.vecgen_record_videos:
             log.error(
-                "the local re-render supplies the videos; drop --vecgen-record-videos "
-                "(vecgen stays parquet-only and the re-render renders the cameras)"
+                "the local render supplies the videos; drop --vecgen-record-videos "
+                "(vecgen stays parquet-only and the render renders the cameras)"
             )
             return 1
+        # Every pass, not just the one --render-flags names: a --render-pass YAML that is not
+        # on this machine would otherwise fail inside the render, after the Kit startup.
         # is_file() RAISES PermissionError (not False) for a path under an unreadable dir.
-        try:
-            readable = Path(args.rerender_flags).is_file()
-        except OSError:
-            readable = False
-        if not readable:
-            log.error(
-                "the local re-render needs a flags YAML readable on THIS machine; %s is not",
-                args.rerender_flags,
-            )
-            return 1
-        # --rerender-local-num-envs is a FLOOR: rerender maps env i to block-size slot
+        for flags, _copies in resolve_render_passes(args):
+            try:
+                readable = Path(flags).is_file()
+            except OSError:
+                readable = False
+            if not readable:
+                log.error(
+                    "the local render needs a flags YAML readable on THIS machine; %s is not",
+                    flags,
+                )
+                return 1
+        # --render-local-num-envs is a FLOOR: render maps env i to block-size slot
         # i % len(table), so fewer envs than the package has profiles leaves the high slots
         # without an env and plan_block_sizes SKIPS the problem -- every problem, silently
         # enough that the run just produces no videos. Refuse up front instead.
-        if args.rerender_local_num_envs < args.num_scene_profiles:
+        if args.render_local_num_envs < args.num_scene_profiles:
             log.error(
-                "--rerender-local-num-envs (%d) must be at least --num-scene-profiles (%d): "
-                "the re-render spawns env i at block-size slot i %% %d, so %d envs leave the "
+                "--render-local-num-envs (%d) must be at least --num-scene-profiles (%d): "
+                "the render spawns env i at block-size slot i %% %d, so %d envs leave the "
                 "remaining slots without an env and every problem is skipped",
-                args.rerender_local_num_envs,
+                args.render_local_num_envs,
                 args.num_scene_profiles,
                 args.num_scene_profiles,
-                args.rerender_local_num_envs,
+                args.render_local_num_envs,
             )
             return 1
 
@@ -1880,6 +1944,9 @@ def main() -> int:
             )
             return 1
 
+    # Recorded before the default is filled in, so the grouped path below can tell an
+    # explicit count from an unset one.
+    args.vecgen_episodes_explicit = args.vecgen_episodes is not None
     if args.vecgen_episodes is None:
         args.vecgen_episodes = args.env_per_problem
     if args.vecgen_problems_per_env > 1:
@@ -1903,7 +1970,7 @@ def main() -> int:
     log.info("Pinned commit: ToyBlocks=%s", toyblocks_commit_sha)
 
     # ── Paths ──────────────────────────────────────────────────────────
-    # Absolute: the rerender staging symlinks and the per-stage subprocesses must not depend
+    # Absolute: the render staging symlinks and the per-stage subprocesses must not depend
     # on the working directory a relative --output-root was given in.
     output_root = os.path.abspath(args.output_root)
     base = f"{output_root}/datasets/{args.dataset_folder}/{exp}"
@@ -1911,7 +1978,7 @@ def main() -> int:
     envs_dir = f"{base}/envs"
     execution_data_dir = f"{base}/execution"
     local_logs_dir = Path(base) / "local_logs"
-    rerender_dir = Path(base) / "rerender"
+    render_dir = Path(base) / "render"
     merge_output_dir = os.path.abspath(args.merge_output_dir or f"{output_root}/datasets/merged/train/{exp}")
 
     log.info("Experiment: %s", exp)
@@ -1925,10 +1992,10 @@ def main() -> int:
             {
                 "task_gen": [tasks_dir],
                 "env": [envs_dir],
-                "exec": [execution_data_dir, str(rerender_dir)],
-                # rerender.py --resume skips every problem whose render_params.json says
+                "exec": [execution_data_dir, str(render_dir)],
+                # render.py --resume skips every problem whose render_params.json says
                 # completed, so a rerun of this stage renders only what is missing.
-                "rerender": [],
+                "render": [],
                 "merge": [merge_output_dir],
                 # Annotation edits the merged dataset in place; rerunning it
                 # re-annotates.
@@ -2043,11 +2110,11 @@ def main() -> int:
     if enabled["env"]:
         mark_stage_complete(base, "env")
 
-    # ── Rerender submitter (shared by the execution + rerender stages) ─
-    local_rerender: LocalRerenderScheduler | None = None
-    if enabled["rerender"]:
-        local_rerender = LocalRerenderScheduler(
-            args, envs_dir, Path(execution_data_dir), rerender_dir
+    # ── Render submitter (shared by the execution + render stages) ─
+    local_render: LocalRenderScheduler | None = None
+    if enabled["render"]:
+        local_render = LocalRenderScheduler(
+            args, envs_dir, Path(execution_data_dir), render_dir
         )
 
     # ── Execution ──────────────────────────────────────────────────
@@ -2105,7 +2172,9 @@ def main() -> int:
                 "--num-envs",
                 str(args.exec_num_envs),
                 "--episodes",
-                str(len(members) * args.env_per_problem),
+                # One episode per reset state across the group, unless a count was given.
+                str(args.vecgen_episodes if args.vecgen_episodes_explicit
+                    else len(members) * args.env_per_problem),
                 "--pool-slots",
                 str(args.vecgen_pool_slots),
                 "--record",
@@ -2118,7 +2187,7 @@ def main() -> int:
                 "--headless",
             ] + vecgen_video_flags
             steps = ([] if (env_path / "problems.json").exists() else [shlex.join(build)])
-            rr = local_rerender_steps(args, base, envs_dir, slug) if args.rerender_local else []
+            rr = local_render_steps(args, base, envs_dir, slug) if args.render_coupled else []
             exec_jobs.append(
                 (slug, ["bash", "-c", " && ".join([*steps, shlex.join(stream), *rr])])
             )
@@ -2157,21 +2226,21 @@ def main() -> int:
                 args.vecgen_exclude_actions,
                 "--headless",
             ] + vecgen_video_flags
-            if args.rerender_local:
-                # Same shape as the grouped path so the re-render runs in the SAME job, holding
+            if args.render_coupled:
+                # Same shape as the grouped path so the render runs in the SAME job, holding
                 # the GPU slot across both phases instead of queueing behind every execution.
-                rr = local_rerender_steps(args, base, envs_dir, slug)
+                rr = local_render_steps(args, base, envs_dir, slug)
                 exec_jobs.append((slug, ["bash", "-c", " && ".join([shlex.join(cmd), *rr])]))
             else:
                 exec_jobs.append((slug, cmd))
-        if local_rerender is not None and not args.rerender_local:
+        if local_render is not None and not args.render_coupled:
             # Coupled mode is excluded deliberately: its render already runs inside each job's
-            # shell chain (local_rerender_steps), so arming the scheduler as well would queue a
-            # SECOND rerender.py against the same rerender/out/job_local/<slug>. --resume
+            # shell chain (local_render_steps), so arming the scheduler as well would queue a
+            # SECOND render.py against the same render/out/job_local/<slug>. --resume
             # resolves that by shutil.rmtree-ing whichever has not finalized -- i.e. by deleting
             # a live writer's output, the hazard _seen exists for. Coupled takes the plain-list
             # branch below and meets the scheduler again only in the post-stage sweep.
-            # Pipelined: the execution items and their re-renders share one slot pool, and a
+            # Pipelined: the execution items and their renders share one slot pool, and a
             # problem's render is queued by on_done the moment its execution finalizes.
             # For the UNGROUPED path slugs_all is every task slug, which also recovers problems
             # an earlier invocation already executed (the stage skips those on .execution_complete)
@@ -2183,42 +2252,42 @@ def main() -> int:
             )
             run_local_stage(
                 "Execution",
-                local_rerender.arm(exec_jobs, slugs_all),
+                local_render.arm(exec_jobs, slugs_all),
                 local_slots,
                 local_logs_dir / "execution",
-                on_done=local_rerender.on_done,
+                on_done=local_render.on_done,
             )
         else:
             run_local_stage("Execution", exec_jobs, local_slots, local_logs_dir / "execution")
 
-        # No re-render report here. It used to live in this block and quantify over exec_jobs,
+        # No render report here. It used to live in this block and quantify over exec_jobs,
         # which is this invocation's job list: a problem the loops above skipped on
         # .execution_complete, or on a missing env dir, was in neither `done` nor `missing`, and
         # the marker was latched by `if done:` -- ANY problem rendering was enough. Merge then
-        # read only rerender/out and dropped the rest with a warning and exit 0. Both local modes
+        # read only render/out and dropped the rest with a warning and exit 0. Both local modes
         # now report from the post-stage sweep below, whose universe is the disk.
 
     if enabled["exec"]:
         mark_stage_complete(base, "exec")
 
-    # ── Rerender (local): render anything the execution stage did not hand over ───
-    if local_rerender is not None:
+    # ── Render (local): render anything the execution stage did not hand over ───
+    if local_render is not None:
         log.info("=" * 60)
-        log.info("Rerender: Re-render finished execution locally")
+        log.info("Render: Render finished execution locally")
         log.info("=" * 60)
         # From disk, not from this invocation's exec_jobs: apply_resume DISABLES the exec
-        # stage when it resumes at 'rerender', so on a resumed run the block above never ran,
+        # stage when it resumes at 'render', so on a resumed run the block above never ran,
         # and in coupled mode the execution loops skip every problem that already finished.
         # The DISPATCH universe stays the raw glob so nothing that is rendered today stops
         # being rendered; what may FAIL the run is narrowed to `expected` below.
         slugs_all = [
             d.name for d in sorted(Path(execution_data_dir).glob("problem_*")) if d.is_dir()
         ]
-        local_rerender.sweep(slugs_all, local_slots, local_logs_dir / "rerender")
-        shipped, unrenderable, absent = local_rerender.report()
+        local_render.sweep(slugs_all, local_slots, local_logs_dir / "render")
+        shipped, unrenderable, absent = local_render.report()
 
         # Only a problem the merge would have shipped from execution/ can be LOST by merging
-        # rerender/out instead, so only those may fail the run. Asking merge's own discovery
+        # render/out instead, so only those may fail the run. Asking merge's own discovery
         # (rather than globbing problem_*) is what keeps this gate from dead-ending on the
         # empty problem dirs the execution stage mkdirs before every job: a crashed execution
         # leaves one behind for good, and it holds nothing the merge would ever have read.
@@ -2226,20 +2295,20 @@ def main() -> int:
         lost = [d for d in absent if d in expected]
         no_loss = [d for d in absent if d not in expected]
         log.info(
-            "Rerender (local): %d problem(s) rendered, %d unrenderable, %d missing",
+            "Render (local): %d problem(s) rendered, %d unrenderable, %d missing",
             len(shipped), len(unrenderable), len(lost),
         )
         if unrenderable:
-            # Terminal and acknowledged -- rerender.py finalized these empty on purpose and a
+            # Terminal and acknowledged -- render.py finalized these empty on purpose and a
             # re-run will produce the same result, so failing on them would wedge the pipeline.
             log.warning(
-                "Rerender (local): %d problem(s) can never render (empty source or block size "
+                "Render (local): %d problem(s) can never render (empty source or block size "
                 "not in the size table) and carry no episodes: %s",
                 len(unrenderable), " ".join(unrenderable[:20]),
             )
         if no_loss:
             log.info(
-                "Rerender (local): %d problem dir(s) had nothing the merge would ship; ignoring:"
+                "Render (local): %d problem dir(s) had nothing the merge would ship; ignoring:"
                 " %s", len(no_loss), " ".join(no_loss[:20]),
             )
         if not shipped:
@@ -2248,58 +2317,58 @@ def main() -> int:
                 # means the execution stage produced no mergeable dataset at all, and telling
                 # the operator to re-run the render would send them in the wrong direction.
                 log.error(
-                    "Rerender (local): %s holds no finalized blocks_success dataset, so there "
-                    "is nothing to re-render or merge. The execution stage produced no usable "
+                    "Render (local): %s holds no finalized blocks_success dataset, so there "
+                    "is nothing to render or merge. The execution stage produced no usable "
                     "episodes; check its logs under %s",
                     execution_data_dir, local_logs_dir / "execution",
                 )
             else:
                 log.error(
-                    "Rerender (local): nothing was rendered, though %d problem(s) executed. "
-                    "Merge reads only rerender/out once this stage is marked complete, so "
+                    "Render (local): nothing was rendered, though %d problem(s) executed. "
+                    "Merge reads only render/out once this stage is marked complete, so "
                     "there is no dataset to ship. Re-run to render them; to merge the raw "
                     "un-rendered execution tree on purpose, re-run without "
-                    "--rerender-local/--rerender.", len(expected),
+                    "--render-local/--render.", len(expected),
                 )
             return 1
         if lost:
             # Not a warning: once this stage is marked complete, merge reads ONLY
-            # rerender/out/job_*, so every problem listed here is silently absent from the
+            # render/out/job_*, so every problem listed here is silently absent from the
             # dataset. Exiting non-zero and leaving the marker unset makes a later --resume
-            # re-render them instead of shipping a quietly truncated dataset.
+            # render them instead of shipping a quietly truncated dataset.
             log.error(
-                "Rerender (local): %d of %d problem(s) have a finalized execution dataset but "
-                "no re-render, and would be MISSING from the merge: %s",
+                "Render (local): %d of %d problem(s) have a finalized execution dataset but "
+                "no render, and would be MISSING from the merge: %s",
                 len(lost), len(expected), " ".join(lost[:20]),
             )
             if not args.merge_allow_missing_problems:
                 log.error(
-                    "Rerender (local): refusing to mark the stage complete; re-run to finish "
+                    "Render (local): refusing to mark the stage complete; re-run to finish "
                     "them, or pass --merge-allow-missing-problems to merge what rendered"
                 )
                 return 1
             log.warning(
-                "Rerender (local): --merge-allow-missing-problems is set, merging %d problem(s) "
+                "Render (local): --merge-allow-missing-problems is set, merging %d problem(s) "
                 "and dropping %d", len(shipped), len(lost)
             )
-        mark_stage_complete(base, "rerender")
+        mark_stage_complete(base, "render")
 
     # ── Merge successful datasets ─────────────────────────────────
-    # Rerendered episodes replace the execution data whenever the rerender
+    # Rendered episodes replace the execution data whenever the render
     # stage ran, in this invocation or an earlier (resumed) one.
-    rerender_ran = enabled["rerender"] or stage_marker(base, "rerender").exists()
+    render_ran = enabled["render"] or stage_marker(base, "render").exists()
     if enabled["merge"]:
         log.info("=" * 60)
         log.info(
-            "Merge: Merge successful datasets (%s)", "re-rendered" if rerender_ran else "execution"
+            "Merge: Merge successful datasets (%s)", "rendered" if render_ran else "execution"
         )
         log.info("=" * 60)
-        if rerender_ran:
+        if render_ran:
             merge_input_dirs = sorted(
-                str(d) for d in (rerender_dir / "out").glob("job_*") if d.is_dir()
+                str(d) for d in (render_dir / "out").glob("job_*") if d.is_dir()
             )
             if not merge_input_dirs:
-                log.error("Merge: rerender ran but no outputs found under %s", rerender_dir / "out")
+                log.error("Merge: render ran but no outputs found under %s", render_dir / "out")
                 return 1
             # Name them. The glob is deliberately wide (every job_* dir), but
             # that means a job dir an earlier run wrote is merged again whether or not this
@@ -2308,9 +2377,7 @@ def main() -> int:
             # leaves the dataset at (N+1)x while the command says Nx.
             log.info("Merge: input job dirs: %s",
                      " ".join(Path(d).name for d in merge_input_dirs))
-            owed = {LOCAL_RERENDER_JOB}
-            if args.render_non_randomized:
-                owed.add(LOCAL_RERENDER_JOB_NONRAND)
+            owed = {render_job_name(f) for f, _ in resolve_render_passes(args)}
             stale = sorted(
                 Path(d).name for d in merge_input_dirs
                 if Path(d).name.startswith("job_local") and Path(d).name not in owed
@@ -2320,7 +2387,7 @@ def main() -> int:
                     "Merge: %s left by an earlier run and NOT produced by this one; it is "
                     "being merged anyway because merge reads every job_* dir. Delete it to "
                     "ship only what this command rendered: %s",
-                    " ".join(stale), " ".join(str(rerender_dir / "out" / n) for n in stale),
+                    " ".join(stale), " ".join(str(render_dir / "out" / n) for n in stale),
                 )
         else:
             merge_input_dirs = [f"{base}/execution"]
@@ -2335,8 +2402,8 @@ def main() -> int:
             *args.merge_cameras,
             "--num_workers",
             str(args.merge_num_workers),
-            # Problems differ in their blocks; the union schema keeps the merge loadable.
-            "--union_schema",
+            # Problems differing in their blocks need the union schema to stay loadable.
+            *(["--union_schema"] if args.merge_union_schema else []),
         ]
 
         run(merge_cmd)
@@ -2347,10 +2414,10 @@ def main() -> int:
     # ── Annotate the merged dataset ───────────────────────────────
     # The annotator projects goals into the front camera and refuses a dataset that records
     # none, which is what vecgen writes unless it records videos or the episodes were
-    # re-rendered.
-    if enabled["annotate"] and not rerender_ran and not args.vecgen_record_videos:
+    # rendered.
+    if enabled["annotate"] and not render_ran and not args.vecgen_record_videos:
         log.warning("Annotate: skipped, the dataset records no camera (pixel goals need "
-                    "--vecgen-record-videos or --rerender)")
+                    "--vecgen-record-videos or --render)")
         enabled["annotate"] = False
     if enabled["annotate"]:
         log.info("=" * 60)

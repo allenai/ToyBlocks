@@ -1541,7 +1541,7 @@ def _run_eval(
             print(f"[INFO]: Per-episode seed for initial episode (ep_idx={ep_idx}): {ep_seed}")
 
     # --- Ingest recorded camera intrinsics (after sensors initialize) ---
-    # Each env gets that episode's first-frame K. Randomized-camera rerenders
+    # Each env gets that episode's first-frame K. Randomized-camera renders
     # vary K across episodes, so a later reset re-applies via apply_setup.
     if args.ingest_camera_intrinsics and args.dataset_path:
         from toyblocks.utils.dataset_provenance import ingest_dataset_camera_intrinsics

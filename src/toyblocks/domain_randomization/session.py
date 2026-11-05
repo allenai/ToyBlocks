@@ -1,14 +1,14 @@
 """One object a client holds to drive the whole DR lifecycle.
 
-`interpreter.py` is the working implementation -- a verbatim lift of rerender's replay_job body --
+`interpreter.py` is the working implementation -- a verbatim lift of render's replay_job body --
 but its entry points are loose functions threading a 66-field namespace, and their call order
 carries constraints that are silent when you get them wrong (build flags before the sim exists,
 camera bases captured before any offset is applied, cameras seated in their own call because
-apply_wave deliberately does not touch them). rerender.py encodes that order by being the code it
+apply_wave deliberately does not touch them). render.py encodes that order by being the code it
 was extracted from. A second client -- a gym wrapper -- has nothing to copy it from.
 
 DRSession is that order, and nothing else. Every method is a one-line delegation to the same
-interpreter/build functions rerender calls, in the same sequence, so the two clients cannot drift:
+interpreter/build functions render calls, in the same sequence, so the two clients cannot drift:
 there is no sampling, no Isaac work and no policy here. If a behaviour question has an answer, it
 lives in interpreter.py; this file only says what happens when.
 
@@ -44,7 +44,7 @@ class DRSession:
         self.salt = int(salt)
         self.seeding = seeding
         self.assets = assets or AssetPaths.default()
-        # off by default = rerender's behaviour today; on, a key the chosen material
+        # off by default = render's behaviour today; on, a key the chosen material
         # omits reverts to the asset instead of keeping the previous episode's.
         self.material_baseline_revert = bool(material_baseline_revert)
         self.ir = None                      # set by bind()
@@ -78,7 +78,7 @@ class DRSession:
         _build.apply_build_flags(env_cfg, self.flags, **kw)
 
     def apply_scene_flags(self, sim, *, show_gizmos: bool = False) -> None:
-        """The three stage mutators rerender runs right after building the sim, same order."""
+        """The three stage mutators render runs right after building the sim, same order."""
         _build.apply_lighting_flags(self.flags, sim)
         if not show_gizmos:
             _build.hide_debug_visuals()
@@ -114,7 +114,7 @@ class DRSession:
 
     def apply_cameras(self, sim, wave, active, *, dt: float, camera_base: str = "scene",
                       rtx_warmup_frames: int = 1):
-        """The cameras, with their pre-render and post-warm-up ordering. Must be called too --
+        """The cameras, with their prender and post-warm-up ordering. Must be called too --
         apply_wave deliberately does not touch cameras."""
         return _interp.apply_wave_cameras(
             self.ir, sim, wave, active, dt=dt, camera_base=camera_base,

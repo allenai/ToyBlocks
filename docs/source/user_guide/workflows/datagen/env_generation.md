@@ -88,7 +88,7 @@ When `run_datagen_pipeline.py` runs this stage, it sets the flags above from its
 | `--usd-library` | `train_blocks_large` | `--usd_library` | Glyph asset library. |
 | `--block-x-range`, `--block-y-range` | `""` | `--block_x_range`, `--block_y_range` | Only forwarded when set. |
 | `--randomize-robot-init` and its range flags | off | `--randomize_robot_init` and the matching `--robot_init_*` flags | Only forwarded with `--randomize-robot-init`. |
-| `--num-reset-states` | `32` | — | **Dead.** The count comes from `--env-per-problem` instead. |
+| `--num-reset-states` | — | — | **Removed from the pipeline** (the standalone script below still has it). The pipeline always passed `--env-per-problem`, so this is now rejected with an error instead of ignored. |
 | `--seed` | `42` | — | Does not reach this stage. The env-generation seed is always `0`, so a different `--seed` regenerates identical reset states. |
 
 The pipeline runs one env-generation process per problem, spread over the GPU slots (see

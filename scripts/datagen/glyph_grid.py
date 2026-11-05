@@ -7,7 +7,7 @@ the letters on the blocks is the only check that the augmentation is coherent: t
 the labels are written by different code paths, and a disagreement is invisible to every
 schema- or value-level test.
 
-    python scripts/datagen/glyph_grid.py --dataset <rerendered> --out grid.png
+    python scripts/datagen/glyph_grid.py --dataset <rendered> --out grid.png
 """
 import argparse
 import json

@@ -5,14 +5,14 @@ Pipeline:
   task-gen   Generate PDDL scenes                     (task_gen/play_scene.py)
   env        Build env packages + reset states         (generate_task_from_pddl.py)
   play       Generate play data                        (vecgen/run.py --play)
-  rerender   Re-render each play problem (opt-in: --rerender)
+  render   Render each play problem (opt-in: --render)
   merge      Merge goal-reached episodes into one LeRobot dataset (scripts/datagen/merge_datasets.py)
   annotate   Annotate the merged dataset               (annotate_target_xy.py)
 
 Play data records exactly like the datagen pipeline's execution stage (same
-LeRobot recorder, Parquet only; images come from --rerender). Episodes whose goal was
+LeRobot recorder, Parquet only; images come from --render). Episodes whose goal was
 reached go to ``blocks_success`` and missed ones to ``blocks_failure``, so the merge keeps
-only goal-reached episodes. The merge hardlinks every re-rendered video instead of copying it.
+only goal-reached episodes. The merge hardlinks every rendered video instead of copying it.
 
 Each reset state is one play "env": a sim slot runs a chain
 of plans from it until ``--max-plans-per-env`` / ``--min-successful-plans-per-env``
@@ -26,7 +26,7 @@ high-level actions.
 The play stage runs on the vecgen engine (``scripts/vecgen/run.py --play``): no TAMP and
 no planner workers. Each goal is one FF call from the symbolic state read off the sim
 (with the derived geometric facts), and the plan runs as batched vecgen skills.
---rerender (or --rerender-local) re-renders each problem inside its play job, right after play,
+--render (or --render-local) renders each problem inside its play job, right after play,
 with the datagen pipeline's render defaults (the RI training set's flags and sidecars).
 
 Every stage runs on this machine, one problem per GPU (--local-gpus, default every visible GPU).
@@ -36,7 +36,7 @@ Usage:
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play \\
       --num-pddls 8 --env-per-pddl 16 --play-num-envs 8 \\
       --max-plans-per-env 20 --min-successful-plans-per-env 10 --local-gpus 0 1 2 3
-  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --rerender \\
+  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --render \\
       --num-pddls 2 --usd-library train_blocks_large
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --resume
 
@@ -68,8 +68,8 @@ PLAY_STEPS: list[tuple[str, str]] = [
     ("task_gen", "Generate PDDL scenes"),
     ("env", "Build env packages + reset states"),
     ("play", "Generate play data"),
-    ("rerender", "Re-render each play problem"),
-    ("merge", "Merge goal-reached episodes (re-rendered if rerender ran)"),
+    ("render", "Render each play problem"),
+    ("merge", "Merge goal-reached episodes (rendered if render ran)"),
     ("annotate", "Annotate merged dataset (target xy)"),
 ]
 
@@ -106,12 +106,12 @@ PARAM_GROUPS: list[tuple[str, str | None, list[tuple[str, str, str]]]] = [
         ("balanced_skills", "balanced-skills", "bool"),
         ("abandon_plan_percent", "abandon-plan-percent", "float"),
     ]),
-    ("Rerender", "rerender", [
-        ("rerender_flags", "rerender-flags", "str"),
-        ("rerender_n", "rerender-n", "int"),
-        ("rerender_skip_cameras", "rerender-skip-cameras", "[str]"),
-        ("rerender_skip_failure_episodes", "rerender-skip-failure-episodes", "bool"),
-        ("rerender_extra", "rerender-extra", "[str]"),
+    ("Render", "render", [
+        ("render_flags", "render-flags", "str"),
+        ("render_n", "render-n", "int"),
+        ("render_skip_cameras", "render-skip-cameras", "[str]"),
+        ("render_skip_failure_episodes", "render-skip-failure-episodes", "bool"),
+        ("render_extra", "render-extra", "[str]"),
     ]),
     ("Merge", "merge", [
         ("merge_cameras", "merge-cameras", "[str]"),
@@ -142,13 +142,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-merge", action="store_true", help="Skip dataset merging")
     parser.add_argument("--skip-annotate", action="store_true",
                         help="Skip annotation of the merged dataset (annotate_target_xy.py)")
-    dg.add_rerender_args(parser)
+    dg.add_render_args(parser)
     # Missed goals are recorded into blocks_failure, which the merge drops, so by
     # default the renderer skips them too.
-    parser.add_argument("--rerender-failure-episodes", dest="rerender_skip_failure_episodes",
+    parser.add_argument("--render-failure-episodes", dest="render_skip_failure_episodes",
                         action="store_false",
-                        help="Rerender: also render blocks_failure (missed goals; the merge drops them)")
-    parser.set_defaults(rerender_skip_failure_episodes=True)
+                        help="Render: also render blocks_failure (missed goals; the merge drops them)")
+    parser.set_defaults(render_skip_failure_episodes=True)
     dg.add_merge_args(parser)
 
     parser.add_argument("--output-root", default="data",
@@ -213,7 +213,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--play-record-videos", action="store_true",
                         help="Record the front / gripper camera videos while playing (run.py "
                              "--record-videos); without it play records Parquet only and images "
-                             "come from --rerender")
+                             "come from --render")
     parser.add_argument("--dfa-spec", default=None,
                         help="DFA strategy choosing the goals (e.g. "
                              "src/toyblocks/playdata/dfa/library/flip_search.yaml) instead of "
@@ -350,7 +350,7 @@ def main() -> int:
         "task_gen": not args.skip_task_gen,
         "env": not args.skip_env,
         "play": not args.skip_play,
-        "rerender": args.rerender or args.rerender_local,
+        "render": args.render or args.render_local,
         "merge": not args.skip_merge,
         "annotate": not args.skip_annotate,
     }
@@ -360,11 +360,11 @@ def main() -> int:
         exp = args.experiment_id
 
     # -- validate -------------------------------------------------------------
-    # As in the datagen pipeline: rerender.py spawns env i at block-size slot i % profiles, so fewer
+    # As in the datagen pipeline: render.py spawns env i at block-size slot i % profiles, so fewer
     # envs than profiles leaves slots without an env and every problem is skipped.
-    if enabled["rerender"] and args.rerender_local_num_envs < args.num_scene_profiles:
-        log.error("--rerender-local-num-envs (%d) must be at least --num-scene-profiles (%d)",
-                  args.rerender_local_num_envs, args.num_scene_profiles)
+    if enabled["render"] and args.render_local_num_envs < args.num_scene_profiles:
+        log.error("--render-local-num-envs (%d) must be at least --num-scene-profiles (%d)",
+                  args.render_local_num_envs, args.num_scene_profiles)
         return 1
     if enabled["env"] and args.env_per_pddl % args.num_envs != 0:
         log.error("env-per-pddl (%d) must be divisible by num-envs (%d)", args.env_per_pddl, args.num_envs)
@@ -385,7 +385,7 @@ def main() -> int:
     log.info("Pinned commit: ToyBlocks=%s", toyblocks_sha)
 
     # -- paths ----------------------------------------------------------------------
-    # Absolute: the rerender staging symlinks and the per-stage subprocesses must not depend
+    # Absolute: the render staging symlinks and the per-stage subprocesses must not depend
     # on the working directory a relative --output-root was given in.
     output_root = os.path.abspath(args.output_root)
     base = f"{output_root}/datasets/{args.dataset_folder}/{exp}"
@@ -393,7 +393,7 @@ def main() -> int:
     envs_dir = f"{base}/envs"
     play_dir = Path(base) / "play"
     local_logs_dir = Path(base) / "local_logs"
-    rerender_dir = Path(base) / "rerender"
+    render_dir = Path(base) / "render"
     merge_source_dir = Path(base) / "merge_src"
     merge_output_dir = os.path.abspath(args.merge_output_dir or f"{output_root}/datasets/merged/train/{exp}")
     log.info("Experiment: %s", exp)
@@ -409,7 +409,7 @@ def main() -> int:
                 # Finished problems are skipped by their .play_complete marker, so a
                 # resumed play stage keeps them and only redoes the rest.
                 "play": [],
-                "rerender": [],
+                "render": [],
                 "merge": [merge_output_dir],
                 "annotate": [],
             },
@@ -505,9 +505,9 @@ def main() -> int:
                 "--seed", str(args.seed),
                 *vecgen_play_cli_flags(args),
             ]
-            if enabled["rerender"]:
+            if enabled["render"]:
                 # Coupled: the render runs in the play job's own slot once play has finished.
-                render = dg.local_rerender_steps(args, base, envs_dir, slug, source_dir=out_dir)
+                render = dg.local_render_steps(args, base, envs_dir, slug, source_dir=out_dir)
                 play_jobs.append((slug, ["bash", "-c", " && ".join([shlex.join(play_cmd), *render])]))
             else:
                 play_jobs.append((slug, play_cmd))
@@ -528,24 +528,26 @@ def main() -> int:
         else:
             dg.mark_stage_complete(base, "play")
 
-    # -- stage 4: rerender ----------------------------------------------------------
+    # -- stage 4: render ----------------------------------------------------------
     # The renders ran inside the local play jobs; ground truth is the output on disk.
-    if enabled["rerender"]:
-        out_root = rerender_dir / "out" / dg.LOCAL_RERENDER_JOB
-        incomplete = [s for s in slugs if not dg.rerender_problem_complete(out_root, s)]
+    if enabled["render"]:
+        out_roots = [render_dir / "out" / job
+                     for job, _ in dg.local_render_passes(args, str(render_dir.parent))]
+        incomplete = [s for s in slugs
+                      if not all(dg.render_problem_complete(r, s) for r in out_roots)]
         if incomplete:
-            log.error("Rerender: %d problem(s) did not finish rendering and will be missing "
+            log.error("Render: %d problem(s) did not finish rendering and will be missing "
                       "from the merge: %s", len(incomplete), " ".join(incomplete[:20]))
         if len(incomplete) < len(slugs):
-            dg.mark_stage_complete(base, "rerender")
+            dg.mark_stage_complete(base, "render")
 
     # -- stage 5: merge goal-reached episodes -------------------------------------------
-    rerender_ran = enabled["rerender"] or dg.stage_marker(base, "rerender").exists()
+    render_ran = enabled["render"] or dg.stage_marker(base, "render").exists()
     if enabled["merge"]:
         log.info("=" * 60)
-        log.info("Merge: merge goal-reached episodes (%s)", "re-rendered" if rerender_ran else "play")
+        log.info("Merge: merge goal-reached episodes (%s)", "rendered" if render_ran else "play")
         log.info("=" * 60)
-        roots = sorted(d for d in (rerender_dir / "out").glob("job_*") if d.is_dir()) if rerender_ran else [play_dir]
+        roots = sorted(d for d in (render_dir / "out").glob("job_*") if d.is_dir()) if render_ran else [play_dir]
         linked = stage_merge_source(roots, merge_source_dir)
         if not linked:
             log.error("Merge: no blocks_success dataset under %s", " ".join(str(r) for r in roots))
@@ -564,9 +566,9 @@ def main() -> int:
 
     # -- stage 6: annotate --------------------------------------------------------------
     # The annotator projects goals into the front camera: needs recorded (--play-record-videos)
-    # or re-rendered episodes.
-    if enabled["annotate"] and not rerender_ran and not args.play_record_videos:
-        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need --rerender)")
+    # or rendered episodes.
+    if enabled["annotate"] and not render_ran and not args.play_record_videos:
+        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need --render)")
         enabled["annotate"] = False
     if enabled["annotate"]:
         log.info("=" * 60)

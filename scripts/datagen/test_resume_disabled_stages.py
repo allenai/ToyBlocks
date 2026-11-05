@@ -39,7 +39,7 @@ def _resume(
     return still_enabled, kept
 
 
-VECGEN_OFF = {"env", "rerender", "annotate"}
+VECGEN_OFF = {"env", "render", "annotate"}
 
 
 def test_vecgen_finished_exec_is_kept(rdp, tmp_path):
@@ -56,11 +56,11 @@ def test_vecgen_unfinished_exec_reruns(rdp, tmp_path):
 
 def test_all_stages_enabled_unchanged(rdp, tmp_path):
     enabled, kept = _resume(rdp, tmp_path, ["task_gen", "env"], set())
-    assert enabled == {"exec", "rerender", "merge", "annotate"}
+    assert enabled == {"exec", "render", "merge", "annotate"}
     assert {"task_gen", "env"} <= kept and "exec" not in kept
 
 
 def test_finished_run_is_untouched(rdp, tmp_path):
-    enabled, kept = _resume(rdp, tmp_path, ["task_gen", "env", "exec", "merge", "annotate"], {"rerender"})
+    enabled, kept = _resume(rdp, tmp_path, ["task_gen", "env", "exec", "merge", "annotate"], {"render"})
     assert enabled == set()
     assert {"task_gen", "env", "exec", "merge"} <= kept

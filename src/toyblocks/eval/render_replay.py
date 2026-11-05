@@ -1,12 +1,12 @@
-"""Replay a rerendered dataset's recorded camera pose and appearance in eval.
+"""Replay a rendered dataset's recorded camera pose and appearance in eval.
 
-The rerender stage gives every episode its own camera offsets and look (HDRI, table
+The render stage gives every episode its own camera offsets and look (HDRI, table
 material, local lights, exposure, hidden backdrop) and records the applied values per
 episode in ``meta/render_params.json``. A merged dataset keeps one such file per source
 problem, reachable through ``meta/provenance.json`` ``sources[].source_dataset``.
 
 :class:`RecordedRenderReplay` maps each queue setup to its record and re-applies it with
-the same DR tools the rerender used (``interpreter.setup_prims`` / ``apply_record``,
+the same DR tools the render used (``interpreter.setup_prims`` / ``apply_record``,
 ``camera._apply_camera_local_offsets``):
 
 * the merged episode's local index is its rank among the merged episodes that share its
@@ -160,7 +160,7 @@ class _RootRecords:
     """Lazily loaded render_params records for one LeRobot root.
 
     ``render_params`` maps problem name to its file; the single key ``None`` means the
-    root itself is one rerender output (no merge, every episode in one file).
+    root itself is one render output (no merge, every episode in one file).
     """
 
     root: Path
@@ -274,7 +274,7 @@ class RecordedRenderReplay:
         self._roots = roots
         self.flags: dict[str, Any] = flags
         self._render_args: dict[str, Any] = dict(render_args or {})
-        # HDRI roots searched before the repo's assets/environments (rerender's --assets_paths).
+        # HDRI roots searched before the repo's assets/environments (render's --assets_paths).
         self._assets_paths: tuple[str, ...] = tuple(str(p) for p in assets_paths)
         self._warned_textures: set[str] = set()
         self._base_env: Any = None
@@ -396,7 +396,7 @@ class RecordedRenderReplay:
 
     # ---- build time -------------------------------------------------------------------
     def configure_build(self, env_cfg: Any) -> None:
-        """Rerender's build-time scene config (env spacing, GI, render mode, AA). Before gym.make."""
+        """Render's build-time scene config (env spacing, GI, render mode, AA). Before gym.make."""
         from toyblocks.domain_randomization.build import apply_build_flags
 
         for name in _UNREPLAYED_FLAGS:
@@ -410,7 +410,7 @@ class RecordedRenderReplay:
         if lost:
             logger.warning(
                 "render replay: carb_settings %s are re-applied by balanced.kit after launch, "
-                "so the rerender's values are lost", lost,
+                "so the render's values are lost", lost,
             )
         apply_build_flags(
             env_cfg,
@@ -421,7 +421,7 @@ class RecordedRenderReplay:
         )
 
     def bind(self, base_env: Any) -> None:
-        """Create the DR prims and run rerender's post-build stage mutators. Sim must exist."""
+        """Create the DR prims and run render's post-build stage mutators. Sim must exist."""
         from toyblocks.domain_randomization import build as dr_build
         from toyblocks.domain_randomization.assets import AssetPaths
         from toyblocks.domain_randomization.camera import _is_link_mounted

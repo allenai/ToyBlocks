@@ -1,4 +1,4 @@
-"""Failed vecgen attempts (``is_failed_attempt``) are skipped by the rerender's loaders."""
+"""Failed vecgen attempts (``is_failed_attempt``) are skipped by the render's loaders."""
 
 from __future__ import annotations
 

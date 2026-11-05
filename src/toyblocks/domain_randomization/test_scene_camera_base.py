@@ -3,7 +3,7 @@
 `--camera_base scene` must record the FOV base the renderer composes onto -- for EVERY problem a
 sim renders, not just the first.
 
-rerender packs several problems into one process and builds the interpreter per problem, so
+render packs several problems into one process and builds the interpreter per problem, so
 `_scene_camera_params` runs once per problem. It read the base FOV from the LIVE camera, which
 after the first problem holds the previous wave's jittered FOV; the renderer meanwhile composes
 onto the pristine `cam_base_K` captured once at sim build. So every later problem recorded
@@ -158,7 +158,7 @@ def _call_kwargs(path: Path, func_name: str, attr_owner: str = "") -> list[set]:
 def test_pristine_base_reaches_the_scene_record():
     """Wiring: replay_job hands its sim-wide cam_base_K to the interpreter, and the interpreter
     hands it to _scene_camera_params. Either link missing silently restores the live read."""
-    setup_calls = _call_kwargs(REPO / "scripts" / "rerender" / "rerender.py", "setup", "_dr_interp")
+    setup_calls = _call_kwargs(REPO / "scripts" / "render" / "render.py", "setup", "_dr_interp")
     assert setup_calls and all("cam_base_K" in kw for kw in setup_calls)
     scene_calls = _call_kwargs(HERE / "interpreter.py", "_scene_camera_params")
     assert scene_calls and all("base_K" in kw for kw in scene_calls)

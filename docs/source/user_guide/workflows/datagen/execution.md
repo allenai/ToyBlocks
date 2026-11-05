@@ -15,10 +15,10 @@ pre-computed plan pickles and no TAMP checkout to manage.
 - **Input:** an env package with `reset_states.pkl`, from [stage 2](env_generation.md), plus
   the PDDL problem and domain.
 - **Output:** a LeRobot dataset split into successful and failed episodes, read by
-  [re-rendering](rerender.md) or directly by [merge](merge.md).
+  [rendering](render.md) or directly by [merge](merge.md).
 
 This stage always runs. By default it records state and actions only; the camera videos come
-from re-rendering, as explained in [What a recorded episode contains](#what-a-recorded-episode-contains).
+from rendering, as explained in [What a recorded episode contains](#what-a-recorded-episode-contains).
 
 ## Correct by construction
 
@@ -72,11 +72,11 @@ When `run_datagen_pipeline.py` runs this stage, it sets `run.py`'s flags from it
 | Pipeline flag | Default | Becomes | Notes |
 |---|---|---|---|
 | `--exec-num-envs` | `128` | `--num-envs` | Must be a multiple of `--num-scene-profiles`. |
-| `--vecgen-episodes` | `--env-per-problem` | `--episodes` | One episode per reset state by default. Only used with `--vecgen-problems-per-env 1`; a multi-problem job always runs `--env-per-problem` episodes per problem in its group. |
+| `--vecgen-episodes` | `--env-per-problem` | `--episodes` | Episodes to run. Left unset, a multi-problem job runs one episode per reset state across the group (`members x --env-per-problem`) and a single-problem job runs `--env-per-problem`. Set it explicitly and that count is used on either path — it used to be silently replaced on the multi-problem path, which is the default. |
 | `--seed` | `42` | `--seed` | |
 | `--vecgen-exclude-actions` | `push_to_right,push_next_to` | `--exclude-actions` | Domain actions FF may never plan, also when re-planning. |
 | `--vecgen-pool-slots` | `32` | `--pool-slots` | cuRobo planner pool slots per process. |
-| `--vecgen-record-videos` | off | `--record-videos --enable_cameras` | Normally videos come from [re-rendering](rerender.md); this cannot be combined with `--rerender` or `--rerender-local`. |
+| `--vecgen-record-videos` | off | `--record-videos --enable_cameras` | Normally videos come from [rendering](render.md); this cannot be combined with `--render-randomized`. |
 | `--vecgen-problems-per-env` | `8` | — | The number of problems sharing one multi-problem env package and process. Above 1 the env stage is skipped: each execution job builds its group's package with `scripts/vecgen/make_superset_env.py` (unless it already exists) and then streams every episode of the group through one `run.py` process, which reads the problems from `problems.json` instead of `--pddl`. |
 
 The pipeline always passes `--record <base>/execution/<slug> --mark-complete --headless`, where
@@ -128,8 +128,8 @@ the camera prims are never spawned, and the recorder leaves out every video feat
 `observation.images.*` and no `observation.depth.*`, and also **no `observation.camera_pose.*` or
 `observation.camera_intrinsics.*` columns**. The output is Parquet only.
 
-This keeps execution fast; the pixels normally come from [the rerender stage](rerender.md)
-instead. It is also why the re-render's `--camera_base data` cannot work on a dataset this stage
+This keeps execution fast; the pixels normally come from [the render stage](render.md)
+instead. It is also why the render's `--camera_base data` cannot work on a dataset this stage
 recorded: there is no recorded camera pose to start from, so the pipeline renders with
 `--camera_base scene`.
 
@@ -217,7 +217,7 @@ than there are reset states replays some of them.
 ### `--mark-complete` does not notice lost videos
 
 It writes `.execution_complete` without consulting the video encoder's defect counter, so a
-`--record-videos` run that lost videos can still be marked complete. Only the rerender tooling
+`--record-videos` run that lost videos can still be marked complete. Only the render tooling
 checks `video_defects()`.
 
 ### Episodes go missing at merge time because of the directory name
@@ -246,5 +246,5 @@ time. So the two counts can legitimately differ.
 
 ## Next
 
-[Re-render](rerender.md) the episodes to produce camera videos, then [merge](merge.md) them into
+[Render](render.md) the episodes to produce camera videos, then [merge](merge.md) them into
 one training dataset.

@@ -63,3 +63,20 @@ def add_env_cfg_args(args: T) -> T:
     )
     args = make_dataclass(BaseArgs.__name__, [("env_cfg", env_cfg.__class__, field(default_factory=env_cfg.__class__))], bases=(args,))
     return args
+
+def parse_cli(args_cls):
+    """``tyro.cli`` that names an unrecognized option instead of failing to build a parser.
+
+    ``add_env_cfg_args`` exposes ``--env-cfg.*`` by rebuilding the dataclass without
+    ``Suppress``, which brings in config fields tyro cannot describe (dicts of config objects
+    with no default). Those parse fine, but tyro introspects every field to render the usage
+    block, so one mistyped flag reported a type error naming no flag. Collecting the unknown
+    arguments instead never enters that path.
+    """
+    import tyro
+
+    args, unknown = tyro.cli(args_cls, return_unknown_args=True)
+    if unknown:
+        print(f"Unrecognized options: {' '.join(unknown)}", file=sys.stderr)
+        raise SystemExit(2)
+    return args

@@ -64,7 +64,7 @@ Orchestrated by `scripts/datagen/run_datagen_pipeline.py` on this machine (one p
 3. **Execution** (`scripts/vecgen/run.py`, `src/toyblocks/vecgen/`): FF plans per env (`symbolic/`), batched skills on a cuRobo v2 planner pool (`skills/`, `planner/`), verified effects and goals (`symbolic/predicates.py`), LeRobot recording → `execution/<slug>/`.
 4. **Merge / annotate / plot** (`scripts/datagen/merge_datasets.py`, `src/toyblocks/data_annotation/annotate_target_xy.py`, `scripts/datagen/plot_episode.py`).
 
-Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rerendering (`scripts/rerender/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--rerender-local`; datagen also has `--rerender`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/rerender/README_local.md`.
+Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rendering (`scripts/render/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--render-local`; datagen also has `--render`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/render/README_local.md`.
 
 ### Evaluation
 - `scripts/evaluate.py`: Eval worker: remote policy server, LL oracle, dataset replay, or random actions.

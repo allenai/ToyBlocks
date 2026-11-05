@@ -51,11 +51,11 @@ SIM2REAL_SCENE_ASSETS_DIR = SCENE_ASSET_DIR / "toyblocks_real" / "usd"
 
 # HDRI skybox datasets under `assets/environments/<dataset>/` (each a dataset.json manifest + *.hdr);
 # polyhaven comes with `get-toyblocks-assets --asset-manifest asset_manifest.json`, see
-# docs/rerender/README_local.md#hdri-backdrops. Single source of
-# truth so the pool can be relocated without touching code/yamls; rerender resolves skybox `set:`
-# routes under this dir and it is overridable via the RERENDER_HDRI_DIR env var.
+# docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops. Single source of
+# truth so the pool can be relocated without touching code/yamls; render resolves skybox `set:`
+# routes under this dir and it is overridable via the RENDER_HDRI_DIR env var.
 ENVIRONMENT_ASSET_DIR = ASSET_DIR / "environments"
 
 # Table material library (grayscale table textures + per-episode HSV randomization) consumed by
-# rerender's material system; lives next to the table USD under the sim2real scene assets.
+# render's material system; lives next to the table USD under the sim2real scene assets.
 TABLE_MATERIALS_FILEPATH = SIM2REAL_SCENE_ASSETS_DIR / "table" / "materials.json"

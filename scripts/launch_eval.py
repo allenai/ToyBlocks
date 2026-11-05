@@ -659,7 +659,7 @@ def main() -> None:
         "--use_render_params",
         action="store_true",
         help="Replay each episode's recorded camera pose and look (HDRI, table "
-        "material, lights, exposure, backdrop) from a rerendered --dataset-path "
+        "material, lights, exposure, backdrop) from a rendered --dataset-path "
         "(evaluate.py --use_render_params). Block glyphs/colours are replayed by "
         "--replay-block-identity. Needs --no-use-calibrated-cameras; with --num-envs > 1 "
         "add --wave-resets so each wave shares one episode's scene-global lighting.",
@@ -669,7 +669,7 @@ def main() -> None:
         "--replay_block_identity",
         action=argparse.BooleanOptionalAction,
         default=None,
-        help="On a glyph/colour-rerendered --dataset-path, paint each episode's recorded "
+        help="On a glyph/colour-rendered --dataset-path, paint each episode's recorded "
         "block letters and colours and prompt the policies with the recorded goal "
         "(evaluate.py --replay_block_identity). Success is graded on the source block "
         "names either way. On by default; --no-replay-block-identity keeps the "
@@ -681,7 +681,7 @@ def main() -> None:
         action="store_true",
         help="Start episodes in waves (evaluate.py --wave_resets): a finished env holds "
         "its reset pose until every active env has finished, so each wave shares the "
-        "dataset's recorded scene lighting. Needs a rerendered --dataset-path and "
+        "dataset's recorded scene lighting. Needs a rendered --dataset-path and "
         "--num-envs > 1; not with --replay or --use-calibrated-cameras.",
     )
     p.add_argument(

@@ -41,10 +41,10 @@ the search budget: every "retry" becomes "run K variants in K envs from the same
      dropped. If the world changed (e.g. a flip landed elsewhere), recompute the env's
      symbolic state and call FF again from where it is.
    - *Record*: per-env GPU ring buffers for the dataset columns, flushed per episode by an
-     async writer into LeRobot shards (same schema as today, videos via rerender).
+     async writer into LeRobot shards (same schema as today, videos via render).
    - *Stream*: a finished env takes the next (problem, reset state) from a queue; no
      per-problem waves.
-3. **Rerender** (unchanged): videos from recorded states.
+3. **Render** (unchanged): videos from recorded states.
 4. **Merge / annotate** (unchanged).
 
 ## Package layout (`src/toyblocks/vecgen/`)
@@ -95,7 +95,7 @@ eval oracle are TAMP-free too.
    stage 2. Milestone: 200-problem run, success >= today's 78-83%.
 3. Snapshot/branch retries, FF per env with derived predicates, streaming across problems,
    universal scene (superset of blocks), stage 1 folded in. Milestone: 1024 envs/GPU.
-4. PhysX tuning on H100, multi-process per node, Beaker job type, rerender hookup.
+4. PhysX tuning on H100, multi-process per node, Beaker job type, render hookup.
 
 ## Status (Oct 20 2026)
 

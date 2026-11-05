@@ -81,7 +81,7 @@ class Args(BaseArgs):
     PDDL file stem with hyphens (``-``) replaced by underscores (``_``).
     """
 
-    pddl: str = "toyblocks/tamp/blocks/problems/pnp_on_table.pddl"
+    pddl: str = "src/toyblocks/tamp/blocks/problems/flip.pddl"
     """The PDDL file to generate task from."""
     seed: Annotated[int, tyro.conf.arg(aliases=["-s"])] = 0
     """Seed for the random number generator."""

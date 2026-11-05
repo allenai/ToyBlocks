@@ -1,8 +1,8 @@
 """The yaml INTERPRETER: given a launched sim + a DR flags dict, it builds the per-problem seed hub,
 creates all DR prims (dome buckets, local/sun lights, env-spheres), resolves material specs + shader
 prims, samples every per-episode value, and captures the pre-randomization `initial` baseline --
-exactly as rerender's replay_job did (moved verbatim). Returns a namespace of all of it so any
-consumer (rerender's replay loop, eval's wave runner) shares ONE interpreter with no code duplication.
+exactly as render's replay_job did (moved verbatim). Returns a namespace of all of it so any
+consumer (render's replay loop, eval's wave runner) shares ONE interpreter with no code duplication.
 
 pxr/omni imports live inside the underlying stage functions, so this module imports without a launched
 Isaac app; `setup()` itself requires a live sim.
@@ -67,7 +67,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     assets = assets or AssetPaths.default()
     flags = flags or {}
     _texcache.configure(flags.get("texture_cache"))
-    # dir-injecting adapters (were rerender globals DEFAULT_HDRI_DIR / DEFAULT_TABLE_MATERIALS)
+    # dir-injecting adapters (were render globals DEFAULT_HDRI_DIR / DEFAULT_TABLE_MATERIALS)
     def _SkyBuckets(flag, rng):
         return SkyBuckets(flag, rng, assets.hdri_dirs)
     def _resolve_material_specs(_flags):
@@ -78,7 +78,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
 
     # A caller with no dataset (a gym wrapper) has no `job` dict and no `units` records, but
     # both reduce to one scalar and one list of episode keys -- so take those directly rather
-    # than forking the function. rerender.py keeps passing job/units positionally and lands on
+    # than forking the function. render.py keeps passing job/units positionally and lands on
     # exactly the same two values.
     if salt is None and job is None:
         raise TypeError("setup() needs either job= (dataset) or salt= (a caller-chosen int)")
@@ -98,7 +98,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
                                       indexed=indexed_seeding)
                   if randomize_cams else {})
     if randomize_cams:
-        print(f"[rerender] per-episode camera randomization: {sorted(randomize_cams)} "
+        print(f"[render] per-episode camera randomization: {sorted(randomize_cams)} "
               f"(all via local USD mount; static={sorted(rand_static)}, link={sorted(rand_link)}; "
               f"seed={rseed_base}+problem_salt={prob_salt} -> {rseed})")
         override_cams = {}  # randomization supersedes recorded-pose matching
@@ -134,19 +134,19 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     # Same trap as _sseed/_w: assigned only under a conditional but handed to the returned
     # namespace unconditionally. `missing` needs a skybox and `desc` needs fill or local
     # lights, so any yaml without those died here. Nothing reads either value back --
-    # rerender rebinds desc to a local it never uses -- so the empty defaults are inert.
+    # render rebinds desc to a local it never uses -- so the empty defaults are inert.
     missing = []
     desc = ""
     if sky_textures:
         missing = [t for t in sky_textures if not os.path.exists(t)]
         if missing:
-            print(f"[rerender] WARNING skybox textures not found: {missing}")
+            print(f"[render] WARNING skybox textures not found: {missing}")
         if sky_buckets.multi:
-            print(f"[rerender] skybox: {len(sky_buckets.buckets)} buckets {sky_buckets.summary()} "
+            print(f"[render] skybox: {len(sky_buckets.buckets)} buckets {sky_buckets.summary()} "
                   f"total {len(sky_textures)} texture(s), format={sky_format}, rotation_deg={sky_rot}, "
                   f"intensity={sky_int}, selection=per-wave bucket -> per-set queue")
         else:
-            print(f"[rerender] skybox: {len(sky_textures)} texture(s), format={sky_format}, "
+            print(f"[render] skybox: {len(sky_textures)} texture(s), format={sky_format}, "
                   f"rotation_deg={sky_rot}, intensity={sky_int}, selection=cycle (without replacement)")
     # --- Scene fill light (flags['scene_lights']['fill_intensity']): controls the neutral
     # SphereLight bundled in the ground-plane asset (a single GLOBAL prim), sampled/set per
@@ -163,7 +163,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     if fill_spec is not None:
         desc = ("auto (ratio %.2f x dome)" % fill_auto_ratio if fill_auto
                 else (f"range {list(fill_range)}" if fill_range is not None else f"fixed {fill_fixed}"))
-        print(f"[rerender] scene_lights.fill_intensity = {desc} "
+        print(f"[render] scene_lights.fill_intensity = {desc} "
               f"(default fill was {_sphere_fill_intensity()})")
     # --- Per-env local lights (scene_lights.local_lights): the ONE way to randomize lighting
     # PER ENV within a batch (the dome can't). Set up once here; sampled per episode + applied
@@ -192,7 +192,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
         _dump_exposure_settings("(before override)")
         if exp_spec.get("auto") is not None:
             _apply_exposure(auto=bool(exp_spec["auto"]))
-            print(f"[rerender] exposure: auto-exposure -> {bool(exp_spec['auto'])}")
+            print(f"[render] exposure: auto-exposure -> {bool(exp_spec['auto'])}")
     # --- EXPERIMENTAL per-env environment sphere (flags['env_sphere']): a per-env background
     # sphere (see the _setup_env_spheres section). Set up once here; sampled + applied below. ---
     env_sphere_spec = (flags or {}).get("env_sphere")
@@ -235,8 +235,8 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
             exp_spec = {"auto": False}
             exp_rng = np.random.default_rng(rseed + 777)
             _apply_exposure(auto=False)
-            print("[rerender] scenarios: enabled RTX exposure path (auto=off) for per-wave ISO")
-        print(f"[rerender] scenarios: {[s.get('name', '?') for s in _scen_mix]} "
+            print("[render] scenarios: enabled RTX exposure path (auto=off) for per-wave ISO")
+        print(f"[render] scenarios: {[s.get('name', '?') for s in _scen_mix]} "
               f"weights={scen_p.round(3).tolist()} (per-wave mixture)")
     # --- Object material randomization (flags['materials']): per-EPISODE, since each scene
     # object is its own per-env USD prim clone (see _resolve_object_shader_prims docstring).
@@ -290,8 +290,8 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
             initial["skybox"]["selection"] = "bucket->queue"
             initial["skybox"]["buckets"] = sky_buckets.metadata()
 
-    # cube_scale is an edge length in metres (1.0 = not recorded). rerender matches it itself, by
-    # respawning blocks per problem (rerender.plan_block_sizes); this flag is informational only.
+    # cube_scale is an edge length in metres (1.0 = not recorded). render matches it itself, by
+    # respawning blocks per problem (render.plan_block_sizes); this flag is informational only.
     n_obj_warn = any(abs(e["cube_scale"] - 1.0) > 1e-6 for e in episodes)
 
     device = sim.device
@@ -312,7 +312,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
         initial["materials"] = _initial_material_params(object_specs, object_shader_prims)
         ep_mats = _sample_episode_materials(object_specs, ep_keys,
                                            indexed=indexed_seeding)
-        print(f"[rerender] per-episode material randomization: {sorted(object_specs)} "
+        print(f"[render] per-episode material randomization: {sorted(object_specs)} "
               f"(per-env, since each is an independent USD prim clone)")
     else:
         ep_mats = {}
@@ -324,7 +324,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     _texcache.warm(flags, assets.hdri_dirs, episode_keys=ep_keys,
                    indexed=(indexed_seeding or "hash"), prob_salt=prob_salt)
     if env_sphere_spec:
-        print(f"[rerender] per-episode env_sphere: emissive={bool(env_sphere_spec.get('emissive'))} "
+        print(f"[render] per-episode env_sphere: emissive={bool(env_sphere_spec.get('emissive'))} "
               f"radius={env_sphere_spec.get('radius', 2.5)} (per-env background within a batch)")
 
     # --- GI <-> env-sphere coupling (flags['couple_gi_to_env_sphere']) ---
@@ -339,10 +339,10 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
                   and _env_has_pool and not bool(sky_buckets))
     if (flags or {}).get("couple_gi_to_env_sphere"):
         if coupled_gi:
-            print("[rerender] couple_gi_to_env_sphere: dome GI texture = each batch's FIRST "
+            print("[render] couple_gi_to_env_sphere: dome GI texture = each batch's FIRST "
                   "env-sphere pick (GI == env0 backdrop; env-sphere queue drives selection)")
         elif bool(sky_buckets) and _env_has_pool:
-            print("[rerender] couple_gi_to_env_sphere: IGNORED -> both skybox and env_sphere define "
+            print("[render] couple_gi_to_env_sphere: IGNORED -> both skybox and env_sphere define "
                   "pools (independent queues)")
 
     # per-env local-light samples (in-batch lighting randomization)
@@ -360,7 +360,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
         else:
             desc = (f"count={local_spec.get('count')} intensity={local_spec.get('intensity')} "
                     f"color={_cdesc(local_spec.get('color', 'white'))}")
-        print(f"[rerender] per-episode local-light randomization: {desc} (per-env within a batch)")
+        print(f"[render] per-episode local-light randomization: {desc} (per-env within a batch)")
 
     # Output video fps must match the SOURCE dataset (e.g. 25 or 100), not a constant.
 
@@ -498,7 +498,7 @@ def sample_episodes(ir, episode_keys):
         # NB: setup() calls a LOCAL closure of this name that injects assets.hdri_dirs; there is
         # no module-level binding, so call the real function and inject from ir. (This raised
         # NameError the first time a gym wrapper drove sample_episodes with an env_sphere block --
-        # rerender never hits it because setup() samples in bulk through the closure.)
+        # render never hits it because setup() samples in bulk through the closure.)
         ir.ep_spheres.update(_es._sample_episode_env_spheres(
             ir.env_sphere_spec, keys, ir.env_sphere_seed, ir.assets.hdri_dirs, indexed=mode))
     if ir.local_spec:
@@ -586,7 +586,7 @@ def sample_wave_task_letters(ir, wave, active=None):
     dropped = [n for n in cand if n not in names_all]
     if dropped and not getattr(ir, "_logged_glyph_lib", False):
         ir._logged_glyph_lib = True
-        print(f"[rerender] randomize_task_letters: SKIPPING {sorted(dropped)} -- their asset is "
+        print(f"[render] randomize_task_letters: SKIPPING {sorted(dropped)} -- their asset is "
               f"not from {_glyphs.SUPPORTED_LIBRARY} (e.g. {assets.get(dropped[0])!r}). This "
               f"module's atlas maths only describe that library; on any other the same UV shift "
               f"renders a DIFFERENT, real-looking glyph. Those blocks keep their letters and are "
@@ -594,7 +594,7 @@ def sample_wave_task_letters(ir, wave, active=None):
     if not names:
         return {}
     if len(names) > len(_glyphs.GLYPHS):
-        print(f"[rerender] randomize_task_letters: {len(names)} blocks > {len(_glyphs.GLYPHS)} "
+        print(f"[render] randomize_task_letters: {len(names)} blocks > {len(_glyphs.GLYPHS)} "
               f"glyphs; sampling WITH replacement, goals may name a glyph twice")
     # ir.rseed, NOT ir.rseed_base: rseed = rseed_base + prob_salt, and _problem_seed_salt exists
     # precisely so "the same episode_index draws different samples across problems". Seeding on
@@ -611,7 +611,7 @@ def apply_wave_task_letters(ir, wave, active=None):
     """PUBLIC: write this wave's sampled glyphs onto the scene; cache the applied map on `ir`.
 
     Callers must invoke this for EVERY render branch, not only the camera-DR one. It used to be
-    reachable only from apply_wave_cameras, which rerender.py calls from a single `elif
+    reachable only from apply_wave_cameras, which render.py calls from a single `elif
     randomize_cams:` arm -- so a flags file carrying randomize_task_letters and no camera DR
     rewrote pddl_goal/task/glyph_map and rendered the ORIGINAL letters. Idempotent: the value
     written is a pure function of the glyph, so applying twice in one wave is a no-op rewrite.
@@ -638,7 +638,7 @@ def _apply_wave_task_letters(ir, wave, active):
     # too, keyed by env, so the wave log names the slots and not just a count.
     gap = _glyphs.reconcile(asg, applied)
     if gap:
-        print(f"[rerender] randomize_task_letters: text/pixel MISMATCH in {len(gap)} env(s): {gap}")
+        print(f"[render] randomize_task_letters: text/pixel MISMATCH in {len(gap)} env(s): {gap}")
     return applied
 
 def sample_wave_block_colors(ir, wave, active=None):
@@ -701,8 +701,8 @@ def apply_wave_block_colors(ir, wave, active=None):
 
 def apply_wave_cameras(ir, sim, wave, active, *, dt, camera_base="scene",
                        cam_base_pose=None, cam_base_K=None, rtx_warmup_frames=1):
-    """Seat this wave's cameras: pre-render, optional re-base onto the recorded pose, per-episode
-    offsets + FOV, then RTX warm-up. Moved verbatim out of rerender's frame loop at t==0.
+    """Seat this wave's cameras: prender, optional re-base onto the recorded pose, per-episode
+    offsets + FOV, then RTX warm-up. Moved verbatim out of render's frame loop at t==0.
 
     apply_wave() deliberately does NOT touch cameras, so this is the other half of "randomize this
     batch" and a caller must run it too. It owns two ordering constraints that are easy to get
@@ -735,7 +735,7 @@ def apply_wave_cameras(ir, sim, wave, active, *, dt, camera_base="scene",
             # mutable state of its own (see the package docstring).
             if not getattr(ir, "_warned_no_robot", False):
                 ir._warned_no_robot = True
-                print("[rerender] WARNING --camera_base data: no robot articulation "
+                print("[render] WARNING --camera_base data: no robot articulation "
                       "to express the recorded pose against; keeping cfg.offset")
         else:
             data_bases = _recorded_static_bases(ir.rand_static, wave, active, cam_base_pose,
@@ -748,14 +748,14 @@ def apply_wave_cameras(ir, sim, wave, active, *, dt, camera_base="scene",
                     cfg = ir.randomize_cams[ck].cfg.offset
                     d = float(torch.linalg.norm(
                         P[i] - torch.tensor(list(cfg.pos), device=ir.device)))
-                    print(f"[rerender] camera_base=data: {ck} re-based onto the "
+                    print(f"[render] camera_base=data: {ck} re-based onto the "
                           f"recorded pose ({d * 1000:.2f} mm from cfg.offset)")
 
     _apply_camera_local_offsets(ir.randomize_cams, wave, active, ir.ep_offsets, ir.device,
                                 data_bases=data_bases)
     _apply_episode_camera_fov(ir.randomize_cams, wave, active, ir.ep_offsets, ir.device,
                               base_K=cam_base_K, camera_base=camera_base)
-    # Same pre-render window as the camera DR: the RTX warm-up below must see the final
+    # Same prender window as the camera DR: the RTX warm-up below must see the final
     # framing AND the final glyphs, or the first frames carry the previous wave's letters.
     apply_wave_task_letters(ir, wave, active)
     for _ in range(max(1, rtx_warmup_frames)):
@@ -770,7 +770,7 @@ def apply_wave(ir, sim, wave, active=None):
     per-set queue cursors (sky_buckets) as intended."""
     # `active` is the list of ENV SLOTS this call should touch. Default is every slot,
     # which is the literal the three per-env appliers used to be handed inline -- so a
-    # caller that omits it (rerender.py) is unchanged. A gym wrapper resetting a subset
+    # caller that omits it (render.py) is unchanged. A gym wrapper resetting a subset
     # passes just those slots; all three appliers already iterate `for i in active`.
     active = list(range(len(wave))) if active is None else list(active)
     # Cuboid colours: here and nowhere else. apply_wave runs once per wave before the frame loop

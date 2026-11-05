@@ -325,7 +325,7 @@ class Args(BaseArgs):
     ``camera_cfgs``. Each env gets that episode's first-frame K; later resets
     re-apply via ``apply_setup`` (randomized-camera datasets vary K per
     episode). Requires ``--dataset_path``. Camera extrinsics are replayed by
-    ``--use_render_params`` when the dataset is a rerender output, and are
+    ``--use_render_params`` when the dataset is a render output, and are
     otherwise verify-only. Mutually exclusive with ``--use_calibrated_cameras``."""
 
     use_calibrated_cameras: bool = True
@@ -336,7 +336,7 @@ class Args(BaseArgs):
     ``--no-use-calibrated-cameras`` uses the dataset's K instead."""
 
     use_render_params: bool = False
-    """Opt-in; needs ``--no-use-calibrated-cameras``. When ``--dataset_path`` is a rerender output (its ``meta/render_params.json``,
+    """Opt-in; needs ``--no-use-calibrated-cameras``. When ``--dataset_path`` is a render output (its ``meta/render_params.json``,
     or for a merged dataset each source's, reached through ``meta/provenance.json``),
     reproduce each queue episode's recorded camera pose and appearance: the env-mounted
     cameras sit on the recorded ``observation.camera_pose``, the arm camera gets its
@@ -349,7 +349,7 @@ class Args(BaseArgs):
     first reset, or per wave with ``--wave_resets``."""
 
     replay_block_identity: bool = True
-    """On glyph/colour-rerendered datasets (rows carry ``block_variable_map`` /
+    """On glyph/colour-rendered datasets (rows carry ``block_variable_map`` /
     ``glyph_map``), paint each episode's recorded block letters and colours at reset
     and prompt the policies with the recorded (rendered) goal. Off
     (``--no-replay_block_identity``): blocks keep their authored look and the prompts
@@ -359,12 +359,12 @@ class Args(BaseArgs):
     render_replay_assets_paths: tuple[str, ...] = ()
     """Extra HDRI roots searched (in order, before the repo's ``assets/environments``) for the
     skybox / backdrop textures a ``--use_render_params`` record names.
-    ``asset_manifest.json`` does not install the HDRI pool (see docs/rerender/README_local.md)."""
+    ``asset_manifest.json`` does not install the HDRI pool (see docs/source/user_guide/workflows/datagen/local.md)."""
 
     render_replay_warmup_frames: int = 16
     """``sim.render()`` calls after a reset that applies a recorded render, so the
     path tracer converges on the new look before the first observation (the
-    rerender's ``rtx_warmup_frames``). Raises ``env_cfg.num_rerenders_on_reset`` to
+    render's ``rtx_warmup_frames``). Raises ``env_cfg.num_renders_on_reset`` to
     this value when ``--use_render_params`` is active."""
 
     wave_resets: bool = False

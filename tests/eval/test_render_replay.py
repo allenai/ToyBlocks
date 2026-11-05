@@ -1,4 +1,4 @@
-"""CPU tests for replaying a rerendered dataset's recorded renders in eval.
+"""CPU tests for replaying a rendered dataset's recorded renders in eval.
 
 Covers the parts of :mod:`toyblocks.eval.render_replay` that decide *which* record an
 episode gets -- the merged-episode -> (problem, local index) mapping, the per-problem
@@ -57,8 +57,8 @@ def _record(local: int, *, x: float = FRONT[0], delta: float = 0.01, **extra: An
     }
 
 
-def _write_render_params(rerender_dir: Path, episodes: list[dict], sha: str = "abc") -> None:
-    meta = rerender_dir / "meta"
+def _write_render_params(render_dir: Path, episodes: list[dict], sha: str = "abc") -> None:
+    meta = render_dir / "meta"
     meta.mkdir(parents=True, exist_ok=True)
     payload = {"flags": FLAGS, "flags_sha256": sha, "args": {}, "episodes": episodes}
     (meta / "render_params.json").write_text(json.dumps(payload))
@@ -162,8 +162,8 @@ def test_flags_hash_mismatch_raises_when_the_problem_loads(tmp_path: Path) -> No
         replay.record_for(_setup(root, 1))
 
 
-def test_unmerged_rerender_output_reads_its_own_render_params(tmp_path: Path) -> None:
-    root = tmp_path / "rerender"
+def test_unmerged_render_output_reads_its_own_render_params(tmp_path: Path) -> None:
+    root = tmp_path / "render"
     _write_shard(root, [None, None])
     _write_render_params(root, [_record(0), _record(1, marker="e1")])
     replay = RecordedRenderReplay.from_dataset(root)

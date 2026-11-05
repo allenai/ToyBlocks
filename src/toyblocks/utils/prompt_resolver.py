@@ -755,7 +755,7 @@ def pddl_goal_to_prompt(
 def policy_goal(setup: dict, replay_block_identity: bool) -> str | None:
     """The PDDL goal the policies are prompted with for one queue setup.
 
-    On glyph/colour rerenders ``pddl_goal`` is in source block names (what success
+    On glyph/colour renders ``pddl_goal`` is in source block names (what success
     is graded on) and ``policy_pddl_goal`` is the recorded, rendered goal. The
     rendered names only match the scene when the recorded identities are painted
     (``--replay_block_identity``), so they are used only then.

@@ -1,9 +1,9 @@
-"""render_params.json assembly + atomic, lock-guarded write -- the DR provenance format rerender
+"""render_params.json assembly + atomic, lock-guarded write -- the DR provenance format render
 writes and eval will reuse (so an eval render carries the same per-episode camera/skybox/materials/
 lights/exposure/env_sphere record). No module globals: the run-`args` block is passed in, so eval
-supplies its own args dict instead of reading rerender's argparse namespace.
+supplies its own args dict instead of reading render's argparse namespace.
 
-Moved verbatim from rerender.py except `render_params_payload` now takes `args` + `script` as
+Moved verbatim from render.py except `render_params_payload` now takes `args` + `script` as
 parameters (was reading the `args_cli` global).
 """
 from __future__ import annotations
@@ -89,15 +89,15 @@ def _resolved_flags_digest(flags: Optional[dict]) -> Optional[str]:
 def render_params_payload(job: Dict[str, Any], flags: dict, fps: int, use_physics: bool,
                           initial: dict, episode_records: list, completed: bool, args: dict,
                           total_episodes: Optional[int] = None,
-                          script: str = "scripts/rerender/rerender.py",
+                          script: str = "scripts/render/render.py",
                           empty_reason: Optional[str] = None) -> dict:
     """Assemble the render_params.json payload. `args` (the run's CLI/config args) and `script` are
-    passed in so this is consumer-agnostic (rerender fills them from argparse; eval from its config)."""
+    passed in so this is consumer-agnostic (render fills them from argparse; eval from its config)."""
     # completed=true with episodes_recorded=0 is a legitimate terminal state (every source parquet
     # unreadable), but indistinguishable from a bug without a reason on disk.
     payload = {
         "rendered_at": datetime.now().isoformat(timespec="seconds"),
-        "rerender_script": script,
+        "render_script": script,
         "completed": bool(completed),
         "empty_reason": empty_reason,
         "episodes_recorded": len(episode_records),
@@ -111,7 +111,7 @@ def render_params_payload(job: Dict[str, Any], flags: dict, fps: int, use_physic
         "flags_sha256": _flags_file_digest((args or {}).get("flags_file")),
         "flags_resolved_sha256": _resolved_flags_digest(flags),
         # Which DR seeding path produced these values. Top-level (not just inside args) because a
-        # consumer must branch on it: 'stream' episodes are only reproducible by re-rendering the
+        # consumer must branch on it: 'stream' episodes are only reproducible by rendering the
         # same episode LIST, while 'indexed' episodes reproduce standalone from (seed, index).
         # Mixing the two inside one dataset would silently mix two different randomizations.
         "dr_seeding": (args or {}).get("dr_seeding", "stream"),
@@ -143,7 +143,7 @@ def write_json_locked(path: str, payload: dict) -> None:
 def write_render_params(out_dir: str, job: Dict[str, Any], flags: dict, fps: int, use_physics: bool,
                         initial: dict, episode_records: list, args: dict, completed: bool = True,
                         total_episodes: Optional[int] = None, verbose: bool = True,
-                        script: str = "scripts/rerender/rerender.py",
+                        script: str = "scripts/render/render.py",
                         video_defects: Optional[list] = None,
                         empty_reason: Optional[str] = None) -> None:
     """Write meta/render_params.json into each output split (incrementally, locked+atomic).
@@ -165,7 +165,7 @@ def write_render_params(out_dir: str, job: Dict[str, Any], flags: dict, fps: int
         #   completed=true,  video_defects=[]   -> whole and usable
         #   completed=true,  video_defects=[..] -> USABLE BUT INCOMPLETE; the listed (episode,
         #                                          feature) videos are absent and need a patch pass
-        #   completed=false                     -> the problem must be re-rendered
+        #   completed=false                     -> the problem must be rendered
         # Carrying the exact list here is what lets the orchestrator patch automatically instead of
         # someone re-deriving it from a 115k-object listing later.
         defects = [d for d in (video_defects or [])

@@ -98,7 +98,7 @@ def _argv_option(*names: str) -> tuple[int | None, str | None]:
 
 
 def _merge_render_replay_kit_args() -> None:
-    # A rerendered dataset's carb_settings (e.g. the RealTimePathTracing render mode)
+    # A rendered dataset's carb_settings (e.g. the RealTimePathTracing render mode)
     # only take effect as launch-time kit args, so --use_render_params has to add
     # them here; merged into a user --kit_args rather than passed as a second flag.
     # Both are opt-in: --use_render_params, and --no-use-calibrated-cameras (calibrated
@@ -149,11 +149,12 @@ import toyblocks.tasks  # noqa: F401
 import isaaclab.sim as sim_utils  # noqa: F401
 
 from toyblocks.eval.args import Args
+from toyblocks.cli.base_args import parse_cli
 from toyblocks.eval import evaluate
 
 
 def main() -> None:
-    args = tyro.cli(Args)
+    args = parse_cli(Args)
 
     # Snap num_envs to a value the task's generated env accepts. Autogen block envs
     # bake a fixed number of randomization slots at codegen time because block size

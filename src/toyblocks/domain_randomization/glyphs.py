@@ -243,7 +243,7 @@ def assign_glyphs(block_names: Sequence[str], rng, charsets=None) -> Dict[str, s
 
     REPRODUCIBILITY: the pool WIDTH is part of the rng stream, so widening GLYPHS from 35 to 36
     (when "10" became assignable) changed this draw -- measured 97.5% of (n, seed) pairs differ.
-    A dataset rendered before that commit will NOT re-render identically from its own seed. Each
+    A dataset rendered before that commit will NOT render identically from its own seed. Each
     episode is still self-consistent, because its map is recorded and drives both the pixels and
     the text; what changed is only which letters a given seed produces. Do not "fix" this by
     quietly trimming the pool here -- that would break the runs made since just as silently.
@@ -459,14 +459,14 @@ def apply_wave_glyphs(assignment: Dict[int, Dict[str, str]], *, verbose: bool = 
         # so when it was never called at all the log looked exactly like a clean run: zero
         # SHADER NOT FOUND, zero MISMATCH, and original letters in every frame. One line per
         # wave makes "did the swap actually run" readable straight off the log.
-        # NOTE this fires TWICE per wave when camera DR is configured: rerender applies at t==0
+        # NOTE this fires TWICE per wave when camera DR is configured: render applies at t==0
         # before the render branch, and apply_wave_cameras applies again inside the camera arm.
         # Both write the same value (a pure function of the glyph), so it is a no-op rewrite --
         # but anything COUNTING these lines sees 2x the wave count on an allrand run.
         pairs = sum(len(m) for m in applied.values())
         sample = next((f" e.g. env{e} {sorted(m.items())[:3]}"
                        for e, m in sorted(applied.items()) if m), "")
-        print(f"[rerender] randomize_task_letters: set {pairs} block-env glyph(s) across "
+        print(f"[render] randomize_task_letters: set {pairs} block-env glyph(s) across "
               f"{len(applied)} env(s){sample}")
     if (no_shader or no_authored) and verbose:
         # Loud, not a footnote: pddl_goal and task are rewritten from the SAMPLED map, so a block
@@ -478,7 +478,7 @@ def apply_wave_glyphs(assignment: Dict[int, Dict[str, str]], *, verbose: bool = 
         cause = (f"SHADER NOT FOUND for {no_shader}" if no_shader else "")
         if no_authored:
             cause += (" and " if cause else "") + f"NO AUTHORED GLYPH for {no_authored}"
-        print(f"[rerender] randomize_task_letters: {cause} block-env "
+        print(f"[render] randomize_task_letters: {cause} block-env "
               f"pair(s) {stale[:8]}; those blocks keep their authored glyph while pddl_goal/task "
               f"claim the new one. The dataset's text will NOT match its pixels.")
     return applied

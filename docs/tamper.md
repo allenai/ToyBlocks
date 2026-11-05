@@ -183,7 +183,7 @@ instances, and runs `scripts/vecgen/run.py` once per problem dir. Episodes go to
 | `--pddl-problem-file` | recorded | Plan every state toward this one problem; required when eval ran without `--queue_url` |
 | `--skip-execution` / `--skip-annotate` / `--skip-merge` | off | Step toggles |
 | `--exec-num-envs` | `32` | vecgen envs. Capped at the selected states and rounded up to a multiple of the scene-profile count. |
-| `--record-videos` | off | Record the scene cameras. Annotation needs them; without, re-render the episodes, then annotate. |
+| `--record-videos` | off | Record the scene cameras. Annotation needs them; without, render the episodes, then annotate. |
 | `--vecgen-args` | `""` | Extra `run.py` flags, as one quoted string, e.g. `'--max-attempts 2 --pool-slots 16'` |
 | `--data-dir` / `--merge-output-dir` | under `--tamper-dir` | Output overrides |
 
@@ -217,7 +217,7 @@ far off-distribution the policy has wandered.
 ### Step 4 — Annotate
 
 Pixel goals project into the front camera, so the annotator needs recorded
-cameras: `--record-videos`, or re-rendered episodes.
+cameras: `--record-videos`, or rendered episodes.
 
 ```bash
 python src/toyblocks/data_annotation/annotate_target_xy.py \

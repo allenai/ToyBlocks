@@ -4,7 +4,7 @@
 The assignment is written through three independent paths, and a bug in any one of them yields a
 dataset that still validates:
 
-  1. render_params.json episodes[].glyphs   <- rerender's wave loop (what was sampled/applied)
+  1. render_params.json episodes[].glyphs   <- render's wave loop (what was sampled/applied)
   2. the glyph_map column                   <- appended during passthrough
   3. the block_* tokens inside pddl_goal    <- rewritten during passthrough
   4. the task strings meta/tasks.parquet resolves task_index to  <- table rebuilt in passthrough
@@ -19,7 +19,7 @@ NOTE none of these four reads a PIXEL. They all descend from one sampling call, 
 perfectly while the render is untouched -- which is exactly how this feature shipped broken. Pair
 this with scripts/datagen/verify_glyph_pixels.py and with looking at the frames.
 
-    python scripts/datagen/verify_glyph_consistency.py --dataset <rerendered dataset>
+    python scripts/datagen/verify_glyph_consistency.py --dataset <rendered dataset>
 """
 import argparse
 import json

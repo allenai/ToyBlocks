@@ -48,7 +48,6 @@ the script from; the training command itself runs inside `maniflow-tb/`.
 - `--data_root_dir`: the merged LeRobot dataset (by default the pipeline writes it to  
 `<output-root>/datasets/merged/train/<experiment-id>`). Pass several directories to co-train  
 on them; `--dataset_ratio` sets their sampling ratio.  
-[re-render step](datagen/rerender.md) writes them.
 
 Everything else keeps its default, which gives:
 
@@ -84,6 +83,33 @@ For several nodes, run the script on every node with the same flags, plus
 launches `torchrun` instead of `accelerate launch`; every node must use the same `--run_id`
 (or `--resume`) so that all of them write to the same run directory, which therefore has to be
 on a filesystem the nodes share.
+
+## The last batch of an epoch
+
+The train dataloader keeps the last, partial batch of every epoch, and ManiFlow splits every batch
+into a flow part (`int(0.75 * B)` samples) and a consistency part (`int(0.25 * B)` samples). A last
+batch of 1 to 3 samples leaves the consistency part empty, and training stops at that step with
+
+```text
+IndexError: list index out of range
+```
+
+raised from the T5 tokenizer (`encode_text_input_T5`), because it is handed an empty list of
+instructions. The `train: <episodes> episodes, <N> samples` line that `[FrankaDataset]` prints
+before training gives `N`; the last batch holds `N mod --dbs` samples (per GPU). Pick a `--dbs` for
+which that is 0 or at least 4. For example, 242 samples crash at `--dbs 16` (last batch: 2) and
+train at `--dbs 32` (last batch: 18). The debug run above, at `--dbs 4`, crashes whenever `N` is
+not a multiple of 4.
+
+`N` is a property of the dataset, not of the training flags, and it is not fixed for a given
+datagen command. The pipeline seeds task generation (`--task-gen-seed`, default `6303`), reset
+state sampling (a fixed `0` with `--vecgen-problems-per-env 1`, `--seed` plus the group offset
+otherwise) and execution (`--seed`, default `42`), so the problems and start states repeat.
+The executed trajectories are not guaranteed to: vecgen steps GPU physics and builds motion plans
+on worker threads, and a skill that is retried from the live state (a flip that misses keeps its
+failed attempt in the episode) changes the episode length. Rerunning the same command can
+therefore change `N`, and a `--dbs` that worked before can stop working. Check the log line after
+each regeneration.
 
 ## Resuming and fine-tuning
 

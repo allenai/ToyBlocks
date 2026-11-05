@@ -39,7 +39,7 @@ Its default, `libsvtav1`, is what datagen uses. Eval passes `libx264` (`--video_
 an eval run keeps hundreds of streams open at once and x264 needs far less native memory per
 stream: measured 5–14 MiB, against 27–57 MiB for SVT-AV1.
 Depth is lossless 12-bit millimetres (`gray12le` HEVC, GOP 2, so a training reader decodes at
-most one extra frame per random access). The rerender pipeline's `rg8_55_224` depth is a
+most one extra frame per random access). The render pipeline's `rg8_55_224` depth is a
 separate, lossy stream: 224×224, clipped at 1,023 mm, 5+5-bit RG packing. The recorder can add
 it alongside the main depth with the `extra_depth` argument, but eval does not set that. Eval
 writes under `<output_dir>/lerobot_dataset/` and records,

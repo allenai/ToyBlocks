@@ -227,7 +227,7 @@ def run_local(args: argparse.Namespace, problems: list[Problem]) -> int:
                 failures.append(f"{problem.slug}:annotate")
         elif not args.skip_annotate:
             log.info("%s: annotation skipped, nothing recorded a camera (pixel goals need "
-                     "--record-videos, or re-render the episodes first)", problem.slug)
+                     "--record-videos, or render the episodes first)", problem.slug)
 
     if not args.skip_merge:
         log.info("=" * 70)
@@ -291,7 +291,7 @@ def main() -> int:
                              "scene-profile count (default: 32)")
     parser.add_argument("--record-videos", action="store_true",
                         help="Record the scene cameras too (needed to annotate here; without "
-                             "it, re-render the episodes before annotating)")
+                             "it, render the episodes before annotating)")
     parser.add_argument("--vecgen-args", default="",
                         help="Extra scripts/vecgen/run.py flags, one quoted string "
                              "(e.g. '--max-attempts 2 --pool-slots 16')")

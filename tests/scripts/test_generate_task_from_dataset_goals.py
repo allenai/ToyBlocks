@@ -1,4 +1,4 @@
-"""generate_task_from_dataset compiles rerendered goals in source block names."""
+"""generate_task_from_dataset compiles rendered goals in source block names."""
 
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ def _write_dataset(root: Path, goal: str, bvm: str | None) -> None:
     (root / "meta" / "info.json").write_text(json.dumps({"fps": 25, "chunks_size": 1000}))
 
 
-def test_rerendered_goals_compile_in_source_names(codegen: types.ModuleType, tmp_path: Path) -> None:
+def test_rendered_goals_compile_in_source_names(codegen: types.ModuleType, tmp_path: Path) -> None:
     _write_dataset(tmp_path, RENDERED, BVM)
     _, goals, counts, _ = codegen.read_task_spec_from_dataset(tmp_path)
     assert goals == [SOURCE]

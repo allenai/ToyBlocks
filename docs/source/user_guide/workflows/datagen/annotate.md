@@ -12,7 +12,7 @@ coordinates come from projecting the recorded object poses through the recorded 
 ## Where it fits
 
 - **Input:** a merged dataset from [stage 5, merge](merge.md), with recorded front-camera poses
-  and intrinsics (normally from [re-rendering](rerender.md)).
+  and intrinsics (normally from [rendering](render.md)).
 - **Output:** the same dataset, with the `goal.*` columns added to its parquet files and to
   `meta/info.json`.
 
@@ -37,7 +37,7 @@ The pipeline runs annotation automatically unless you pass `--skip-annotate`. It
 in place at `<output-root>/datasets/merged/train/<experiment-id>/` (or `--merge-output-dir`). A
 non-zero exit from the annotator fails the run.
 
-The pipeline also skips this stage on its own, with a warning, when the rerender stage did not run
+The pipeline also skips this stage on its own, with a warning, when the render stage did not run
 and `--vecgen-record-videos` was not set. Pixel goals need a camera, and
 [execution records none by default](execution.md#what-a-recorded-episode-contains).
 
@@ -81,7 +81,7 @@ reporting `recorded`. Catching that case is exactly what this check is for.
 
 `--allow-nominal-camera` bypasses the check, and is correct **only** for the legacy `table` and
 `color_only_blocks_table` presets. On any other preset it annotates against the wrong camera, so
-re-render the dataset instead.
+render the dataset instead.
 
 ### Annotation can succeed and write nothing useful
 

@@ -1,5 +1,5 @@
 """Per-env "environment sphere" backdrop -- a large emissive UV-sphere per env showing an HDRI as a
-camera-only skybox. Moved verbatim from rerender.py. The in-process luminance memo (_LUMINANCE) is
+camera-only skybox. Moved verbatim from render.py. The in-process luminance memo (_LUMINANCE) is
 keyed by source path and holds successes only (see _hdri_luminance), and SkyBuckets takes the
 default HDRI dir explicitly. pxr/omni/cv2 imports are function-local so this module imports without a
 launched Isaac app (the sampler is pure; _setup_*/_apply_* require a live stage)."""
@@ -75,7 +75,7 @@ def _set_camera_far_clip(far: float) -> None:
             near = float(cr[0]) if cr is not None else 0.01
             cam.GetClippingRangeAttr().Set(Gf.Vec2f(near, float(far)))
             n += 1
-    print(f"[rerender] env_sphere: raised camera far-clip -> {far} on {n} camera prim(s)")
+    print(f"[render] env_sphere: raised camera far-clip -> {far} on {n} camera prim(s)")
 
 
 def _setup_env_spheres(sim, spec: dict):
@@ -151,7 +151,7 @@ def _setup_env_spheres(sim, spec: dict):
             UsdShade.MaterialBindingAPI(prim).Apply(prim)
             UsdShade.MaterialBindingAPI(prim).Bind(UsdShade.Material(stage.GetPrimAtPath(mat_path)))
             out.append((stage.GetPrimAtPath(f"{mat_path}/Shader"), rot_op))
-    print(f"[rerender] env_sphere: {sim.num_envs} UV-sphere(s) radius {radius} material={material} "
+    print(f"[render] env_sphere: {sim.num_envs} UV-sphere(s) radius {radius} material={material} "
           f"emissive={bool(spec.get('emissive'))} no_shadow={no_shadow} backdrop_only={backdrop_only}")
     return out
 
@@ -187,7 +187,7 @@ def _hdri_luminance(src: str) -> Optional[float]:
         try:
             val = _read_luminance(path)
         except Exception as e:
-            print(f"[rerender] env_sphere: HDRI luminance read failed for {os.path.basename(path)}: {e}")
+            print(f"[render] env_sphere: HDRI luminance read failed for {os.path.basename(path)}: {e}")
         if val is not None:
             break
     if val is not None:
@@ -210,16 +210,16 @@ def _sample_episode_env_spheres(spec: dict, episode_indices, seed: int, default_
     rng = np.random.default_rng(seed)
     buckets = SkyBuckets(spec, rng, default_hdri_dir)
     if not buckets:
-        print("[rerender] env_sphere: WARNING no textures resolved")
+        print("[render] env_sphere: WARNING no textures resolved")
     elif buckets.multi:
-        print(f"[rerender] env_sphere: {len(buckets.buckets)} buckets {buckets.summary()} "
+        print(f"[render] env_sphere: {len(buckets.buckets)} buckets {buckets.summary()} "
               f"(per-episode bucket -> per-set queue)")
     rot = spec.get("rotation_deg", [0, 360])
     ei = spec.get("emissive_intensity", 1.0)
     normalize = bool(spec.get("emissive_normalize", False))
     clamp = spec.get("emissive_clamp", [0.05, 100.0])
     if normalize:
-        print(f"[rerender] env_sphere: emissive_normalize ON -> per-skybox scale = target/median_lum "
+        print(f"[render] env_sphere: emissive_normalize ON -> per-skybox scale = target/median_lum "
               f"(target={ei}, clamp={list(clamp)}) so dim HDRIs stay visible")
     # Draw every episode first (the rng stream is consumed in exactly the original order), then
     # fetch + measure the unique HDRIs in parallel: serially, one copy off weka plus one full HDR

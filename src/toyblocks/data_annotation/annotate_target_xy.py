@@ -494,7 +494,7 @@ def _front_camera_columns_status(blocks_dir: Path, sample_parquet: Path) -> tupl
         f"video is present for {video_cams} but the parquet carries no front-camera {miss} "
         f"column, so goal.position would be projected through the NOMINAL fallback camera "
         f"(fx 527.36 and one fixed pose) rather than the camera that rendered these frames. "
-        f"An execution that recorded no cameras writes no camera columns; the re-render that "
+        f"An execution that recorded no cameras writes no camera columns; the render that "
         f"produced the video must supply them."
     )
 
