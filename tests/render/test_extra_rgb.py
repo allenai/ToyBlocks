@@ -25,9 +25,13 @@ from pathlib import Path
 
 import av
 import numpy as np
+import pytest
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+# The encoder imports LeRobot at module level, and the CPU CI lane does not install it; skip there
+# (like the ffmpeg/ffprobe check in test_main) instead of failing collection for every test.
+pytest.importorskip("lerobot")
 from toyblocks.vecgen.recording._video_encoder import _VideoEncoderProcess as VP  # noqa: E402
 
 _failures = []
