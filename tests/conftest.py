@@ -18,6 +18,10 @@ GPU tests:
 
 CPU tests:
     pytest tests/serving tests/tamp tests/eval -v
+
+Installation checks (tests/install; the GPU tier is opt-in):
+    pytest tests/install
+    pytest tests/install --install-gpu
 """
 
 import pytest
@@ -58,6 +62,14 @@ def pytest_addoption(parser):
             "checkpoint -- it reruns the same pure functions the tests call -- so "
             "the diff is reviewable text. CI never passes it: a job that "
             "re-recorded its own baseline would report success against itself."
+        ),
+    )
+    parser.addoption(
+        "--install-gpu", action="store_true", default=False,
+        help=(
+            "Also run the GPU tier of tests/install: start Isaac Sim, run vecgen with and "
+            "without videos, import the agentic skill servers. Takes several minutes and "
+            "needs OMNI_KIT_ACCEPT_EULA=YES."
         ),
     )
 

@@ -82,7 +82,19 @@ This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/po
 
 ## Verify the installation
 
-With the `vecgen` group installed, generate one environment package from a checked-in problem and record a few episodes. This exercises Isaac Sim, cuRobo and LeRobot recording, and should end with a `RESULT episodes=4 success=...` line:
+Run the installation checks from the repository root, with the virtual environment active:
+
+```bash
+pytest tests/install                    # seconds: packages, versions, submodules, assets
+export OMNI_KIT_ACCEPT_EULA=YES
+pytest tests/install --install-gpu      # several minutes: also Isaac Sim, cuRobo and vecgen
+```
+
+The first command checks each extra you installed and skips the others. For every installed extra, it checks that the packages are installed in the versions `pyproject.toml` allows and that what its workflows import imports. It also checks that the submodules the extra needs are checked out at the pinned commits and are the ones Python imports. Finally, it checks that the assets are downloaded. A failure names what is wrong and the command that fixes it.
+
+`--install-gpu` also checks that PyTorch sees the GPU and that Isaac Sim starts headless with the right Warp. With the `vecgen` extra, it runs the vecgen check below, with and without videos. With the `agentic` extra, it imports the agentic skill servers.
+
+To run the vecgen check by hand: with the `vecgen` group installed, generate one environment package from a checked-in problem and record a few episodes. This exercises Isaac Sim, cuRobo and LeRobot recording, and should end with a `RESULT episodes=4 success=...` line:
 
 ```bash
 export OMNI_KIT_ACCEPT_EULA=YES
