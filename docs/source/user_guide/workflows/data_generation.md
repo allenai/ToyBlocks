@@ -67,7 +67,7 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
 
 - **Generate a demonstration dataset for a task family**, such as 3-block stacking,
   flipping, rotating or pick-and-place: pick a generator in `scripts/task_gen/` and run
-  `run_datagen_pipeline.py` (see [Full-pipeline data generation](#full-pipeline-data-generation)).
+  `run_datagen_pipeline.py` (see [Full data generation pipeline](#full-data-generation-pipeline)).
 - **Generate a single task end to end on one GPU** for debugging, with
   `generate_task_from_pddl.py` followed by `scripts/vecgen/run.py` (see
   [Env generation](datagen/env_generation.md) and
