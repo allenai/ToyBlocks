@@ -67,10 +67,6 @@ class Args(BaseArgs):
     resize back (inference counterpart of ``random_crop_ratio``, e.g. 0.95).
     ``camera_intrinsics`` stay nominal (224 grid scale only). ``None`` feeds
     the full frame."""
-    depth_aug: str | None = None
-    """Maniflow obs transforms only: live depth augmentation before the policy
-    sees depth (``ejbl`` matches HVLA ``datasets.vla_data.augment_depth``).
-    ``None`` sends clean sim depth."""
     enable_crop: bool = False
     """Maniflow policy evals only: build ``target_front_crop_rgb`` on the client
     from native front camera + native target pixels (training ``_crop_centered``

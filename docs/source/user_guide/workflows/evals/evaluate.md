@@ -185,7 +185,6 @@ These flags apply to the ManiFlow transforms only, and raise with any other tran
 | Flag | Default | Description |
 |---|---|---|
 | `--center_crop_ratio` | none | After the resize to 224, centre-crop RGB, depth and `target_heatmap` to `int(224 * ratio)` and resize back (inference counterpart of `random_crop_ratio`, e.g. `0.95`). |
-| `--depth_aug` | none | Live depth augmentation before the policy sees depth; `ejbl` matches HVLA's `augment_depth`. |
 | `--enable_crop` | off | Build `target_front_crop_rgb` on the client from the native front camera and target pixels. Needs a checkpoint with `use_target_front_crop >= 0`. |
 
 To add a transform, subclass `BaseObsTransform`, override `transform` (and optionally

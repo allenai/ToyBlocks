@@ -1,4 +1,4 @@
-"""Maniflow eval ptmap Z depth masking (after resize and optional EJBL)."""
+"""Maniflow eval ptmap Z depth masking (after resize)."""
 
 from __future__ import annotations
 
@@ -38,20 +38,13 @@ def _depth_inputs_with_patches(
         return transform._depth_inputs(obs)
 
 
-def test_ptmap_z_mask_after_ejbl_order() -> None:
+def test_ptmap_z_mask_after_resize() -> None:
     z_min, z_max = z_bounds_for_depth_key(
         "front_depth", DEFAULT_FRANKA_PER_CAMERA_PTMAP_BOUNDS
     )
     transform = ManiflowObsTransform(depth_keys=("front_depth",))
     depth = np.array([[[z_min - 0.05, z_min + 0.05, z_max + 0.5]]], dtype=np.float32)
-    with patch.object(
-        transform,
-        "_apply_ejbl_depth_nhw",
-        return_value=np.array([[[z_min - 0.02, z_min + 0.05, z_max + 0.5]]], dtype=np.float32),
-    ) as mock_ejbl:
-        transform.augment_depth = "ejbl"
-        out = _depth_inputs_with_patches(transform, depth)
-        mock_ejbl.assert_called_once()
+    out = _depth_inputs_with_patches(transform, depth)
     front = out["front_depth"][0, 0, 0]
     assert float(front[0, 0]) == 0.0
     assert float(front[0, 1]) == pytest.approx(z_min + 0.05)

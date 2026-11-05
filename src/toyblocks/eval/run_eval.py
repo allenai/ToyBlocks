@@ -94,7 +94,6 @@ def _log_step0_depth_stats(adapter: Any) -> None:
         per_camera_ptmap_bounds=(
             transform._per_camera_ptmap_bounds_for_masking() if transform.depth_keys else None
         ),
-        augment_depth=transform.augment_depth,
     )
     log_depth_stats_summary(payload)
 
@@ -721,21 +720,6 @@ def evaluate(args: Args) -> None:
             )
             args.env_cfg.episode_length_s = needed_s
 
-    if args.depth_aug is not None and args.obs_transform not in (
-        "maniflow",
-        "maniflow_blocks_table",
-    ):
-        raise ValueError(
-            f"--depth_aug only applies to the maniflow obs transforms, "
-            f"not --obs_transform {args.obs_transform!r}."
-        )
-    if args.depth_aug is not None:
-        name = str(args.depth_aug).strip().lower()
-        if name not in ("ejbl",):
-            raise ValueError(f"--depth_aug must be 'ejbl' when set, got {args.depth_aug!r}")
-        from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
-
-        require_depth_aug_supported(name)
     if args.enable_crop and args.obs_transform not in (
         "maniflow",
         "maniflow_blocks_table",

@@ -118,8 +118,6 @@ REPLAY_CLIP_STATS="${REPLAY_CLIP_STATS:-}"
 # Policy evals with a maniflow obs transform: centre-crop ratio for the RGB inputs
 # (evaluate.py --center_crop_ratio). Empty feeds the full frame.
 CENTER_CROP_RATIO="${CENTER_CROP_RATIO:-}"
-# Maniflow obs transform live depth aug (evaluate.py --depth_aug), e.g. ejbl.
-DEPTH_AUG="${DEPTH_AUG:-}"
 # Maniflow crop-trained checkpoints: client target_front_crop_rgb (evaluate.py --enable_crop).
 ENABLE_CROP="${ENABLE_CROP:-}"
 USE_CALIBRATED_CAMERAS="${USE_CALIBRATED_CAMERAS-1}"   # "" -> dataset camera K (--no-use-calibrated-cameras)
@@ -335,15 +333,6 @@ else
 fi
 
 # =============================================================================
-# 4b. OpenCV contrib for live depth augmentation (client-side --depth_aug)
-# =============================================================================
-if [ -n "${DEPTH_AUG:-}" ]; then
-  # shellcheck source=scripts/eval/install_hvla_opencv_contrib.sh
-  source "${SCRIPT_DIR}/install_hvla_opencv_contrib.sh"
-  install_hvla_opencv_contrib
-fi
-
-# =============================================================================
 # 5. Eval workers on GPUs 1..N (0..N-1 under replay: no server holds GPU 0)
 # =============================================================================
 GPU_OFFSET=0
@@ -364,7 +353,6 @@ else
     --policy_host localhost --policy_port "$POLICY_PORT"
     --obs_transform "${OBS_TRANSFORM}"
     ${CENTER_CROP_RATIO:+--center_crop_ratio "$CENTER_CROP_RATIO"}
-    ${DEPTH_AUG:+--depth_aug "$DEPTH_AUG"}
     ${ENABLE_CROP:+--enable_crop}
     --action_horizon "${ACTION_HORIZON}"
     ${HL_FLAG}

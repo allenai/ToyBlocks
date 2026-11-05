@@ -2,8 +2,7 @@
 
 Opt-in via ``--save_diagnostic_plots``. Two PNGs per episode start:
 
-* one strip per depth camera: raw sim depth -> (when ``augment_depth`` is set)
-  resize-only @224 before live aug -> the augmented depth on the wire ->
+* one strip per depth camera: raw sim depth -> the model-input depth on the wire ->
   the dataset's recorded depth for the same episode, their signed difference,
   and an overlaid histogram of both;
 * one state panel: every ``agent_pos`` dim against the ``[q01, q99]`` training
@@ -211,38 +210,18 @@ class PolicyInputDebugRecorder:
         fx, fy, cx, cy = np.asarray(wire["camera_intrinsics"])[env_idx, 0, cam_row]
         dataset_depth = _dataset_depth_meters(setup, cam, model_depth.shape)
 
-        augment_depth = getattr(self._transform, "augment_depth", None)
         z_min, z_max = z_bounds_for_depth_key(
             depth_key,
             self._transform._per_camera_ptmap_bounds_for_masking(),
         )
-        resized_plane: np.ndarray | None = None
-        ejbl_note = ""
-        if augment_depth:
-            resized_batch = self._transform.process_depth(
-                raw_batch,
-                self._transform.image_size,
-                max_depth_m=self._transform.depth_max_m,
-            )
-            resized_plane = resized_batch[env_idx] if resized_batch.ndim == 3 else resized_batch
-            both_aug = (model_depth > 0) & (resized_plane > 0)
-            mae_ejbl = (
-                float(np.abs(model_depth - resized_plane)[both_aug].mean())
-                if both_aug.any()
-                else float("nan")
-            )
-            ejbl_note = (
-                f"  ·  depth_aug={augment_depth!r}  "
-                f"MAE(aug−resize_only)={mae_ejbl:.4f} m"
-            )
-        ejbl_note += f"  ·  ptmap Z mask [{z_min:g}, {z_max:g}] m"
+        z_note = f"  ·  ptmap Z mask [{z_min:g}, {z_max:g}] m"
 
-        n_cols = 2 + (1 if resized_plane is not None else 0) + (2 if dataset_depth is not None else 0) + 1
+        n_cols = 2 + (2 if dataset_depth is not None else 0) + 1
         fig, axes = plt.subplots(1, n_cols, figsize=(3.4 * n_cols, 3.9))
         fig.suptitle(
             f"policy input · env {env_idx} · {cam} · {depth_key}   "
             f"K(224)=[fx {fx:.1f}, fy {fy:.1f}, cx {cx:.1f}, cy {cy:.1f}]"
-            f"{ejbl_note}",
+            f"{z_note}",
             fontsize=10,
         )
         ax_hist = axes[-1]
@@ -261,32 +240,16 @@ class PolicyInputDebugRecorder:
         fig.colorbar(im, ax=axes[col], fraction=0.046)
         col += 1
 
-        if resized_plane is not None:
-            _depth_panel_imshow(
-                fig,
-                axes[col],
-                resized_plane,
-                title=(
-                    f"resize only @224 (no {augment_depth})\n"
-                    f"clean grid before live depth aug"
-                ),
-            )
-            col += 1
-
         zeroed = 100.0 * float((model_depth == 0).mean())
         valid = model_depth > 0
-        aug_title = (
-            f"model input @224 + {augment_depth}\n"
-            if augment_depth
-            else f"model input depth {model_depth.shape[0]}x{model_depth.shape[1]}\n"
-        )
+        depth_title = f"model input depth {model_depth.shape[0]}x{model_depth.shape[1]}\n"
         invalid_note = f"outside ptmap Z [{z_min:g}, {z_max:g}] m or coarse invalid"
         _depth_panel_imshow(
             fig,
             axes[col],
             model_depth,
             title=(
-                f"{aug_title}"
+                f"{depth_title}"
                 f"{zeroed:.1f}% zeroed ({invalid_note})"
             ),
         )
@@ -296,20 +259,9 @@ class PolicyInputDebugRecorder:
             model_depth[valid].ravel(),
             bins=64,
             alpha=0.6,
-            label="model input" if augment_depth else "eval (model input)",
+            label="eval (model input)",
             color="tab:blue",
         )
-        if resized_plane is not None:
-            ro_valid = resized_plane > 0
-            if ro_valid.any():
-                ax_hist.hist(
-                    resized_plane[ro_valid].ravel(),
-                    bins=64,
-                    alpha=0.5,
-                    label="resize only @224",
-                    color="tab:green",
-                )
-
         if dataset_depth is not None:
             ds_valid = dataset_depth > 0
             _depth_panel_imshow(
