@@ -145,7 +145,19 @@ robot body; the scene parameters; the provenance columns (`scene_id`, `robot_id`
 Every column is described in [Dataset fields](dataset_fields.md).
 
 If you do want video from this stage, `--record-videos` is not enough on its own. Isaac also has
-to be told to render, so pass `--enable_cameras` as well.
+to be told to render, so pass `--enable_cameras` as well:
+
+```bash
+python scripts/vecgen/run.py \
+    --env-path outputs/flip \
+    --pddl src/toyblocks/tamp/blocks/problems/flip.pddl \
+    --domain src/toyblocks/tamp/blocks/domain.pddl \
+    --num-envs 16 --episodes 32 \
+    --record datasets/flip_videos --record-videos --enable_cameras --mark-complete --headless
+```
+
+This adds `observation.images.camera:<camera>` and `observation.depth.camera:<camera>` videos
+for the front and gripper cameras (640x360) to the dataset.
 
 ## Flags
 

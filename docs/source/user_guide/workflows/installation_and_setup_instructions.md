@@ -94,6 +94,16 @@ python scripts/vecgen/run.py --env-path outputs/flip --pddl ${problem} \
     --record datasets/flip/flip --mark-complete --headless
 ```
 
+That run records state and actions only. To also record camera videos (RGB and depth from the front and gripper cameras, 640x360), add `--record-videos --enable_cameras`: `--record-videos` adds the cameras to the scene, and `--enable_cameras` lets Isaac Sim render them. Each simulation step takes about 1.5 times as long:
+
+```bash
+python scripts/vecgen/run.py --env-path outputs/flip --pddl ${problem} \
+    --domain src/toyblocks/tamp/blocks/domain.pddl --num-envs 4 --episodes 4 \
+    --record datasets/flip/flip_videos --record-videos --enable_cameras --mark-complete --headless
+```
+
+The videos land in `datasets/flip/flip_videos/blocks_success/videos/` (and `blocks_failure/videos/` for failed episodes), one folder per camera stream.
+
 A full pipeline run ([Running the pipeline locally](datagen/local.md)) also leaves two things worth checking: a plot of a sample episode, `episode_0.png`, next to the merged dataset, and the full run configuration, `run_datagen_pipeline_config_<timestamp>.json`, in the run's base directory.
 
 ## Build the docs
