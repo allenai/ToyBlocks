@@ -1,6 +1,6 @@
 """Loading per-episode replay records from a LeRobot dataset.
 
-Moved verbatim out of scripts/rerender/rerender.py so that any consumer of the
+Moved verbatim out of scripts/render/render.py so that any consumer of the
 domain-randomization package can build the episode records the package already
 expects -- ``camera.py`` reads ``cam_pose``/``cam_K`` straight off these dicts. Pure
 pandas/numpy: no Isaac, no sim, importable from a plain test.
@@ -102,7 +102,7 @@ def load_episodes(dataset_path: Path, default_success: Optional[bool],
 
     ``keep`` (episode indices) converts only those episodes, after the ``max_episodes`` cap: a
     group dataset holds every member problem's episodes, and converting all ~200 to render one
-    member's ~24 took minutes per problem on Weka (rerender, 2026-11-02).
+    member's ~24 took minutes per problem on Weka (render, 2026-11-02).
 
     Unreadable parquet files are skipped and recorded in `LAST_SKIPPED_PARQUET`, which is reset on
     every call -- read it immediately after, before the next load overwrites it.
@@ -120,7 +120,7 @@ def load_episodes(dataset_path: Path, default_success: Optional[bool],
             frames.append(pd.read_parquet(f))
         except Exception as e:
             LAST_SKIPPED_PARQUET.append(f)
-            print(f"[rerender] WARNING skipping unreadable parquet {f}: {e}")
+            print(f"[render] WARNING skipping unreadable parquet {f}: {e}")
     if not frames:
         return []
     df = pd.concat(frames, ignore_index=True) if len(frames) > 1 else frames[0]

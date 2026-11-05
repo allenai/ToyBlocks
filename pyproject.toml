@@ -91,6 +91,17 @@ maniflow = [
     "deepspeed"
 ]
 
+# Agentic robotics (the agentic_robotics submodule): a vision-language model drives the robot through
+# MCP tools, one per skill (the scripted vecgen skills or ManiFlow); see
+# docs/source/user_guide/workflows/agentic_robotics.md. Needs the vecgen extra for the scripted skills.
+agentic = [
+    "agentic-robotics[toyblocks]",
+    # toyblocks.serving (reached by the scripted skills through toyblocks.eval.ll_oracle, and by
+    # the ManiFlow skills' policy client); the maniflow extra has them too.
+    "msgpack",
+    "websockets",
+]
+
 deployment = [
     "vlagents==0.2.0",
     "rcs-core==0.7.2",
@@ -138,6 +149,16 @@ override-dependencies = [
     "pyarrow<26",
     "pandas<3",
     "packaging==23.0",
+    # The agentic extra's MCP SDK needs newer web-server packages than Isaac Sim pins (isaaclab:
+    # starlette==0.45.3; isaacsim-kernel: fastapi==0.115.7, uvicorn==0.29.0, idna==3.10). Those pins
+    # only serve Isaac's livestream / web services, which headless runs do not load. The floors are
+    # the MCP SDK's (sse-starlette, uvicorn, httpx2); starlette stays below 0.51 and fastapi moves
+    # to the releases that accept it (0.115.7 breaks on starlette 1.x). uv applies overrides to
+    # every install, extra or not.
+    "starlette>=0.49.1,<0.51",
+    "fastapi>=0.123,<0.126",
+    "uvicorn>=0.31.1",
+    "idna>=3.18",
     # NOTE(wilbert): these overrides are needed for molmo2
     "fsspec==2024.6.1",
     # molmo2 pins transformers<5.0; keep molmo_flow's >=4.37.1 floor (plus the maniflow <5.18 cap) instead.
@@ -154,6 +175,7 @@ isaaclab = { index = "nvidia" }
 nvidia-curobo = { editable = true, path = "./curobo/" }
 maniflow-tb = { editable = true, path = "./maniflow-tb/" }
 ai2-molmo2 = { editable = true, path = "./molmo2/" }
+agentic-robotics = { editable = true, path = "./agentic_robotics/" }
 
 torch = [
     { index = "pytorch-cu128", extra = "torch-cu128" },

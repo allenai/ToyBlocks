@@ -6,7 +6,7 @@ These instructions use `uv` and set up everything needed for evaluation, data ge
 
 - Linux with an NVIDIA GPU and a driver that supports CUDA 12.8 (driver 570 or newer).
 - [`uv`](https://docs.astral.sh/uv/getting-started/installation/) on your `PATH` (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
-- Git access to GitHub over HTTPS. ToyBlocks and its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
+- Git access to GitHub over HTTPS. ToyBlocks and its `curobo`, `molmo2` and `agentic_robotics` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
 - `tmux` (`sudo apt install tmux`): long-running jobs (pipeline runs, merges, renders) are run in detached `tmux` sessions so they survive a dropped connection.
 
 ## Setup
@@ -19,7 +19,8 @@ cd ToyBlocks
 uv venv --python 3.11
 source .venv/bin/activate
 
-# Fetch the submodules (curobo, plus maniflow-tb and molmo2 for the policies)
+# Fetch the submodules (curobo, plus maniflow-tb and molmo2 for the policies and agentic_robotics
+# for LLM agents)
 git submodule update --init --recursive
 # Without ManiFlow, only curobo is needed:
 # git submodule update --init curobo
@@ -56,6 +57,19 @@ No local CUDA toolkit is needed: cuRobo v2 compiles its kernels at runtime with 
 **Docker:** `docker/vecgen.dockerfile` still installs `curobo` as a separate step after the main install instead of passing the `vecgen` group, because a one-step install failed inside `docker build`. `docker/eval.dockerfile` installs every extra, `vecgen` included, in one step.
 :::
 
+## Agentic robotics setup
+
+The `agentic_robotics` submodule runs LLM agents that drive the robot through the skills as MCP
+tools. It needs the `vecgen` extra for its scripted skills, plus the `agentic` extra:
+
+```bash
+git submodule update --init agentic_robotics
+uv pip install -e ".[dev,isaac,torch-cu128,vecgen,agentic]"
+```
+
+Episodes call the model through OpenRouter, so you need your own OpenRouter API key. See
+[Agentic Robotics](agentic_robotics.md) for the key, the web UI and adding tasks.
+
 ## Download the assets
 
 The assets are downloaded from a public R2 bucket (about 280 MB, no credentials needed) into a cache at `~/.toyblocks`, and symlinked into the `assets` folder at the root of the repository. The cache is shared by every checkout on the machine, so the disk usage lands in your home directory and deleting `assets/` frees nothing. Run it with the virtual environment active, since the command is installed into `.venv/bin`:
@@ -64,7 +78,7 @@ The assets are downloaded from a public R2 bucket (about 280 MB, no credentials 
 get-toyblocks-assets --asset-manifest asset_manifest.json
 ```
 
-This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/polyhaven`) that re-rendering uses for backdrops. The second pool the default render flags use, the Laval Indoor HDR Dataset (`indoor-2018`), is licensed for research use and has to be requested from Université Laval. See [HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops) in `docs/rerender/README_local.md` for how to install it.
+This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/polyhaven`) that rendering uses for backdrops. The second pool the default render flags use, the Laval Indoor HDR Dataset (`indoor-2018`), is licensed for research use and has to be requested from Université Laval. See [HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops) in `docs/source/user_guide/workflows/datagen/local.md` for how to install it.
 
 ## Verify the installation
 
@@ -126,3 +140,4 @@ The ManiFlow and Molmo2 policy code is in the `maniflow-tb/` (package `hvla`) an
 - [Automatic Data Generation](data_generation.md): generate demonstration datasets.
 - [Pre-training ManiFlow Policies](imitation_learning.md): train a policy on them.
 - [Policy Evaluation](evaluations.md): evaluate it.
+- [Agentic Robotics](agentic_robotics.md): let an LLM agent drive the robot through the skills.

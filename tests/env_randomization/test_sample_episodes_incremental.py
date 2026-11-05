@@ -1,6 +1,6 @@
 """interpreter.sample_episodes() must give a gym wrapper the same numbers a bulk call gives.
 
-setup() samples the whole episode list up front because rerender knows its dataset; a training
+setup() samples the whole episode list up front because render knows its dataset; a training
 env does not, so it samples per reset. Those two paths only agree under prefix-free seeding --
 under `stream` an episode's draw depends on how many preceded it. These tests pin that contract.
 Pure: no Isaac, no GPU.
@@ -16,7 +16,7 @@ from toyblocks.domain_randomization.resolve import resolve_skybox_textures
 
 KEYS = [0, 1, 2, 3, 4, 5, 6, 7]
 FIELDS = ("ep_offsets", "ep_mats", "ep_spheres", "ep_local")
-FLAGS_YAML = "src/toyblocks/domain_randomization/flags/rerender_flags_open_hybrid_camera_rand_only.yaml"
+FLAGS_YAML = "src/toyblocks/domain_randomization/flags/render_flags_open_hybrid_camera_rand_only.yaml"
 ENV_SPHERE_SPEC: dict = {"sets": [{"set": "polyhaven/all"}], "seed": 7}
 
 

@@ -5,7 +5,7 @@ Kept deliberately FREE of isaaclab imports: the encoder runs under a
 ``forkserver`` context (see ``ENCODER_CTX``). The old plain-``fork`` default made
 the encoder copy-on-write inherit the parent's (num_envs-scaled) Isaac/CUDA
 footprint -> ~50GB RSS and OOM at high num_envs. ``spawn`` can't be used because
-rerender.py launches Isaac at module import, so a spawned child would re-launch
+render.py launches Isaac at module import, so a spawned child would re-launch
 Isaac. ``forkserver`` (with the server started BEFORE Isaac, and this lean module
 preloaded) forks the encoder from a clean ~2-3GB (torch+lerobot+av, no isaaclab)
 server instead of the ~26GB Isaac parent -> bounded memory regardless of num_envs.
@@ -68,7 +68,7 @@ except Exception:                           # forkserver worker may load us as _
     from _video_validate import has_moov
 
 # Forkserver context: the encoder forks from a clean, pre-Isaac server (started early by
-# rerender.py with this module preloaded), NOT from the Isaac-heavy parent.
+# render.py with this module preloaded), NOT from the Isaac-heavy parent.
 ENCODER_CTX = mp.get_context("forkserver")
 SHM_KEY = "__shm__"  # == toyblocks.vecgen.recording._shm_slots.SHM_KEY (a frame's slot descriptor)
 # The forkserver preloads ``__main__`` by default, and spawn's main-module fixup re-imports the
@@ -298,7 +298,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
 
     # --extra_depth variants: an ADDITIONAL depth video written alongside the main one, into
     # videos/observation.depth.<cam>_<variant>/. Matches the layout and encode of the reference
-    # dataset (yejink aug07_color_pnp_rerendering_textrand_only_updated_N1), whose files carry
+    # dataset (yejink aug07_color_pnp_rendering_textrand_only_updated_N1), whose files carry
     # x264 settings `qp=0 keyint=1` at 224x224 -- i.e. the SAME rg8 codec config as the main
     # rg8 path, only downscaled. Kept lossless + GOP 1 on purpose: every frame is an intra
     # keyframe so a loader can random-access any episode index without keyframe seeking.
@@ -365,7 +365,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
         self._heartbeat = heartbeat
         # Videos are staged here before publishing to _data_dir. Defaults to node-local scratch;
         # see the staging_dir comment in run() for why this must not live on weka.
-        self._staging_root = staging_root or os.environ.get("RERENDER_VIDEO_STAGING") \
+        self._staging_root = staging_root or os.environ.get("RENDER_VIDEO_STAGING") \
             or tempfile.gettempdir()
         # mp.Value the parent reads after finalize: number of (episode, feature) videos that could
         # NOT be published. Non-zero means the dataset has holes and MUST NOT be marked complete.
@@ -576,7 +576,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
         made every withhold unrecoverable AND unfalsifiable: there was nothing left to prove whether
         the file was really bad or whether has_moov had produced a false negative. Quarantine keeps
         it next to the dataset, where it can be inspected and, if it is actually intact, published
-        directly with no re-render at all.
+        directly with no render at all.
         """
         if not src or not os.path.exists(src):
             return None

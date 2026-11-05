@@ -31,7 +31,7 @@ class BaseEnvCfg(DirectRLEnvCfg):
     """Whether to automatically reset the environment when the episode is done. If False, the environment will need to be reset manually."""
     ignore_terminations: bool = True
     """Whether termination condition (success/fail) should be ignored when determining if the episode is done."""
-    num_rerenders_on_reset: int = 1
+    num_renders_on_reset: int = 1
     """Extra ``sim.render()`` calls after every reset so RTX cameras reflect
     the post-reset state before ``_get_observations``. IsaacLab's upstream
     default is ``0`` (stale RGB until the next render-decimation step). Set to

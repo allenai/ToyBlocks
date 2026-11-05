@@ -14,7 +14,7 @@ from toyblocks.utils.prompt_resolver import (
 
 # Episode 0 of oct30_stack3_train_rg_readable_1000x32rs_glyphcolor_symm_N1, as a queue setup:
 # graded in source block names, recorded (rendered) goal kept for the policy.
-_RERENDER_SETUP = {
+_RENDER_SETUP = {
     "pddl_goal": "(and\n        (on_table block_blue workspace_table)\n        (on block_5 block_blue)\n"
                  "        (on block_1 block_5)\n        (clear block_1)\n    )",
     "policy_pddl_goal": "(and\n        (on_table block_green workspace_table)\n"
@@ -25,29 +25,29 @@ _RERENDER_SETUP = {
 
 @pytest.mark.parametrize("flag,key", [(False, "pddl_goal"), (True, "policy_pddl_goal")])
 def test_policy_goal_follows_replay_block_identity(flag: bool, key: str) -> None:
-    assert policy_goal(_RERENDER_SETUP, flag) == _RERENDER_SETUP[key]
-    assert parse_prompt_for_setup(_RERENDER_SETUP, replay_block_identity=flag) == (
-        pddl_goal_to_prompt(_RERENDER_SETUP[key]))
+    assert policy_goal(_RENDER_SETUP, flag) == _RENDER_SETUP[key]
+    assert parse_prompt_for_setup(_RENDER_SETUP, replay_block_identity=flag) == (
+        pddl_goal_to_prompt(_RENDER_SETUP[key]))
 
 
 def test_policy_goal_without_rendered_goal_is_the_grading_goal() -> None:
-    setup = {"pddl_goal": _RERENDER_SETUP["pddl_goal"]}
+    setup = {"pddl_goal": _RENDER_SETUP["pddl_goal"]}
     assert policy_goal(setup, True) == setup["pddl_goal"]
 
 
 @pytest.mark.parametrize("flag", [False, True])
 def test_resolver_prompts_with_its_flag(flag: bool) -> None:
     resolver = PromptResolver(1, replay_block_identity=flag)
-    resolver.update_setups([_RERENDER_SETUP])
+    resolver.update_setups([_RENDER_SETUP])
     assert resolver.prompt_for_env(0) == parse_prompt_for_setup(
-        _RERENDER_SETUP, replay_block_identity=flag)
+        _RENDER_SETUP, replay_block_identity=flag)
 
 
 @pytest.mark.parametrize("flag,label", [(False, "Stack 1 5 BLUE"), (True, "Stack F L GREEN")])
 def test_hl_stack_prompt_follows_replay_block_identity(flag: bool, label: str) -> None:
     from toyblocks.serving.molmo2_hl import stack_label
 
-    assert stack_label(policy_goal(_RERENDER_SETUP, flag)) == label
+    assert stack_label(policy_goal(_RENDER_SETUP, flag)) == label
 
 
 def test_isolate_basic_skills_goal() -> None:

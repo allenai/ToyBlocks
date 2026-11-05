@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Replace data/ and meta/ in a rerendered dataset with those from the original.
+"""Replace data/ and meta/ in a rendered dataset with those from the original.
 
 For each matching <problem>/{blocks_success,blocks_failure} folder, copies
-data/ and meta/ from dataset_original into dataset_rerendered. Videos are
+data/ and meta/ from dataset_original into dataset_rendered. Videos are
 left untouched.
 """
 
@@ -52,7 +52,7 @@ def main() -> int:
         description=(
             "Copy data/ and meta/ from dataset_original into matching "
             "<problem>/{blocks_success,blocks_failure} folders of "
-            "dataset_rerendered. Does not touch videos/."
+            "dataset_rendered. Does not touch videos/."
         )
     )
     parser.add_argument(
@@ -61,9 +61,9 @@ def main() -> int:
         help="Path to the original dataset root (contains <problem>/ folders)",
     )
     parser.add_argument(
-        "dataset_rerendered",
+        "dataset_rendered",
         type=Path,
-        help="Path to the rerendered dataset root (data/meta will be replaced)",
+        help="Path to the rendered dataset root (data/meta will be replaced)",
     )
     parser.add_argument(
         "--dry-run",
@@ -73,13 +73,13 @@ def main() -> int:
     args = parser.parse_args()
 
     original = args.dataset_original.resolve()
-    rerendered = args.dataset_rerendered.resolve()
+    rendered = args.dataset_rendered.resolve()
 
     if not original.is_dir():
         print(f"error: dataset_original is not a directory: {original}", file=sys.stderr)
         return 1
-    if not rerendered.is_dir():
-        print(f"error: dataset_rerendered is not a directory: {rerendered}", file=sys.stderr)
+    if not rendered.is_dir():
+        print(f"error: dataset_rendered is not a directory: {rendered}", file=sys.stderr)
         return 1
 
     problems = sorted(p.name for p in original.iterdir() if p.is_dir())
@@ -91,9 +91,9 @@ def main() -> int:
     skipped = 0
     for problem in problems:
         src_problem = original / problem
-        dst_problem = rerendered / problem
+        dst_problem = rendered / problem
         if not dst_problem.is_dir():
-            print(f"skip problem (not in rerendered): {problem}")
+            print(f"skip problem (not in rendered): {problem}")
             skipped += 1
             continue
 
@@ -106,7 +106,7 @@ def main() -> int:
     print(
         f"\nDone. Replaced {replaced} data/meta folders"
         f"{' (dry-run)' if args.dry_run else ''}"
-        f"; skipped {skipped} problems missing from rerendered."
+        f"; skipped {skipped} problems missing from rendered."
     )
     return 0
 

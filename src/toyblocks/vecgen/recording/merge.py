@@ -287,7 +287,7 @@ class OutputLock:
     Two merges into one output dir destroy each other: each starts by rmtree()ing it, so the
     second deletes the data files the first has already written, and the first then writes
     episode metadata pointing at files that are gone. On 2026-10-31 two stale orchestrators of
-    the oct30 RG rerender did exactly that under a live merge: 125 of 414 data files deleted, and
+    the oct30 RG render did exactly that under a live merge: 125 of 414 data files deleted, and
     the live merge still reported success.
 
     The lock is ``<output_dir>.merge.lock`` NEXT TO the output dir, so the merge's own rmtree
@@ -739,7 +739,7 @@ def transform_piece(
             hit = np.zeros(len(vals), dtype=bool)
             mapped = vals
         if not hit.all():
-            # Keep the original index rather than crash or map it somewhere wrong (rerender used
+            # Keep the original index rather than crash or map it somewhere wrong (render used
             # to copy task_index from its source while writing its own 1-row task table).
             bad = np.unique(vals[~hit])[:5].tolist()
             warn.append(

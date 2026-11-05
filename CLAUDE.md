@@ -53,6 +53,7 @@ tmux ls
   - `curobo/`: NVIDIA CuRobo motion planning (editable dependency).
   - `maniflow-tb/`: ManiFlow low-level policy (installs as the `hvla` package; submodule of allenai/maniflow-tb).
   - `molmo2/`: Molmo2 high-level policy model (installs as `ai2-molmo2`, package `olmo`; submodule of allenai/molmo2).
+  - `agentic_robotics/`: LLM agents driving the robot through MCP skill tools (installs as `agentic-robotics`, `agentic-robotics` CLI; submodule of allenai/agentic_robotics). Its scripted skills run vecgen's skills via `toyblocks.eval.ll_oracle`'s engine wiring, so changes there can affect it.
   - `data/`: Default pipeline output root (`--output-root`): `data/datasets/<folder>/<exp>`, merged sets under `data/datasets/merged/train/<exp>`.
 
 ## Critical Files & Data Flow
@@ -64,7 +65,7 @@ Orchestrated by `scripts/datagen/run_datagen_pipeline.py` on this machine (one p
 3. **Execution** (`scripts/vecgen/run.py`, `src/toyblocks/vecgen/`): FF plans per env (`symbolic/`), batched skills on a cuRobo v2 planner pool (`skills/`, `planner/`), verified effects and goals (`symbolic/predicates.py`), LeRobot recording → `execution/<slug>/`.
 4. **Merge / annotate / plot** (`scripts/datagen/merge_datasets.py`, `src/toyblocks/data_annotation/annotate_target_xy.py`, `scripts/datagen/plot_episode.py`).
 
-Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rerendering (`scripts/rerender/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--rerender-local`; datagen also has `--rerender`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/rerender/README_local.md`.
+Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rendering (`scripts/render/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--render-local`; datagen also has `--render`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/render/README_local.md`.
 
 ### Evaluation
 - `scripts/evaluate.py`: Eval worker: remote policy server, LL oracle, dataset replay, or random actions.
@@ -93,6 +94,7 @@ Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`
 - **Install with Isaac Lab**: `uv pip install -e .[dev,isaac,torch-cu128]`
 - **Install for datagen (vecgen, builds cuRobo v2 from `./curobo`, no CUDA toolkit needed)**: `uv pip install -e .[dev,isaac,torch-cu128,vecgen]`
 - **Install with ManiFlow**: `uv pip install -e .[dev,isaac,torch-cu128,maniflow]` (extras combine in one command)
+- **Install agentic robotics**: `uv pip install -e .[dev,isaac,torch-cu128,vecgen,agentic]` (needs the `agentic_robotics` submodule and the user's own OpenRouter key; see `docs/source/user_guide/workflows/agentic_robotics.md`)
 - **Linting**: `ruff check` / `ruff format` (config in `pyproject.toml`).
 
 ### Running the Datagen Pipeline Locally
@@ -160,6 +162,7 @@ python scripts/task_gen/search.py --count 5 --out-dir outputs/search/tasks --see
 - **FF**: Symbolic planner, vendored (with its binary) in `src/toyblocks/vecgen/symbolic/ff_planner/`.
 - **CuRobo**: Motion planning in `./curobo/` (editable install as `nvidia-curobo`).
 - **ManiFlow**: Molmo2 HL in `./molmo2/`, ManiFlow LL in `./maniflow-tb/` (`hvla` package).
+- **Agentic robotics**: `./agentic_robotics/` (`agentic-robotics` package): episodes, web UI (`agentic-robotics menu` / `portal`), task packages in `agentic_robotics/data/tasks/`.
 
 ## Key Entry Points
 

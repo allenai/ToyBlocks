@@ -136,7 +136,7 @@ def read_dataset_camera_calib(dataset_path: str | Path) -> dict[str, dict[str, A
     ``pos`` and ``quat_wxyz`` (scalar-first, robot base frame, taken at the
     first episode's first frame), ``pose_world_fixed`` and
     ``pose_moves_within_episode``. ``K`` is required to be constant *within*
-    each episode; it may vary across episodes (randomized-camera rerenders).
+    each episode; it may vary across episodes (randomized-camera renders).
     Per-episode ``K`` for eval ingest lives on the queue setup
     (``setup["camera_intrinsics"]``).
     """

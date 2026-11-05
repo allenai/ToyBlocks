@@ -1,6 +1,6 @@
-"""Load + schema-validate a rerender DR flags yaml, so rerender and eval parse the same file the
+"""Load + schema-validate a render DR flags yaml, so render and eval parse the same file the
 same way with the same checks. Pure (no Isaac). Validation is LENIENT by design -- every existing
-rerender_flags_*.yaml must load without errors; unknown keys and suspicious shapes are reported as
+render_flags_*.yaml must load without errors; unknown keys and suspicious shapes are reported as
 warnings, and only structural type errors (e.g. `scenarios.mix` not a list) are hard errors (raised
 only when strict=True).
 """

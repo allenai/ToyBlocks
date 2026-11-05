@@ -1,12 +1,12 @@
 """    python scripts/datagen/test_merge_cameras_default.py
 
-The pipeline's --merge-cameras default must keep the sidecars --rerender-extra produces.
+The pipeline's --merge-cameras default must keep the sidecars --render-extra produces.
 
 The default used to be an explicit six-key list (front/gripper/left x images+depth). Naming
 cameras explicitly makes merge_success drop everything else -- merge_success.py:1082 is
 `if keep_all_cameras or key in keep_video_keys` -- so a run launched with
 
-    --rerender-extra="--extra_rgb 224 --extra_depth rg8_224 --depth_gop 1000"
+    --render-extra="--extra_rgb 224 --extra_depth rg8_224 --depth_gop 1000"
 
 rendered observation.images.camera:<cam>_224 and observation.depth.camera:<cam>_rg8_224 and then
 merged a dataset without them. Those are the streams HVLA trains on. merge_success's own
@@ -14,7 +14,7 @@ docstring records the same incident ("which is how a merged dataset ended up wit
 depth streams the render had produced"), and the sep16_flip_left_right_play run was queued to
 repeat it.
 
-The old list also named left_camera, which --rerender-skip-cameras left_camera never renders, so
+The old list also named left_camera, which --render-skip-cameras left_camera never renders, so
 the default simultaneously asked for three keys that cannot exist and dropped two that do.
 """
 import argparse
@@ -136,8 +136,8 @@ def test_every_merge_invocation_asks_for_all_cameras():
     """The durable guard: a new call site that forgets --cameras fails here, not in a dataset.
 
     run_tamper_pipeline.py shelled out with no --cameras at all and inherited merge_success's
-    named-list default, which on a rerendered dataset matches nothing at all -- bare names become
-    observation.images.<cam> while rerender writes observation.images.camera:<cam>. The upstream
+    named-list default, which on a rendered dataset matches nothing at all -- bare names become
+    observation.images.<cam> while render writes observation.images.camera:<cam>. The upstream
     default is 'all' now, but a pinned older TAMP still has the old one, so each call site says it.
     """
     print("D. every merge invocation in the repo asks for all cameras")

@@ -1,0 +1,33 @@
+# Plain render: one fixed look, nothing sampled.
+#
+# Every key here is deterministic, so each episode renders identically. The skybox names a
+# single HDRI rather than a set, which is what lets hide_objects stay: the sky replaces the
+# backdrop geometry instead of leaving a void behind it.
+#
+# Render a pass with it:
+#     --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+#
+# For a randomized look, add the sampled sections (sets or ranges in skybox, plus env_sphere,
+# scene_lights, materials, scenarios, randomize*) --
+# render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml is the RI training set's.
+carb_settings:
+  /persistent/rtx/modes/rt/enabled: true
+  /persistent/rtx/modes/rt2/enabled: true
+  /persistent/rtx/rendermode: RealTimePathTracing
+  /rtx/rendermode: RealTimePathTracing
+env_spacing: 500
+texture_cache:
+  enabled: true
+  dir: /dev/shm/toyblocks_texture_cache
+  preload: auto
+  max_gb: 20
+  verbose: true
+hide_objects:
+- backdrop
+skybox:
+  names:
+  - abandoned_bakery_2k
+  texture_format: latlong
+  rotation_deg: 0
+  intensity: 800
+  visible_background: true

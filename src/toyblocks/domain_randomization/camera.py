@@ -1,5 +1,5 @@
 """Camera randomization -- per-episode position/orientation/FOV offsets + quaternion math + base
-capture/override. Moved verbatim from rerender.py (pure samplers + USD/torch appliers for one
+capture/override. Moved verbatim from render.py (pure samplers + USD/torch appliers for one
 concern). No module globals. pxr/torch imports are function-local so this imports without a launched
 Isaac app (samplers pure; _capture_*/_apply_*/_override_* require a live stage)."""
 from __future__ import annotations
@@ -237,14 +237,14 @@ def _apply_camera_local_offsets(cams: Dict[str, Any], wave, active,
         off_cfg = getattr(getattr(cam, "cfg", None), "offset", None)
         view = getattr(cam, "_view", None)
         if off_cfg is None or view is None:
-            print(f"[rerender] WARNING: cannot set local mount offset for {cam_key} "
+            print(f"[render] WARNING: cannot set local mount offset for {cam_key} "
                   f"(missing cfg.offset or _view); skipping pose DR")
             continue
         conv = getattr(off_cfg, "convention", "ros") or "ros"
         base_pos = torch.tensor(list(off_cfg.pos), device=device, dtype=torch.float32)
         base_quat_cfg = torch.tensor(list(off_cfg.rot), device=device, dtype=torch.float32)
         # camera_base="data": this static camera's base is the pose the DATASET records, not the
-        # SceneConfig mount, so editing the config cannot silently redefine what re-rendering this
+        # SceneConfig mount, so editing the config cannot silently redefine what rendering this
         # data means. Per-env, because each env carries its own recorded row.
         rebased = (data_bases or {}).get(cam_key)
         P, Q, ce = [], [], []
@@ -257,7 +257,7 @@ def _apply_camera_local_offsets(cams: Dict[str, Any], wave, active,
                 b_pos, b_quat = rebased[0][i], rebased[1][i]
             pos = b_pos + torch.tensor([x / 100.0 for x in off["position_offset_cm"]],
                                        device=device, dtype=torch.float32)
-            # `quat_delta` is the REPLAY path: rerender_from_params recovers a rotation delta
+            # `quat_delta` is the REPLAY path: render_from_params recovers a rotation delta
             # from recorded absolute params, which cannot be decomposed back into pitch/yaw/roll
             # without ambiguity, so it hands the composed quaternion over directly.
             if off.get("quat_delta") is not None:
@@ -281,7 +281,7 @@ def recorded_K(wave, i, cam_key, scene_K, device):
 
     The dataset records observation.camera_intrinsics.<cam> as a flattened 3x3. Preferring it over
     the built scene's matrix is the point: the scene's value is a SceneConfig constant, so editing
-    the config silently changes what a "re-render of this data" means, while the data itself is the
+    the config silently changes what a "render of this data" means, while the data itself is the
     calibration the frames were actually captured with.
 
     Two ways it is unusable, both real: the recorder writes ZEROS when a camera had no intrinsics
@@ -337,7 +337,7 @@ def _set_wave_intrinsics(cam, cam_key, KK, ce, warned):
     spread = max(float(torch.abs(k - k0).max()) for k in KK[1:])
     if spread > 1e-3 and cam_key not in warned:
         warned.add(cam_key)
-        print(f"[rerender] {cam_key}: tiled rendering cannot vary intrinsics per env; applying "
+        print(f"[render] {cam_key}: tiled rendering cannot vary intrinsics per env; applying "
               f"the wave's first value to all {len(ce)} env(s) (discarding up to {spread:.2f} px "
               f"of fx jitter). FOV randomization is per WAVE, not per episode -- recorded "
               f"intrinsics now match the rendered pixels.")
@@ -351,7 +351,7 @@ def applied_wave_offsets(off, wave, active, ep_off):
     its first active env, so every episode in the wave was framed with that FOV whatever it
     sampled for itself. Recording the sampled value makes render_params.json describe a camera
     that never existed, and everything that rebuilds intrinsics from it -- recover_camera_columns
-    for camera-less sources, rerender_from_params for replays -- then reproduces the wrong one.
+    for camera-less sources, render_from_params for replays -- then reproduces the wrong one.
 
     Position and rotation are left alone: those DO apply per env.
     """
@@ -400,7 +400,7 @@ def _apply_episode_camera_fov(cams: Dict[str, Any], wave, active,
                 if rk == "mismatch":
                     if cam_key not in warned:
                         warned.add(cam_key)
-                        print(f"[rerender] WARNING {cam_key}: recorded intrinsics disagree with the "
+                        print(f"[render] WARNING {cam_key}: recorded intrinsics disagree with the "
                               f"rendered image (principal point off by >20%); using the scene's. "
                               f"A source captured at a different resolution cannot supply K.")
                 elif rk is not None:
@@ -492,7 +492,7 @@ def _scene_camera_params(sim, cam_keys,
 
     The FOV comes from `base_K` -- the pristine intrinsics `_capture_camera_bases` snapshots once at
     sim build, the same tensors the renderer composes the FOV offset onto -- wherever it covers the
-    camera. The live intrinsics are pristine only for the first problem a sim renders: rerender
+    camera. The live intrinsics are pristine only for the first problem a sim renders: render
     builds this record per problem, so every later one read the previous wave's jittered FOV as
     its base and recorded base + offset off by that jitter, while the parquet's intrinsics were
     right. A camera outside `base_K` is not FOV-randomized, so its live K is still its base.
@@ -556,7 +556,7 @@ def offsets_from_absolute(initial_cams: dict, episodes: List[Dict[str, Any]],
     for e in episodes:
         idx = int(e.get(index_key, e.get("episode_index")))
         # Preferred: the run recorded the RAW offsets, so no reconstruction is needed and the
-        # replay is exact. Datasets written before rerender.py started recording these fall back
+        # replay is exact. Datasets written before render.py started recording these fall back
         # to the derivation below, which is correct for position on env-mounted cameras but CANNOT
         # recover rotation (the recorded absolute is composed onto a different-convention base
         # than the renderer uses).

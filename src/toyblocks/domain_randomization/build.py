@@ -1,5 +1,5 @@
 """Build-time scene configuration for domain randomization -- the "start a scene + apply the loaded
-parameters" seam, reusable by rerender and eval. `apply_build_flags` mutates an env_cfg BEFORE the sim
+parameters" seam, reusable by render and eval. `apply_build_flags` mutates an env_cfg BEFORE the sim
 is built (env_spacing, GI, RTX render-mode/carb, anti-aliasing, per-preset camera cfg); the moved
 STAGE helpers (apply_lighting_flags / hide_*) run AFTER the sim exists. pxr/omni/toyblocks imports
 are function-local so this module imports without a launched Isaac app. No module globals.
@@ -85,7 +85,7 @@ def apply_camera_flag_overrides(flags: dict, env_cfg=None) -> None:
     are not in the preset at all: ``BaseEnv._setup_scene`` merges ``robot_cfg.cameras`` into
     ``cfg.camera_cfgs`` AFTER this runs, so there is nothing here to override and the old code
     printed "not in sim2real preset; skipping" and dropped the request on the floor. Measured
-    2026-11-03: rerender_flags_camtest.yaml asks for gripper position z=0.062 / fov 105 and
+    2026-11-03: render_flags_camtest.yaml asks for gripper position z=0.062 / fov 105 and
     every dataset it ever produced rendered at the robot default z=0.022 / ~88 while
     render_params still recorded the request.
 
@@ -126,7 +126,7 @@ def apply_camera_flag_overrides(flags: dict, env_cfg=None) -> None:
         if "fov_deg" in ov:
             ha = float(getattr(cfg.spawn, "horizontal_aperture", 20.955))
             cfg.spawn.focal_length = ha / (2.0 * math.tan(math.radians(float(ov["fov_deg"])) / 2.0))
-        print(f"[rerender] flags: overrode camera '{name}' -> {ov}")
+        print(f"[render] flags: overrode camera '{name}' -> {ov}")
     if deferred:
         _defer_camera_overrides(deferred, env_cfg)
 
@@ -175,11 +175,11 @@ def hide_debug_visuals() -> None:
                     UsdGeom.Imageable(prim).MakeInvisible()
                     hidden.append(p)
         if hidden:
-            print(f"[rerender] hid debug visuals: {sorted(set(hidden))}")
+            print(f"[render] hid debug visuals: {sorted(set(hidden))}")
         else:
-            print("[rerender] no /Visuals debug markers found to hide")
+            print("[render] no /Visuals debug markers found to hide")
     except Exception as e:
-        print(f"[rerender] hide_debug_visuals failed: {e}")
+        print(f"[render] hide_debug_visuals failed: {e}")
 
 
 def hide_scene_objects(flags: dict) -> None:
@@ -237,20 +237,20 @@ def hide_scene_objects(flags: dict) -> None:
                     # geometry only (Mesh/Plane/etc.) -> keep the SphereLight (not a Gprim)
                     if pr.IsA(UsdGeom.Gprim) and not pr.HasAPI(UsdLux.LightAPI):
                         UsdGeom.Imageable(pr).MakeInvisible(); nf += 1
-            print(f"[rerender] hide_objects: hid floor geometry under /World/ground "
+            print(f"[render] hide_objects: hid floor geometry under /World/ground "
                   f"({nf} gprim(s); kept SphereLight)")
             n_prims += nf
         if names_hit or abs_pats:
-            print(f"[rerender] hide_objects {name_pats + abs_pats}: hid across envs -> {sorted(names_hit)}")
+            print(f"[render] hide_objects {name_pats + abs_pats}: hid across envs -> {sorted(names_hit)}")
         if not n_prims:
-            print(f"[rerender] hide_objects: nothing matched {patterns}")
+            print(f"[render] hide_objects: nothing matched {patterns}")
     except Exception as e:
-        print(f"[rerender] hide_scene_objects failed: {e}")
+        print(f"[render] hide_scene_objects failed: {e}")
 
 
 def apply_lighting_flags(flags: dict, sim) -> None:
     """Apply lighting overrides after scene creation (dome intensity + optional
-    per-env colored lights), mirroring the vectorized_recorder rerender."""
+    per-env colored lights), mirroring the vectorized_recorder render."""
     if not flags:
         return
     from pxr import UsdLux, Gf, UsdGeom
@@ -262,16 +262,16 @@ def apply_lighting_flags(flags: dict, sim) -> None:
         # A [min,max] list is a per-batch sampling range handled in replay_job
         # (_dome_intensity per wave) -> don't fix a value here.
         if isinstance(val, (list, tuple)):
-            print(f"[rerender] flags: lighting_intensity range {list(val)} "
+            print(f"[render] flags: lighting_intensity range {list(val)} "
                   "(sampled per batch at replay)")
         else:
             intensity = float(np.random.uniform(200, 5000)) if val == "random" else float(val)
             prim = stage.GetPrimAtPath("/World/Light")
             if prim and prim.IsValid():
                 UsdLux.DomeLight(prim).GetIntensityAttr().Set(intensity)
-                print(f"[rerender] flags: lighting_intensity = {intensity:.1f}")
+                print(f"[render] flags: lighting_intensity = {intensity:.1f}")
             else:
-                print("[rerender] flags: /World/Light not found; skipping lighting_intensity")
+                print("[render] flags: /World/Light not found; skipping lighting_intensity")
 
     if "randomized_colored_lighting" in flags:
         # Best-effort: prims created after the first sim.reset may need a render
@@ -290,7 +290,7 @@ def apply_lighting_flags(flags: dict, sim) -> None:
             xf = UsdGeom.Xformable(light.GetPrim())
             xf.ClearXformOpOrder()
             xf.AddTranslateOp().Set(Gf.Vec3d(*pos))
-        print(f"[rerender] flags: randomized_colored_lighting applied ({sim.num_envs} envs)")
+        print(f"[render] flags: randomized_colored_lighting applied ({sim.num_envs} envs)")
 
 
 def apply_build_flags(env_cfg, flags, *, cli_env_spacing=None, antialiasing=None,
@@ -301,10 +301,10 @@ def apply_build_flags(env_cfg, flags, *, cli_env_spacing=None, antialiasing=None
     """Apply build-time DR scene config to `env_cfg` BEFORE the sim is built (mutates env_cfg + the
     scene preset's camera cfgs). env_spacing precedence: yaml flags['env_spacing'] > cli_env_spacing >
     InteractiveScene default. GI auto-on when flags has a `skybox` block (or enable_gi). Order-
-    independent env_cfg mutations, so this reproduces rerender's build config exactly.
+    independent env_cfg mutations, so this reproduces render's build config exactly.
 
     camera_update_period: None (default) leaves each preset camera's own update_period from the
-    scene config untouched; a float overrides every one of them. Rerender passes 0.0."""
+    scene config untouched; a float overrides every one of them. Render passes 0.0."""
     flags = flags or {}
     ys = flags.get("env_spacing")
     if ys is not None:
@@ -316,8 +316,8 @@ def apply_build_flags(env_cfg, flags, *, cli_env_spacing=None, antialiasing=None
         env_cfg.scene.env_spacing = float(cli_env_spacing)
         print(f"[dr.build] env_spacing = {cli_env_spacing} (from --env_spacing)")
     # None keeps whatever the scene config declares (0.04 = the 25fps recording cadence).
-    # Rerender passes 0.0: that default is time-gated and occasionally skips a refresh under
-    # rerender's manual render loop, leaving a duplicate frame; 0 forces a fresh capture on
+    # Render passes 0.0: that default is time-gated and occasionally skips a refresh under
+    # render's manual render loop, leaving a duplicate frame; 0 forces a fresh capture on
     # every scene.update().
     if camera_update_period is not None:
         period = float(camera_update_period)

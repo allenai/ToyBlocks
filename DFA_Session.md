@@ -105,7 +105,7 @@ python scripts/generate_play_data.py --domain_path src/toyblocks/tamp/blocks \
 
 Camera videos are recorded into the LeRobot dataset exactly as in the legacy pipeline (one video
 per camera per episode, in the `<data_dir>__sNNN/` shard). `--no-video` records Parquet only and
-spawns no cameras (much faster); images can be produced afterwards with the rerender stage.
+spawns no cameras (much faster); images can be produced afterwards with the render stage.
 `--cameras front_camera` spawns and records only the named cameras.
 **Let runs exit naturally** — killing mid-finalize truncates the mp4 `moov` atom (unplayable). The
 bundled ffmpeg for repair/probe: `.venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-*`.

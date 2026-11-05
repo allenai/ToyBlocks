@@ -20,6 +20,7 @@ import argparse
 import json
 import logging
 import os
+import traceback
 import random
 import sys
 import tempfile
@@ -523,6 +524,11 @@ def main() -> int:
             else lambda rid: goal_block[problem_for(rid).name],
             episode_of_reset_state=episode_of_rid.__getitem__ if episode_of_rid else None,
             record_videos=args.record_videos,
+            # Source files copied into meta/extra/ and checksummed in provenance.json.
+            provenance={
+                "domain_pddl": args.domain,
+                "ll_env_directory": args.env_path,
+            },
         )
         log.info("recording to %s", args.record)
 
@@ -789,7 +795,15 @@ def _run_play(
 
 
 if __name__ == "__main__":
-    rc = main()
+    # Isaac's exit hook swallows the interpreter's own non-zero status, so an uncaught
+    # exception would end the process with 0 and the job would be reported as a success.
+    try:
+        rc = main()
+    except BaseException:
+        # Exit straight from here: simulation_app.close() terminates the process itself with
+        # status 0, so going on to the orderly shutdown below would report this as a success.
+        traceback.print_exc()
+        os._exit(1)
     # simulation_app.close() can hang in headless runs; give it a moment, then exit hard.
     import threading
 

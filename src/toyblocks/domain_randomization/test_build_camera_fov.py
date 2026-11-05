@@ -8,7 +8,7 @@ file carrying a TOP-LEVEL `cameras: {<name>: {fov_deg: ...}}` raised
     NameError: name 'math' is not defined
 
 the first time that branch was reached. Two checked-in yamls sit on it --
-TAMP/scripts/rerender/rerender_flags.example.yaml and rerender_flags_camtest.yaml -- while the
+TAMP/scripts/render/render_flags.example.yaml and render_flags_camtest.yaml -- while the
 production yaml survives only because its `cameras:` block is nested under `randomize:` and is
 consumed by a different path. So the crash was latent, not theoretical: it waited for whoever
 first pinned an FOV.

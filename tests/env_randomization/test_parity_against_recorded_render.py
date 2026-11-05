@@ -1,13 +1,13 @@
-"""The DR package must reproduce the parameters a REAL rerender run recorded.
+"""The DR package must reproduce the parameters a REAL render run recorded.
 
-This is the parity metric that does not need a second renderer: rerender writes every sampled
+This is the parity metric that does not need a second renderer: render writes every sampled
 value into meta/render_params.json, so driving the package with the same (flags, salt, episode
 keys, seeding) must reproduce them exactly. A gym wrapper that supplies those four inputs gets
 the same scene by construction -- which is the whole claim the dagger integration rests on.
 
 Pure: reads a recorded artifact, calls pure samplers. No Isaac, no GPU.
 
-THE SALT IS THE TRAP. rerender derives it as _stable_seed_salt(Path(job["out_dir"]).name) --
+THE SALT IS THE TRAP. render derives it as _stable_seed_salt(Path(job["out_dir"]).name) --
 the basename of the OUTPUT directory, which is whatever the dataset discovery named the job,
 NOT the problem or env directory. A caller with no output dir (a gym wrapper) must be handed
 the same string explicitly or every sampler keys differently and nothing matches.
@@ -120,7 +120,7 @@ def test_local_lights_reproduce_the_recorded_run(recording):
                                           indexed=R["dr_seeding"])
     present = [e for e in eps if "local_lights" in e]
     if not present:
-        pytest.skip("not recorded in this run -- rerender omits it when the wave's scenario "
+        pytest.skip("not recorded in this run -- render omits it when the wave's scenario "
                     "disables the sun (rec['local_lights'] is only set when non-empty)")
     for e in present:
         assert got[e["episode_index"]] == e["local_lights"], e["episode_index"]

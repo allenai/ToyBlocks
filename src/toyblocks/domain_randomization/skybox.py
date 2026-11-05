@@ -1,5 +1,5 @@
 """Skybox DOME + fill-light STAGE appliers (the pure resolver + SkyBuckets picker live in
-resolve.py / buckets.py). Moved verbatim from rerender.py. No module globals. pxr/omni/carb imports
+resolve.py / buckets.py). Moved verbatim from render.py. No module globals. pxr/omni/carb imports
 are function-local so this imports without a launched Isaac app; the functions require a live stage."""
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ def _apply_skybox(texture_file: Optional[str], texture_format: str = "latlong",
         import omni.usd
         prim = omni.usd.get_context().get_stage().GetPrimAtPath("/World/Light")
         if not (prim and prim.IsValid()):
-            print("[rerender] skybox: /World/Light not found")
+            print("[render] skybox: /World/Light not found")
             return False
         dome = UsdLux.DomeLight(prim)
         if texture_file is not None:
@@ -83,5 +83,5 @@ def _apply_skybox(texture_file: Optional[str], texture_format: str = "latlong",
         a.Set(bool(visible_background))
         return True
     except Exception as e:
-        print(f"[rerender] skybox apply failed: {e}")
+        print(f"[render] skybox apply failed: {e}")
         return False

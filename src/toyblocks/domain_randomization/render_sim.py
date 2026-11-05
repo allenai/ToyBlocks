@@ -1,6 +1,6 @@
-"""The simulator view rerender drives: a ToyBlocks autogen env, without TAMP.
+"""The simulator view render drives: a ToyBlocks autogen env, without TAMP.
 
-Rerender used TAMP's ``tmp3.Backends.IsaacLabVectorized.simulator.IsaacLabSimulatorVectorized``
+Render used TAMP's ``tmp3.Backends.IsaacLabVectorized.simulator.IsaacLabSimulatorVectorized``
 (pinned ea570fd2) as a wrapper around the gym env, but only ever touched a small part of it.
 :class:`RenderSim` is that part, with the same behaviour:
 
@@ -20,7 +20,7 @@ Rerender used TAMP's ``tmp3.Backends.IsaacLabVectorized.simulator.IsaacLabSimula
 
 TAMP's wrapper also built its cuRobo robot model on construction. That set the arm's PD gains to
 the ``medium`` profile (``TMP3_MOTION_PROFILE`` overrides it) and teleported the arm to a start
-pose. Rerender writes the arm's joint state every frame, so the pose is irrelevant; the gains
+pose. Render writes the arm's joint state every frame, so the pose is irrelevant; the gains
 matter only with ``--physics_step``, so :class:`RenderSim` applies the same profile.
 """
 
@@ -87,7 +87,7 @@ def fix_object_name_mappings(scene: Any, rigid_objects: Mapping[str, Any]) -> di
 
 
 class RenderSim:
-    """Rerender's view of a ToyBlocks env (see the module docstring)."""
+    """Render's view of a ToyBlocks env (see the module docstring)."""
 
     def __init__(self, env: Any, num_envs: int = 1, skip_initial_step: bool = False) -> None:
         from isaaclab.sensors.camera.camera import Camera

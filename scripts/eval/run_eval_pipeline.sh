@@ -123,9 +123,9 @@ DEPTH_AUG="${DEPTH_AUG:-}"
 # Maniflow crop-trained checkpoints: client target_front_crop_rgb (evaluate.py --enable_crop).
 ENABLE_CROP="${ENABLE_CROP:-}"
 USE_CALIBRATED_CAMERAS="${USE_CALIBRATED_CAMERAS-1}"   # "" -> dataset camera K (--no-use-calibrated-cameras)
-# Replay a rerendered dataset's recorded camera pose and look (evaluate.py --use_render_params).
+# Replay a rendered dataset's recorded camera pose and look (evaluate.py --use_render_params).
 USE_RENDER_PARAMS="${USE_RENDER_PARAMS:-}"
-# Paint a glyph/colour rerender's recorded block identities and prompt with its goal (evaluate.py --replay_block_identity).
+# Paint a glyph/colour render's recorded block identities and prompt with its goal (evaluate.py --replay_block_identity).
 REPLAY_BLOCK_IDENTITY="${REPLAY_BLOCK_IDENTITY-1}"   # "" -> authored look, source-name prompts (--no-replay_block_identity)
 # Start episodes in waves sharing the dataset's recorded lighting (evaluate.py --wave_resets).
 WAVE_RESETS="${WAVE_RESETS:-}"
@@ -411,7 +411,7 @@ for EVAL_GPU in $(seq 1 "$NUM_EVAL_GPUS"); do
     ${EVAL_TABLE_Z_OFFSET:+--env-cfg.eval-table-z-offset "${EVAL_TABLE_Z_OFFSET}"} \
     --env-cfg.episode-length-s "${EPISODE_LENGTH_S}" \
     --expert_timeout_scale "${EXPERT_TIMEOUT_SCALE}" \
-    --env-cfg.num-rerenders-on-reset 4 \
+    --env-cfg.num-renders-on-reset 4 \
     ${LEGACY_EE_POS:+--env-cfg.legacy-ee-pos} \
     --control_mode arm_joint_gripper_binary \
     --obs_mode rgb+state \

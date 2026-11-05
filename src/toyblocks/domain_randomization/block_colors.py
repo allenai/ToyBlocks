@@ -368,6 +368,6 @@ def apply_wave_block_colors(assignment: Dict[int, Dict[str, str]], palette,
     if missing and verbose:
         # Not fatal: the record and the text rewrite still describe the draw. But the pixels do
         # not, so say it loudly -- this is precisely the shape that renders cleanly and is wrong.
-        print(f"[rerender] randomize_block_colors: {missing} cuboid shader(s) NOT FOUND; their "
+        print(f"[render] randomize_block_colors: {missing} cuboid shader(s) NOT FOUND; their "
               f"pixels keep the authored colour while the text was rewritten", flush=True)
     return applied

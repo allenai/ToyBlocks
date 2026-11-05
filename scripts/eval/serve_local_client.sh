@@ -166,7 +166,7 @@ run_eval() {
     ${ROBOT_ID:+--env-cfg.robot-id "$ROBOT_ID"} \
     ${SCENE_PRESET:+--env-cfg.scene-preset-id "$SCENE_PRESET"} \
     --env-cfg.episode-length-s "$EPISODE_LENGTH_S" \
-    --env-cfg.num-rerenders-on-reset 4 \
+    --env-cfg.num-renders-on-reset 4 \
     --control_mode arm_joint_gripper_binary \
     --obs_mode rgb+state \
     --obs_transform "$OBS_TRANSFORM" \

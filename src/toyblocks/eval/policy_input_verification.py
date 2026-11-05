@@ -10,7 +10,7 @@ gap that cannot be closed on CPU, and this module is the leg that closes it.
 It is called from ``scripts/eval/verify_dataset_loading.py``'s ``verify_episode``
 rather than from a script of its own, because that function already has, at once:
 a live env reset into a recorded episode's setup through the **real**
-``apply_setup`` path with cameras re-rendered, the dataset's ground-truth spec,
+``apply_setup`` path with cameras rendered, the dataset's ground-truth spec,
 the ``target_env`` matching the episode's ``cube_scale``, recorded camera
 intrinsics already ingested, and a ``SceneMismatchReport`` whose ``FieldDiff``
 list drives the console output, the margin ranking, the report JSON and the exit

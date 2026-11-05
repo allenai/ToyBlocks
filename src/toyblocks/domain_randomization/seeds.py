@@ -1,5 +1,5 @@
 """Deterministic per-problem / per-string seed salts (md5-based) shared across DR concerns.
-Moved verbatim from rerender.py. Pure, no globals."""
+Moved verbatim from render.py. Pure, no globals."""
 from __future__ import annotations
 
 import hashlib

@@ -233,7 +233,7 @@ The play pipeline takes the same strategy: `scripts/datagen/run_playdata_pipelin
 | `--num-envs` | parallel independent searches (envs are matched to reset states by scene profile) |
 | `--max-plans-total` | stop after this many executed plans (the run's budget) |
 | `--one-chain-per-reset-state` | after ACCEPT / REJECT move to the next unplayed reset state (else a random one) |
-| `--record-videos --enable_cameras` | record the front / gripper cameras; without them Parquet only (images can come from the rerender stage) |
+| `--record-videos --enable_cameras` | record the front / gripper cameras; without them Parquet only (images can come from the render stage) |
 
 ---
 

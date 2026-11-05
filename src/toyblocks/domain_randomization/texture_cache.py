@@ -21,7 +21,7 @@ much smaller than the folders they live in):
   union addressable by the shipped scene yamls: 294 files, 1.76 GiB
 Raw bytes are what tmpfs holds, and raw is 3.7-4.7x smaller than decoded, which is the second
 reason to cache files rather than pixels. Real working sets are ~0.8 GiB (dagger) and <=1.0 GiB per
-rerender process -- far below the folder totals, which is why the cache is specified as a PLAN
+render process -- far below the folder totals, which is why the cache is specified as a PLAN
 rather than a byte budget (see PLAN-DRIVEN WARM-UP below).
 
 /dev/shm GOTCHA: tmpfs defaults to half of RAM on a bare host, but Docker defaults it to **64 MB**
@@ -30,7 +30,7 @@ failed copy falls back to the original path, so the render is never broken by a 
 
 CROSS-PROCESS SHARING: entries are named ``<stem>-<size>-<mtime_ns><ext>`` and published by atomic
 rename, so N worker processes on one node share one copy and never observe a partial file. That
-makes the cache cheaper the more workers you pack: 8 rerender workers on a node pay for one copy,
+makes the cache cheaper the more workers you pack: 8 render workers on a node pay for one copy,
 not eight.
 
 NOT IMPLEMENTED HERE (deliberately -- design only, see README): lookahead preloading with an
@@ -272,7 +272,7 @@ def reset() -> None:
 # =============================================================================
 # PLAN-DRIVEN WARM-UP
 # =============================================================================
-# A size ceiling is the wrong knob for a rerender worker: we already KNOW which HDRIs it will
+# A size ceiling is the wrong knob for a render worker: we already KNOW which HDRIs it will
 # touch. But WHICH ones is a property of the worker's lease, not of the yaml -- an orchestrator
 # hands each worker a different slice, and the yaml is shared by all of them. So the slice is
 # never written in the yaml; the plan is derived automatically from the episode keys this process
@@ -285,7 +285,7 @@ def reset() -> None:
 #     # preload: {auto: true, sets: [...]}   # or both (union)
 #     max_gb: 0                  # optional ceiling; see below for when it is the right knob
 #
-# `auto` is exact for the rerender path, where setup() is handed the job's whole episode list up
+# `auto` is exact for the render path, where setup() is handed the job's whole episode list up
 # front, so the plan is precisely what this worker will draw and nothing else.
 #
 # It works because _sample_episode_env_spheres is a pure function of (spec, keys, seed): it builds

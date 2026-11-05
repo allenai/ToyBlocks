@@ -1,4 +1,4 @@
-"""Glyph/colour rerenders: queue setups grade on source block names, prompt on the recorded goal."""
+"""Glyph/colour renders: queue setups grade on source block names, prompt on the recorded goal."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def _write_dataset(root: Path, extra: dict[str, str]) -> None:
     (root / "meta" / "info.json").write_text(json.dumps({"fps": 25, "chunks_size": 1000}))
 
 
-def test_rerender_setup_splits_grading_and_policy_goal(tmp_path: Path) -> None:
+def test_render_setup_splits_grading_and_policy_goal(tmp_path: Path) -> None:
     _write_dataset(tmp_path, {"block_variable_map": BVM, "glyph_map": GLYPH_MAP})
     (setup,) = load_setups(tmp_path)
     assert setup["pddl_goal"] == SOURCE

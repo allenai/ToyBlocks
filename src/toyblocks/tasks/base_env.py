@@ -943,8 +943,8 @@ class BaseEnv(DirectRLEnv):
         self.sim.forward()
 
         # if sensors are added to the scene, make sure we render to reflect changes in reset
-        if self.sim.has_rtx_sensors() and self.cfg.num_rerenders_on_reset > 0:
-            for _ in range(self.cfg.num_rerenders_on_reset):
+        if self.sim.has_rtx_sensors() and self.cfg.num_renders_on_reset > 0:
+            for _ in range(self.cfg.num_renders_on_reset):
                 self.sim.render()
 
         if self.cfg.wait_for_textures and self.sim.has_rtx_sensors():
@@ -1102,15 +1102,15 @@ class BaseEnv(DirectRLEnv):
                 self.extras["final_info"]["episode"] = episode_info
             self._before_auto_reset(reset_env_ids)
             self._reset_idx(reset_env_ids)
-            # Commit buffered writes + rerender RTX sensors *before* sampling
+            # Commit buffered writes + render RTX sensors *before* sampling
             # _get_observations. The previous order rendered after, so the
             # policy / recorded video saw stale RGB from the previous episode.
             # sim.render() only updates RTX annotators; camera.data.output is
             # filled by _update_sensor_buffers (see set_state_dict).
             self.scene.write_data_to_sim()
             self.sim.forward()
-            if self.sim.has_rtx_sensors() and self.cfg.num_rerenders_on_reset > 0:
-                for _ in range(self.cfg.num_rerenders_on_reset):
+            if self.sim.has_rtx_sensors() and self.cfg.num_renders_on_reset > 0:
+                for _ in range(self.cfg.num_renders_on_reset):
                     self.sim.render()  # pyright: ignore[reportCallIssue]
             self._update_sensor_buffers(reset_env_ids)
             self._compute_goals_and_intermediate_values()
@@ -1209,8 +1209,8 @@ class BaseEnv(DirectRLEnv):
         self.scene.write_data_to_sim()
         self.sim.forward()
         # if sensors are added to the scene, make sure we render to reflect changes in reset
-        if self.sim.has_rtx_sensors() and self.cfg.num_rerenders_on_reset > 0:
-            for _ in range(self.cfg.num_rerenders_on_reset):
+        if self.sim.has_rtx_sensors() and self.cfg.num_renders_on_reset > 0:
+            for _ in range(self.cfg.num_renders_on_reset):
                 self.sim.render()
 
         if self.cfg.wait_for_textures and self.sim.has_rtx_sensors():

@@ -15,7 +15,7 @@ dataset's recorded ``scene_id``; see ``_apply_table_height``). An optional
 ``BaseEnvCfg.eval_table_z_offset`` (world Z, metres) is applied after that and
 shifts block local Z by the same amount so blocks stay on the table,
 ``camera_intrinsics`` (per-camera first-frame K; applied per env so
-randomized-camera rerenders keep the matching lens),
+randomized-camera renders keep the matching lens),
 and ``pddl_problem_file`` (path to a full PDDL problem; read by
 :class:`toyblocks.eval.oracle.OracleHLController` when ``--use_oracle`` is set,
 overriding the run-wide ``--pddl_problem_file``).  Unknown keys are ignored by
@@ -267,7 +267,7 @@ def apply_setup(
             apply_camera_intrinsics_for_env(base_env, env_idx, camera_intrinsics)
 
     # Recorded camera pose + appearance (--use_render_params). USD writes only:
-    # the reset path renders afterwards (num_rerenders_on_reset). In wave mode the
+    # the reset path renders afterwards (num_renders_on_reset). In wave mode the
     # record waits for the wave release, and with several envs the scene-global
     # lighting is left alone so a reset cannot relight envs mid-episode.
     render_replay = getattr(base_env, "render_replay", None)
@@ -282,7 +282,7 @@ def apply_setup(
 
 # Attribute on ``base_env``: env index -> {"glyphs": blocks whose glyph was changed,
 # "colors": {cuboid: authored inputs:diffuseColor}} for every block a glyph/colour
-# rerender's identity was painted on, so a later episode can restore the rest.
+# render's identity was painted on, so a later episode can restore the rest.
 _BLOCK_IDENTITY_ATTR = "_block_identity_painted"
 # Attribute on ``base_env``: the generated env's ``block_specs`` (read once).
 _BLOCK_SPECS_ATTR = "_block_identity_block_specs"

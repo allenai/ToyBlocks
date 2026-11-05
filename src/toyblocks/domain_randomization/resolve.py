@@ -1,5 +1,5 @@
 """PURE HDRI / skybox path resolution -- no Isaac, no module-level globals. Moved verbatim from
-rerender.py (the ``_expand_path`` / ``_resolve_*`` / ``_discover_datasets`` family) so rerender and
+render.py (the ``_expand_path`` / ``_resolve_*`` / ``_discover_datasets`` family) so render and
 eval share exactly one resolver.
 
 MULTI-ROOT: every resolver accepts either a single root (str) OR an ORDERED list of roots. HDRIs are
@@ -17,7 +17,7 @@ import json
 import os
 from typing import Dict, List
 
-# per-dataset manifest filename rerender scans for in each subfolder
+# per-dataset manifest filename render scans for in each subfolder
 SKYBOX_MANIFEST = "dataset.json"
 
 
@@ -234,7 +234,7 @@ def resolve_skybox_textures(sky: dict, default_hdri_dirs) -> List[str]:
 def resolve_basename(basename: str, dirs) -> str:
     """Resolve an HDRI *basename* (e.g. 'mosaic_tunnel_2k.hdr', as recorded in render_params) back to
     its full path via the unified multi-root index (first root wins). Used by the render_params
-    re-render path (values, not yaml). Returns the basename unchanged if not found (caller decides)."""
+    render path (values, not yaml). Returns the basename unchanged if not found (caller decides)."""
     if not basename:
         return basename
     if os.path.isabs(basename) and os.path.exists(basename):

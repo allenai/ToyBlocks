@@ -26,7 +26,7 @@ from torch.utils.tensorboard import SummaryWriter
 import wandb
 from tensordict import from_module
 from tensordict.nn import CudaGraphModule
-from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args
+from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args, parse_cli
 import isaaclab_tasks  # noqa: F401
 import toyblocks.tasks  # noqa: F401
 import isaaclab.sim as sim_utils  # noqa: F401
@@ -276,7 +276,7 @@ update = tensordict.nn.TensorDictModule(
     out_keys=["approx_kl", "v_loss", "pg_loss", "entropy_loss", "old_approx_kl", "clipfrac", "gn"],
 )
 if __name__ == "__main__":
-    args = tyro.cli(Args)
+    args = parse_cli(Args)
 
     batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = batch_size // args.num_minibatches

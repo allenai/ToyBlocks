@@ -1,6 +1,6 @@
 """DRSession must be pure delegation: same functions, same order, no logic of its own.
 
-The one method that re-implements anything is kit_args -- rerender builds that string inline
+The one method that re-implements anything is kit_args -- render builds that string inline
 before launch, so the facade cannot delegate to it. This pins the two to the same output over
 every checked-in flag yaml. Pure: no Isaac, no GPU.
 """
@@ -11,11 +11,11 @@ import yaml
 
 from toyblocks.domain_randomization.session import DRSession
 
-YAMLS = sorted(glob.glob("src/toyblocks/domain_randomization/flags/rerender_flags_*.yaml"))
+YAMLS = sorted(glob.glob("src/toyblocks/domain_randomization/flags/render_flags_*.yaml"))
 
 
-def _rerender_inline_kit_args(flags):
-    """Verbatim copy of rerender.py's pre-launch block, kept here as the oracle."""
+def _render_inline_kit_args(flags):
+    """Verbatim copy of render.py's pre-launch block, kept here as the oracle."""
     cs = flags.get("carb_settings")
     if isinstance(cs, dict) and cs:
         def kv(k, v):
@@ -25,7 +25,7 @@ def _rerender_inline_kit_args(flags):
     return ""
 
 
-def test_kit_args_matches_rerender_on_every_checked_in_yaml():
+def test_kit_args_matches_render_on_every_checked_in_yaml():
     assert YAMLS, "no flag yamls found - run from the repo root"
     checked = 0
     for p in YAMLS:
@@ -33,7 +33,7 @@ def test_kit_args_matches_rerender_on_every_checked_in_yaml():
             flags = yaml.safe_load(open(p)) or {}
         except Exception:                                     # noqa: BLE001
             continue
-        assert DRSession.kit_args(flags) == _rerender_inline_kit_args(flags), p
+        assert DRSession.kit_args(flags) == _render_inline_kit_args(flags), p
         checked += 1
     assert checked == len(YAMLS), f"only {checked} of {len(YAMLS)} yamls parsed"
 

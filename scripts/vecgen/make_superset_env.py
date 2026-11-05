@@ -20,6 +20,7 @@ import argparse
 import importlib
 import json
 import os
+import traceback
 import pickle
 import shutil
 import sys
@@ -273,7 +274,15 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    rc = main()
+    # Isaac's exit hook swallows the interpreter's own non-zero status, so an uncaught
+    # exception would end the process with 0 and the job would be reported as a success.
+    try:
+        rc = main()
+    except BaseException:
+        # Exit straight from here: simulation_app.close() terminates the process itself with
+        # status 0, so going on to the orderly shutdown below would report this as a success.
+        traceback.print_exc()
+        os._exit(1)
     import threading
 
     threading.Timer(15.0, lambda: os._exit(rc)).start()

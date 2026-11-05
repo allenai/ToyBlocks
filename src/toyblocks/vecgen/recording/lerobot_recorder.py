@@ -73,7 +73,7 @@ def resolve_spill_dir(staging_root: Optional[str] = None) -> Path:
     """Where over-budget frames are spilled: ``TOYBLOCKS_RECORDER_SPILL_DIR``, else the video
     staging root, else the system temp dir. Must be node-local disk (not tmpfs, not weka)."""
     raw = os.environ.get("TOYBLOCKS_RECORDER_SPILL_DIR", "").strip()
-    return Path(raw or staging_root or os.environ.get("RERENDER_VIDEO_STAGING") or tempfile.gettempdir())
+    return Path(raw or staging_root or os.environ.get("RENDER_VIDEO_STAGING") or tempfile.gettempdir())
 
 
 def _spill_min_free_bytes() -> int:
@@ -163,8 +163,8 @@ def _shard_dir_free(candidate: Path) -> bool:
     """A shard dir is free when it is missing, or exists but holds nothing yet.
 
     Callers routinely ``mkdir`` the problem dir before constructing the recorder
-    (execute_plans / the datagen pipeline / rerender.py). Counting that empty dir
-    as taken pushed shard 0 to ``<dir>__s001``; under rerender.py, which does no
+    (execute_plans / the datagen pipeline / render.py). Counting that empty dir
+    as taken pushed shard 0 to ``<dir>__s001``; under render.py, which does no
     resume scan, every attempt then landed in a fresh sibling that its output
     verifier and completion oracle never looked at, so the item failed forever.
     A dir with any content is still a shard that must not be overwritten.
@@ -419,7 +419,7 @@ class IsaacDataRecorderLeRobot:
             shard_dir, self._shard_index = next_free_shard(self._shard_base_dir)
         else:
             # Callers that are not the datagen orchestrator write ONE dataset per problem dir and
-            # have no resume-from-preemption story. rerender is the case in point: its output
+            # have no resume-from-preemption story. render is the case in point: its output
             # verifier, --resume, the orchestrator's completion oracle, merge and annotate all read
             # the problem dir itself, so a sibling __sNNN renders fully and then fails verification
             # forever. Such a caller says so here instead of having to keep the dir empty to coax
@@ -747,9 +747,9 @@ class IsaacDataRecorderLeRobot:
         credited again (the historical silent, GPU-holding hang).
 
         An encoder that is alive but cannot drain the budget is reported, not waited on silently:
-        a warning every minute, and after ``_queue_full_abort_s`` (``RERENDER_QUEUE_FULL_ABORT_S``,
+        a warning every minute, and after ``_queue_full_abort_s`` (``RENDER_QUEUE_FULL_ABORT_S``,
         default 900 s; 0 disables) an :class:`EncoderProcessError`, so a stalled encoder fails the
-        item instead of holding the GPU until the render watchdog (the 2026-09-15 rerender stall).
+        item instead of holding the GPU until the render watchdog (the 2026-09-15 render stall).
         """
         import time as _time
         proc = writer.process
@@ -882,7 +882,7 @@ class IsaacDataRecorderLeRobot:
         # Fail an item after this long with the budget full and a LIVE encoder. Legitimate
         # backpressure is seconds; minutes means the encoder cannot keep up at this configuration
         # and will not recover. 0 disables (wait forever).
-        self._queue_full_abort_s = float(os.environ.get("RERENDER_QUEUE_FULL_ABORT_S", 900))
+        self._queue_full_abort_s = float(os.environ.get("RENDER_QUEUE_FULL_ABORT_S", 900))
         # Each writer gets its share of the cores for its encode pool (TMP3_ENCODER_THREADS still
         # sizes a single writer).
         encode_threads = (
@@ -2874,7 +2874,8 @@ class IsaacDataRecorderLeRobot:
             meta = root / "meta"
             meta.mkdir(parents=True, exist_ok=True)
             extra = meta / "extra"
-            extra.mkdir(parents=True, exist_ok=True)
+            if domain_p or problem_p or ll_env:
+                extra.mkdir(parents=True, exist_ok=True)
 
             with open(meta / "recording_config.json", "w") as f:
                 json.dump(recording_cfg, f, indent=2)
@@ -2904,6 +2905,13 @@ class IsaacDataRecorderLeRobot:
                 for name in ("block_config.json", "init.py"):
                     p = ll_path / name
                     _copy_logged(p, name)
+                # Env packages also carry the generated problems and the tables describing
+                # what was spawned. A multi-problem package holds several, hence the glob.
+                for name in ("problems.json", "profiles.json",
+                             "non_sim_state_randomizations.json"):
+                    _copy_logged(ll_path / name, name)
+                for p in sorted((ll_path / "problems").glob("*.pddl")):
+                    _copy_logged(p, p.name)
                 if instance_ids:
                     for iid in instance_ids:
                         p = ll_path / f"{int(iid)}.json"
@@ -3398,7 +3406,7 @@ class IsaacDataRecorderLeRobot:
                 f"video encoder subprocess {writer.index} already dead before finalize "
                 f"(exitcode={writer.process.exitcode}); skipping finalize send. "
                 f"This dataset is INCOMPLETE (completed flag stays false) and will be "
-                f"re-rendered on a --resume relaunch."
+                f"rendered on a --resume relaunch."
             )
             return
         logger.info(
@@ -3438,7 +3446,7 @@ class IsaacDataRecorderLeRobot:
                 logger.error(
                     f"video encoder {writer.index} HUNG: no progress for {STALL_GRACE_S}s "
                     f"(heartbeat={hb}); terminating. Tail videos may be incomplete — the post-write / "
-                    f"upload validator will flag them; --resume re-renders this problem."
+                    f"upload validator will flag them; --resume renders this problem."
                 )
                 writer.force_terminated = True
                 proc.terminate()
@@ -3502,7 +3510,7 @@ class IsaacDataRecorderLeRobot:
             self._await_writer(writer)
         # True if any encoder did NOT finish cleanly (died, or had to be force-terminated after a
         # hang). The caller must then withhold render_params.completed=true so the incomplete problem
-        # is re-rendered on a --resume relaunch instead of being uploaded with truncated tail videos.
+        # is rendered on a --resume relaunch instead of being uploaded with truncated tail videos.
         self._writer_force_terminated = any(w.force_terminated for w in self._writers)
 
         for writer in self._writers:

@@ -4,6 +4,7 @@ simulation_app = launch_app()
 from dataclasses import dataclass
 from typing import Annotated
 from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args
+from toyblocks.cli.base_args import parse_cli
 import gymnasium as gym
 import toyblocks.tasks  # noqa: F401
 @add_env_cfg_args
@@ -58,5 +59,5 @@ def main(args: Args):
 
 
 if __name__ == "__main__":
-    main(tyro.cli(Args))
+    main(parse_cli(Args))
     simulation_app.close()

@@ -1,5 +1,5 @@
 """``SkyBuckets`` -- PURE, self-contained multi-bucket HDRI queue picker (no Isaac, no globals).
-Moved verbatim from rerender.py. All state (per-bucket queues + cursors) lives on the instance; the
+Moved verbatim from render.py. All state (per-bucket queues + cursors) lives on the instance; the
 caller owns the rng and passes it to ``next()`` / construction, so two consumers can each hold their
 own independent picker. The only former global it relied on (``DEFAULT_HDRI_DIR``, via
 ``resolve_skybox_textures``) is now the explicit ``default_hdri_dir`` constructor argument.

@@ -1,5 +1,5 @@
 """Default asset locations for domain randomization, resolved from toyblocks constants with the
-same env-var overrides + repo-relative fallback rerender.py used. This replaces rerender.py's
+same env-var overrides + repo-relative fallback render.py used. This replaces render.py's
 module-level ``DEFAULT_HDRI_DIR`` / ``DEFAULT_TABLE_MATERIALS`` globals with an explicit, passable
 config object so nothing relies on import-time module state.
 """
@@ -16,26 +16,26 @@ _REPO_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."
 
 def default_hdri_dir() -> str:
     """HDRI/skybox pool root. Single source of truth = toyblocks.ENVIRONMENT_ASSET_DIR
-    (asset-manager managed); overridable via the RERENDER_HDRI_DIR env var. Identical resolution to
-    the former rerender.DEFAULT_HDRI_DIR so paths never change under the refactor."""
+    (asset-manager managed); overridable via the RENDER_HDRI_DIR env var. Identical resolution to
+    the former render.DEFAULT_HDRI_DIR so paths never change under the refactor."""
     try:
         from toyblocks import ENVIRONMENT_ASSET_DIR  # noqa: WPS433 (local import: optional dep)
         base = str(ENVIRONMENT_ASSET_DIR)
     except Exception:
         base = os.path.join(_REPO_ROOT, "assets", "environments")
-    return os.environ.get("RERENDER_HDRI_DIR") or base
+    return os.environ.get("RENDER_HDRI_DIR") or base
 
 
 def default_table_materials() -> str:
     """Default table-material library. Single source of truth = toyblocks.TABLE_MATERIALS_FILEPATH;
-    overridable via RERENDER_TABLE_MATERIALS. Identical to the former rerender.DEFAULT_TABLE_MATERIALS."""
+    overridable via RENDER_TABLE_MATERIALS. Identical to the former render.DEFAULT_TABLE_MATERIALS."""
     try:
         from toyblocks import TABLE_MATERIALS_FILEPATH  # noqa: WPS433
         base = str(TABLE_MATERIALS_FILEPATH)
     except Exception:
         base = os.path.join(_REPO_ROOT, "assets", "scenes", "toyblocks_real", "usd", "table",
                             "materials.json")
-    return os.environ.get("RERENDER_TABLE_MATERIALS") or base
+    return os.environ.get("RENDER_TABLE_MATERIALS") or base
 
 
 @dataclass(frozen=True)
