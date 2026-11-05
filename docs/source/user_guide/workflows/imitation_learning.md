@@ -1,4 +1,4 @@
-# Pre-training ManiFlow Policies on Automatically Generated Data 
+# Training ManiFlow Policies on Automatically Generated Data
 
 ManiFlow policies are trained with the `maniflow-tb` submodule
 ([allenai/maniflow-tb](https://github.com/allenai/maniflow-tb), Python package `hvla`) and
@@ -13,7 +13,7 @@ accelerate launch --config_file hvla/config/deepseeds/deepspeed_zero2.yaml ... h
 and runs it on this machine: `accelerate launch` on all visible GPUs by default, or
 `torchrun` across several nodes. It trains on a merged LeRobot dataset, the output of the
 [data generation pipeline](data_generation.md). Every flag is listed in the
-[`train_maniflow.py` Reference](imitation_learning/train_maniflow.md).
+`train_maniflow.py` [Reference](imitation_learning/train_maniflow.md).
 
 ## Setup
 
@@ -39,40 +39,32 @@ its logs stay in the run directory.
 ## Training on a generated dataset
 
 ```bash
-python maniflow-tb/scripts/train_maniflow.py \
-    --data_root_dir data/datasets/merged/train/oct06_stack3_1000x32 \
-    --goal_action_filter 'pick,place on table,place,flip backward,flip forward,flip left,flip right,rotate ccw,rotate cw,done' \
-    --rgb_224
+python maniflow-tb/scripts/train_maniflow.py  --data_root_dir data/datasets/merged/train/my_dataset 
 ```
 
 Relative `--data_root_dir` and `--run_root_dir` paths are resolved against the directory you run
 the script from; the training command itself runs inside `maniflow-tb/`.
 
-- `--data_root_dir`: the merged LeRobot dataset (by default the pipeline writes it to
-  `<output-root>/datasets/merged/train/<experiment-id>`). Pass several directories to co-train
-  on them; `--dataset_ratio` sets their sampling ratio.
-- `--goal_action_filter`: training samples only start on frames whose `goal.action` is in
-  this list. With several datasets, give one `;`-separated group per dataset.
-- `--rgb_224`: read the pre-resized `<camera>_224` videos instead of decoding the native
-  640x360 ones. The run fails if a dataset has no 224 videos; the
-  [re-render step](datagen/rerender.md) writes them.
+- `--data_root_dir`: the merged LeRobot dataset (by default the pipeline writes it to  
+`<output-root>/datasets/merged/train/<experiment-id>`). Pass several directories to co-train  
+on them; `--dataset_ratio` sets their sampling ratio.  
+[re-render step](datagen/rerender.md) writes them.
 
 Everything else keeps its default, which gives:
 
-- absolute 9-D joint actions (7 joints, gripper, PD mode), predicting chunks of 50 actions
-  and executing 25;
-- a 9-D state (joint positions, gripper, PD mode);
-- front and gripper RGB through a fine-tuned CLIP ViT-B/16, no depth;
+- absolute 9-D joint actions (7 joints, gripper, Play mode), predicting chunks of 50 actions  
+and executing 25;
+- a 9-D state (joint positions, gripper, Play mode); The play mode is used my Maniflow to indicate that it has completed the task and request the next instruction.
+- front and gripper RGB through a fine-tuned CLIP ViT-B/16. Depth is supported but off by default.
 - the target heatmap as cross-attention tokens through the shared RGB encoder (dropped
-  with probability 0.1, sigma 0.8 patches);
+with probability 0.1, sigma 0.8 patches);
 - T5-small language conditioning on the action string only (`action_only`);
 - one node with all visible GPUs, AdamW with DeepSpeed ZeRO-2, a batch of 128 per GPU,
-  200k steps, a checkpoint every 10k steps and a 5% validation split.
+200k steps, a checkpoint every 10k steps and a 5% validation split.
 
 The script prints the run ID, the run directory and the full command before it starts;
 `--dry_run` prints them and exits. The run ID is built from the dataset name and the flags,
-plus a timestamp, for example
-`rgb224_oct06_stack3_1000x32_50_25_abs_token_shared_rgb_mask0.1_sigma0.8_lang_t5-small_action_only-11-05-09-30-00`.
+plus a timestamp.
 `--user_prefix` puts a prefix in front of it, and `--run_id` replaces it.
 
 ## Choosing GPUs and nodes
@@ -84,7 +76,7 @@ them. A short debug run on one GPU:
 CUDA_VISIBLE_DEVICES=0 WANDB_MODE=offline python maniflow-tb/scripts/train_maniflow.py \
     --run_root_dir /tmp/maniflow_debug --duration 100 --save_interval 100 \
     --logging_frequency 10 --dbs 4 --num_workers 0 --max_episodes 500 \
-    --data_root_dir data/datasets/merged/train/my_dataset --rgb_224
+    --data_root_dir data/datasets/merged/train/my_dataset
 ```
 
 For several nodes, run the script on every node with the same flags, plus
@@ -96,12 +88,12 @@ on a filesystem the nodes share.
 ## Resuming and fine-tuning
 
 - `--resume <run_id>` continues a run in `--run_root_dir` from its latest complete checkpoint,
-  and fails if there is none. The architecture (actions, state, cameras, conditioning, depth)
-  comes from the run's saved `config.yaml`, so the flags that define it are not emitted; only
-  the training-loop flags still apply. `--data_root_dir` is not needed. The run must resume on
-  the same number of GPUs it was saved with, since the optimizer state is sharded per GPU.
+and fails if there is none. The architecture (actions, state, cameras, conditioning, depth)
+comes from the run's saved `config.yaml`, so the flags that define it are not emitted; only
+the training-loop flags still apply. `--data_root_dir` is not needed. The run must resume on
+the same number of GPUs it was saved with, since the optimizer state is sharded per GPU.
 - `--pretrained_checkpoint <file>` starts a new run from a checkpoint's weights. The
-  optimizer, scheduler, EMA and W&B state start fresh.
+optimizer, scheduler, EMA and W&B state start fresh.
 
 ## Outputs
 
@@ -133,8 +125,7 @@ python scripts/launch_eval.py --policy maniflow \
 ```
 
 The policy server imports `hvla` from the `maniflow-tb` submodule, and the eval pipeline refuses
-to start if that checkout is not the commit ToyBlocks pins (`git submodule update --init
-maniflow-tb` fixes it). A checkpoint trained with this code is on Hugging Face,
+to start if that checkout is not the commit ToyBlocks pins (`git submodule update --init maniflow-tb` fixes it). A checkpoint trained with this code is on Hugging Face,
 [allenai/maniflow-tb](https://huggingface.co/allenai/maniflow-tb), with the same layout
 (`hf download allenai/maniflow-tb --local-dir <dir>`). See [Policy Evaluation](evaluations.md)
 for the rest of the eval workflow, and
