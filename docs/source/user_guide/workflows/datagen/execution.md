@@ -82,7 +82,7 @@ When `run_datagen_pipeline.py` runs this stage, it sets `run.py`'s flags from it
 The pipeline always passes `--record <base>/execution/<slug> --mark-complete --headless`, where
 `<slug>` is the problem's slug, or `problem_grp_<first slug>` for a group. It skips any problem
 whose `.execution_complete` marker already exists. Each problem (or group) is one job in the
-pipeline's GPU-slot pool; see [Running on this machine](local.md).
+pipeline's GPU-slot pool; see [Running the pipeline locally](local.md).
 
 The pipeline does **not** forward `--profile`, `--max-attempts`, `--friction-comp`,
 `--arm-joint-friction-scale` or `--arm-armature-scale`, so a pipeline run always uses their
