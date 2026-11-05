@@ -2874,7 +2874,8 @@ class IsaacDataRecorderLeRobot:
             meta = root / "meta"
             meta.mkdir(parents=True, exist_ok=True)
             extra = meta / "extra"
-            extra.mkdir(parents=True, exist_ok=True)
+            if domain_p or problem_p or ll_env:
+                extra.mkdir(parents=True, exist_ok=True)
 
             with open(meta / "recording_config.json", "w") as f:
                 json.dump(recording_cfg, f, indent=2)
@@ -2904,6 +2905,16 @@ class IsaacDataRecorderLeRobot:
                 for name in ("block_config.json", "init.py"):
                     p = ll_path / name
                     _copy_logged(p, name)
+                # A vecgen env package carries none of the TAMP-era names above: it holds the
+                # generated problems plus the tables that decide what was spawned. Without
+                # these the dataset keeps pddl_goal but loses the :objects/:init that define
+                # the task, so the problems cannot be re-run -- only new random ones generated.
+                # A grouped package holds every member problem, which is why this is a glob.
+                for name in ("problems.json", "profiles.json",
+                             "non_sim_state_randomizations.json"):
+                    _copy_logged(ll_path / name, name)
+                for p in sorted((ll_path / "problems").glob("*.pddl")):
+                    _copy_logged(p, p.name)
                 if instance_ids:
                     for iid in instance_ids:
                         p = ll_path / f"{int(iid)}.json"

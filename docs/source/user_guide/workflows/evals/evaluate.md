@@ -39,6 +39,7 @@ Before the run starts, `evaluate.py` also:
 | Zero actions | none of the above | Sanity checks of task spawning and metrics. |
 | Dataset replay | `--replay` with `--queue_url`, `--dataset_path` and `--num_envs 1` | Playing back each queued episode's recorded actions and reporting how far the simulation diverges from the recording. |
 
+`--obs_mode state` raises when combined with `--policy_host` (see the flag table below).
 `--random_actions` raises when combined with `--policy_host`, and `--replay` raises when
 combined with either.
 
@@ -203,7 +204,7 @@ The tables below list the user-facing flags with their defaults. Every flag's do
 | `--num_envs` | `4` | Parallel environments (snapped to the task's slot count). |
 | `--num_eval_steps` | `200` | Maximum environment steps. Ignored under `--queue_url`, where the run ends when the queue is exhausted. |
 | `--num_episodes` | none | Stop after this many finished episodes; with `--num_eval_steps`, whichever comes first. |
-| `--obs_mode` | `state` | `state`, `rgb` or `rgb+state`. A `depth` component is added automatically when the served checkpoint takes depth. |
+| `--obs_mode` | `state` | `state`, `rgb` or `rgb+state`. A `depth` component is added automatically when the served checkpoint takes depth. **Not combinable with `--policy_host`:** `state` flattens the observation into one tensor, while the server protocol needs a dict of named keys, so the pair is rejected up front. Use `rgb+state` (add `--obs_transform none` to send the raw keys). |
 | `--control_mode` | env default | Control mode override, e.g. `arm_joint_gripper_binary` (needed for absolute joint targets: replay, `--dataset_path` runs, `--sync_action_chunks`, `--wave_resets`, `--ll_oracle`, play-mode checkpoints). |
 | `--seed` | none | Random seed; no fixed seed when unset. |
 | `--deterministic_cuda` | off | Deterministic cuDNN plus PhysX enhanced determinism and a single solver partition; slower, and still not bit-for-bit across hardware. |

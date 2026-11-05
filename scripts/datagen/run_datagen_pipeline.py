@@ -1608,7 +1608,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--num-distractors", type=int, default=0, help="Number of distractors per problem"
     )
-    parser.add_argument("--num-reset-states", type=int, default=32)
+    # Dead flag, kept only to fail loudly rather than be ignored. Nothing reads it: the env
+    # stage passes --env-per-problem through to the generator as its --num-reset-states.
+    parser.add_argument("--num-reset-states", type=int, default=None, help=argparse.SUPPRESS)
     parser.add_argument(
         "--block-x-range",
         type=str,
@@ -1789,6 +1791,13 @@ def main() -> int:
         exp = args.experiment_id
 
     # ── Validate parameters ──────────────────────────────────────────
+    if args.num_reset_states is not None:
+        log.error(
+            "--num-reset-states has never had an effect and has been removed: the env stage "
+            "passes --env-per-problem to the generator as its reset-state count. Use "
+            "--env-per-problem (default %d) instead.", parser.get_default("env_per_problem"),
+        )
+        return 1
     if args.rerender_local:
         if enabled["rerender"]:
             log.error("--rerender and --rerender-local are alternatives; pass one")
@@ -1880,6 +1889,9 @@ def main() -> int:
             )
             return 1
 
+    # Remember whether this was asked for: once it is defaulted below, the grouped execution
+    # path cannot tell "you asked for N" from "nobody asked", and it used to overwrite both.
+    args.vecgen_episodes_explicit = args.vecgen_episodes is not None
     if args.vecgen_episodes is None:
         args.vecgen_episodes = args.env_per_problem
     if args.vecgen_problems_per_env > 1:
@@ -2105,7 +2117,9 @@ def main() -> int:
                 "--num-envs",
                 str(args.exec_num_envs),
                 "--episodes",
-                str(len(members) * args.env_per_problem),
+                # One episode per reset state across the group unless you asked for a count.
+                str(args.vecgen_episodes if args.vecgen_episodes_explicit
+                    else len(members) * args.env_per_problem),
                 "--pool-slots",
                 str(args.vecgen_pool_slots),
                 "--record",

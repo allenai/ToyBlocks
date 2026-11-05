@@ -237,7 +237,7 @@ good. Pass `--merge-allow-missing-problems` to merge what rendered and drop the 
 
 | Flag | What actually happens |
 |---|---|
-| `--num-reset-states` | **Dead.** The env stage passes `--num_reset_states <--env-per-problem>`, and the multi-problem path passes `--env-per-problem` too. Use **`--env-per-problem`** (default `32`) to control reset states. |
+| `--num-reset-states` | **Removed.** It never had an effect — the env stage passes `--env-per-problem` through as the generator's `--num_reset_states` — so passing it is now an error rather than a silent no-op. Use **`--env-per-problem`** (default `32`). |
 | `--env-per-problem` | Despite the name, this is the number of **reset states** per problem, not a number of environments. The environment count is `--num-envs` (sampling) or `--exec-num-envs` (execution). |
 | `--num-scene-profiles` | The count is **baked into the env package at codegen time**, so changing it does nothing for a problem whose package already exists — see below. |
 | `--seed` | With `--vecgen-problems-per-env 1`, it does not reach env generation: the env stage is hard-wired to `ENV_GEN_SEED = 0`, so re-running with a different `--seed` regenerates **identical reset states** and `--seed` affects execution only. With multi-problem packages (the default), the package for the group starting at problem *g* is sampled with `--seed + g`, so `--seed` changes the reset states too. |

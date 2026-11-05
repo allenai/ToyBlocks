@@ -72,7 +72,7 @@ When `run_datagen_pipeline.py` runs this stage, it sets `run.py`'s flags from it
 | Pipeline flag | Default | Becomes | Notes |
 |---|---|---|---|
 | `--exec-num-envs` | `128` | `--num-envs` | Must be a multiple of `--num-scene-profiles`. |
-| `--vecgen-episodes` | `--env-per-problem` | `--episodes` | One episode per reset state by default. Only used with `--vecgen-problems-per-env 1`; a multi-problem job always runs `--env-per-problem` episodes per problem in its group. |
+| `--vecgen-episodes` | `--env-per-problem` | `--episodes` | Episodes to run. Left unset, a multi-problem job runs one episode per reset state across the group (`members x --env-per-problem`) and a single-problem job runs `--env-per-problem`. Set it explicitly and that count is used on either path — it used to be silently replaced on the multi-problem path, which is the default. |
 | `--seed` | `42` | `--seed` | |
 | `--vecgen-exclude-actions` | `push_to_right,push_next_to` | `--exclude-actions` | Domain actions FF may never plan, also when re-planning. |
 | `--vecgen-pool-slots` | `32` | `--pool-slots` | cuRobo planner pool slots per process. |

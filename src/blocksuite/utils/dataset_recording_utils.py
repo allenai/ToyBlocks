@@ -527,6 +527,18 @@ def _make_env(
     video_fps = args.video_fps if args.video_fps is not None else _env_control_hz(base_env)
 
     if args.obs_mode == "state":
+        # A policy server cannot be driven by flattened observations: PolicyClientAdapter's
+        # contract is infer(obs: dict) -> dict and it calls obs.items() / _split_dict(obs),
+        # while run_eval additionally stamps HL timing keys onto obs. Both need a mapping.
+        # Without this check the run boots Isaac, then dies at the first stamp with
+        # "can't assign a numpy.ndarray to a torch.FloatTensor", naming neither flag.
+        if getattr(args, "policy_host", None):
+            raise ValueError(
+                "--obs_mode state cannot be used with a policy server (--policy_host): the "
+                "server protocol needs a dict of named observations, and --obs_mode state "
+                "flattens them into one tensor. Pass --obs_mode rgb+state (add "
+                "--obs_transform none if your policy wants the raw keys)."
+            )
         env = FlattenObservationWrapper(env)
 
     any_tracking = (

@@ -523,6 +523,12 @@ def main() -> int:
             else lambda rid: goal_block[problem_for(rid).name],
             episode_of_reset_state=episode_of_rid.__getitem__ if episode_of_rid else None,
             record_videos=args.record_videos,
+            # Without these the recorder creates meta/extra/ and copies nothing into it, so
+            # provenance.json names an empty directory and records zero checksums.
+            provenance={
+                "domain_pddl": args.domain,
+                "ll_env_directory": args.env_path,
+            },
         )
         log.info("recording to %s", args.record)
 
