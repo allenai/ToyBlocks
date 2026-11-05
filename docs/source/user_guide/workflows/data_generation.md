@@ -61,7 +61,7 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
   the stages that already finished.
 - **One command, one machine.** The orchestrator runs every stage on the machine you
   launch it on, spreading problems over the visible GPUs. The same command works on a
-  single-GPU workstation and on a multi-GPU node (see [Running on this machine](datagen/local.md)).
+  single-GPU workstation and on a multi-GPU node (see [Running the pipeline locally](datagen/local.md)).
 
 ## What can you do with the datagen pipeline?
 
@@ -116,7 +116,7 @@ If you simply want to generate some example datasets with already tested scripts
 
 ## Full Data Generation Pipeline
 
-The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in [Running on this machine](datagen/local.md).
+The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in [Running the pipeline locally](datagen/local.md).
 
 ### Datagen Pipeline Steps
 
@@ -214,7 +214,7 @@ python scripts/datagen/run_datagen_pipeline.py \
 | `--local-gpus` | every visible GPU | GPU ids the stages may use, e.g. `--local-gpus 0 1`. |
 | `--local-gpu-workers` | 1 | Concurrent problems per GPU. Host RAM is usually the limit; validate videos when raising it. |
 
-See [Running on this machine](datagen/local.md) for how the GPU slots are filled, where logs go,
+See [Running the pipeline locally](datagen/local.md) for how the GPU slots are filled, where logs go,
 and what `--resume` deletes.
 
 ### Rendering
