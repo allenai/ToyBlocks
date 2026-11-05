@@ -37,74 +37,15 @@ The overall goal of ToyBlocks is to provide a controlled world for robot learnin
 By providing full control over the data generation process, ToyBlocks provides tools for researchers 
 to trace the outcomes of trained policies back to the training data.
 
+## How to get started
 
-## Setup
+The [docs](https://allenai.github.io/ToyBlocks/docs/user_guide/index.html) walk through each workflow:
 
-This guide uses `uv` to set everything up. The setup instructions here are for setting up the evaluation environments and data generation systems.
+- [Installation and Setup](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html)
+- [Automatic Data Generation](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html)
+- [Training ManiFlow Policies on Automatically Generated Data](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html)
+- [Policy Evaluation](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html)
 
-Prerequisites: an NVIDIA driver that supports CUDA 12.8 (570+) and 
-[`uv`](https://docs.astral.sh/uv/getting-started/installation/). ToyBlocks and 
-its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
-
-```bash
-git clone https://github.com/allenai/ToyBlocks.git
-cd ToyBlocks
-
-# Create a virtual environment for py311 (required for isaacsim 5.1) and activate it
-uv venv --python 3.11
-source .venv/bin/activate
-
-# Grab the submodules: curobo, plus maniflow-tb and molmo2 (without maniflow, `--init curobo` is enough)
-git submodule update --init --recursive
-
-# Just install like any python package (don't do uv sync, it's not recommended)
-uv pip install -e ".[dev,isaac,torch-cu128]"
-
-# If you want to install with maniflow (maniflow-tb + molmo2)
-uv pip install -e ".[dev,isaac,torch-cu128,maniflow]"
-
-# Headless / scripted Isaac Sim runs can't answer the EULA prompt
-export OMNI_KIT_ACCEPT_EULA=YES
-```
-
-### Datagen (curobo) setup
-
-Datagen (vecgen) needs cuRobo v2 (the `curobo` submodule): install the `vecgen` optional group (or
-`tamp`, which adds the rerun / flask debug viewers). The submodule must be initialized first
-(`git submodule update --init curobo`; the `--recursive` command above already does it).
-There is no TAMP submodule any more; the FF planner is vendored in `src/toyblocks/vecgen/symbolic/ff_planner/`.
-
-```bash
-uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
-
-# or datagen + maniflow
-uv pip install -e ".[dev,isaac,torch-cu128,vecgen,maniflow]"
-```
-
-`uv` builds `curobo` from the submodule itself (it is registered in `pyproject.toml` as an editable
-source), so no separate `uv pip install -e curobo` step is needed.
-
-No local CUDA toolkit is needed: cuRobo v2 compiles its kernels at runtime with NVRTC from the
-`nvidia-*-cu12` pip packages installed with torch. The `cuda-12.8` toolkit install and the
-`setup_cuda` shell function that cuRobo v1 needed can be dropped.
-
-:warning: **Docker:** `docker/vecgen.dockerfile` still installs `curobo` as a separate step after
-the main install instead of passing the `vecgen` group (a one-step install failed inside `docker build`).
-
-### Download the assets
-
-The assets can be downloaded from `R2` using the following command, with the venv active (it caches
-them in `~/.toyblocks` and symlinks them into the `assets` folder at the root of the repo)
-
-```bash
-get-toyblocks-assets --asset-manifest asset_manifest.json
-```
-
-This also installs the CC0 Poly Haven HDRI pool (1.8 GB, `assets/environments/polyhaven`) that
-re-rendering uses for backdrops. The second pool the default render flags use, the Laval Indoor
-HDR Dataset (`indoor-2018`), is licensed for research use and has to be requested from Université
-Laval. See
-[docs/rerender/README_local.md](docs/rerender/README_local.md#hdri-backdrops) for how to install it.
 
 ## Code Organization
 
