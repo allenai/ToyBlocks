@@ -1,0 +1,1034 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Running the pipeline on this machine &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/datagen/local';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Pre-training ManiFlow Policies on Automatically Generated Data" href="../imitation_learning.html" />
+    <link rel="prev" title="Recorded Dataset Fields" href="dataset_fields.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../data_generation.html" class="nav-link">Automatic Data Generation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Running the pipeline on this machine</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="running-the-pipeline-on-this-machine">
+<h1>Running the pipeline on this machine<a class="headerlink" href="#running-the-pipeline-on-this-machine" title="Link to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> runs the whole data generation pipeline on the machine
+you launch it on: PDDL problems, env packages, executed episodes, re-rendered videos and a merged
+LeRobot dataset, all on local disk and local GPUs. The same command works on a single-GPU
+workstation and on a multi-GPU node; the pipeline spreads problems over every GPU it can see.</p>
+<p>This page covers what is specific to running it: choosing GPUs and concurrency, where outputs and
+logs go, re-rendering, resuming, and checking the result. For the stage-by-stage reference, see
+<a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Stage</p></th>
+<th class="head"><p>How it runs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>task-gen</p></td>
+<td><p>one subprocess, on the CPU</p></td>
+</tr>
+<tr class="row-odd"><td><p>env</p></td>
+<td><p>one process per problem, across the GPU slots (skipped with <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span></code> &gt; 1, the default)</p></td>
+</tr>
+<tr class="row-even"><td><p>execution</p></td>
+<td><p>one process per problem or problem group, across the GPU slots</p></td>
+</tr>
+<tr class="row-odd"><td><p>rerender</p></td>
+<td><p>one render per problem, in the same GPU-slot pool (<code class="docutils literal notranslate"><span class="pre">--rerender</span></code>) or inside each execution job (<code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>merge</p></td>
+<td><p>one subprocess, on the CPU</p></td>
+</tr>
+<tr class="row-odd"><td><p>annotate</p></td>
+<td><p>one subprocess, on the CPU</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The pipeline needs no network access once the assets are installed. Run it from the root of the
+checkout: the stage scripts are called by relative path (<code class="docutils literal notranslate"><span class="pre">scripts/...</span></code>), and the pipeline runs
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">rev-parse</span> <span class="pre">HEAD</span></code> to pin the commit into the run config for reproducibility.</p>
+<section id="before-you-start">
+<h2>Before you start<a class="headerlink" href="#before-you-start" title="Link to this heading">#</a></h2>
+<p>Follow <a class="reference internal" href="../installation_and_setup_instructions.html"><span class="std std-doc">the installation instructions</span></a>: with the
+virtual environment active, install the datagen (vecgen) extra and fetch the assets:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,isaac,torch-cu128,vecgen]"</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>get-toyblocks-assets<span class="w"> </span>--asset-manifest<span class="w"> </span>asset_manifest.json
+</pre></div>
+</div>
+<p>Re-rendering with the default flags draws HDRI backdrops from polyhaven (installed with the base
+assets) and the separately licensed Laval indoor set; see
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops">HDRI backdrops</a>.</p>
+<p>Re-rendering needs real disk. A run of a few problems at <code class="docutils literal notranslate"><span class="pre">--rerender-n</span> <span class="pre">2</span></code> writes several GB of
+video; check free space before a long run rather than discovering it mid-encode.</p>
+</section>
+<section id="a-complete-run">
+<h2>A complete run<a class="headerlink" href="#a-complete-run" title="Link to this heading">#</a></h2>
+<p>This generates 4 stacking problems, executes 16 episodes each, re-renders them, and merges the
+result into one LeRobot dataset under <code class="docutils literal notranslate"><span class="pre">./outputs</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--rerender-local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span>my_run<span class="w"> </span>--output-root<span class="w"> </span>outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task-gen-script<span class="w"> </span>scripts/task_gen/stack_three.py<span class="w"> </span>--task-gen-count<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--env-per-problem<span class="w"> </span><span class="m">16</span><span class="w"> </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>The merged dataset is annotated at the end, since the re-render supplies the camera data that
+annotation projects goals into. Drop <code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code> to stop after execution and merge the raw
+parquet (state and actions, no video); the pipeline then logs a warning and skips annotation,
+which needs video (<code class="docutils literal notranslate"><span class="pre">--rerender</span></code>, <code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code> or <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>).</p>
+<p>Without any flags beyond <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>, the pipeline uses the settings the RI stack-3 training
+set was generated with: 1000 <code class="docutils literal notranslate"><span class="pre">stack_three.py</span> <span class="pre">--train</span></code> problems, randomized scenes, 32 reset states
+per problem, 8 problems per vecgen env package at 128 envs.</p>
+<p>Each stage also runs on its own; see <a class="reference internal" href="task_generation.html"><span class="std std-doc">task generation</span></a>,
+<a class="reference internal" href="env_generation.html"><span class="std std-doc">env generation</span></a>, <a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a>, <a class="reference internal" href="rerender.html"><span class="std std-doc">re-rendering</span></a>,
+<a class="reference internal" href="merge.html"><span class="std std-doc">merge</span></a> and <a class="reference internal" href="annotate.html"><span class="std std-doc">annotate</span></a>.</p>
+</section>
+<section id="choosing-gpus-and-how-many-problems-run-at-once">
+<h2>Choosing GPUs and how many problems run at once<a class="headerlink" href="#choosing-gpus-and-how-many-problems-run-at-once" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--local-gpus</span> <span class="pre">ID</span> <span class="pre">[ID</span> <span class="pre">...]</span></code></p></td>
+<td><p>every GPU visible to the process</p></td>
+<td><p>Which GPU ids the stages may use.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Concurrent problems <strong>per GPU</strong>. <code class="docutils literal notranslate"><span class="pre">1</span></code> is a strict no-op.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The pipeline builds one <em>slot</em> per GPU per worker, so <code class="docutils literal notranslate"><span class="pre">len(gpus)</span> <span class="pre">*</span> <span class="pre">workers</span></code> problems run at once.
+Each slot owns one <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> value, so every job sees a single GPU; a stage scales
+out by spreading problems over more slots, never by giving one problem several GPUs. Listing a
+GPU id twice in <code class="docutils literal notranslate"><span class="pre">--local-gpus</span></code> gives it two slots, like <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> does.</p>
+<p>GPU discovery honours an existing <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>; failing that it asks <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>, and
+if that is unavailable it runs one problem at a time on the default GPU.</p>
+<p>A failing problem does not abort the stage. The stage keeps going and reports the failure count at
+the end, and the next stage works with the problems that succeeded.</p>
+<section id="how-much-fits">
+<h3>How much fits<a class="headerlink" href="#how-much-fits" title="Link to this heading">#</a></h3>
+<p>Measured on one RTX 5090 (32,607 MiB) at <code class="docutils literal notranslate"><span class="pre">--rerender-local-num-envs</span> <span class="pre">8</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>peak VRAM</p></th>
+<th class="head"><p>peak GPU util</p></th>
+<th class="head"><p>mean util while busy</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>re-render</p></td>
+<td><p>7,673 MiB</p></td>
+<td><p>76%</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>vecgen execution</p></td>
+<td><p>5,198 MiB</p></td>
+<td><p>88%</p></td>
+<td><p>61%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two concurrent processes fit comfortably on a 32 GiB card and one does not saturate it, so
+<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> is usually free throughput. Read “Host RAM and disk, not VRAM, are the
+limits” under <a class="reference internal" href="#things-that-will-bite-you">Things that will bite you</a> first.</p>
+</section>
+</section>
+<section id="logs">
+<h2>Logs<a class="headerlink" href="#logs" title="Link to this heading">#</a></h2>
+<p>With a single slot, every job’s output is streamed to your console. With more than one slot, each
+problem’s output goes to its own log file instead, since concurrent Isaac Sim logs are unreadable
+interleaved:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;base&gt;/local_logs/env/&lt;slug&gt;.log
+&lt;base&gt;/local_logs/execution/&lt;slug&gt;.log
+&lt;base&gt;/local_logs/rerender/&lt;slug&gt;.log
+</pre></div>
+</div>
+<p>The pipeline logs the directory when it does this, and a <code class="docutils literal notranslate"><span class="pre">FAILED</span> <span class="pre">&lt;stage&gt;:</span> <span class="pre">&lt;slug&gt;</span> <span class="pre">(see</span> <span class="pre">...)</span></code> line
+names the log of each problem that failed. <code class="docutils literal notranslate"><span class="pre">[sched]</span> <span class="pre">&lt;stage&gt;</span> <span class="pre">start|end</span> <span class="pre">&lt;slug&gt;</span> <span class="pre">slot=...</span> <span class="pre">t=...</span></code> lines
+record when each job ran, which is how per-stage timings are measured. The pipeline’s own log goes
+to the console only; pipe it through <code class="docutils literal notranslate"><span class="pre">tee</span></code> if you want to keep it.</p>
+</section>
+<section id="outputs">
+<h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--output-root</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Root for every dataset the pipeline writes. A relative path is taken from the working directory and resolved to an absolute one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--dataset-folder</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unmerged</span></code></p></td>
+<td><p>Subfolder of <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/</span></code> for the per-problem outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;</span></code></p></td>
+<td><p>Where the merged dataset goes.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Everything else lands under <code class="docutils literal notranslate"><span class="pre">&lt;base&gt;</span></code> = <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/&lt;dataset-folder&gt;/&lt;experiment-id&gt;/</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;experiment-id&gt;/
+├── tasks/              # generated PDDL problem files
+├── envs/               # env packages + reset states, one per problem or problem_grp_&lt;slug&gt;
+├── execution/          # per-problem LeRobot datasets (blocks_success + blocks_failure)
+├── rerender/
+│   ├── src/                      # per-problem staging links the renders read from
+│   ├── out/job_local/            # re-rendered problems
+│   ├── out/job_local_nonrand/    # the --render-non-randomized pass, if enabled
+│   └── non_randomized_flags.yaml # derived flags for that pass
+├── local_logs/         # per-problem logs, only when &gt;1 slot runs at a time
+├── .pipeline_state/    # &lt;stage&gt;.done markers that --resume reads
+└── run_datagen_pipeline_config_&lt;timestamp&gt;.json
+</pre></div>
+</div>
+<p>The merged dataset gets a copy of the run config and a plot of its first episode,
+<code class="docutils literal notranslate"><span class="pre">episode_0.png</span></code>.</p>
+</section>
+<section id="re-rendering-locally">
+<h2>Re-rendering locally<a class="headerlink" href="#re-rendering-locally" title="Link to this heading">#</a></h2>
+<p>Execution records state and actions only — vecgen spawns no cameras by default. The videos come
+from the re-render stage, which replays the recorded states with no physics and renders them
+under the domain randomization in a flags YAML. See <a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a> for what that
+stage does and every flag it takes, and the
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a>
+for how to write the randomization.</p>
+<p>Two flags turn the stage on, and they pick how it is scheduled against the executions. Both
+produce <strong>the same pixels</strong> — the <code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> argv, the staged source layout and the
+per-problem output directory name (which is the domain-randomization seed salt) are identical, so
+a problem draws the same randomization either way. The choice is about throughput and
+observability, not about how the dataset looks.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--rerender</span></code> (pipelined)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code> (coupled)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>where the render runs</p></td>
+<td><p>its own item in the shared GPU-slot pool</p></td>
+<td><p>inside the execution job’s own shell chain, <code class="docutils literal notranslate"><span class="pre">vecgen</span> <span class="pre">&amp;&amp;</span> <span class="pre">rerender</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>when it becomes eligible</p></td>
+<td><p>the moment that problem’s execution finalizes</p></td>
+<td><p>immediately, holding the slot its execution just used</p></td>
+</tr>
+<tr class="row-even"><td><p>can overlap the next execution</p></td>
+<td><p>yes, whenever a slot is free</p></td>
+<td><p>no — one job, one slot</p></td>
+</tr>
+<tr class="row-odd"><td><p>exec vs render timing</p></td>
+<td><p>separate items, separate logs, separate <code class="docutils literal notranslate"><span class="pre">[sched]</span></code> lines</p></td>
+<td><p>not separable (one process span)</p></td>
+</tr>
+<tr class="row-even"><td><p>a render failure</p></td>
+<td><p>its own item with its own log</p></td>
+<td><p>indistinguishable from an execution failure in the job’s exit code</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>They are alternatives; passing both is refused. Neither can be combined with
+<code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>: recording in-physics video and then overwriting it pays the slow
+physics-render cost for frames nothing reads.</p>
+<p>The render defaults are the RI training set’s: the flags YAML
+<code class="docutils literal notranslate"><span class="pre">src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>
+(<code class="docutils literal notranslate"><span class="pre">--rerender-flags</span></code>), one copy per episode (<code class="docutils literal notranslate"><span class="pre">--rerender-n</span> <span class="pre">1</span></code>), the 224 RGB and <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> depth
+sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The flags YAML must be readable on
+this machine; the pipeline checks it before starting.</p>
+<section id="which-mode-to-use">
+<h3>Which mode to use<a class="headerlink" href="#which-mode-to-use" title="Link to this heading">#</a></h3>
+<p>Measured over 4 problems, 2 reps, execution + re-render window only
+(<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/BENCHMARK_local.md">BENCHMARK_local.md</a>):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>1 slot</p></th>
+<th class="head"><p>2 slots (<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>coupled (<code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code>)</p></td>
+<td><p>921 s</p></td>
+<td><p><strong>667 s</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>pipelined (<code class="docutils literal notranslate"><span class="pre">--rerender</span></code>)</p></td>
+<td><p>906 s</p></td>
+<td><p>733 s</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>For throughput, use <code class="docutils literal notranslate"><span class="pre">--rerender-local</span> <span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code></strong> — 28% faster than a single coupled slot, and
+it needs none of the scheduler. Pipelining costs nothing at one slot but <em>loses</em> about 10% at
+two, because its render-first ordering pairs render against render (two GPU-saturating
+processes), whereas the coupled chains naturally pair one problem’s execution against another’s
+render.</p>
+<p>Use the pipelined mode when you want separable exec/render timings and logs, failure isolation
+between the two, a first finished problem early rather than at the end of a chain, or bounded
+un-rendered disk.</p>
+</section>
+<section id="options-that-matter-on-one-machine">
+<h3>Options that matter on one machine<a class="headerlink" href="#options-that-matter-on-one-machine" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender-local-num-envs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
+<td><p>Envs per render wave, in both modes. A <strong>floor</strong>, not a preference: the re-render spawns env <em>i</em> at block-size slot <em>i</em> % <em>profiles</em>, so a value below <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> leaves the high slots without an env and <strong>every problem is skipped</strong>. The pipeline refuses that pairing up front. 8 keeps the encoder’s RSS survivable beside Isaac.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender-local-stall-timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3600</span></code></p></td>
+<td><p>SIGKILL the render if it prints nothing for this many seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender-local-fail-on-video-defects</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Fail a problem whose encoder could not publish every video. Off by default because a failed problem re-renders whole; <code class="docutils literal notranslate"><span class="pre">scripts/rerender/fast_patch.py</span></code> fills video holes afterwards.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--rerender-n</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>, <code class="docutils literal notranslate"><span class="pre">--rerender-skip-cameras</span></code> and <code class="docutils literal notranslate"><span class="pre">--rerender-extra</span></code> are
+described in <a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a>, along with what <code class="docutils literal notranslate"><span class="pre">--rerender-n</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> actually multiply and how to check that they did.</p>
+</section>
+</section>
+<section id="what-counts-as-rendered">
+<h2>What counts as “rendered”<a class="headerlink" href="#what-counts-as-rendered" title="Link to this heading">#</a></h2>
+<p>Once the rerender stage is marked complete, <strong>merge reads only <code class="docutils literal notranslate"><span class="pre">rerender/out/job_*</span></code></strong>. A problem
+that executed but was never re-rendered would simply vanish from the merged dataset. To stop that
+being silent, a post-stage sweep classifies every problem on disk into three states:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>State</p></th>
+<th class="head"><p>Meaning</p></th>
+<th class="head"><p>Retried?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_SHIPPED</span></code></p></td>
+<td><p>finalized under <code class="docutils literal notranslate"><span class="pre">blocks_success</span></code> <strong>and</strong> merge can read it (<code class="docutils literal notranslate"><span class="pre">info.json</span></code> present)</p></td>
+<td><p>no — it is done</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_UNRENDERABLE</span></code></p></td>
+<td><p>finalized, but it can never ship: it declared itself empty, recorded zero episodes, or finalized with only a <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> split</p></td>
+<td><p>no — permanent, and failing on it would wedge every later run</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_ABSENT</span></code></p></td>
+<td><p>not finalized, or finalized without a readable dataset</p></td>
+<td><p>yes — the run exits non-zero and a later run or <code class="docutils literal notranslate"><span class="pre">--resume</span></code> finishes it</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two of these are worth understanding. <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> in <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> means <em>terminal</em>,
+not <em>has data</em>. And a problem whose episodes all failed finalizes with <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> alone, so
+no <code class="docutils literal notranslate"><span class="pre">blocks_success</span></code> is ever created; re-running cannot change that, because the source has no
+successful episodes.</p>
+<p>Both modes report from this sweep, never from the job list, so it also covers problems the
+execution loop skipped, runs with <code class="docutils literal notranslate"><span class="pre">--skip-execution</span></code>, resumed runs where the execution stage was
+disabled, and preemption shards (<code class="docutils literal notranslate"><span class="pre">problem_x__s001</span></code>). The merge gate asks merge’s own discovery
+what it would ship, rather than globbing <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> — the execution stage creates each problem’s
+output directory <em>before</em> running it, so a crashed execution leaves an empty directory behind for
+good. Pass <code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> to merge what rendered and drop the rest.</p>
+</section>
+<section id="flags-that-do-not-do-what-their-name-suggests">
+<h2>Flags that do not do what their name suggests<a class="headerlink" href="#flags-that-do-not-do-what-their-name-suggests" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>What actually happens</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num-reset-states</span></code></p></td>
+<td><p><strong>Dead.</strong> The env stage passes <code class="docutils literal notranslate"><span class="pre">--num_reset_states</span> <span class="pre">&lt;--env-per-problem&gt;</span></code>, and the multi-problem path passes <code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code> too. Use <strong><code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code></strong> (default <code class="docutils literal notranslate"><span class="pre">32</span></code>) to control reset states.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code></p></td>
+<td><p>Despite the name, this is the number of <strong>reset states</strong> per problem, not a number of environments. The environment count is <code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> (sampling) or <code class="docutils literal notranslate"><span class="pre">--exec-num-envs</span></code> (execution).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code></p></td>
+<td><p>The count is <strong>baked into the env package at codegen time</strong>, so changing it does nothing for a problem whose package already exists — see below.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--seed</span></code></p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">1</span></code>, it does not reach env generation: the env stage is hard-wired to <code class="docutils literal notranslate"><span class="pre">ENV_GEN_SEED</span> <span class="pre">=</span> <span class="pre">0</span></code>, so re-running with a different <code class="docutils literal notranslate"><span class="pre">--seed</span></code> regenerates <strong>identical reset states</strong> and <code class="docutils literal notranslate"><span class="pre">--seed</span></code> affects execution only. With multi-problem packages (the default), the package for the group starting at problem <em>g</em> is sampled with <code class="docutils literal notranslate"><span class="pre">--seed</span> <span class="pre">+</span> <span class="pre">g</span></code>, so <code class="docutils literal notranslate"><span class="pre">--seed</span></code> changes the reset states too.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--vecgen-episodes</span></code></p></td>
+<td><p>Only used with <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">1</span></code>. A multi-problem job runs <code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code> episodes per problem in its group.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The env-count constraint is “a multiple of the profile count, <strong>or</strong> strictly smaller than it” —
+<code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">4</span></code> against 8 profiles is legal and spawns only the low slots. It is not “must be a
+multiple”.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> the env stage is <strong>switched off entirely</strong> — the execution
+jobs build the multi-problem packages themselves with <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/make_superset_env.py</span></code>.</p>
+<section id="render-arguments-the-pipeline-pins-for-you">
+<h3>Render arguments the pipeline pins for you<a class="headerlink" href="#render-arguments-the-pipeline-pins-for-you" title="Link to this heading">#</a></h3>
+<p>The pipeline builds its own <code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> command line, and three of its arguments differ from
+<code class="docutils literal notranslate"><span class="pre">rerender.py</span></code>’s own defaults. They are worth knowing if you are comparing a pipeline render
+against one you ran by hand:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Pipeline passes</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">60</span></code></p></td>
+<td><p>unset (scene default <code class="docutils literal notranslate"><span class="pre">5.0</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--camera_base</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scene</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rtx_warmup_frames</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> comes from <code class="docutils literal notranslate"><span class="pre">--rerender-local-num-envs</span></code>. Anything you pass through
+<code class="docutils literal notranslate"><span class="pre">--rerender-extra</span></code> is appended last and therefore wins over all of these.</p>
+<p>Env generation also <strong>skips any problem whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> already exists</strong>, and a
+multi-problem job skips building a package whose <code class="docutils literal notranslate"><span class="pre">problems.json</span></code> exists. That is what makes
+re-running cheap — and what makes a stale env package silently survive a parameter change.
+Delete the problem’s env directory, or use a fresh <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>, when you change env-stage
+parameters. This applies to <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> in particular: the profile count is a property
+of the package, not of the run, so re-running an existing experiment with a new count keeps the
+old bake.</p>
+</section>
+</section>
+<section id="resuming">
+<h2>Resuming<a class="headerlink" href="#resuming" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--resume</span></code> continues a previous run of the same <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>: stages already marked complete
+in <code class="docutils literal notranslate"><span class="pre">&lt;base&gt;/.pipeline_state/</span></code> are skipped, and the first unfinished stage is rerun <strong>from scratch,
+deleting its outputs</strong> first. It is a no-op if the experiment directory does not exist.</p>
+<p>What that deletes matters for long runs. If the execution stage was interrupted, <code class="docutils literal notranslate"><span class="pre">--resume</span></code>
+deletes <code class="docutils literal notranslate"><span class="pre">execution/</span></code> and <code class="docutils literal notranslate"><span class="pre">rerender/</span></code>, including the problems that had already finished. The
+rerender stage is the exception: it deletes nothing, and <code class="docutils literal notranslate"><span class="pre">rerender.py</span> <span class="pre">--resume</span></code> renders only the
+problems not yet completed. A run interrupted after its executions finalized therefore resumes
+straight into <code class="docutils literal notranslate"><span class="pre">rerender</span></code> instead of silently merging raw parquet.</p>
+<p>A stage is marked complete when it finishes, even if some of its problems failed, so <code class="docutils literal notranslate"><span class="pre">--resume</span></code>
+does not retry failed problems. To keep finished problems and run only the missing or failed
+ones, rerun the same command <strong>without</strong> <code class="docutils literal notranslate"><span class="pre">--resume</span></code> and with <code class="docutils literal notranslate"><span class="pre">--skip-task-gen</span></code> (otherwise task
+generation writes a fresh batch of problems next to the old ones): env generation skips problems
+whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> exists, and execution skips problems whose <code class="docutils literal notranslate"><span class="pre">.execution_complete</span></code> marker
+exists.</p>
+</section>
+<section id="verify-the-output">
+<h2>Verify the output<a class="headerlink" href="#verify-the-output" title="Link to this heading">#</a></h2>
+<p><strong>Metadata cannot see a broken render.</strong> A dataset can carry <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> and still contain
+videos no decoder will open — a host-RAM OOM mid-encode produces <code class="docutils literal notranslate"><span class="pre">moov</span> <span class="pre">atom</span> <span class="pre">not</span> <span class="pre">found</span></code> mp4s behind
+a perfectly healthy-looking marker. Validate the pixels after any run above one worker:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/rerender/validate_dataset_videos.py<span class="w"> </span>&lt;base&gt;/rerender/out/job_local
+</pre></div>
+</div>
+<p>To confirm that <code class="docutils literal notranslate"><span class="pre">--rerender-n</span></code> genuinely multiplied, count episodes, frames and distinct video
+files — never bytes. Merge hardlinks videos into the merged tree, so <code class="docutils literal notranslate"><span class="pre">du</span></code> of the merged directory
+is meaningless, and different random draws compress differently. See
+<a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+</section>
+<section id="things-that-will-bite-you">
+<h2>Things that will bite you<a class="headerlink" href="#things-that-will-bite-you" title="Link to this heading">#</a></h2>
+<section id="re-rendering-segfaults-at-startup-on-some-gpu-driver-combinations">
+<h3>Re-rendering segfaults at startup on some GPU/driver combinations<a class="headerlink" href="#re-rendering-segfaults-at-startup-on-some-gpu-driver-combinations" title="Link to this heading">#</a></h3>
+<p>On an RTX 5090 with driver 595.99.02, every local render died about 7 s into Isaac startup with
+a SIGSEGV in <code class="docutils literal notranslate"><span class="pre">librtx.scenedb.plugin.so</span></code>, while env generation and execution ran fine on the same
+GPU. This is an Isaac Sim 5.1 RTX-renderer problem, not ToyBlocks. Check your machine with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from isaaclab.app import AppLauncher; AppLauncher(headless=True, enable_cameras=True)"</span>
+</pre></div>
+</div>
+<p>If that crashes, the machine cannot render: run the pipeline without a rerender flag and
+re-render the executed episodes on a machine that can (see <a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a>). The same
+crash affects <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code> and eval video capture. Kit logs are under
+<code class="docutils literal notranslate"><span class="pre">.venv/lib/python3.11/site-packages/isaacsim/kit/logs/Kit/Isaac-Sim/5.1/</span></code>.</p>
+</section>
+<section id="harmless-physx-errors">
+<h3>Harmless PhysX errors<a class="headerlink" href="#harmless-physx-errors" title="Link to this heading">#</a></h3>
+<p>Some otherwise clean runs print
+<code class="docutils literal notranslate"><span class="pre">PxDirectGPUAPI::getRigidDynamicData():</span> <span class="pre">not</span> <span class="pre">allowed</span> <span class="pre">while</span> <span class="pre">simulation</span> <span class="pre">is</span> <span class="pre">running</span></code>. The episodes
+still succeed; ignore it.</p>
+</section>
+<section id="isaac-hangs-after-it-finishes">
+<h3>Isaac hangs after it finishes<a class="headerlink" href="#isaac-hangs-after-it-finishes" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> prints <code class="docutils literal notranslate"><span class="pre">all</span> <span class="pre">jobs</span> <span class="pre">done</span></code> and then hangs in Isaac teardown — observed holding a GPU for
+53 minutes after finalizing all 16 episodes. Every pipeline render therefore runs through
+<code class="docutils literal notranslate"><span class="pre">scripts/rerender/run_local_render.py</span></code>, which watches for the marker and kills the process group
+after a grace period. <strong>Never key completion on an exit code</strong> here; key it on the log.</p>
+</section>
+<section id="host-ram-and-disk-not-vram-are-the-limits">
+<h3>Host RAM and disk, not VRAM, are the limits<a class="headerlink" href="#host-ram-and-disk-not-vram-are-the-limits" title="Link to this heading">#</a></h3>
+<p>VRAM is not the binding constraint when raising <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span></code> — host RAM is, and a
+host-RAM OOM mid-encode corrupts videos behind a <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> marker. Raise the worker count
+only if you validate the output afterwards.</p>
+</section>
+<section id="concurrent-slots-share-isaac-s-caches">
+<h3>Concurrent slots share Isaac’s caches<a class="headerlink" href="#concurrent-slots-share-isaac-s-caches" title="Link to this heading">#</a></h3>
+<p>The pipeline sets <code class="docutils literal notranslate"><span class="pre">KIT_CACHE_ROOT</span></code>, <code class="docutils literal notranslate"><span class="pre">KIT_LOG_DIR</span></code> and <code class="docutils literal notranslate"><span class="pre">OMNI_USER_CONFIG_DIR</span></code> per slot, but the
+installed Isaac Sim <strong>does not read any of them</strong>. Concurrent slots still share <code class="docutils literal notranslate"><span class="pre">~/.cache/ov</span></code>,
+<code class="docutils literal notranslate"><span class="pre">~/.local/share/ov</span></code> and <code class="docutils literal notranslate"><span class="pre">~/.nvidia-omniverse</span></code>. The one per-slot variable that does take effect is
+<code class="docutils literal notranslate"><span class="pre">TMP3_ENCODER_THREADS</span></code>, which stops N processes each sizing an encode pool from the whole CPU set.</p>
+</section>
+<section id="camera-base-data-does-nothing-here">
+<h3><code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> does nothing here<a class="headerlink" href="#camera-base-data-does-nothing-here" title="Link to this heading">#</a></h3>
+<p>It tells the renderer to base each static camera on the pose the <em>dataset</em> records. The execution
+stage records no camera pose at all — vecgen is parquet-only, so there is never a recorded pose to
+base on. <code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> detects this, warns loudly, and falls back to <code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">scene</span></code>; the
+pipeline passes <code class="docutils literal notranslate"><span class="pre">scene</span></code> explicitly and drops a <code class="docutils literal notranslate"><span class="pre">data</span></code> arriving through <code class="docutils literal notranslate"><span class="pre">--rerender-extra</span></code>. Same
+outcome, said at argv-build time instead of minutes into Kit startup.</p>
+</section>
+<section id="rerender-extra-needs-the-form">
+<h3><code class="docutils literal notranslate"><span class="pre">--rerender-extra</span></code> needs the <code class="docutils literal notranslate"><span class="pre">=</span></code> form<a class="headerlink" href="#rerender-extra-needs-the-form" title="Link to this heading">#</a></h3>
+<p>Argparse reads a space-separated value starting with <code class="docutils literal notranslate"><span class="pre">-</span></code> as an option of its own:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--rerender-extra<span class="o">=</span><span class="s2">"--extra_rgb 224 --extra_depth g12_224 --depth_gop 1000"</span><span class="w">   </span><span class="c1"># works</span>
+--rerender-extra<span class="w"> </span><span class="s2">"--skip_failure_episodes"</span><span class="w">                                  </span><span class="c1"># rejected</span>
+</pre></div>
+</div>
+<p>It is appended last, so it beats the pipeline’s own <code class="docutils literal notranslate"><span class="pre">--depth_gop</span></code>, <code class="docutils literal notranslate"><span class="pre">--dr_seeding</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--camera_base</span></code> and <code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code>, and the default sidecars. <code class="docutils literal notranslate"><span class="pre">--output</span></code>, <code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code>, <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> are dropped with a warning — they break
+the pipeline’s accounting rather than the render.</p>
+</section>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a> — the pipeline overview and every pipeline flag</p></li>
+<li><p><a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a> — the rerender stage and its flags</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a> — writing a randomization YAML</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md">docs/rerender/README_local.md</a> — implementation notes, HDRI backdrops and invariants for the pipeline re-render</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/BENCHMARK_local.md">docs/rerender/BENCHMARK_local.md</a> — the coupled-vs-pipelined measurements</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="dataset_fields.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Recorded Dataset Fields</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../imitation_learning.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Pre-training ManiFlow Policies on Automatically Generated Data</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">Before you start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-complete-run">A complete run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#choosing-gpus-and-how-many-problems-run-at-once">Choosing GPUs and how many problems run at once</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-much-fits">How much fits</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-rendering-locally">Re-rendering locally</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#which-mode-to-use">Which mode to use</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options-that-matter-on-one-machine">Options that matter on one machine</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-counts-as-rendered">What counts as “rendered”</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags-that-do-not-do-what-their-name-suggests">Flags that do not do what their name suggests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#render-arguments-the-pipeline-pins-for-you">Render arguments the pipeline pins for you</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resuming">Resuming</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-output">Verify the output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#things-that-will-bite-you">Things that will bite you</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#re-rendering-segfaults-at-startup-on-some-gpu-driver-combinations">Re-rendering segfaults at startup on some GPU/driver combinations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#harmless-physx-errors">Harmless PhysX errors</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#isaac-hangs-after-it-finishes">Isaac hangs after it finishes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#host-ram-and-disk-not-vram-are-the-limits">Host RAM and disk, not VRAM, are the limits</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concurrent-slots-share-isaac-s-caches">Concurrent slots share Isaac’s caches</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#camera-base-data-does-nothing-here"><code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> does nothing here</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rerender-extra-needs-the-form"><code class="docutils literal notranslate"><span class="pre">--rerender-extra</span></code> needs the <code class="docutils literal notranslate"><span class="pre">=</span></code> form</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/datagen/local.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

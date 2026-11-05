@@ -1,0 +1,1074 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>train_maniflow.py Reference &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/imitation_learning/train_maniflow';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Setting up a new policy server" href="new_policy_server.html" />
+    <link rel="prev" title="Pre-training ManiFlow Policies on Automatically Generated Data" href="../imitation_learning.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../imitation_learning.html" class="nav-link">Pre-training ManiFlow Policies on Automatically Generated Data</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="train-maniflow-py-reference">
+<h1><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference<a class="headerlink" href="#train-maniflow-py-reference" title="Link to this heading">#</a></h1>
+<p>Every flag of maniflow-tb’s <code class="docutils literal notranslate"><span class="pre">scripts/train_maniflow.py</span></code> at commit <code class="docutils literal notranslate"><span class="pre">7b10edf</span></code>, the commit the
+<code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> submodule is pinned to (<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">maniflow-tb/scripts/train_maniflow.py</span> <span class="pre">--help</span></code>
+prints the same list). For the workflow (setup, an example run, outputs, evaluation) see
+<a class="reference internal" href="../imitation_learning.html"><span class="std std-doc">Pre-training Policies on Automatically Generated Data</span></a>.</p>
+<p>The flags are spelled with underscores. Each one either sets a field of
+<code class="docutils literal notranslate"><span class="pre">examples/Franka/train_maniflow_multimodal.yaml</span></code> on the <code class="docutils literal notranslate"><span class="pre">train_hvla.py</span></code> command line or
+configures the launcher. With <code class="docutils literal notranslate"><span class="pre">--resume</span></code>, the architecture flags (marked “fresh runs
+only”) are not emitted: the run’s saved <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> defines them.</p>
+<section id="launcher-and-logging">
+<h2>Launcher and logging<a class="headerlink" href="#launcher-and-logging" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--dry_run</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Print the run ID, run directory and training command, then exit without training.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--user_prefix</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Prefix of the run ID (<code class="docutils literal notranslate"><span class="pre">&lt;prefix&gt;-&lt;run</span> <span class="pre">name&gt;</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--run_id</span></code></p></td>
+<td><p>derived</p></td>
+<td><p>Run name; replaces the ID built from the flags (see <a class="reference internal" href="#run-name">Run name</a>). Must be shorter than 123 characters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_gpus_per_node</span></code></p></td>
+<td><p>all visible GPUs</p></td>
+<td><p>GPUs per node (<code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> aware).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num_nodes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Nodes. More than one launches with <code class="docutils literal notranslate"><span class="pre">torch.distributed.run</span></code> (<code class="docutils literal notranslate"><span class="pre">torchrun</span></code>) instead of <code class="docutils literal notranslate"><span class="pre">accelerate</span> <span class="pre">launch</span></code>; run the script once per node with the same flags and its own <code class="docutils literal notranslate"><span class="pre">--node_rank</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--node_rank</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$NODE_RANK</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Rank of this node (multi-node only).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--master_addr</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$MASTER_ADDR</span></code> or <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code></p></td>
+<td><p>Address of node 0 (multi-node only).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--master_port</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$MASTER_PORT</span></code> or <code class="docutils literal notranslate"><span class="pre">29500</span></code></p></td>
+<td><p>Rendezvous port on node 0 (multi-node only).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--wandb_project</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$WANDB_PROJECT</span></code> or <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code></p></td>
+<td><p>W&amp;B project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--wandb_entity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$WANDB_ENTITY</span></code> or your default entity</p></td>
+<td><p>W&amp;B entity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--wandb_mode</span></code></p></td>
+<td><p>see description</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">online</span></code>, <code class="docutils literal notranslate"><span class="pre">offline</span></code> or <code class="docutils literal notranslate"><span class="pre">disabled</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">$WANDB_MODE</span></code>, else <code class="docutils literal notranslate"><span class="pre">online</span></code> when <code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code> is set or <code class="docutils literal notranslate"><span class="pre">~/.netrc</span></code> holds W&amp;B credentials, else <code class="docutils literal notranslate"><span class="pre">offline</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The training command runs inside <code class="docutils literal notranslate"><span class="pre">maniflow-tb/</span></code>. <code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">--run_root_dir</span></code> are
+resolved against the directory you launch from, so relative paths work from anywhere.</p>
+</section>
+<section id="data">
+<h2>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h2>
+<p>All fresh runs only, except <code class="docutils literal notranslate"><span class="pre">--num_workers</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code></p></td>
+<td><p>none</p></td>
+<td><p>One or more LeRobot datasets; several are co-trained, merged at load time. Required for a new run; a <code class="docutils literal notranslate"><span class="pre">--resume</span></code> run reads it from its saved config.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--data_mix</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">apr13_test</span></code></p></td>
+<td><p>Dataset mixture name (<code class="docutils literal notranslate"><span class="pre">datasets.vla_data.data_mix</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--val_ratio</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Fraction of episodes held out for validation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code></p></td>
+<td><p>all</p></td>
+<td><p>Use only N episodes, then split them into validation and training. A comma-separated list (e.g. <code class="docutils literal notranslate"><span class="pre">10000,5000,2000</span></code>) caps each <code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code> separately.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--dataset_ratio</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Sampling ratio across datasets, e.g. <code class="docutils literal notranslate"><span class="pre">1,1</span></code> or <code class="docutils literal notranslate"><span class="pre">10,5,2</span></code>; larger datasets are subsampled to match.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_workers</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">12</span></code></p></td>
+<td><p>Dataloader workers per process.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--filter_config</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Episode filter preset name or YAML path; presets are in <code class="docutils literal notranslate"><span class="pre">maniflow-tb/hvla/config/episode_filtering/</span></code> (<code class="docutils literal notranslate"><span class="pre">spatial_filter</span></code>). A relative YAML path is resolved from <code class="docutils literal notranslate"><span class="pre">maniflow-tb/</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--filter_override</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Dotlist overrides of the filter config, e.g. <code class="docutils literal notranslate"><span class="pre">spatial_region=inside</span> <span class="pre">bounds='[0.4,0.7,-0.1,0.1]'</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--filter_joint_jumps</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Drop episodes in which any joint moves more than RAD radians between consecutive frames (teleport resets). The bare flag uses 0.5. Applies to training and validation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--filter_small_rotates</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Drop episodes with a rotate cycle that turns the block less than DEG degrees about z (failed rotate attempts). The bare flag uses 10. Applies to training and validation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--goal_action_filter</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Allow-list of <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> values a training sample may start on, e.g. <code class="docutils literal notranslate"><span class="pre">'pick,place'</span></code>. With several datasets, <code class="docutils literal notranslate"><span class="pre">'pick,place;stack,done;lift'</span></code> gives one <code class="docutils literal notranslate"><span class="pre">;</span></code>-separated group per dataset, and an empty group leaves that dataset unfiltered. Not to be combined with <code class="docutils literal notranslate"><span class="pre">--phase_sample_weights</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--phase_sample_weights</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Sampling weights per <code class="docutils literal notranslate"><span class="pre">action.low_level_action</span></code> phase: a preset string or a dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--skip_actions</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Comma-separated low-level actions to skip.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--drop_redundant_table_moves</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Drop redundant back-to-back table-to-table retries, keeping the last attempt.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--max_frames_per_episode</span></code></p></td>
+<td><p>all</p></td>
+<td><p>Truncate each episode to its first N frames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--skip_first_n_steps_per_episode</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Skip the first N frames of every episode.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="training-loop-and-optimizer">
+<h2>Training loop and optimizer<a class="headerlink" href="#training-loop-and-optimizer" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--duration</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200000</span></code></p></td>
+<td><p>Training steps (<code class="docutils literal notranslate"><span class="pre">trainer.max_train_steps</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--dbs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">128</span></code></p></td>
+<td><p>Batch size per GPU.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--grad_accum</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Gradient accumulation steps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--optimizer</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">adamw</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">adamw</span></code> (DeepSpeed ZeRO-2) or <code class="docutils literal notranslate"><span class="pre">muon</span></code> (distributed Muon + AdamW on plain DDP, bf16). <code class="docutils literal notranslate"><span class="pre">muon</span></code> needs the <code class="docutils literal notranslate"><span class="pre">muon-optimizer</span></code> package (see <code class="docutils literal notranslate"><span class="pre">maniflow-tb/INSTALL.md</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--muon_lr</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.02</span></code></p></td>
+<td><p>Muon learning rate; lower it (e.g. 0.01 or 0.005) if training diverges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_interval</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10000</span></code></p></td>
+<td><p>Save a checkpoint every N steps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--logging_frequency</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
+<td><p>Log metrics every N steps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--run_root_dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">runs</span></code></p></td>
+<td><p>Parent directory of the run directory (<code class="docutils literal notranslate"><span class="pre">&lt;run_root_dir&gt;/&lt;run_id&gt;</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--resume</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Run ID to resume from <code class="docutils literal notranslate"><span class="pre">&lt;run_root_dir&gt;/&lt;run_id&gt;/</span></code>, using its <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> and latest complete checkpoint. Fails if the run has no loadable checkpoint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--pretrained_checkpoint</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Checkpoint whose weights initialize a new run at step 0; optimizer, scheduler, EMA and W&amp;B state are not restored.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="action-and-state">
+<h2>Action and state<a class="headerlink" href="#action-and-state" title="Link to this heading">#</a></h2>
+<p>All fresh runs only.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--action_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">abs</span></code></p></td>
+<td><p>Action space: <code class="docutils literal notranslate"><span class="pre">abs</span></code> or <code class="docutils literal notranslate"><span class="pre">relative</span></code> (9-D joints), <code class="docutils literal notranslate"><span class="pre">ee</span></code> (8-D end effector), <code class="docutils literal notranslate"><span class="pre">ee_target_7d</span></code> or <code class="docutils literal notranslate"><span class="pre">rel_ee_target_7d</span></code> (9-D).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--action_keys</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Custom action columns, e.g. <code class="docutils literal notranslate"><span class="pre">action.cube_position.block_r</span> <span class="pre">action.cube_distance.block_r</span></code>. The action size is read from the first dataset’s <code class="docutils literal notranslate"><span class="pre">meta/info.json</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--action_norm_band</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">q01_q99</span></code></p></td>
+<td><p>Arm-action normalization band: <code class="docutils literal notranslate"><span class="pre">q01_q99</span></code> (the <code class="docutils literal notranslate"><span class="pre">stats.json</span></code> quantiles, clipping the outer 1% of labels) or <code class="docutils literal notranslate"><span class="pre">valid_min_max</span></code> (min/max over the <code class="docutils literal notranslate"><span class="pre">action.is_valid</span></code> rows, no clipping).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--state_estimation</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Predict <code class="docutils literal notranslate"><span class="pre">cube_position.block_red1</span></code> and <code class="docutils literal notranslate"><span class="pre">cube_distance.block_red1</span></code> (4-D) with a horizon of 1, saving every 2000 steps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--state_dim</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">9</span></code></p></td>
+<td><p>Proprioceptive state size: joint positions (7), gripper and PD mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--include_jvel_ee_pos</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Add joint velocities (7) and the end-effector XYZ (3), giving a 19-D state.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--zero_state</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Zero the state vector, keeping its size.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--ft</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Add the 6-D wrench to the state.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--horizon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">50</span></code></p></td>
+<td><p>Predicted action chunk length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--n_action_steps</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">25</span></code></p></td>
+<td><p>Actions executed per chunk.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num_inference_steps</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">12</span></code></p></td>
+<td><p>ODE solver steps at inference.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="cameras-and-rgb">
+<h2>Cameras and RGB<a class="headerlink" href="#cameras-and-rgb" title="Link to this heading">#</a></h2>
+<p>All fresh runs only.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--camera_config</span></code></p></td>
+<td><p>front and gripper RGB</p></td>
+<td><p>Camera preset (table below).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--no_gripper</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Legacy: same as <code class="docutils literal notranslate"><span class="pre">--camera_config</span> <span class="pre">front_rgb</span></code> (<code class="docutils literal notranslate"><span class="pre">front_rgb_depth</span></code> with <code class="docutils literal notranslate"><span class="pre">--depth</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rgb_224</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Read pre-resized RGB videos from <code class="docutils literal notranslate"><span class="pre">&lt;camera&gt;_224</span></code> instead of the native 640x360 ones. Missing 224 videos fail the run.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rgb_backbone</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">vit_base_patch16_clip_224.openai</span></code></p></td>
+<td><p>timm RGB backbone, e.g. <code class="docutils literal notranslate"><span class="pre">vit_base_patch16_siglip_224.webli</span></code>, <code class="docutils literal notranslate"><span class="pre">vit_base_patch16_siglip_224.v2_webli</span></code> (SigLIP2) or <code class="docutils literal notranslate"><span class="pre">vit_so400m_patch14_siglip_224.webli</span></code>. The normalization mean and std are read from the checkpoint.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--siglip</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Shorthand for <code class="docutils literal notranslate"><span class="pre">--rgb_backbone</span> <span class="pre">vit_base_patch16_siglip_224.v2_webli</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--freeze_rgb_backbone</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Freeze the RGB backbone instead of fine-tuning it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Add the previous front frame as a third RGB view.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--previous_front_frame_lookback_weights</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Weighted lookback ranges of that frame, e.g. <code class="docutils literal notranslate"><span class="pre">0-1_1</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--target_crop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
+<td><p>Target-centred square front crop: <code class="docutils literal notranslate"><span class="pre">-1</span></code> off, <code class="docutils literal notranslate"><span class="pre">0</span></code> = all of it above the target, <code class="docutils literal notranslate"><span class="pre">50</span></code> centred, <code class="docutils literal notranslate"><span class="pre">33</span></code> = 67/33 top/bottom, <code class="docutils literal notranslate"><span class="pre">25</span></code> = 75/25. Not with <code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--camera_config</span></code> presets:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Preset</p></th>
+<th class="head"><p>RGB</p></th>
+<th class="head"><p>Depth</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">front_rgb</span></code></p></td>
+<td><p>front</p></td>
+<td><p>none</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">front_gripper_rgb</span></code></p></td>
+<td><p>front, gripper</p></td>
+<td><p>none</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">front_rgb_depth</span></code></p></td>
+<td><p>front</p></td>
+<td><p>front</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">front_gripper_rgb_front_depth</span></code></p></td>
+<td><p>front, gripper</p></td>
+<td><p>front</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">front_gripper_rgb_depth</span></code></p></td>
+<td><p>front, gripper</p></td>
+<td><p>front, gripper</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">front_gripper_rgb_gripper_depth</span></code></p></td>
+<td><p>front, gripper</p></td>
+<td><p>gripper</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">front_gripper_depth_only</span></code></p></td>
+<td><p>none</p></td>
+<td><p>front, gripper</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gripper_rgb_depth</span></code></p></td>
+<td><p>gripper</p></td>
+<td><p>gripper</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gripper_rgb</span></code></p></td>
+<td><p>gripper</p></td>
+<td><p>none</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A preset without RGB turns target conditioning off.</p>
+</section>
+<section id="depth">
+<h2>Depth<a class="headerlink" href="#depth" title="Link to this heading">#</a></h2>
+<p>All fresh runs only. Any depth input also turns on <code class="docutils literal notranslate"><span class="pre">--per_cam_norm</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--depth</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Use depth (raw depth, back-projected to a pointmap on the GPU). Without <code class="docutils literal notranslate"><span class="pre">--camera_config</span></code>, both cameras’ depth.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_encoder</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">shared_rgb</span></code></p></td>
+<td><p>Depth encoder: <code class="docutils literal notranslate"><span class="pre">dense</span></code>, <code class="docutils literal notranslate"><span class="pre">sparse</span></code>, <code class="docutils literal notranslate"><span class="pre">shared_rgb</span></code> (the RGB backbone) or <code class="docutils literal notranslate"><span class="pre">defm</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--sparse_depth</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Sparse PointNet encoder. Only read when <code class="docutils literal notranslate"><span class="pre">--depth_encoder</span></code> is empty, which its choices do not allow, so it has no effect; use <code class="docutils literal notranslate"><span class="pre">--depth_encoder</span> <span class="pre">sparse</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--ptmap_backbone</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">convnextv2_tiny.fcmae_ft_in22k_in1k</span></code></p></td>
+<td><p>Pointmap encoder backbone (e.g. <code class="docutils literal notranslate"><span class="pre">vit_small_patch14_dinov2</span></code>). Ignored with <code class="docutils literal notranslate"><span class="pre">--depth_encoder</span> <span class="pre">shared_rgb</span></code>, which uses <code class="docutils literal notranslate"><span class="pre">--rgb_backbone</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_rg8</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Decode depth from RG8-packed videos in <code class="docutils literal notranslate"><span class="pre">&lt;camera&gt;_&lt;variant&gt;</span></code>: <code class="docutils literal notranslate"><span class="pre">rg8</span></code> / <code class="docutils literal notranslate"><span class="pre">rg8_224</span></code> (depth = R + 256 G) or <code class="docutils literal notranslate"><span class="pre">rg8_55</span></code> / <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> (10-bit 5+5 pack, clipped to 1023 mm). Only for datasets re-encoded with <code class="docutils literal notranslate"><span class="pre">scripts/depth_conversion/reencode_to_rg8_batch.py</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_g12</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Read depth from gray HEVC videos <code class="docutils literal notranslate"><span class="pre">&lt;depth_key&gt;_&lt;variant&gt;</span></code>: <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> (lossless gray12le), <code class="docutils literal notranslate"><span class="pre">g10_224</span></code> (lossless gray10le, clipped to 1023 mm) or <code class="docutils literal notranslate"><span class="pre">g10_224_crf035</span></code> (x265 CRF 0.35). Not with <code class="docutils literal notranslate"><span class="pre">--depth_rg8</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--add_depth_noise</span></code></p></td>
+<td><p>off</p></td>
+<td><p>RGB-guided depth noise augmentation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_noise_ideal_mix</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.6</span></code></p></td>
+<td><p>Blend of clean and corrupted depth (1.0 = clean).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--per_cam_norm</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Per-camera pointmap normalization bounds instead of global ones.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="target-conditioning">
+<h2>Target conditioning<a class="headerlink" href="#target-conditioning" title="Link to this heading">#</a></h2>
+<p>All fresh runs only.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--token</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Target heatmap as cross-attention context tokens.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--timestep_concat</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Heatmap fused into the AdaLN time conditioning.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--target_embedding</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Gaussian bias on the RGB tokens, without a heatmap encoder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--target_pe</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Learned per-patch encoding on the RGB tokens, without a heatmap encoder.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--no_target</span></code></p></td>
+<td><p>off</p></td>
+<td><p>No target conditioning.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--heatmap_encoder_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">shared_rgb</span></code></p></td>
+<td><p>Heatmap encoder for <code class="docutils literal notranslate"><span class="pre">--token</span></code>: <code class="docutils literal notranslate"><span class="pre">shared_rgb</span></code> (the CLIP ViT), <code class="docutils literal notranslate"><span class="pre">convnextv2</span></code> (a separate pretrained one), <code class="docutils literal notranslate"><span class="pre">lightweight</span></code>, or <code class="docutils literal notranslate"><span class="pre">cnn</span></code> (from scratch on the same 14x14 grid).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--target_mask_prob</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></td>
+<td><p>Probability of dropping the target conditioning during training.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--target_sigma</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.8</span></code></p></td>
+<td><p>Gaussian sigma of the heatmap, in patches.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The five mode flags are mutually exclusive, but at this commit <code class="docutils literal notranslate"><span class="pre">--token</span></code> is on by default and
+checked first, so <code class="docutils literal notranslate"><span class="pre">--timestep_concat</span></code>, <code class="docutils literal notranslate"><span class="pre">--target_embedding</span></code> and <code class="docutils literal notranslate"><span class="pre">--target_pe</span></code> have no
+effect: the mode is <code class="docutils literal notranslate"><span class="pre">token</span></code> unless <code class="docutils literal notranslate"><span class="pre">--no_target</span></code> is given.</p>
+</section>
+<section id="language-conditioning">
+<h2>Language conditioning<a class="headerlink" href="#language-conditioning" title="Link to this heading">#</a></h2>
+<p>All fresh runs only.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--language_conditioned</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Language conditioning (already on; turn it off with <code class="docutils literal notranslate"><span class="pre">--no_language</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--no_language</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Disable language conditioning.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--language_model</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">t5-small</span></code></p></td>
+<td><p>T5 encoder: <code class="docutils literal notranslate"><span class="pre">t5-small</span></code>, <code class="docutils literal notranslate"><span class="pre">t5-base</span></code> or <code class="docutils literal notranslate"><span class="pre">t5-large</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--language_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">action_only</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">action_only</span></code> drops the coordinates from the language string; <code class="docutils literal notranslate"><span class="pre">action_goal</span></code> keeps them.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--lang_injection_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">token</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">token</span></code> (cross-attention) or <code class="docutils literal notranslate"><span class="pre">timestep_concat</span></code> (fused into AdaLN).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="action-chunk-labelling">
+<h2>Action-chunk labelling<a class="headerlink" href="#action-chunk-labelling" title="Link to this heading">#</a></h2>
+<p>All fresh runs only.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--pause_on_attempt</span></code></p></td>
+<td><p>off</p></td>
+<td><p>When a pick, place, flip or rotate switch falls inside a chunk, repeat that frame’s action for the rest of the chunk and set done = 1 from the switch. Not with <code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--freeze_on_goal_change</span></code></p></td>
+<td><p>off</p></td>
+<td><p>When the lookback crosses a goal change, relabel the chunk as “hold position”. Needs <code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="diagnostics">
+<h2>Diagnostics<a class="headerlink" href="#diagnostics" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_first_batch</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Save the preprocessed first batch to <code class="docutils literal notranslate"><span class="pre">&lt;run_dir&gt;/first_batch_data/</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_arch_diagram</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Save an ASCII architecture diagram to <code class="docutils literal notranslate"><span class="pre">&lt;run_dir&gt;/architecture.txt</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--profile_steps</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>cProfile the first N steps on rank 0, dumped to <code class="docutils literal notranslate"><span class="pre">&lt;run_dir&gt;/profiles/</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--faulthandler</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Set <code class="docutils literal notranslate"><span class="pre">PYTHONFAULTHANDLER=1</span></code>, so a native crash dumps a Python traceback per thread.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="checks-the-script-enforces">
+<h2>Checks the script enforces<a class="headerlink" href="#checks-the-script-enforces" title="Link to this heading">#</a></h2>
+<p>The script stops with an error for:</p>
+<ul class="simple">
+<li><p>a new run without <code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--num_nodes</span></code> above 1 without <code class="docutils literal notranslate"><span class="pre">--run_id</span></code> or <code class="docutils literal notranslate"><span class="pre">--resume</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--depth_rg8</span></code> together with <code class="docutils literal notranslate"><span class="pre">--depth_g12</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--freeze_on_goal_change</span></code> without <code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--pause_on_attempt</span></code> together with <code class="docutils literal notranslate"><span class="pre">--use_previous_front_frame</span></code>;</p></li>
+<li><p>no visible GPU and no <code class="docutils literal notranslate"><span class="pre">--num_gpus_per_node</span></code> (not checked with <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code>);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--optimizer</span> <span class="pre">muon</span></code> without the <code class="docutils literal notranslate"><span class="pre">muon</span></code> package installed (not checked with <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code>);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--resume</span></code> of a run without <code class="docutils literal notranslate"><span class="pre">&lt;run_root_dir&gt;/&lt;run_id&gt;/config.yaml</span></code> (not checked with <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code>).</p></li>
+</ul>
+</section>
+<section id="run-name">
+<h2>Run name<a class="headerlink" href="#run-name" title="Link to this heading">#</a></h2>
+<p>A fresh run’s ID is <code class="docutils literal notranslate"><span class="pre">&lt;datasets&gt;_&lt;horizon&gt;_&lt;n_action_steps&gt;_&lt;action_mode&gt;</span></code> plus a suffix for
+each non-default choice, then a <code class="docutils literal notranslate"><span class="pre">-&lt;MM-DD-HH-MM-SS&gt;</span></code> timestamp:</p>
+<ul class="simple">
+<li><p>the target mode, heatmap encoder, mask and sigma (<code class="docutils literal notranslate"><span class="pre">_token_shared_rgb_mask0.1_sigma0.8</span></code>);</p></li>
+<li><p>the language model and mode (<code class="docutils literal notranslate"><span class="pre">_lang_t5-small_action_only</span></code>);</p></li>
+<li><p>the camera preset (for example <code class="docutils literal notranslate"><span class="pre">_FGd</span></code>) and depth encoder;</p></li>
+<li><p>the backbone, state, filtering, ratio, optimizer and labelling flags.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">--rgb_224</span></code>, <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> and <code class="docutils literal notranslate"><span class="pre">--target_crop</span></code> add the prefixes <code class="docutils literal notranslate"><span class="pre">rgb224_</span></code>, <code class="docutils literal notranslate"><span class="pre">Ep&lt;N&gt;_</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tcrop&lt;N&gt;_</span></code>, and <code class="docutils literal notranslate"><span class="pre">--user_prefix</span></code> goes in front of everything. IDs longer than 122 characters
+are truncated before the timestamp, so that <code class="docutils literal notranslate"><span class="pre">--resume</span></code> accepts them. <code class="docutils literal notranslate"><span class="pre">--run_id</span></code> replaces the
+whole ID, timestamp included.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../imitation_learning.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Pre-training ManiFlow Policies on Automatically Generated Data</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="new_policy_server.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Setting up a new policy server</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#launcher-and-logging">Launcher and logging</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data">Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-loop-and-optimizer">Training loop and optimizer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action-and-state">Action and state</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cameras-and-rgb">Cameras and RGB</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#depth">Depth</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#target-conditioning">Target conditioning</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#language-conditioning">Language conditioning</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action-chunk-labelling">Action-chunk labelling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diagnostics">Diagnostics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checks-the-script-enforces">Checks the script enforces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-name">Run name</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/imitation_learning/train_maniflow.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

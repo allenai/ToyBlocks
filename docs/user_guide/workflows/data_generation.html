@@ -1,0 +1,889 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Automatic Data Generation &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/data_generation';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Stage 1: Task generation" href="datagen/task_generation.html" />
+    <link rel="prev" title="ToyBlocks Installation and Setup Instructions" href="installation_and_setup_instructions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Automatic Data Generation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="evaluations.html">Policy Evaluation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Workflows</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Automatic Data Generation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="automatic-data-generation">
+<h1>Automatic Data Generation<a class="headerlink" href="#automatic-data-generation" title="Link to this heading">#</a></h1>
+<p>The data generation pipeline turns a symbolic PDDL description of a task into a large,
+automatically-labelled dataset of robot demonstrations in simulation. You describe what should be
+true at the end of the task, for example “the red block is on the green block”, and the
+pipeline does the rest: it samples scenes in which the task can start, plans every
+episode with a symbolic planner, carries the plan out with motion-planned skills on
+hundreds of simulated environments at once, checks every step against the simulator,
+and records the demonstrations in LeRobot format, including sensor observations, ready for training.</p>
+<p>Because tasks are written as goals rather than as simulation code, the same pipeline
+produces data for stacking, flipping, rotating, pick-and-place and other task
+families, and it runs the same way on a single GPU or across every GPU of one machine.</p>
+<section id="design-goals-for-the-datagen-system">
+<h2>Design goals for the datagen system<a class="headerlink" href="#design-goals-for-the-datagen-system" title="Link to this heading">#</a></h2>
+<ul>
+<li><p><strong>Declarative tasks.</strong> A task is a Planning Domain Definition Language (PDDL)
+problem: a set of initial facts and a goal over predicates such as <code class="docutils literal notranslate"><span class="pre">on</span></code>, <code class="docutils literal notranslate"><span class="pre">on_table</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ori_of</span></code>. Task generators in <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/</span></code> produce whole task families, and
+the simulation environment and its reset states are generated from the PDDL
+automatically. Adding a task means writing a goal, not simulation code.</p></li>
+<li><p><strong>Correct by construction.</strong> The FF symbolic planner plans each environment from its
+own symbolic state. After every skill, the skill’s effects are checked against the
+live simulation. If a check fails, the environment returns to its pre-skill snapshot
+and retries; once the retries run out, the planner re-plans from the current state.
+An episode is labelled successful only if the PDDL goal holds in the final state, and
+failed episodes are stored in a separate failure split instead of being mixed in.</p></li>
+<li><p><strong>Scalable, with CPU and GPU parallelization.</strong> One Isaac process per GPU runs hundreds of
+environments at once (eg. 256 per GPU in measured runs). Skills run as batched tensor
+operations on a pool of cuRobo inverse-kinematics and trajectory-optimization solvers,
+with a separate collision world per environment, while each environment’s FF plan
+takes milliseconds on the CPU. Finished environments stream straight into their next
+episode, and several problems share one process (8 by default) so the Isaac start-up
+cost is paid once per group.</p></li>
+<li><p><strong>Diverse tasks on simple assets.</strong> Scene randomization covers block size, table height, friction,
+distractor blocks and block placement, and the robot’s starting pose can be randomized
+(always collision-free).</p></li>
+<li><p><strong>Rerendering, with visuals separate from physics.</strong> Execution records the
+trajectory states; the camera videos come from a separate rerendering stage. It replays
+each recorded episode by placing the robot and objects frame by frame, with no physics
+stepping, and renders it under domain randomization: lighting and sky images, table
+materials, camera poses and field of view, and block letters and colours. This means:</p>
+<ul class="simple">
+<li><p>one expensive planning-and-physics run can be rendered many times with different
+visuals, for example several copies per episode, or separate train and test letter
+sets, without re-planning;</p></li>
+<li><p>rendering is scheduled separately from data generation: as its own job in the
+pipeline’s GPU-slot pool, appended to each execution job, or run again later on the
+stored states;</p></li>
+<li><p>the render settings sampled for each episode are recorded, so evaluation can
+reproduce an episode’s look.</p></li>
+</ul>
+<p>Re-rendered pixels match the original rendering closely but not exactly: driver and
+scene-version differences remain.</p>
+</li>
+<li><p><strong>Rich, training-ready output.</strong> Episodes are written in LeRobot v3 format. Alongside
+the robot state, camera streams and actions, every frame records the symbolic state,
+the current high-level and low-level action labels, and the goal. A merge and an
+annotation step produce one training dataset.</p></li>
+<li><p><strong>Reproducible and traceable.</strong> Each run pins the git commit, saves its full
+configuration, and writes provenance into the dataset (the commit, checksums of the
+source files, copies of the PDDL files). An interrupted run can be resumed, skipping
+the stages that already finished.</p></li>
+<li><p><strong>One command, one machine.</strong> The orchestrator runs every stage on the machine you
+launch it on, spreading problems over the visible GPUs. The same command works on a
+single-GPU workstation and on a multi-GPU node (see <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>).</p></li>
+</ul>
+</section>
+<section id="what-you-can-do-with-the-datagen-pipeline">
+<h2>What you can do with the datagen pipeline?<a class="headerlink" href="#what-you-can-do-with-the-datagen-pipeline" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Generate a demonstration dataset for a task family</strong>, such as 3-block stacking,
+flipping, rotating or pick-and-place: pick a generator in <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/</span></code> and run
+<code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline.py</span></code> (see <a class="reference internal" href="#full-pipeline-data-generation">Full-pipeline data generation</a>).</p></li>
+<li><p><strong>Generate a single task end to end on one GPU</strong> for debugging, with
+<code class="docutils literal notranslate"><span class="pre">generate_task_from_pddl.py</span></code> followed by <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code> (see
+<a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">Env generation</span></a> and
+<a class="reference internal" href="datagen/execution.html"><span class="std std-doc">Execution</span></a>).</p></li>
+<li><p><strong>Randomize the physical scene</strong> (block size, table height, friction, distractors and
+robot start pose); scene randomization is on by default, and <code class="docutils literal notranslate"><span class="pre">--randomize-robot-init</span></code>
+adds the robot start pose.</p></li>
+<li><p><strong>Re-render a dataset</strong> with new lighting, materials, cameras, and block letters or
+colours, as many times as you like, without re-planning (see
+<a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>).</p></li>
+<li><p><strong>Generate play data</strong>, where each scene plays a chain of goals with no reset in
+between, with <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_playdata_pipeline.py</span></code> or
+<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span> <span class="pre">--play</span></code>.</p></li>
+<li><p><strong>Relabel a policy’s failures</strong>: turn the states where a policy failed during
+evaluation into new expert demonstrations, with
+<code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_tamper_pipeline.py</span></code>
+(<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">TAMPER</a>).</p></li>
+<li><p><strong>Produce training-ready output</strong>: one merged, annotated LeRobot dataset, ready for
+imitation learning and for <a class="reference internal" href="evaluations.html"><span class="std std-doc">evaluation</span></a>.</p></li>
+</ul>
+</section>
+<section id="how-to-get-started">
+<h2>How to get started<a class="headerlink" href="#how-to-get-started" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> runs the stages below in order, all on your machine.
+Each stage can also be run on its own, as its page (linked under “Datagen Pipeline Steps” below)
+shows.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>run_datagen_pipeline.py
+  ├─ task-gen    scripts/task_gen/*.py           PDDL problems
+  ├─ env         generate_task_from_pddl.py      env package + sampled reset states
+  ├─ execution   scripts/vecgen/run.py           FF per env -&gt; batched skills -&gt; verify -&gt; record
+  ├─ rerender    (optional, --rerender or        new visuals from the recorded states
+  │               --rerender-local)
+  ├─ merge       merge_datasets.py               one training dataset
+  └─ annotate    annotate_target_xy.py           target annotations
+</pre></div>
+</div>
+<p>If you simply want to generate some example datasets with already tested scripts, start from these entry points in the <a class="reference external" href="https://github.com/allenai/ToyBlocks/tree/main/scripts/datagen">scripts/datagen folder</a>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_datagen_pipeline.py">run_datagen_pipeline.py</a>: the end-to-end pipeline described on this page; its docstring lists ready-to-run example commands.</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_playdata_pipeline.py">run_playdata_pipeline.py</a>: the same pipeline for play data, where each scene plays a chain of goals without resetting.</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_tamper_pipeline.py">run_tamper_pipeline.py</a>: turns states where a policy failed during evaluation into new expert demonstrations.</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/merge_datasets.py">merge_datasets.py</a>: merges per-problem LeRobot datasets into one.</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/plot_episode.py">plot_episode.py</a>: plots every signal of one episode, a quick way to check a generated dataset.</p></li>
+</ul>
+</section>
+<section id="full-pipeline-data-generation">
+<h2>Full-Pipeline Data Generation<a class="headerlink" href="#full-pipeline-data-generation" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>.</p>
+<section id="datagen-pipeline-steps">
+<h3>Datagen Pipeline Steps<a class="headerlink" href="#datagen-pipeline-steps" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong><a class="reference internal" href="datagen/task_generation.html"><span class="std std-doc">Task generation</span></a></strong>: runs a task gen script (default <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/stack_three.py</span> <span class="pre">--train</span></code>) to produce randomised PDDL problem files.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">Env generation</span></a></strong>: builds one env package per problem and samples its reset states (<code class="docutils literal notranslate"><span class="pre">generate_task_from_pddl.py</span></code>). Skipped when <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span></code> &gt; 1 (the default is 8): the execution step then builds one multi-problem package per group itself.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/execution.html"><span class="std std-doc">Execution</span></a></strong>: runs vecgen on each problem or group (<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code>): FF planning per environment, batched skills, verification, and LeRobot recording.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Rerender</span></a></strong> (optional): re-renders each problem’s episodes as soon as its execution finishes, either as its own job in the GPU-slot pool (<code class="docutils literal notranslate"><span class="pre">--rerender</span></code>) or inside the execution job (<code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code>).</p></li>
+<li><p><strong><a class="reference internal" href="datagen/merge.html"><span class="std std-doc">Merge</span></a></strong>: merges all successful per-problem LeRobot datasets (the re-rendered ones when the rerender stage ran) into a single LeRobot training dataset (<code class="docutils literal notranslate"><span class="pre">merge_datasets.py</span></code>).</p></li>
+<li><p><strong><a class="reference internal" href="datagen/annotate.html"><span class="std std-doc">Annotate</span></a></strong>: adds per-frame goal columns to the merged LeRobot dataset (<code class="docutils literal notranslate"><span class="pre">annotate_target_xy.py</span></code>): <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> (the current action as text, e.g. <code class="docutils literal notranslate"><span class="pre">pick</span></code>, <code class="docutils literal notranslate"><span class="pre">push</span> <span class="pre">left</span></code>) and <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> (the target object’s pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were re-rendered or recorded with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>.</p></li>
+</ol>
+</section>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Full pipeline with the defaults (the RI stack-3 training-set settings), on every visible GPU</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3
+
+<span class="c1"># The same, re-rendered: the camera videos come from the rerender stage</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>--rerender-local
+
+<span class="c1"># A small run: 2 problems, 16 episodes each, re-rendered, outputs under ./outputs</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3_small<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output-root<span class="w"> </span>outputs<span class="w"> </span>--rerender-local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task-gen-count<span class="w"> </span><span class="m">2</span><span class="w"> </span>--env-per-problem<span class="w"> </span><span class="m">16</span><span class="w"> </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span>
+
+<span class="c1"># Another task generator</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_rotate<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task-gen-script<span class="w"> </span>scripts/task_gen/rotate.py<span class="w"> </span>--task-gen-count<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># Interactive mode: choose which steps to run and edit parameters</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>-i
+
+<span class="c1"># Quick smoke test (1 problem, 16 envs, no randomization)</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_smoketest<span class="w"> </span>--smoke-test
+
+<span class="c1"># Continue an interrupted run: finished stages are skipped</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>--resume
+</pre></div>
+</div>
+</section>
+<section id="key-options">
+<h3>Key Options<a class="headerlink" href="#key-options" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code></p></td>
+<td><p>(required)</p></td>
+<td><p>Name for this experiment run. Used for directory naming.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--interactive</span></code> / <code class="docutils literal notranslate"><span class="pre">-i</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Interactively select steps and edit parameters before running.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--resume</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Skip stages already marked complete and restart the first unfinished one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--smoke-test</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Override to minimal params: 1 problem, 16 envs, no distractors, no scene randomization.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--task-gen-script</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scripts/task_gen/stack_three.py</span> <span class="pre">--train</span></code></p></td>
+<td><p>Which task generator to use (<code class="docutils literal notranslate"><span class="pre">flip.py</span></code>, <code class="docutils literal notranslate"><span class="pre">rotate.py</span></code>, <code class="docutils literal notranslate"><span class="pre">pnp.py</span></code>, <code class="docutils literal notranslate"><span class="pre">stack_three.py</span></code>, …), optionally with its own flags.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--task-gen-count</span></code></p></td>
+<td><p>1000</p></td>
+<td><p>Number of PDDL problems to generate.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--task-gen-seed</span></code></p></td>
+<td><p>6303</p></td>
+<td><p>Task generation seed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--randomize-scene</span></code> / <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Block size, table height, and friction randomization.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--randomize-robot-init</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Give each reset state a random collision-free arm configuration and gripper state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num-distractors</span></code></p></td>
+<td><p>0</p></td>
+<td><p>Distractor objects per problem (passed to the generator as <code class="docutils literal notranslate"><span class="pre">--num_distractors</span></code>; see <a class="reference internal" href="datagen/task_generation.html#common-pitfalls"><span class="std std-ref">Task generation</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--domain-path</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks</span></code></p></td>
+<td><p>Path to the PDDL domain directory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--usd-library</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">train_blocks_large</span></code></p></td>
+<td><p>Glyph asset library that block names resolve against at code generation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--skip-task-gen</span></code>, <code class="docutils literal notranslate"><span class="pre">--skip-env</span></code>, <code class="docutils literal notranslate"><span class="pre">--skip-execution</span></code>, <code class="docutils literal notranslate"><span class="pre">--skip-merge</span></code>, <code class="docutils literal notranslate"><span class="pre">--skip-annotate</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Skip individual steps for re-runs or debugging.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="scene-randomization">
+<h3>Scene Randomization<a class="headerlink" href="#scene-randomization" title="Link to this heading">#</a></h3>
+<p>The pipeline can randomize the following parts of the physical scene:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Randomization</p></th>
+<th class="head"><p>Flags</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Block size</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--block-size-range</span> <span class="pre">MIN</span> <span class="pre">MAX</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.03</span> <span class="pre">0.05</span></code></p></td>
+<td><p>Ignored with <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table height</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--table-height-range</span> <span class="pre">MIN</span> <span class="pre">MAX</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-0.05</span> <span class="pre">0.05</span></code></p></td>
+<td><p>Height offset; ignored with <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>Friction</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--friction-range</span> <span class="pre">MIN</span> <span class="pre">MAX</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span> <span class="pre">0.5</span></code></p></td>
+<td><p>Ignored with <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Distractor objects</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--num-distractors</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Extra blocks that are not part of the goal.</p></td>
+</tr>
+<tr class="row-even"><td><p>Block placement</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--block-x-range</span> <span class="pre">SPEC</span></code>, <code class="docutils literal notranslate"><span class="pre">--block-y-range</span> <span class="pre">SPEC</span></code></p></td>
+<td><p>PDDL value, else <code class="docutils literal notranslate"><span class="pre">[-0.1,</span> <span class="pre">0.25]</span></code> / <code class="docutils literal notranslate"><span class="pre">[-0.30,</span> <span class="pre">0.30]</span></code></p></td>
+<td><p>Table-frame window for on-table block spawns; accepts one interval or several disjoint intervals.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Robot start pose</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--randomize-robot-init</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Collision-free random arm configuration per reset state.</p></td>
+</tr>
+<tr class="row-even"><td><p>Robot start pose ranges</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--robot-init-ee-x-range</span></code>, <code class="docutils literal notranslate"><span class="pre">--robot-init-ee-y-range</span></code>, <code class="docutils literal notranslate"><span class="pre">--robot-init-ee-z-min</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.25</span> <span class="pre">0.65</span></code>, <code class="docutils literal notranslate"><span class="pre">-0.35</span> <span class="pre">0.35</span></code>, <code class="docutils literal notranslate"><span class="pre">0.20</span></code></p></td>
+<td><p>End-effector window in the robot base frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gripper start state</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--robot-init-gripper-closed-prob</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></td>
+<td><p>Probability a reset state starts with the gripper closed.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Block size, table height and friction are not sampled per episode: each env package bakes in <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> (default 8) profiles drawn from the ranges, so <code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> and <code class="docutils literal notranslate"><span class="pre">--exec-num-envs</span></code> must be multiples of it. How the ranges travel through the PDDL file to the simulator is in <a class="reference internal" href="datagen/task_generation.html#how-scene-randomization-reaches-the-simulator"><span class="std std-ref">How scene randomization reaches the simulator</span></a>. Visual randomization (lighting, materials, cameras, block letters and colours) happens at rerender time; see <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+<p>Scene randomization is on by default, over the ranges above. With <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code> (and with <code class="docutils literal notranslate"><span class="pre">--smoke-test</span></code>), block size, table height and friction are fixed: block size = 0.04, table height delta = 0, friction = 0.4. To use other ranges:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span>nov05_stack3_rand<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--block-size-range<span class="w"> </span><span class="m">0</span>.03<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--table-height-range<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span><span class="m">0</span>.04<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--friction-range<span class="w"> </span><span class="m">0</span>.1<span class="w"> </span><span class="m">0</span>.4
+</pre></div>
+</div>
+</section>
+<section id="output-and-gpu-options">
+<h3>Output and GPU Options<a class="headerlink" href="#output-and-gpu-options" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--output-root</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Root for every dataset the pipeline writes, relative to the working directory (resolved to an absolute path).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--dataset-folder</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unmerged</span></code></p></td>
+<td><p>Subfolder of <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/</span></code> for the per-problem outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;</span></code></p></td>
+<td><p>Where the merged dataset goes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--local-gpus</span></code></p></td>
+<td><p>every visible GPU</p></td>
+<td><p>GPU ids the stages may use, e.g. <code class="docutils literal notranslate"><span class="pre">--local-gpus</span> <span class="pre">0</span> <span class="pre">1</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span></code></p></td>
+<td><p>1</p></td>
+<td><p>Concurrent problems per GPU. Host RAM is usually the limit; validate videos when raising it.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>See <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a> for how the GPU slots are filled, where logs go,
+and what <code class="docutils literal notranslate"><span class="pre">--resume</span></code> deletes.</p>
+</section>
+<section id="re-rendering">
+<h3>Re-rendering<a class="headerlink" href="#re-rendering" title="Link to this heading">#</a></h3>
+<p>Execution records state and actions only; the videos come from the optional rerender stage. Turn
+it on with one of two flags, which produce the same pixels and differ only in scheduling:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender</span></code></p></td>
+<td><p>Pipelined: each problem’s render is queued as its own item in the GPU-slot pool the moment its execution finishes, so it can overlap the next execution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code></p></td>
+<td><p>Coupled: the render is appended to each execution job and holds the slot its execution just used. With <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> this is the faster choice.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>They are alternatives; passing both is refused. The render defaults are the RI training set’s:
+the flags YAML <code class="docutils literal notranslate"><span class="pre">rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>, one copy per
+episode, the 224 RGB and depth sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The
+default flags draw HDRI backdrops from polyhaven (part of the base asset download) and the
+separately licensed Laval indoor set; see
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops">HDRI backdrops</a>.
+Every rerender flag is described in <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+</section>
+<section id="per-stage-parameters">
+<h3>Per-Stage Parameters<a class="headerlink" href="#per-stage-parameters" title="Link to this heading">#</a></h3>
+<p>Flags that set one stage’s options are listed on that stage’s page, with the stage flag each
+one becomes: <a class="reference internal" href="datagen/env_generation.html#through-the-pipeline"><span class="std std-ref">env generation</span></a>,
+<a class="reference internal" href="datagen/execution.html#through-the-pipeline"><span class="std std-ref">execution</span></a>, <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">re-rendering</span></a>,
+<a class="reference internal" href="datagen/merge.html#flags"><span class="std std-ref">merge</span></a> and <a class="reference internal" href="datagen/annotate.html#running-it"><span class="std std-ref">annotation</span></a>.</p>
+</section>
+<section id="execution-settings-without-a-pipeline-flag">
+<h3>Execution Settings Without a Pipeline Flag<a class="headerlink" href="#execution-settings-without-a-pipeline-flag" title="Link to this heading">#</a></h3>
+<p>Some execution settings are <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code> flags that the pipeline does not forward: the
+motion profile (<code class="docutils literal notranslate"><span class="pre">--profile</span></code>, default <code class="docutils literal notranslate"><span class="pre">medium</span></code>) and the arm dynamics (<code class="docutils literal notranslate"><span class="pre">--friction-comp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--arm-joint-friction-scale</span></code>, <code class="docutils literal notranslate"><span class="pre">--arm-armature-scale</span></code>). Their defaults are the frictionless,
+armature-free arm without friction compensation that the RI training set was generated with, so
+a pipeline run always uses them. To change them, run the execution stage by hand; see
+<a class="reference internal" href="datagen/execution.html#flags"><span class="std std-ref">Execution</span></a>.</p>
+<p>A few recording settings are read from environment variables. The pipeline’s stages inherit your
+shell’s environment, so export them before launching. They are listed in
+<a class="reference internal" href="datagen/execution.html#environment-variables"><span class="std std-ref">Execution: Environment variables</span></a>.</p>
+</section>
+<section id="datagen-output-structure">
+<h3>Datagen Output Structure<a class="headerlink" href="#datagen-output-structure" title="Link to this heading">#</a></h3>
+<p>If successful, all outputs of the script <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> will be written
+under <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/&lt;dataset-folder&gt;/&lt;experiment-id&gt;/</span></code> (by default
+<code class="docutils literal notranslate"><span class="pre">data/datasets/unmerged/&lt;experiment-id&gt;/</span></code>), containing the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;experiment-id&gt;/
+├── tasks/                    # Generated PDDL problem files
+├── envs/                     # Env packages + reset states, one per problem or problem group
+├── execution/                # Per-problem LeRobot datasets (success + failure splits)
+├── rerender/                 # Re-rendered datasets (only with --rerender / --rerender-local)
+├── local_logs/               # Per-problem logs, only when more than one GPU slot runs at a time
+├── .pipeline_state/          # &lt;stage&gt;.done markers read by --resume
+└── run_datagen_pipeline_config_&lt;timestamp&gt;.json  # Full reproducibility config
+</pre></div>
+</div>
+<p>The final merged dataset is written to <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;/</span></code> (or <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code>). Every column it contains is described in <a class="reference internal" href="datagen/dataset_fields.html"><span class="std std-doc">Dataset fields</span></a>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="installation_and_setup_instructions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ToyBlocks Installation and Setup Instructions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="datagen/task_generation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Stage 1: Task generation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-goals-for-the-datagen-system">Design goals for the datagen system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-you-can-do-with-the-datagen-pipeline">What you can do with the datagen pipeline?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-started">How to get started</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-pipeline-data-generation">Full-Pipeline Data Generation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datagen-pipeline-steps">Datagen Pipeline Steps</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic Usage</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-options">Key Options</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scene-randomization">Scene Randomization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-and-gpu-options">Output and GPU Options</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#re-rendering">Re-rendering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#per-stage-parameters">Per-Stage Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-settings-without-a-pipeline-flag">Execution Settings Without a Pipeline Flag</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datagen-output-structure">Datagen Output Structure</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user_guide/workflows/data_generation.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

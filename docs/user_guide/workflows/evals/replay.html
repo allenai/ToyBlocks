@@ -1,0 +1,645 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Replaying Actions from a Dataset &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/evals/replay';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Eval Metrics" href="metrics.html" />
+    <link rel="prev" title="Policy Evaluation" href="../evaluations.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../evaluations.html" class="nav-link">Policy Evaluation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Replaying Actions from a Dataset</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="replaying-actions-from-a-dataset">
+<h1>Replaying Actions from a Dataset<a class="headerlink" href="#replaying-actions-from-a-dataset" title="Link to this heading">#</a></h1>
+<p>Replay plays a LeRobot dataset’s recorded actions back through the <strong>same
+queue-driven eval loop a policy uses</strong> (<code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval._run_eval</span></code>).
+There is no separate replay runner any more: <code class="docutils literal notranslate"><span class="pre">--replay</span></code> is just another action
+source next to a policy server, random or zero actions.</p>
+<p>What replay measures is the <em>open-loop ceiling</em> of the sim: replaying the
+expert’s own actions from the recorded initial state reports both the usual
+eval metrics (<code class="docutils literal notranslate"><span class="pre">success_once</span></code>, <code class="docutils literal notranslate"><span class="pre">episode_len</span></code>, …) and per-episode divergence
+from the recording (<code class="docutils literal notranslate"><span class="pre">replay_*</span></code> metrics).</p>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># One eval GPU, episodes 0-39 of a merged LeRobot root (all of one cube scale)</span>
+python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--replay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_flip_dataset<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--episode-indices<span class="w"> </span><span class="s2">"0-39"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--save-diagnostic-plots<span class="w"> </span>--deterministic-cuda
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> stays at 1 and the LeRobot recording is on by default. To replay on several
+GPUs, add <code class="docutils literal notranslate"><span class="pre">--num-eval-gpus</span> <span class="pre">N</span></code>; the launcher currently also needs <code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">maniflow</span></code>
+alongside it, because its one-GPU check for the default <code class="docutils literal notranslate"><span class="pre">molmo2_maniflow</span></code> policy runs
+under <code class="docutils literal notranslate"><span class="pre">--replay</span></code> too.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--replay</span></code> selects <code class="docutils literal notranslate"><span class="pre">POLICY_NAME=replay</span></code> in
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/run_eval_pipeline.sh"><code class="docutils literal notranslate"><span class="pre">scripts/eval/run_eval_pipeline.sh</span></code></a>:
+the policy server is skipped, the autogen task is generated from the dataset,
+the episode queue is started, and each eval worker runs</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span>--task<span class="w"> </span>&lt;slug&gt;-v0<span class="w"> </span>--replay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--queue_url<span class="w"> </span>http://localhost:8001/next<span class="w"> </span>--dataset_path<span class="w"> </span>&lt;root&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--control_mode<span class="w"> </span>arm_joint_gripper_binary<span class="w"> </span>--obs_mode<span class="w"> </span>rgb+state<span class="w"> </span>--num_envs<span class="w"> </span><span class="m">1</span><span class="w"> </span>--headless
+</pre></div>
+</div>
+<p>Output lands under <code class="docutils literal notranslate"><span class="pre">runs/&lt;task&gt;-v0/replay/&lt;out_subdir&gt;/...</span></code> like any other eval (see
+<a class="reference internal" href="launch_eval.html#outputs"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> outputs</span></a>)
+(<code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code>, <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code>, videos, the optional LeRobot
+recording), so the offline diagnostics
+(<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/plot_diagnostics_from_eval_run.py"><code class="docutils literal notranslate"><span class="pre">scripts/plot_diagnostics_from_eval_run.py</span></code></a>)
+work unchanged.</p>
+<p>Add <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> to print the pipeline invocation instead of running it.</p>
+</section>
+<section id="how-it-works">
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Piece</p></th>
+<th class="head"><p>Where</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Initial state</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">apply_setup</span></code> (<code class="docutils literal notranslate"><span class="pre">utils/episode_queue.py</span></code>) via the queue setup</p></td>
+<td><p>Robot joints, gripper, objects, table height, friction, <code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code>, cube-scale slot. Under <code class="docutils literal notranslate"><span class="pre">--replay</span></code> the recorded frame-0 arm joint <strong>velocity</strong> is restored too (<code class="docutils literal notranslate"><span class="pre">setup[&quot;robot_joint_velocities&quot;]</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Actions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReplayPolicy</span></code> (<code class="docutils literal notranslate"><span class="pre">eval/replay.py</span></code>)</p></td>
+<td><p>Emits a 9-dim action per step: 7 recorded joint targets, binary gripper command, and the recorded <code class="docutils literal notranslate"><span class="pre">action.pd_mode</span></code> as the 9th channel.</p></td>
+</tr>
+<tr class="row-even"><td><p>Gains</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PDModeController</span></code> (<code class="docutils literal notranslate"><span class="pre">eval/pd_mode_controller.py</span></code>)</p></td>
+<td><p>The pd_mode channel drives the same controller a policy’s prediction would. Whenever a ground-truth <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> is given, a mode switch settles for the TAMP tick counts <code class="docutils literal notranslate"><span class="pre">DATASET_SWITCH_SETTLE_TICKS</span> <span class="pre">=</span> <span class="pre">(5,</span> <span class="pre">10)</span></code> (compliant/stiff) with the arm frozen and the finger target active. The settle runs as per-env hold steps (<code class="docutils literal notranslate"><span class="pre">DeferredSettle</span></code>) that the policy, the recording and the episode clock never see. Initial writes at reset never settle.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Skipped ticks</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReplayPolicy.pop_gap_holds</span></code> (<code class="docutils literal notranslate"><span class="pre">eval/replay.py</span></code>)</p></td>
+<td><p>Where the recording skipped control ticks (detected by <code class="docutils literal notranslate"><span class="pre">_detect_unrecorded_ticks</span></code> from the recorded joint velocities and timestamps), the previous row’s action is held for that many ticks before the next row runs, so the sim stays in step with the recording. Uses the same hold steps as the settle.</p></td>
+</tr>
+<tr class="row-even"><td><p>Termination</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReplayPolicy.done_indices()</span></code> → <code class="docutils literal notranslate"><span class="pre">base_env.request_episode_end</span></code></p></td>
+<td><p>The episode ends on the step that applies the last recorded action; <code class="docutils literal notranslate"><span class="pre">episode_end</span></code> is forced to <code class="docutils literal notranslate"><span class="pre">horizon</span></code> and <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code> is raised to cover the longest recording.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Divergence</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReplayPolicy.record_divergence()</span></code> / <code class="docutils literal notranslate"><span class="pre">episode_metrics()</span></code></p></td>
+<td><p>Joint error vs the recorded row, per-object position / quaternion error, pre/post PD-switch phases. Scalars only, folded into the episode metrics under <code class="docutils literal notranslate"><span class="pre">replay_*</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="replay-metrics">
+<h2><code class="docutils literal notranslate"><span class="pre">replay_*</span></code> metrics<a class="headerlink" href="#replay-metrics" title="Link to this heading">#</a></h2>
+<p>Per episode (in <code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code>; aggregated in <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code> and the
+wandb episodes table):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_num_frames</span></code>, <code class="docutils literal notranslate"><span class="pre">replay_profile_switch_frame</span></code> (NaN when no switch),
+<code class="docutils literal notranslate"><span class="pre">replay_unrecorded_ticks</span></code> (control ticks the recording skipped; see “Skipped ticks”
+above)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_joint_pos_error_{mean,max,final}</span></code>,
+<code class="docutils literal notranslate"><span class="pre">replay_{pre,post}_switch_joint_pos_error_{mean,max,final}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_object_&lt;name&gt;_{pos,quat}_error_{mean,max,final}</span></code>,
+<code class="docutils literal notranslate"><span class="pre">replay_{pre,post}_switch_object_&lt;name&gt;_{pos,quat}_error_{mean,max,final}</span></code></p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">--replay_clip_stats</span></code> only: <code class="docutils literal notranslate"><span class="pre">replay_clipped_frames</span></code>, <code class="docutils literal notranslate"><span class="pre">replay_clip_max_rad</span></code>
+(see <a class="reference internal" href="#clipping-replayed-targets">Clipping replayed targets</a>).</p></li>
+</ul>
+<p>Any metric without data is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>; the aggregation is NaN-safe.</p>
+</section>
+<section id="clipping-replayed-targets">
+<h2>Clipping replayed targets<a class="headerlink" href="#clipping-replayed-targets" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--replay_clip_stats</span> <span class="pre">&lt;stats.json&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">--replay-clip-stats</span></code> on <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code>)
+clamps every replayed arm joint target to the <code class="docutils literal notranslate"><span class="pre">action.joint_target</span></code> q01/q99
+bands of that <code class="docutils literal notranslate"><span class="pre">stats.json</span></code>, for example a ManiFlow run’s. It answers whether a
+policy whose labels were clipped to those bands could still succeed, and adds
+the per-episode metrics <code class="docutils literal notranslate"><span class="pre">replay_clipped_frames</span></code> and <code class="docutils literal notranslate"><span class="pre">replay_clip_max_rad</span></code>. It
+only applies to <code class="docutils literal notranslate"><span class="pre">--replay</span></code> and raises otherwise.</p>
+</section>
+<section id="requirements-and-failure-modes">
+<h2>Requirements and failure modes<a class="headerlink" href="#requirements-and-failure-modes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">--num_envs</span> <span class="pre">1</span></code>.</strong> <code class="docutils literal notranslate"><span class="pre">ReplayPolicy</span></code> advances every env’s recording on each
+step, so it cannot hold one env through a PD-switch settle while the others
+move on. Replay therefore runs one env per worker (use <code class="docutils literal notranslate"><span class="pre">--num-eval-gpus</span></code> for
+parallelism). If the autogen task bakes several cube-scale slots,
+<code class="docutils literal notranslate"><span class="pre">reconcile_num_envs_with_task</span></code> raises <code class="docutils literal notranslate"><span class="pre">num_envs</span></code> and <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> errors
+out — restrict <code class="docutils literal notranslate"><span class="pre">--episode-indices</span></code> to episodes of a single cube scale, or
+use a task whose package bakes one slot.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">--control_mode</span> <span class="pre">arm_joint_gripper_binary</span></code></strong> — datagen records absolute
+joint targets, and the deferred settle holds the arm with absolute joint
+targets, so any run with <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> (replay or policy eval) raises
+under another control mode. The pipeline sets this; pass it yourself when
+calling <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> directly.</p></li>
+<li><p><strong>The dataset must record <code class="docutils literal notranslate"><span class="pre">action.pd_mode</span></code></strong> and the gain columns
+(<code class="docutils literal notranslate"><span class="pre">observation.state.current_stiffness</span></code> / <code class="docutils literal notranslate"><span class="pre">current_damping</span></code> /
+<code class="docutils literal notranslate"><span class="pre">current_effort_limit</span></code>). Missing gains fail at startup
+(<code class="docutils literal notranslate"><span class="pre">load_pd_gains_from_dataset</span></code>); a missing or all-NaN <code class="docutils literal notranslate"><span class="pre">action.pd_mode</span></code> fails
+when the episode is loaded (<code class="docutils literal notranslate"><span class="pre">ReplayPolicy.on_reset</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_gripper_close_target</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">0.72</span></code> (TAMP datagen’s Robotiq close
+target); override with <code class="docutils literal notranslate"><span class="pre">--env-cfg.replay-gripper-close-target</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">apply_setup</span></code> is strict: a setup without a table pose / height delta, or
+referencing an object the scene does not spawn, raises instead of warning.</p></li>
+</ul>
+</section>
+<section id="behavior-notes">
+<h2>Behavior notes<a class="headerlink" href="#behavior-notes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Gain <em>values</em> are the dataset-wide stiff/compliant vectors from
+<code class="docutils literal notranslate"><span class="pre">load_pd_gains_from_dataset</span></code> (first parquet chunk, one representative vector
+per mode), not the exact per-frame recorded ones; joint velocity limits are
+not written. Identical for datasets recorded under two fixed profiles. When
+the dataset has no frames of one mode, that mode falls back to the blocksuite
+defaults.</p></li>
+<li><p>The 5/10-tick settle is a fixed convention (settle steps are not recorded in
+the source dataset). It applies to policy evals with a <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> as
+well, so a pd_mode switch in a policy eval also settles.</p></li>
+<li><p>The LeRobot recorder (the same one datagen uses) pairs each row’s observation
+with the action applied next, so a replay recording has the same row layout
+as the dataset it replays.</p></li>
+</ul>
+</section>
+<section id="historical-note">
+<h2>Historical note<a class="headerlink" href="#historical-note" title="Link to this heading">#</a></h2>
+<p>The former standalone path (<code class="docutils literal notranslate"><span class="pre">--replay_lerobot_dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">--replay_dataset_path</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--max_replay_episodes</span></code>, <code class="docutils literal notranslate"><span class="pre">replay_results.json</span></code>, <code class="docutils literal notranslate"><span class="pre">replay_plots/</span></code>, comparison
+videos) has been removed.
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/extract_lerobot_episode.py"><code class="docutils literal notranslate"><span class="pre">scripts/extract_lerobot_episode.py</span></code></a>
+and the side-by-side video helpers in <code class="docutils literal notranslate"><span class="pre">utils/tamp_dataset.py</span></code> remain for offline
+inspection but are no longer used by eval.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../evaluations.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Policy Evaluation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="metrics.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Eval Metrics</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quickstart">Quickstart</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-it-works">How it works</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#replay-metrics"><code class="docutils literal notranslate"><span class="pre">replay_*</span></code> metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clipping-replayed-targets">Clipping replayed targets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-and-failure-modes">Requirements and failure modes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-notes">Behavior notes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#historical-note">Historical note</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/evals/replay.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1129 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>evaluate.py Reference &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/evals/evaluate';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="prev" title="launch_eval.py Reference" href="launch_eval.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../evaluations.html" class="nav-link">Policy Evaluation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="evaluate-py-reference">
+<h1><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference<a class="headerlink" href="#evaluate-py-reference" title="Link to this heading">#</a></h1>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py"><code class="docutils literal notranslate"><span class="pre">scripts/evaluate.py</span></code></a>
+is the eval worker: <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> runs one per eval GPU, each pulling episodes from the
+episode queue. You can also run it by hand, for example to debug one worker against a
+policy server you started yourself. This page covers its action sources, how to run it
+against a server, the observation transforms, its flags and its outputs. For the full
+pipeline, see <a class="reference internal" href="../evaluations.html"><span class="std std-doc">Policy Evaluation</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> parses the <code class="docutils literal notranslate"><span class="pre">Args</span></code> dataclass in
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code></a>
+with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, and hands it to <code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval.evaluate</span></code>. <code class="docutils literal notranslate"><span class="pre">Args</span></code> also inherits the
+Isaac launcher options of
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/cli/base_args.py"><code class="docutils literal notranslate"><span class="pre">BaseArgs</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">--device</span></code> (default <code class="docutils literal notranslate"><span class="pre">cuda:0</span></code>), <code class="docutils literal notranslate"><span class="pre">--headless</span></code> (on for eval), <code class="docutils literal notranslate"><span class="pre">--enable_cameras</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--kit_args</span></code>, <code class="docutils literal notranslate"><span class="pre">--rendering_mode</span></code>) and the nested env-config overrides <code class="docutils literal notranslate"><span class="pre">--env-cfg.&lt;field&gt;</span></code>
+(for example <code class="docutils literal notranslate"><span class="pre">--env-cfg.robot-id</span> <span class="pre">droid_franka</span></code>). Flags accept <code class="docutils literal notranslate"><span class="pre">-</span></code> or <code class="docutils literal notranslate"><span class="pre">_</span></code> between words,
+and boolean flags are turned off with <code class="docutils literal notranslate"><span class="pre">--no-&lt;flag&gt;</span></code>. Isaac starts before the arguments
+are parsed, so even <code class="docutils literal notranslate"><span class="pre">--help</span></code> launches it.</p>
+<p>Before the run starts, <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> also:</p>
+<ul class="simple">
+<li><p>adds <code class="docutils literal notranslate"><span class="pre">--enable_cameras</span></code> when <code class="docutils literal notranslate"><span class="pre">--obs_mode</span></code> contains <code class="docutils literal notranslate"><span class="pre">rgb</span></code>;</p></li>
+<li><p>snaps <code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> to a value the task accepts (<code class="docutils literal notranslate"><span class="pre">reconcile_num_envs_with_task</span></code>), since
+autogen block tasks bake a fixed number of cube-size slots;</p></li>
+<li><p>with <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code>, defaults the eval <code class="docutils literal notranslate"><span class="pre">robot_id</span></code> and <code class="docutils literal notranslate"><span class="pre">scene_preset_id</span></code> to the
+dataset’s recorded provenance, warning on a mismatching override and failing when the
+provenance is missing and no override was given (see
+<a class="reference internal" href="launch_eval.html#dataset-scene-provenance"><span class="std std-ref">Dataset scene provenance</span></a>).</p></li>
+</ul>
+<section id="action-sources">
+<h2>Action sources<a class="headerlink" href="#action-sources" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> picks where actions come from based on its flags:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>Selected by</p></th>
+<th class="head"><p>Use for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Remote policy server</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--policy_host</span></code> (+ <code class="docutils literal notranslate"><span class="pre">--policy_port</span></code>, default <code class="docutils literal notranslate"><span class="pre">8000</span></code>)</p></td>
+<td><p>Evaluating the served ManiFlow / Molmo2 policies, or any model behind the <code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code> interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Random actions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--random_actions</span></code></p></td>
+<td><p>Sanity checks: uniform in <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>Zero actions</p></td>
+<td><p>none of the above</p></td>
+<td><p>Sanity checks of task spawning and metrics.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dataset replay</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--replay</span></code> with <code class="docutils literal notranslate"><span class="pre">--queue_url</span></code>, <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> and <code class="docutils literal notranslate"><span class="pre">--num_envs</span> <span class="pre">1</span></code></p></td>
+<td><p>Playing back each queued episode’s recorded actions and reporting how far the simulation diverges from the recording.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--random_actions</span></code> raises when combined with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>, and <code class="docutils literal notranslate"><span class="pre">--replay</span></code> raises when
+combined with either.</p>
+<section id="random-and-zero-actions">
+<h3>Random and zero actions<a class="headerlink" href="#random-and-zero-actions" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span>--task<span class="w"> </span>Blocksuite-Lift-v0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--random_actions<span class="w"> </span>--num_envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_eval_steps<span class="w"> </span><span class="m">200</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--random_actions</span></code> samples every action component uniformly from <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]</span></code>; with no
+action source at all, every step gets a zero action. Both are handy for confirming that a
+task spawns correctly and that recording and metrics work before plugging in a policy.</p>
+</section>
+<section id="dataset-replay">
+<h3>Dataset replay<a class="headerlink" href="#dataset-replay" title="Link to this heading">#</a></h3>
+<p>Replay is easiest through the launcher, which also starts the queue:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--replay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset<span class="w"> </span>--episode-indices<span class="w"> </span><span class="s2">"0"</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="replay.html"><span class="std std-doc">Dataset Replay</span></a> for how replay works, its metrics and its requirements.</p>
+</section>
+</section>
+<section id="running-against-a-policy-server-by-hand">
+<h2>Running against a policy server by hand<a class="headerlink" href="#running-against-a-policy-server-by-hand" title="Link to this heading">#</a></h2>
+<p>Running the server and the eval worker in two terminals is the easiest way to debug
+either side with breakpoints.</p>
+<p><strong>1. Start a policy server</strong> (terminal 1),
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/serve_maniflow_policy.py"><code class="docutils literal notranslate"><span class="pre">serve_maniflow_policy</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">oracle</span></code> serves the ManiFlow LL alone (the client supplies the high-level commands);
+<code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">model</span></code> serves Molmo2 + ManiFlow:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">H_VLA_PATH</span><span class="o">=</span><span class="nv">$PWD</span>/maniflow-tb<span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$PYTHONPATH</span>:<span class="nv">$PWD</span>/maniflow-tb
+
+<span class="c1"># ManiFlow, with the high-level oracle on the client</span>
+python<span class="w"> </span>-m<span class="w"> </span>blocksuite.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>oracle<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--checkpoint<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--config<span class="w"> </span>data/checkpoints/my_maniflow_run/config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--train_config<span class="w"> </span>maniflow-tb/examples/Franka/train_maniflow_multimodal.yaml
+
+<span class="c1"># Molmo2 high level + ManiFlow low level</span>
+python<span class="w"> </span>-m<span class="w"> </span>blocksuite.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>model<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--checkpoint<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--hl_checkpoint<span class="w"> </span>data/checkpoints/my_molmo2_run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--config<span class="w"> </span>data/checkpoints/my_maniflow_run/config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--train_config<span class="w"> </span>maniflow-tb/examples/Franka/train_maniflow_multimodal.yaml
+</pre></div>
+</div>
+<p><strong>2. Run the eval worker</strong> (terminal 2). Prompts and per-episode setups come from the
+episode queue (<code class="docutils literal notranslate"><span class="pre">--queue_url</span></code>, started with
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/serve_episode_queue.py</span> <span class="pre">--dataset-path</span> <span class="pre">&lt;root&gt;</span> <span class="pre">--port</span> <span class="pre">8001</span></code>) and the
+dataset (<code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code>), and the task must already be generated (see
+<a class="reference internal" href="../evaluations.html"><span class="std std-doc">Policy Evaluation</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task<span class="w"> </span>&lt;task-slug&gt;-v0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--policy_host<span class="w"> </span>localhost<span class="w"> </span>--policy_port<span class="w"> </span><span class="m">8000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--queue_url<span class="w"> </span>http://localhost:8001/next<span class="w"> </span>--dataset_path<span class="w"> </span>data/datasets/my_dataset<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--control_mode<span class="w"> </span>arm_joint_gripper_binary<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--obs_mode<span class="w"> </span>rgb+state<span class="w"> </span>--obs_transform<span class="w"> </span>maniflow_blocks_table<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--action_horizon<span class="w"> </span><span class="m">25</span><span class="w"> </span>--sync_action_chunks<span class="w"> </span>--num_envs<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--use_oracle<span class="w"> </span>--save_lerobot
+</pre></div>
+</div>
+<p>Drop <code class="docutils literal notranslate"><span class="pre">--use_oracle</span></code> against the <code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">model</span></code> server; <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> passes
+<code class="docutils literal notranslate"><span class="pre">--hl_from_model</span></code> there instead.</p>
+<p><strong>Split-terminal scripts.</strong> <code class="docutils literal notranslate"><span class="pre">scripts/eval/serve_local_server.sh</span></code> (terminal 1) and
+<code class="docutils literal notranslate"><span class="pre">scripts/eval/serve_local_client.sh</span></code> (terminal 2) wrap these steps and match
+<code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code>’s ManiFlow and Molmo2 inputs. Both run in the foreground with plain
+<code class="docutils literal notranslate"><span class="pre">python</span></code>, so a <code class="docutils literal notranslate"><span class="pre">breakpoint()</span></code> in the server, the eval client or an obs transform is hit
+interactively (<code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> backgrounds everything with redirected output). Activate
+the venv first:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Terminal 1: policy server (POLICY_NAME=maniflow serves --hl oracle)</span>
+<span class="nv">MODEL_PATH</span><span class="o">=</span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
+<span class="nv">HL_MODEL_PATH</span><span class="o">=</span>data/checkpoints/my_molmo2_run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash<span class="w"> </span>scripts/eval/serve_local_server.sh
+
+<span class="c1"># Terminal 2: task generation + episode queue + evaluate.py</span>
+<span class="nv">DATASET_PATH</span><span class="o">=</span>data/datasets/my_dataset<span class="w"> </span><span class="nv">EPISODE_INDICES</span><span class="o">=</span><span class="m">0</span>,3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash<span class="w"> </span>scripts/eval/serve_local_client.sh
+</pre></div>
+</div>
+<p>Their configuration (policy, checkpoints, dataset, ports, <code class="docutils literal notranslate"><span class="pre">num_envs</span></code> cap) lives once in
+<code class="docutils literal notranslate"><span class="pre">scripts/eval/_common.sh</span></code>, sourced by both; override any variable inline. <code class="docutils literal notranslate"><span class="pre">POLICY_NAME</span></code>
+defaults to <code class="docutils literal notranslate"><span class="pre">molmo2_maniflow</span></code> (<code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">model</span></code>). <code class="docutils literal notranslate"><span class="pre">MODEL_PATH</span></code> (and <code class="docutils literal notranslate"><span class="pre">HL_MODEL_PATH</span></code> for
+<code class="docutils literal notranslate"><span class="pre">molmo2_maniflow</span></code>) and <code class="docutils literal notranslate"><span class="pre">DATASET_PATH</span></code> (or <code class="docutils literal notranslate"><span class="pre">PDDL_PROBLEM_FILE</span></code>, to generate the task from
+a PDDL problem instead) have no defaults, and the scripts exit with a message when one is
+missing. The client waits for the server’s port, then either runs one batched pass sized
+to the queue (<code class="docutils literal notranslate"><span class="pre">PER_EPISODE=0</span></code>, the default with <code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">oracle</span></code>) or one task generation,
+queue and single-environment <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> per episode (<code class="docutils literal notranslate"><span class="pre">PER_EPISODE=1</span></code>, the default with
+<code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">model</span></code>). Results go under <code class="docutils literal notranslate"><span class="pre">runs/</span></code> (<code class="docutils literal notranslate"><span class="pre">OUT_PATH</span></code>). Note that both scripts first kill
+your own stale servers, queues and <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> processes.</p>
+<p>Key flags:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--obs_transform</span></code>: how observations are converted for the policy (see
+<a class="reference internal" href="#observation-transforms">Observation transforms</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--unbatched</span></code>: call the server once per environment instead of once per step with a
+batch of all environments, for servers that add their own batch dimension.
+<code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> always runs batched.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--action_horizon</span> <span class="pre">N</span></code>: the server returns chunks of actions and one is applied per
+step; <code class="docutils literal notranslate"><span class="pre">--sync_action_chunks</span></code> puts all environments on the same chunk boundary so the
+server is queried once per chunk (the pipeline always sets it).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code>: record the rollouts as a LeRobot dataset, including the raw policy
+actions.</p></li>
+</ul>
+<p>A policy that returns 9-dim actions (7 arm joints, gripper, <code class="docutils literal notranslate"><span class="pre">pd_mode</span></code>) switches the
+controller gains through its trailing <code class="docutils literal notranslate"><span class="pre">pd_mode</span></code> channel; no flag is needed. The channel
+drives the same PD-mode controller as replay, and is stripped before <code class="docutils literal notranslate"><span class="pre">env.step</span></code>. Depth
+images are added to the observations automatically when the served checkpoint expects
+them.</p>
+<p>Any model can be served by implementing the small <code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code> interface; see
+<a class="reference internal" href="../imitation_learning/new_policy_server.html"><span class="std std-doc">Setting up a new policy server</span></a>.</p>
+</section>
+<section id="observation-transforms">
+<h2>Observation transforms<a class="headerlink" href="#observation-transforms" title="Link to this heading">#</a></h2>
+<p>Registered in
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/obs_transforms/__init__.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving/obs_transforms/__init__.py</span></code></a>
+and selected with <code class="docutils literal notranslate"><span class="pre">--obs_transform</span></code> (default <code class="docutils literal notranslate"><span class="pre">none</span></code>, which sends the raw observations):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Use for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maniflow</span></code></p></td>
+<td><p>ManiFlow Franka policies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maniflow_blocks_table</span></code></p></td>
+<td><p>Same as <code class="docutils literal notranslate"><span class="pre">maniflow</span></code>, mapping the blocks-table cameras (<code class="docutils literal notranslate"><span class="pre">front_camera</span></code> / <code class="docutils literal notranslate"><span class="pre">gripper_camera</span></code>) onto the policy’s <code class="docutils literal notranslate"><span class="pre">front_rgb</span></code> / <code class="docutils literal notranslate"><span class="pre">gripper_rgb</span></code>. The default of <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The ManiFlow <code class="docutils literal notranslate"><span class="pre">agent_pos</span></code> width is the served checkpoint’s, not a flag: the server
+advertises <code class="docutils literal notranslate"><span class="pre">state_dim</span></code> in its metadata, and the client builds the state from
+<code class="docutils literal notranslate"><span class="pre">STATE_DIM_LAYOUTS</span></code> (<code class="docutils literal notranslate"><span class="pre">obs_transforms/maniflow.py</span></code>): 8 (7 arm + 1 gripper), 9 (+ <code class="docutils literal notranslate"><span class="pre">pd_mode</span></code>)
+or 19 (+ 7 joint velocities and 3 EE xyz). Without metadata it defaults to 19; any other
+width raises.</p>
+<p>These flags apply to the ManiFlow transforms only, and raise with any other transform:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--center_crop_ratio</span></code></p></td>
+<td><p>none</p></td>
+<td><p>After the resize to 224, centre-crop RGB, depth and <code class="docutils literal notranslate"><span class="pre">target_heatmap</span></code> to <code class="docutils literal notranslate"><span class="pre">int(224</span> <span class="pre">*</span> <span class="pre">ratio)</span></code> and resize back (inference counterpart of <code class="docutils literal notranslate"><span class="pre">random_crop_ratio</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">0.95</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_aug</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Live depth augmentation before the policy sees depth; <code class="docutils literal notranslate"><span class="pre">ejbl</span></code> matches HVLA’s <code class="docutils literal notranslate"><span class="pre">augment_depth</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--enable_crop</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Build <code class="docutils literal notranslate"><span class="pre">target_front_crop_rgb</span></code> on the client from the native front camera and target pixels. Needs a checkpoint with <code class="docutils literal notranslate"><span class="pre">use_target_front_crop</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To add a transform, subclass <code class="docutils literal notranslate"><span class="pre">BaseObsTransform</span></code>, override <code class="docutils literal notranslate"><span class="pre">transform</span></code> (and optionally
+<code class="docutils literal notranslate"><span class="pre">action_postprocess</span></code>), and register it in <code class="docutils literal notranslate"><span class="pre">_lazy_registry</span></code>.</p>
+</section>
+<section id="flags">
+<h2>Flags<a class="headerlink" href="#flags" title="Link to this heading">#</a></h2>
+<p>The tables below list the user-facing flags with their defaults. Every flag’s docstring in
+<code class="docutils literal notranslate"><span class="pre">args.py</span></code> has the full details.</p>
+<section id="run-and-environment">
+<h3>Run and environment<a class="headerlink" href="#run-and-environment" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--task</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Blocksuite-Lift-v0</span></code></p></td>
+<td><p>Gymnasium task id. Queue evals use the autogen <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;-v0</span></code> task generated from the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
+<td><p>Parallel environments (snapped to the task’s slot count).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num_eval_steps</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span></code></p></td>
+<td><p>Maximum environment steps. Ignored under <code class="docutils literal notranslate"><span class="pre">--queue_url</span></code>, where the run ends when the queue is exhausted.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_episodes</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Stop after this many finished episodes; with <code class="docutils literal notranslate"><span class="pre">--num_eval_steps</span></code>, whichever comes first.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--obs_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">state</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">state</span></code>, <code class="docutils literal notranslate"><span class="pre">rgb</span></code> or <code class="docutils literal notranslate"><span class="pre">rgb+state</span></code>. A <code class="docutils literal notranslate"><span class="pre">depth</span></code> component is added automatically when the served checkpoint takes depth.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--control_mode</span></code></p></td>
+<td><p>env default</p></td>
+<td><p>Control mode override, e.g. <code class="docutils literal notranslate"><span class="pre">arm_joint_gripper_binary</span></code> (needed for absolute joint targets: replay, <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> runs, <code class="docutils literal notranslate"><span class="pre">--sync_action_chunks</span></code>, <code class="docutils literal notranslate"><span class="pre">--wave_resets</span></code>, <code class="docutils literal notranslate"><span class="pre">--ll_oracle</span></code>, play-mode checkpoints).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--seed</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Random seed; no fixed seed when unset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--deterministic_cuda</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Deterministic cuDNN plus PhysX enhanced determinism and a single solver partition; slower, and still not bit-for-bit across hardware.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--exp_name</span></code></p></td>
+<td><p>auto</p></td>
+<td><p>Name of the run.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code></p></td>
+<td><p>env default</p></td>
+<td><p>Grid spacing (m) between parallel envs.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="policy-server">
+<h3>Policy server<a class="headerlink" href="#policy-server" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>, <code class="docutils literal notranslate"><span class="pre">--policy_port</span></code></p></td>
+<td><p>none, <code class="docutils literal notranslate"><span class="pre">8000</span></code></p></td>
+<td><p>WebSocket policy server. Without a host, no server is contacted (zero actions, unless <code class="docutils literal notranslate"><span class="pre">--random_actions</span></code> or <code class="docutils literal notranslate"><span class="pre">--replay</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--action_key</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">actions</span></code></p></td>
+<td><p>Key of the server response that holds the actions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--unbatched</span></code></p></td>
+<td><p>off</p></td>
+<td><p>One server call per environment instead of one batched call per step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--obs_transform</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">none</span></code></p></td>
+<td><p>See <a class="reference internal" href="#observation-transforms">Observation transforms</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--action_horizon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Actions per server chunk, one applied per step; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables chunking.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--sync_action_chunks</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Batched chunked evals: one shared chunk boundary for all environments, so the server is queried once per horizon. An environment whose episode ends mid-chunk holds its reset pose, hidden from the episode clock and the recording, until the boundary.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="queue-and-dataset">
+<h3>Queue and dataset<a class="headerlink" href="#queue-and-dataset" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--queue_url</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Episode-queue URL (e.g. <code class="docutils literal notranslate"><span class="pre">http://localhost:8001/next</span></code>) the per-episode setups come from.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code></p></td>
+<td><p>none</p></td>
+<td><p>LeRobot dataset root: reconciles robot and scene with its provenance, overlays its targets on plots, and enables the dataset PD-switch settle. Pass the dataset the queue serves.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--expert_timeout_scale</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>End each episode after this multiple of its expert demonstration’s duration (needs <code class="docutils literal notranslate"><span class="pre">--queue_url</span></code> and <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables). Such episodes end as truncations, so they keep their full metrics and TAMPER tags them <code class="docutils literal notranslate"><span class="pre">timeout</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--use_calibrated_cameras</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Use the fixed sim2real + FR3 gripper camera intrinsics instead of the dataset’s. Disables the two options below.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--ingest_camera_intrinsics</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Apply each episode’s recorded camera intrinsics (needs <code class="docutils literal notranslate"><span class="pre">--no-use_calibrated_cameras</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--use_render_params</span></code></p></td>
+<td><p>off</p></td>
+<td><p>On a rerendered dataset, reproduce each episode’s recorded camera pose, HDRI, materials and lights (needs <code class="docutils literal notranslate"><span class="pre">--no-use_calibrated_cameras</span></code>). See also <code class="docutils literal notranslate"><span class="pre">--render_replay_assets_paths</span></code> (extra HDRI roots), <code class="docutils literal notranslate"><span class="pre">--render_replay_warmup_frames</span></code> (default <code class="docutils literal notranslate"><span class="pre">16</span></code>) and <code class="docutils literal notranslate"><span class="pre">--wave_resets</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--replay_block_identity</span></code></p></td>
+<td><p>on</p></td>
+<td><p>On glyph/colour-rerendered datasets, paint each episode’s recorded block letters and colours and prompt with the rendered goal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--verify_scene</span></code> / <code class="docutils literal notranslate"><span class="pre">--verify_scene_strict</span></code></p></td>
+<td><p>off</p></td>
+<td><p>After the first queue reset, compare the scene with the recording and write <code class="docutils literal notranslate"><span class="pre">scene_verification.json</span></code>; strict aborts on hard mismatches.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="high-level-conditioning">
+<h3>High-level conditioning<a class="headerlink" href="#high-level-conditioning" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--use_oracle</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Drive <code class="docutils literal notranslate"><span class="pre">task_name</span></code> and <code class="docutils literal notranslate"><span class="pre">target_heatmap</span></code> from the client-side symbolic oracle instead of a learned HL. Needs <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>, a ManiFlow transform and a PDDL problem per episode: <code class="docutils literal notranslate"><span class="pre">--pddl_problem_file</span></code>, or the queue (each setup’s <code class="docutils literal notranslate"><span class="pre">pddl_problem_file</span></code>, else a problem rebuilt from its <code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code> and recorded high-level state). The oracle re-plans from the live state (up to 3 times) when the next step’s preconditions no longer hold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--pddl_problem_file</span></code></p></td>
+<td><p>none</p></td>
+<td><p>One PDDL problem for every environment; a queue setup’s own problem overrides it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--async_hl</span></code>, <code class="docutils literal notranslate"><span class="pre">--async_hl_call_scale</span></code></p></td>
+<td><p>off, <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Molmo2 HL with a play-mode LL: query the HL only at episode start and when the LL ends a skill; optionally cap HL calls at a multiple of the expert’s.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--ll_oracle</span></code>, <code class="docutils literal notranslate"><span class="pre">--ll_oracle_hl_call_scale</span></code></p></td>
+<td><p>off, <code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
+<td><p>Run Molmo2’s commands with the vecgen motion-planned skills instead of the served LL (needs <code class="docutils literal notranslate"><span class="pre">--action_horizon</span> <span class="pre">0</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--go_home</span></code></p></td>
+<td><p>off</p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--async_hl</span></code> or <code class="docutils literal notranslate"><span class="pre">--ll_oracle</span></code>: drive the arm home after a place, flip or rotate, before the next HL query.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--post_place_lift</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Play-mode LL: lift the end effector this many metres after a release before the next LL query.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--oracle_comparison</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Also run a client-side oracle (not fed to the LL) and show it next to the model in the HL overlay video.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--hl_update_interval_ms</span></code>, <code class="docutils literal notranslate"><span class="pre">--hl_update_interval_jitter_ms</span></code>, <code class="docutils literal notranslate"><span class="pre">--estimated_hl_inference_time_ms</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Simulated HL latency: update interval K (with jitter) and inference time M. Must match training for checkpoints that use the previous front frame; see <a class="reference internal" href="launch_eval.html#hl-latency"><span class="std std-ref">HL latency</span></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--hl_from_model</span></code> is set by <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> for <code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">molmo2_maniflow</span></code>; it is not
+meant to be passed by hand.</p>
+</section>
+<section id="episode-end-and-scoring">
+<h3>Episode end and scoring<a class="headerlink" href="#episode-end-and-scoring" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--episode_end</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">goal</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">goal</span></code> ends on the goal predicate (oracle runs: plan completion), <code class="docutils literal notranslate"><span class="pre">horizon</span></code> runs to <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code>, <code class="docutils literal notranslate"><span class="pre">ll_done</span></code> ends on a play-mode LL’s -1. A stuck oracle plan and a learned HL’s <code class="docutils literal notranslate"><span class="pre">done</span></code> end the episode in every mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--collision</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
+<td><p>A non-target block moving more than 2 cm or 15 deg fails the episode; <code class="docutils literal notranslate"><span class="pre">end</span></code> also ends it, <code class="docutils literal notranslate"><span class="pre">penalize</span></code> lets it run, <code class="docutils literal notranslate"><span class="pre">off</span></code> ignores collisions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--goal_ori_yaw_tol_deg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">40.0</span></code></p></td>
+<td><p>Yaw tolerance of the goal’s orientation atoms when judging goal success.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A place-on-table sub-goal counts only within 25 front-camera pixels of the HL’s table
+point (a fixed tolerance, not a flag).</p>
+</section>
+<section id="recording-and-video">
+<h3>Recording and video<a class="headerlink" href="#recording-and-video" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--output_dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">runs/&lt;run_name&gt;</span></code></p></td>
+<td><p>Where everything is written.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Record the rollouts as a LeRobot dataset (scene data and raw policy actions), with the datagen recorder; see <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/lerobot_recording.md">LeRobot recording</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--lerobot_dataset_name</span></code></p></td>
+<td><p>run name</p></td>
+<td><p>Name of that dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_shards</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
+<td><p>Parallel LeRobot writer processes, stitched into one <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_success</span></code> / <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_failure</span></code> pair at the end.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--video_codec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">libx264</span></code></p></td>
+<td><p>LeRobot RGB codec: <code class="docutils literal notranslate"><span class="pre">libx264</span></code> or <code class="docutils literal notranslate"><span class="pre">libsvtav1</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--video_fps</span></code></p></td>
+<td><p>control rate</p></td>
+<td><p>Frame rate of saved videos and LeRobot datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_sensor_obs_video</span></code></p></td>
+<td><p>off</p></td>
+<td><p>One MP4 per finished episode from the RGB observations (needs <code class="docutils literal notranslate"><span class="pre">rgb</span></code> in <code class="docutils literal notranslate"><span class="pre">--obs_mode</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--video_env_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">--save_video_all_envs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(0,)</span></code>, off</p></td>
+<td><p>Which envs the videos record.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--video_camera</span></code></p></td>
+<td><p>all, tiled</p></td>
+<td><p>Camera used for videos.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--drop_cameras</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">left_camera</span></code></p></td>
+<td><p>Scene cameras not spawned for a policy eval; pass it with no names to keep every camera.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_hl_overlay_video</span></code>, <code class="docutils literal notranslate"><span class="pre">--hl_overlay_camera</span></code></p></td>
+<td><p>off, <code class="docutils literal notranslate"><span class="pre">front_camera</span></code></p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code> and an HL, also record the frame with the HL heatmap and text drawn on it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_hl_latency_video</span></code></p></td>
+<td><p>off</p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--save_sensor_obs_video</span></code> and HL conditioning, a side-by-side of the fresh HL view and the aged one the LL acted on.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_expert_video</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Extract each episode’s expert demonstration video for the W&amp;B episodes table (set by <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span> <span class="pre">--wandb</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="metrics">
+<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code>, <code class="docutils literal notranslate"><span class="pre">--track_joint_metrics</span></code> and <code class="docutils literal notranslate"><span class="pre">--track_ee_metrics</span></code> are on by default;
+<code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code> (per-step CSVs) is off. Contact-force tracking is an env-config
+option (<code class="docutils literal notranslate"><span class="pre">--env-cfg.track-collisions</span></code>). See <a class="reference internal" href="metrics.html"><span class="std std-doc">Metrics</span></a> for every metric and
+output format.</p>
+</section>
+<section id="replay">
+<h3>Replay<a class="headerlink" href="#replay" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--replay</span></code> and <code class="docutils literal notranslate"><span class="pre">--replay_clip_stats</span></code>; see <a class="reference internal" href="replay.html"><span class="std std-doc">Dataset Replay</span></a>.</p>
+</section>
+<section id="tamper">
+<h3>TAMPER<a class="headerlink" href="#tamper" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--tamper_output_dir</span></code> captures the terminal sim state of every unsuccessful episode as a
+vecgen env package, so new expert demonstrations can be planned from those states.
+<code class="docutils literal notranslate"><span class="pre">--tamper_capture_successes</span></code>, <code class="docutils literal notranslate"><span class="pre">--tamper_max_states</span></code> and <code class="docutils literal notranslate"><span class="pre">--tamper_source_env_path</span></code> refine
+it. See <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">TAMPER</a>.</p>
+</section>
+<section id="w-b">
+<h3>W&amp;B<a class="headerlink" href="#w-b" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--wandb</span></code> mirrors throughput, per-episode metrics and videos to a W&amp;B run (needs
+<code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code>). <code class="docutils literal notranslate"><span class="pre">--wandb_project</span></code> (default <code class="docutils literal notranslate"><span class="pre">blocksuite-eval</span></code>), <code class="docutils literal notranslate"><span class="pre">--wandb_entity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--wandb_group</span></code> (none by default), <code class="docutils literal notranslate"><span class="pre">--wandb_name</span></code>, <code class="docutils literal notranslate"><span class="pre">--wandb_job_type</span></code>, <code class="docutils literal notranslate"><span class="pre">--wandb_tags</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--wandb_log_interval_seconds</span></code> configure it. Pipeline runs leave it off and merge all
+workers into one run instead (see <a class="reference internal" href="launch_eval.html#outputs"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> outputs</span></a>).</p>
+</section>
+<section id="debugging">
+<h3>Debugging<a class="headerlink" href="#debugging" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--debug</span></code></p></td>
+<td><p>off</p></td>
+<td><p>t=0 sim-vs-training comparison, per-episode seed logs, and per-step action prints.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_diagnostic_plots</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Live-rollout diagnostics for the env <code class="docutils literal notranslate"><span class="pre">video_env_ids</span></code> names: policy-input panels in <code class="docutils literal notranslate"><span class="pre">policy_input_debug/</span></code>, HL staleness plot, and server-side LL / HL input traces. The per-step comparison plots are offline: run <code class="docutils literal notranslate"><span class="pre">scripts/plot_diagnostics_from_eval_run.py</span> <span class="pre">--eval-dir</span> <span class="pre">&lt;output_dir&gt;</span></code> on a <code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code> run.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--save_first_batch_data</span></code></p></td>
+<td><p>off</p></td>
+<td><p>On step 0, have the (ManiFlow) server dump the model-ready batch to <code class="docutils literal notranslate"><span class="pre">first_batch_data/</span></code> for comparison with training.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--enable_viewer</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Launch the viser 3D viewer.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Policy-input verification</strong> (<code class="docutils literal notranslate"><span class="pre">--save_diagnostic_plots</span></code>) answers “is the policy being
+fed what it was trained on?” rather than “did it succeed”. For every environment at the
+first reset, then for the followed video environment at each episode start, it renders
+two PNGs into <code class="docutils literal notranslate"><span class="pre">policy_input_debug/</span></code> from the live obs transform’s own output:</p>
+<ul class="simple">
+<li><p>per depth camera: the raw sim depth, the depth the model receives (after
+<code class="docutils literal notranslate"><span class="pre">process_depth</span></code>, optional depth augmentation, point-map Z masking and the centre crop),
+the episode’s recorded frame-0 depth, their signed difference and both histograms. A
+constant offset is a calibration or units mismatch; structured residue is a scene
+mismatch.</p></li>
+<li><p>the state panel (<code class="docutils literal notranslate"><span class="pre">*_state.png</span></code>): each <code class="docutils literal notranslate"><span class="pre">agent_pos</span></code> dimension against the <code class="docutils literal notranslate"><span class="pre">[q01,</span> <span class="pre">q99]</span></code>
+band the server normalizes it into. Dimensions drawn in red are outside the training
+band.</p></li>
+</ul>
+<p>The panels are capability-gated: a run with no policy server, no ManiFlow transform, or
+a server that advertises no normalization bands prints why it skipped them and carries
+on. On its first inference the server also logs, per depth camera, how much of the
+back-projected point map its clamp saturates (<code class="docutils literal notranslate"><span class="pre">ptmap</span> <span class="pre">saturation</span> <span class="pre">...</span></code>); high saturation
+means the scene sits outside the checkpoint’s point-map bounds even when both depth
+columns look healthy. The server-side traces (<code class="docutils literal notranslate"><span class="pre">ll_policy_input_trace/</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">hl_policy_input_trace/</span></code> for Molmo2) are rendered inside the policy server just before
+the model call, one PNG per handover, so they show the tensors the model actually
+receives.</p>
+</section>
+</section>
+<section id="outputs">
+<h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">#</a></h2>
+<p>Everything is written under <code class="docutils literal notranslate"><span class="pre">--output_dir</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Path</p></th>
+<th class="head"><p>When written</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code></p></td>
+<td><p>Every run: arguments, git checkout, per-episode values and aggregates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code></p></td>
+<td><p>Every run: one record per episode (prompt, setup, metrics, goal progress, video paths).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">step_metrics/env{idx}_episode_NNNN.csv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sensor_obs_videos/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--save_sensor_obs_video</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hl_latency_videos/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--save_hl_latency_video</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">source_episode_videos/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--save_expert_video</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>LeRobot dataset</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">policy_input_debug/</span></code>, <code class="docutils literal notranslate"><span class="pre">first_batch_data/</span></code>, <code class="docutils literal notranslate"><span class="pre">scene_verification.json</span></code></p></td>
+<td><p>The debugging and verification flags above</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>See <a class="reference internal" href="metrics.html"><span class="std std-doc">Metrics</span></a> for the fields of the two JSON files. Aggregated results are also
+printed at the end of every run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>============================================================
+  Evaluation complete  |  episodes: 50  |  time: 312.4s
+============================================================
+metric                     mean       std       min       max    count
+------------------------------------------------------------
+return                   0.7854    0.4108    0.0000    1.0000       50
+success_once             0.7800    0.4143    0.0000    1.0000       50
+...
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="launch_eval.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action-sources">Action sources</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-and-zero-actions">Random and zero actions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-replay">Dataset replay</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-against-a-policy-server-by-hand">Running against a policy server by hand</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#observation-transforms">Observation transforms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags">Flags</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-and-environment">Run and environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-server">Policy server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#queue-and-dataset">Queue and dataset</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#high-level-conditioning">High-level conditioning</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#episode-end-and-scoring">Episode end and scoring</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#recording-and-video">Recording and video</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#metrics">Metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#replay">Replay</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tamper">TAMPER</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#w-b">W&amp;B</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging">Debugging</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/evals/evaluate.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

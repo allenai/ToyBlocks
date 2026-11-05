@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Stage 5: Merge &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/datagen/merge';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Stage 6: Annotation" href="annotate.html" />
+    <link rel="prev" title="Stage 4: Re-rendering" href="rerender.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../data_generation.html" class="nav-link">Automatic Data Generation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Stage 5: Merge</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="stage-5-merge">
+<h1>Stage 5: Merge<a class="headerlink" href="#stage-5-merge" title="Link to this heading">#</a></h1>
+<p>By this point the pipeline has produced one small LeRobot dataset per problem, from
+<a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a> or <a class="reference internal" href="rerender.html"><span class="std std-doc">re-rendering</span></a>. Training wants a single dataset
+instead. Merge combines the per-problem datasets into <strong>one training dataset</strong>: it re-indexes
+episodes, frames and tasks so they are contiguous, writes the data into parquet files of about
+100 MB each, links every source video into place, and writes the merged metadata.</p>
+<p>The videos are hardlinked rather than copied, so the merged dataset’s videos take no extra disk
+space. The flip side of that choice is covered under <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p>
+<p>The command-line tool is <code class="docutils literal notranslate"><span class="pre">scripts/datagen/merge_datasets.py</span></code>, a thin wrapper around
+<code class="docutils literal notranslate"><span class="pre">blocksuite.vecgen.recording.merge</span></code>.</p>
+<section id="where-it-fits">
+<h2>Where it fits<a class="headerlink" href="#where-it-fits" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Input:</strong> a root directory containing per-problem datasets, from re-rendering (the usual
+case) or straight from execution.</p></li>
+<li><p><strong>Output:</strong> one merged LeRobot dataset, read by <a class="reference internal" href="annotate.html"><span class="std std-doc">annotation</span></a> and then by training.</p></li>
+</ul>
+<p>The pipeline always runs this stage. Run it by hand to re-merge after a patch, or to combine
+datasets from several runs.</p>
+</section>
+<section id="running-it">
+<h2>Running it<a class="headerlink" href="#running-it" title="Link to this heading">#</a></h2>
+<p>Point <code class="docutils literal notranslate"><span class="pre">--input_dirs</span></code> at the directory that contains the <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> directories, and
+<code class="docutils literal notranslate"><span class="pre">--output_dir</span></code> at where the merged dataset should go:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/merge_datasets.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input_dirs<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/rerender/out/job_local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output_dir<span class="w"> </span>data/datasets/merged/train/&lt;experiment-id&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cameras<span class="w"> </span>all<span class="w"> </span>--num_workers<span class="w"> </span><span class="m">16</span>
+</pre></div>
+</div>
+<p>Pass the <strong>root</strong> that contains the <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> directories, not a single dataset. Discovery
+expands each input directory itself, as described in
+<a class="reference internal" href="#how-sources-are-discovered">How sources are discovered</a>. <code class="docutils literal notranslate"><span class="pre">--cameras</span> <span class="pre">all</span></code> keeps every video
+stream, and <code class="docutils literal notranslate"><span class="pre">--num_workers</span></code> sets how many processes share the work.</p>
+</section>
+<section id="through-the-pipeline">
+<h2>Through the pipeline<a class="headerlink" href="#through-the-pipeline" title="Link to this heading">#</a></h2>
+<p>The pipeline exposes this stage through four wrapper flags: <code class="docutils literal notranslate"><span class="pre">--merge-cameras</span></code> (default <code class="docutils literal notranslate"><span class="pre">all</span></code>),
+<code class="docutils literal notranslate"><span class="pre">--merge-num-workers</span></code> (default <code class="docutils literal notranslate"><span class="pre">16</span></code>), <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code> and <code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code>.
+The last one is not evaluated here but in the rerender stage; see
+<a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p>
+<p>The pipeline merges <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/unmerged/&lt;experiment-id&gt;/rerender/out/job_*</span></code> when the
+rerender stage ran, and <code class="docutils literal notranslate"><span class="pre">.../execution</span></code> otherwise. The merged dataset lands in
+<code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;/</span></code> unless <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code> says otherwise
+(<code class="docutils literal notranslate"><span class="pre">--output-root</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">data</span></code>). The pipeline then copies its run config
+(<code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline_config_&lt;timestamp&gt;.json</span></code>) into the merged directory, and writes
+<code class="docutils literal notranslate"><span class="pre">episode_0.png</span></code>, a plot of episode 0, next to it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline.py</span></code> also hardcodes <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code> on every merge invocation, so its own
+<code class="docutils literal notranslate"><span class="pre">--merge-union-schema</span></code> flag is never read. <code class="docutils literal notranslate"><span class="pre">--merge-depth-frames</span></code> is read by nothing anywhere:
+the merge does no <code class="docutils literal notranslate"><span class="pre">.npy</span></code> depth extraction.</p>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
+<p>The output directory holds one LeRobot v3 dataset, with re-indexed <code class="docutils literal notranslate"><span class="pre">data/</span></code> parquet files,
+hardlinked videos and merged <code class="docutils literal notranslate"><span class="pre">meta/</span></code>.</p>
+<p>To confirm it loads, open it with LeRobot:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lerobot.datasets.lerobot_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">LeRobotDataset</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">LeRobotDataset</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">"local"</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">merged_dir</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">LeRobotDataset(...,</span> <span class="pre">episodes=[0])</span></code> is the cheap version of this check. Loading a subset of
+episodes requires the feature <strong>order</strong> in <code class="docutils literal notranslate"><span class="pre">info.json</span></code> to match the parquet column order, which is
+why the merge reorders the non-video features.</p>
+<p>Merge does its own LeRobot check when you pass <code class="docutils literal notranslate"><span class="pre">--validate</span></code> or <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code>, but a failed
+check does not fail the merge; see <a class="reference internal" href="#validation-is-advisory">Validation is advisory</a>.</p>
+</section>
+<section id="how-sources-are-discovered">
+<h2>How sources are discovered<a class="headerlink" href="#how-sources-are-discovered" title="Link to this heading">#</a></h2>
+<p>You give merge a root directory, and it finds the datasets inside on its own. Discovery is
+automatic and <strong>keeps successes only</strong>: for the vectorized layout, the merge takes
+<code class="docutils literal notranslate"><span class="pre">base_dir/problem_*/blocks_success</span></code> and never <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code>.</p>
+<p><strong>Merge reads the re-rendered tree, not the execution tree.</strong> Once the rerender stage is marked
+complete, the pipeline merges <strong><code class="docutils literal notranslate"><span class="pre">rerender/out/job_*</span></code> and nothing else</strong>, and the execution tree is
+no longer read. A problem that was executed but never re-rendered therefore vanishes from the
+merged dataset. The local flow has <a class="reference internal" href="local.html#what-counts-as-rendered"><span class="std std-ref">a three-state gate</span></a> to
+stop that from happening silently.</p>
+<p>The glob is deliberately wide, so that both <code class="docutils literal notranslate"><span class="pre">job_local</span></code> and the <code class="docutils literal notranslate"><span class="pre">job_local_nonrand</span></code> directory of
+<a class="reference internal" href="rerender.html#multiplexing-n-copies-and-the-original"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></span></a> are picked up.
+That means a <code class="docutils literal notranslate"><span class="pre">job_local*</span></code> directory left by an <strong>earlier</strong> run is merged again, whether or not
+this run produced it: dropping <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> from an otherwise identical command keeps
+shipping the old baseline copies. The pipeline only warns about it, so clean up old job directories
+before re-running.</p>
+</section>
+<section id="what-union-schema-actually-does">
+<h2>What <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code> actually does<a class="headerlink" href="#what-union-schema-actually-does" title="Link to this heading">#</a></h2>
+<p>Different problems can record slightly different columns, and <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code> controls how the
+merged metadata describes them. It does <strong>not</strong> change which columns the merged parquet has:
+that union always happens. It changes what <code class="docutils literal notranslate"><span class="pre">meta/info.json</span></code> <em>declares</em>, and it turns validation
+on.</p>
+<p>It can still change parquet <em>content</em> at the margin. When a source lacks a column, the merge
+fills it with NaN, and the width of that fill is read from the declared features, so declaring
+more can change the shape of those filled values.</p>
+<p>Two consequences are worth knowing:</p>
+<ul class="simple">
+<li><p><strong>It decides whether LeRobot validation runs at all.</strong> Without <code class="docutils literal notranslate"><span class="pre">--validate</span></code> and without
+<code class="docutils literal notranslate"><span class="pre">--union_schema</span></code>, the check is skipped, and the log says so.</p></li>
+<li><p><strong>The pipeline always passes it</strong>, as described under <a class="reference internal" href="#through-the-pipeline">Through the pipeline</a>.</p></li>
+</ul>
+</section>
+<section id="validation-is-advisory">
+<h2>Validation is advisory<a class="headerlink" href="#validation-is-advisory" title="Link to this heading">#</a></h2>
+<p><strong>A failed LeRobot validation never fails the merge.</strong> The exception is caught, turned into a
+warning, and <code class="docutils literal notranslate"><span class="pre">main()</span></code> still returns 0. So a merged dataset that no <code class="docutils literal notranslate"><span class="pre">LeRobotDataset</span></code> can open
+still exits successfully, and you should read the warnings.</p>
+<p>These are the obstacles to a <code class="docutils literal notranslate"><span class="pre">LeRobotDataset</span></code> load, in the order you are likely to hit them:</p>
+<ol class="arabic simple">
+<li><p>Without <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code>, columns that some problems have but the template does not declare
+make the cast fail (<code class="docutils literal notranslate"><span class="pre">column</span> <span class="pre">names</span> <span class="pre">don't</span> <span class="pre">match</span></code> / <code class="docutils literal notranslate"><span class="pre">CastError</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset[0]</span></code> needs a working video backend. A torchcodec or ffmpeg failure is reported as
+“validation skipped, video decoding unavailable”, not as a data defect.</p></li>
+<li><p>Merged episodes whose clip was never rendered resolve to <strong>zeros</strong> rather than raising an
+error.</p></li>
+</ol>
+<p>Consumers that read the parquet directly, such as HVLA’s dataloader or pyarrow, are not affected
+by the first one.</p>
+<section id="coverage-warnings-that-do-not-fail-the-merge">
+<h3>Coverage warnings that do not fail the merge<a class="headerlink" href="#coverage-warnings-that-do-not-fail-the-merge" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Warning</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INCOMPLETE</span> <span class="pre">VIDEO</span> <span class="pre">COVERAGE</span></code></p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">(dataset,</span> <span class="pre">video</span> <span class="pre">key)</span></code> pair has more than zero but fewer clips than that dataset’s <code class="docutils literal notranslate"><span class="pre">total_episodes</span></code>. Those episodes declare a video that is not on disk, <strong>which a path-resolving dataloader reads as zeros</strong>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">present</span> <span class="pre">in</span> <span class="pre">N/M</span> <span class="pre">datasets</span></code></p></td>
+<td><p>A video key exists in some sources and not others. With <code class="docutils literal notranslate"><span class="pre">--cameras</span> <span class="pre">all</span></code>, the merged <code class="docutils literal notranslate"><span class="pre">info.json</span></code> can declare a key that only some problems rendered.</p></td>
+</tr>
+<tr class="row-even"><td><p>stray files</p></td>
+<td><p>Files in a video directory not named <code class="docutils literal notranslate"><span class="pre">file-NNN.mp4</span></code>, such as an abandoned encode temp file, are reported and skipped.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>All three are log warnings only. Merge also does <strong>not</strong> check that the source and the render have
+the same number of episodes.</p>
+<p>Two checks <em>do</em> fail the run. After the data pass, the merge verifies every <code class="docutils literal notranslate"><span class="pre">data/</span></code> and <code class="docutils literal notranslate"><span class="pre">meta/</span></code>
+parquet footer, and it checks that every planned data file and video link exists, with no
+unplanned file present.</p>
+</section>
+</section>
+<section id="flags">
+<h2>Flags<a class="headerlink" href="#flags" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--input_dirs</span></code></p></td>
+<td><p>(required)</p></td>
+<td><p>One or more roots holding the datasets to merge.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--output_dir</span></code></p></td>
+<td><p>(required)</p></td>
+<td><p>The destination. It is <strong>deleted before writing</strong>; see <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--cameras</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">all</span></code></p></td>
+<td><p>The video feature keys to keep, or <code class="docutils literal notranslate"><span class="pre">all</span></code> / <code class="docutils literal notranslate"><span class="pre">*</span></code> for every video feature any source declares. Naming cameras silently drops all the others, including depth streams and the <code class="docutils literal notranslate"><span class="pre">--extra_rgb</span></code> / <code class="docutils literal notranslate"><span class="pre">--extra_depth</span></code> sidecars.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_workers</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
+<td><p>The process-pool size for the data pass.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--max_datasets</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Merge only the first N source datasets. <code class="docutils literal notranslate"><span class="pre">--episodes</span></code> is a backward-compatible alias.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--union_schema</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Declare in <code class="docutils literal notranslate"><span class="pre">info.json</span></code> every non-video column that any source declares, plus columns present in the parquet that no source declared. <strong>Implies <code class="docutils literal notranslate"><span class="pre">--validate</span></code></strong>, at <code class="docutils literal notranslate"><span class="pre">--validate_mode</span></code>’s default of <code class="docutils literal notranslate"><span class="pre">fast</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--validate</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Run the LeRobot loadability check after the merge.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--validate_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fast</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fast</span></code> checks the footers, <code class="docutils literal notranslate"><span class="pre">LeRobotDataset(episodes=[0])</span></code> and <code class="docutils literal notranslate"><span class="pre">dataset[0]</span></code>. <code class="docutils literal notranslate"><span class="pre">full</span></code> checks every frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--validate_timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">900</span></code></p></td>
+<td><p>Seconds before validation is abandoned; <code class="docutils literal notranslate"><span class="pre">0</span></code> means no limit.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="common-pitfalls">
+<h2>Common pitfalls<a class="headerlink" href="#common-pitfalls" title="Link to this heading">#</a></h2>
+<section id="the-output-directory-is-deleted-first">
+<h3>The output directory is deleted first<a class="headerlink" href="#the-output-directory-is-deleted-first" title="Link to this heading">#</a></h3>
+<p>The merge <code class="docutils literal notranslate"><span class="pre">rmtree</span></code>s <code class="docutils literal notranslate"><span class="pre">--output_dir</span></code> before it starts, so never point it at anything you want to
+keep. It also takes an exclusive lock at <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;.merge.lock</span></code>, a sibling of the output so its
+own rmtree cannot remove it. A second merge into the same output refuses to start while the
+lock’s heartbeat is under 600 s; an older lock is taken over.</p>
+</section>
+<section id="du-and-deleting-the-source-do-not-behave-as-expected">
+<h3><code class="docutils literal notranslate"><span class="pre">du</span></code> and deleting the source do not behave as expected<a class="headerlink" href="#du-and-deleting-the-source-do-not-behave-as-expected" title="Link to this heading">#</a></h3>
+<p>Because videos are hardlinked, <code class="docutils literal notranslate"><span class="pre">du</span> <span class="pre">-sh</span></code> on the merged directory tells you almost nothing about
+real disk use, and deleting the unmerged source does not free that space while the merged tree
+exists. Only a merge across filesystems copies. Because the links share inodes with the source,
+the merge <strong>raises an error rather than overwrite</strong> an existing destination: overwriting would
+write straight through into the source dataset.</p>
+<p>This is also why you must never check <code class="docutils literal notranslate"><span class="pre">-N</span></code> multiplication by comparing bytes; see
+<a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+</section>
+<section id="an-unreadable-source-disappears-from-the-merge">
+<h3>An unreadable source disappears from the merge<a class="headerlink" href="#an-unreadable-source-disappears-from-the-merge" title="Link to this heading">#</a></h3>
+<p>A source dataset with any unreadable data parquet is dropped entirely, with a warning listing its
+episode count, before offsets are assigned, so merged indices stay contiguous. The merge still
+succeeds and those episodes are silently absent. Search the log for that warning.</p>
+</section>
+<section id="offsets-follow-info-json-not-the-parquet-footers">
+<h3>Offsets follow <code class="docutils literal notranslate"><span class="pre">info.json</span></code>, not the parquet footers<a class="headerlink" href="#offsets-follow-info-json-not-the-parquet-footers" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">info.json</span> <span class="pre">total_frames</span></code> decides the offsets. When it disagrees with the actual number of footer
+rows, the merge warns (“offsets follow info.json”) and continues.</p>
+</section>
+<section id="merge-allow-missing-problems-drops-episodes-permanently">
+<h3><code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> drops episodes permanently<a class="headerlink" href="#merge-allow-missing-problems-drops-episodes-permanently" title="Link to this heading">#</a></h3>
+<p>This flag is evaluated in the rerender stage, not in the merge. Without it, a problem with a
+finished execution but no re-render makes the run return 1 and leaves the rerender marker unset,
+so <code class="docutils literal notranslate"><span class="pre">--resume</span></code> re-renders that problem. <strong>With</strong> it, the stage is marked complete and those
+episodes are gone from the dataset permanently.</p>
+</section>
+</section>
+<section id="next">
+<h2>Next<a class="headerlink" href="#next" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="annotate.html"><span class="std std-doc">Annotate</span></a> the merged dataset to add the goal columns that vision-language policies
+train on.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="rerender.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Stage 4: Re-rendering</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="annotate.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Stage 6: Annotation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-it-fits">Where it fits</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-it">Running it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#through-the-pipeline">Through the pipeline</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-sources-are-discovered">How sources are discovered</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-union-schema-actually-does">What <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code> actually does</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation-is-advisory">Validation is advisory</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#coverage-warnings-that-do-not-fail-the-merge">Coverage warnings that do not fail the merge</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags">Flags</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-pitfalls">Common pitfalls</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-output-directory-is-deleted-first">The output directory is deleted first</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#du-and-deleting-the-source-do-not-behave-as-expected"><code class="docutils literal notranslate"><span class="pre">du</span></code> and deleting the source do not behave as expected</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-unreadable-source-disappears-from-the-merge">An unreadable source disappears from the merge</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#offsets-follow-info-json-not-the-parquet-footers">Offsets follow <code class="docutils literal notranslate"><span class="pre">info.json</span></code>, not the parquet footers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merge-allow-missing-problems-drops-episodes-permanently"><code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> drops episodes permanently</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next">Next</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/datagen/merge.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

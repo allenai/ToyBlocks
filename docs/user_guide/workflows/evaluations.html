@@ -1,0 +1,817 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Policy Evaluation &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/evaluations';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Replaying Actions from a Dataset" href="evals/replay.html" />
+    <link rel="prev" title="Setting up a new policy server" href="imitation_learning/new_policy_server.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="data_generation.html">Automatic Data Generation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Policy Evaluation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Workflows</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Policy Evaluation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="policy-evaluation">
+<h1>Policy Evaluation<a class="headerlink" href="#policy-evaluation" title="Link to this heading">#</a></h1>
+<p>The evaluation system measures how well a trained policy performs in closed loop in
+simulation, on scenes and tasks automatically generated by the datagen system.</p>
+<p>The evaluation system runs on your machine, from a workstation with a single GPU to a
+multi-GPU machine that evaluates hundreds of episodes at a time spread over several GPUs.
+It uses a queue to distribute episodes over GPU-parallel simulation environments in
+IsaacSim/IsaacLab. It works with any policy that can be served over a WebSocket, such as
+a hierarchical VLA.</p>
+<p>Each evaluation episode can start from a randomly-generated unseen scene and task definition
+or from the scene and task definition of an episode already recorded in a
+dataset (with the same robot pose, block poses, block sizes, table height and goal).
+The policy has to reach the task’s goal from that initial state. Because the eval scene can be
+rebuilt and initialized from a dataset episode, success metrics are indicative of policy performance
+rather than of differences between the training and eval setups.</p>
+<section id="what-you-can-do-with-it">
+<h2>What you can do with it<a class="headerlink" href="#what-you-can-do-with-it" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Benchmark ManiFlow (low-level) policies, alone or under a Molmo2 (high-level) policy,
+on the episodes of a dataset.</p></li>
+<li><p>Run ablations that replace the high-level or the low-level policy with an oracle, to
+help isolate where errors might be coming from.</p></li>
+<li><p>Replay the expert actions recorded in a dataset in an open-loop fashion, as a sanity
+check of the simulation settings, the dataset, and the evaluation system overall.</p></li>
+<li><p>Plug in a new model by implementing a small policy-server interface.</p></li>
+<li><p>Capture the episodes on which a policy failed and send them back to data generation, which
+plans new expert demonstrations and recovery behaviors from those states
+(<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">TAMPER</a>).</p></li>
+</ul>
+</section>
+<section id="design-goals-for-our-evaluation-system">
+<h2>Design goals for our evaluation system<a class="headerlink" href="#design-goals-for-our-evaluation-system" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Scalability and GPU parallelization.</strong> An eval runs many episodes at once at two
+levels. On one GPU, many parallel environments (up to 50 per GPU by default) live in
+one Isaac scene, and the policy server answers rollout requests from all of them with
+one GPU-batched inference call. Across GPUs, several eval workers (<code class="docutils literal notranslate"><span class="pre">--num-eval-gpus</span></code>)
+pull episodes from a single episode queue, so adding GPUs adds throughput without
+changing which episodes are evaluated. (The Molmo2 + ManiFlow server accepts a single
+eval worker, so it scales through environments only.)</p></li>
+<li><p><strong>Reproducible statistically rather than bit-by-bit.</strong> Every episode starts from a
+randomly-generated unseen scene and task or from the scene and task in a recorded
+dataset episode, handed out by an episode queue. Seeds are fixed. A
+rerun therefore gives the same success rates within some noise. Individual
+trajectories, however, are <em>not</em> guaranteed to match bit-for-bit between runs. Sharing
+one physics scene across environments is what makes this evaluation system fast,
+but it is also the main reason results are not bit-for-bit reproducible (see reasons below).</p></li>
+<li><p><strong>One pipeline from one GPU to many.</strong> The same evaluation pipeline runs a smoke test
+on a one-GPU workstation and a full evaluation over several GPUs; only the profile
+flags change.</p></li>
+<li><p><strong>Faithful to data generation.</strong> When the eval scene (robot, scene preset, table height,
+block sizes, cameras) is taken from an existing episode in a dataset, provenance is recorded,
+and a scene verification step compares the eval scene against the recording before
+any numbers are reported.</p></li>
+<li><p><strong>Model-agnostic.</strong> Any policy that implements the <code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code> interface can be
+served over WebSocket. Observation transforms convert the simulator’s observations
+into the format each model expects, so the eval client is the same for every model.</p></li>
+<li><p><strong>Decomposable.</strong> Policies that are split into a high-level part (which decides
+what to do next, e.g. “pick the red block”) and a low-level part (which moves the
+arm) can have either part replaced by an oracle. This isolates whether a failure
+comes from the high-level decision or from its execution.</p></li>
+<li><p><strong>Easy definition of metrics.</strong> A new metric is one tensor with one value per
+environment, added in the task’s <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>. Per-episode summaries, aggregates
+across episodes, per-step CSVs and Weights &amp; Biases (W&amp;B) tables are produced
+automatically, with no additional logging code. See
+<a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a>
+for the built-in metrics and how to add your own.</p></li>
+<li><p><strong>Automatic definition of partial progress metrics</strong> Each scene and task definition
+contains a PDDL logical goal that is defined over a set of logical predicates over the
+objects in the scene. We leverage this to measure how many predicates of the logical goal
+specification have been achieved at a particular point in an episode. Counting how many of
+these goal predicates are successful allows us to automatically have a partial progress metric
+estimated for every episode, without the need to write custom code. Moreover, the partial progress
+metrics are measured the same way for all tasks.</p></li>
+<li><p><strong>Diagnosable.</strong> Runs can produce videos, per-episode metrics, detailed diagnostic figures,
+W&amp;B tables, checks of the exact inputs the policy received, and LeRobot recordings of the rollouts.
+This makes it easier to detect bugs during the development process.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Why results are not bit-for-bit reproducible.</strong> Two runs of the same eval give the
+same success rates within noise, but not necessarily identical trajectories:</p>
+<ul class="simple">
+<li><p><strong>All parallel environments share one PhysX scene.</strong> Isaac Sim 5.1 (through Isaac
+Lab 2.3.2) steps every environment in a single GPU physics solve. One environment’s
+result can depend on which other environments are in the batch and what they are
+doing, which changes with the number of environments, the queue order, episodes
+ending at different times, and idle environments whose queue has run out.</p></li>
+<li><p><strong>The GPU physics solver is not deterministic.</strong> Contact-rich PhysX simulation is
+not reproducible across GPUs, drivers or Isaac versions. <code class="docutils literal notranslate"><span class="pre">--deterministic-cuda</span></code>
+turns on PhysX enhanced determinism, a single solver partition and deterministic
+cuDNN. That narrows the gap on one machine at a speed cost, but it does not guarantee
+identical trajectories across hardware.</p></li>
+<li><p><strong>There is no per-environment physics step.</strong> Any extra physics step (for example a
+settle after a controller gain switch) advances every environment, and PhysX keeps
+contact history when objects are teleported at reset, so earlier episodes in a run
+can affect later ones.</p></li>
+<li><p><strong>Some render state and the reseed are shared.</strong> Lighting, and camera intrinsics
+under tiled rendering, are shared by all environments in the scene, and the
+per-episode reseed applies to the whole process, so the policy’s sampling noise
+depends on scheduling.</p></li>
+</ul>
+<p>In practice: compare runs by aggregate metrics over many episodes, use replay or a
+single environment to debug one trajectory, and do not expect runs with a different
+number of environments or GPUs to give identical per-episode outcomes.</p>
+</div>
+</section>
+<section id="before-you-run-the-eval-pipeline-creating-an-environment-and-task">
+<h2>Before you run the eval pipeline: creating an environment and task<a class="headerlink" href="#before-you-run-the-eval-pipeline-creating-an-environment-and-task" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> runs an Isaac Lab gym task (<code class="docutils literal notranslate"><span class="pre">--task</span> <span class="pre">&lt;id&gt;</span></code>). Before a policy can be evaluated on
+a scenario, a task for it has to exist and be registered, and it has to define three things:</p>
+<ul class="simple">
+<li><p>the scene: the robot, the table and the blocks;</p></li>
+<li><p>how each episode starts;</p></li>
+<li><p>an <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> method that returns a per-step <code class="docutils literal notranslate"><span class="pre">success</span></code> flag and any metric stats.</p></li>
+</ul>
+<p>Evaluation scores episodes on that <code class="docutils literal notranslate"><span class="pre">success</span></code> signal and those stats, not on an RL reward.</p>
+<p><strong>Blocks tasks are generated, not written by hand.</strong> Both generators below render the domain
+template in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks/template/</span></code> into a package
+<code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/autogen/&lt;slug&gt;/</span></code> (gitignored) that registers the gym id <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;-v0</span></code>.
+Code generation also writes the success criterion and the metrics into the task’s
+<code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">success</span></code> means the PDDL goal holds: every conjunct is true, the goal blocks have settled
+and the gripper is open;</p></li>
+<li><p>one <code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code> stat per conjunct.</p></li>
+</ul>
+<p>So there is no reward or metric code to write: “Partial progress from the PDDL goal” below
+explains how these stats become a partial progress score.</p>
+<p><strong>From a dataset:</strong>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/generate_task_from_dataset.py"><code class="docutils literal notranslate"><span class="pre">scripts/generate_task_from_dataset.py</span></code></a>.
+This is the task <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> evaluates, and the pipeline generates it for you from
+<code class="docutils literal notranslate"><span class="pre">--dataset-path</span></code> before starting the workers. The slug is the dataset directory name with
+<code class="docutils literal notranslate"><span class="pre">-</span></code> replaced by <code class="docutils literal notranslate"><span class="pre">_</span></code>, unless you pass <code class="docutils literal notranslate"><span class="pre">--task-name</span></code>. From the LeRobot dataset it reads:</p>
+<ul class="simple">
+<li><p>the block names, from the <code class="docutils literal notranslate"><span class="pre">observation.state.object_pose.&lt;name&gt;</span></code> columns;</p></li>
+<li><p>every distinct <code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code>. A dataset with several goals gives one task that selects
+each environment’s goal per episode.</p></li>
+<li><p>the recorded block sizes (<code class="docutils literal notranslate"><span class="pre">cube_scale</span></code>);</p></li>
+<li><p>the recorded <code class="docutils literal notranslate"><span class="pre">scene_id</span></code> and <code class="docutils literal notranslate"><span class="pre">robot_id</span></code>. A dataset that records no scene or robot is
+rejected.</p></li>
+</ul>
+<p>It only generates code: each episode’s starting state comes from the
+<a class="reference internal" href="evals/launch_eval.html#the-episode-queue"><span class="std std-ref">episode queue</span></a>, so no reset states are sampled. To
+run it by hand, for example to debug code generation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/generate_task_from_dataset.py<span class="w"> </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain-path<span class="w"> </span>src/blocksuite/tamp/blocks<span class="w"> </span>--output-dir<span class="w"> </span>src/blocksuite/tasks/autogen<span class="w"> </span>--headless
+</pre></div>
+</div>
+<p><strong>From a PDDL problem:</strong>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/generate_task_from_pddl.py"><code class="docutils literal notranslate"><span class="pre">scripts/generate_task_from_pddl.py</span></code></a>,
+the <a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">environment generation</span></a> stage of data generation. Besides the
+package it samples starting scenes from the problem’s <code class="docutils literal notranslate"><span class="pre">:init</span></code> into <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code>, which
+the task starts from when no queue is attached. Use it to evaluate on a problem that has no
+dataset, by running <code class="docutils literal notranslate"><span class="pre">evaluate.py</span> <span class="pre">--task</span> <span class="pre">&lt;slug&gt;-v0</span></code> directly. <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> does not use it (this will
+be fixed by December 2026).</p>
+<p><strong>Hand-written tasks</strong> in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/</span></code> (for example <code class="docutils literal notranslate"><span class="pre">Blocksuite-Lift-v0</span></code>) define
+their own <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>; <a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a> shows how to add task-specific metrics.</p>
+<p><strong>Regenerate packages after updating the code.</strong> Each package records the codegen version
+that built it (<code class="docutils literal notranslate"><span class="pre">codegen_version</span></code> in <code class="docutils literal notranslate"><span class="pre">profiles.json</span></code>), and evaluation refuses a package built
+by a different version. Otherwise a stale package’s goal checks and success gate would
+silently change success rates.</p>
+</section>
+<section id="how-to-run-the-eval-pipeline">
+<h2>How to run the eval pipeline<a class="headerlink" href="#how-to-run-the-eval-pipeline" title="Link to this heading">#</a></h2>
+<p>There are two entry points:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts/launch_eval.py</span></code> is the recommended one. It runs the whole queue-driven evaluation
+pipeline on your machine.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts/evaluate.py</span></code> is the eval worker the evaluation pipeline runs. You can also run this script
+directly, for example to debug one process against a policy server you started by
+hand.</p></li>
+</ul>
+<p>The evaluation pipeline itself lives in
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/run_eval_pipeline.sh"><code class="docutils literal notranslate"><span class="pre">scripts/eval/run_eval_pipeline.sh</span></code></a>
+and <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span> <span class="pre">--dry-run</span></code> prints the exact invocation of it. Here’s what processes
+are launched when running <code class="docutils literal notranslate"><span class="pre">scripts/launch_eval.py</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>launch_eval.py --policy {molmo2_maniflow,maniflow}  (or --replay)
+  └─ run_eval_pipeline.sh
+       ├─ GPU 0     policy server: serve_maniflow_policy --hl {model,oracle}  (none under --replay)
+       ├─ codegen   builds the gym task from the dataset (generate_task_from_dataset.py)
+       ├─ CPU       serve_episode_queue.py hands out one recorded setup per episode
+       ├─ GPU 1..N  evaluate.py --queue_url ...  (one worker per GPU, many envs each)
+       ├─ CPU       wandb_consolidate.py merges all workers into one W&amp;B run (--wandb)
+       └─ CPU       merge_eval_runs.py + skill_success_from_eval_run.py merge the workers'
+                    results into one run directory under runs/
+</pre></div>
+</div>
+<p>On a machine with fewer GPUs than that layout, the workers share the GPUs round-robin, so
+a one-GPU workstation runs the server and one worker on GPU 0.</p>
+<p>Detailed references:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="evals/launch_eval.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</span></a>: every <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> flag, the
+default and smoke-test profiles, the per-policy defaults, the episode queue, dataset
+requirements and the output layout.</p></li>
+<li><p><a class="reference internal" href="evals/evaluate.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</span></a>:
+<code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> flag reference.</p></li>
+<li><p><a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a>:
+built-in metrics, output formats, and how to add metrics.</p></li>
+</ul>
+</section>
+<section id="quick-start-with-launch-eval-py">
+<h2>Quick start with <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code><a class="headerlink" href="#quick-start-with-launch-eval-py" title="Link to this heading">#</a></h2>
+<p>The eval pipeline initializes episodes from the recorded episodes of the LeRobot dataset
+given by <code class="docutils literal notranslate"><span class="pre">--dataset-path</span></code> (required): the queue reads one setup per episode from it, and
+the gym task is generated from it. <code class="docutils literal notranslate"><span class="pre">--smoke-test</span></code> switches to a small validation profile
+(10 episodes, 1 eval GPU, 2 environments, 3-second episodes); drop it for a full run over
+the whole dataset. Policy evals need the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> and <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> submodules (see
+<a class="reference internal" href="installation_and_setup_instructions.html"><span class="std std-doc">Installation and setup</span></a>).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Learned Molmo2 high-level policy + ManiFlow low-level policy (the default policy)</span>
+python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--smoke-test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--model-path<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--hl-model-path<span class="w"> </span>data/checkpoints/my_molmo2_run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset
+
+<span class="c1"># ManiFlow low-level policy, with the high-level oracle (the default for maniflow)</span>
+python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--smoke-test<span class="w"> </span>--policy<span class="w"> </span>maniflow<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--model-path<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset
+
+<span class="c1"># Replay the dataset's recorded actions (no policy, no checkpoint)</span>
+python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--replay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset<span class="w"> </span>--episode-indices<span class="w"> </span><span class="s2">"0"</span>
+</pre></div>
+</div>
+<p>Useful additions: <code class="docutils literal notranslate"><span class="pre">--episode-indices</span> <span class="pre">&quot;0,3,10-19&quot;</span></code> to pick episodes, <code class="docutils literal notranslate"><span class="pre">--num-eval-gpus</span> <span class="pre">N</span></code>
+to spread a <code class="docutils literal notranslate"><span class="pre">maniflow</span></code> eval over N eval GPUs, <code class="docutils literal notranslate"><span class="pre">--wandb</span></code> to log the run to W&amp;B, and
+<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> to print the pipeline command instead of running it.
+Full episode rollouts and videos are recorded as a LeRobot dataset by default
+(<code class="docutils literal notranslate"><span class="pre">--no-save-lerobot</span></code> to skip it). See the <a class="reference internal" href="evals/launch_eval.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</span></a>
+for every flag and its defaults.</p>
+</section>
+<section id="high-level-conditioning-modes">
+<h2>High-level conditioning modes<a class="headerlink" href="#high-level-conditioning-modes" title="Link to this heading">#</a></h2>
+<p>ManiFlow low-level policies are conditioned on a high-level command (a task string
+and a target point in the front camera image). Where that command comes from is
+chosen at launch:</p>
+<ul class="simple">
+<li><p><strong>High-level oracle</strong> (<code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">maniflow</span></code>, <code class="docutils literal notranslate"><span class="pre">--use-oracle</span></code> on by default): a symbolic
+planner running next to the simulation produces the commands from the episode’s
+PDDL problem. This measures the low-level policy on its own.</p></li>
+<li><p><strong>Learned high-level policy</strong> (<code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">molmo2_maniflow</span></code>): a Molmo2 model served
+alongside ManiFlow produces the commands from camera images. By default it is
+queried at every action-chunk boundary; with a play-mode low-level checkpoint,
+<code class="docutils literal notranslate"><span class="pre">--async-hl</span></code> queries it only at the start of an episode and whenever the low-level
+policy ends a skill.</p></li>
+<li><p><strong>Low-level oracle</strong> (<code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">molmo2_maniflow</span> <span class="pre">--ll-oracle</span></code>): the Molmo2 commands are
+executed by the motion-planned skills used in data generation (cuRobo v2) instead of
+by ManiFlow. This measures the high-level policy on its own.</p></li>
+</ul>
+<p>The recorded expert actions can also be replayed open-loop with <code class="docutils literal notranslate"><span class="pre">--replay</span></code>, which needs
+no policy at all; see <a class="reference internal" href="evals/replay.html"><span class="std std-doc">Dataset Replay</span></a>.</p>
+</section>
+<section id="running-evaluate-py-directly">
+<h2>Running <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> directly<a class="headerlink" href="#running-evaluate-py-directly" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> is the eval worker the pipeline runs, and you can also run it by hand:
+against a policy server you started yourself (the easiest way to debug either side with
+breakpoints), with random or zero actions, or to replay a dataset.
+<a class="reference internal" href="evals/evaluate.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</span></a> covers its action sources, a two-terminal
+server + worker recipe, the observation transforms, every flag and its outputs.</p>
+</section>
+<section id="episode-scoring-and-outputs">
+<h2>Episode scoring and outputs<a class="headerlink" href="#episode-scoring-and-outputs" title="Link to this heading">#</a></h2>
+<p>An episode ends when the goal is reached, at the timeout, or when a play-mode low-level
+policy stops (<code class="docutils literal notranslate"><span class="pre">--episode_end</span></code>); <code class="docutils literal notranslate"><span class="pre">--expert-timeout-scale</span></code> ties the timeout to the length of
+each episode’s expert demonstration. A block that was not supposed to move (by more than
+2 cm or 15 degrees) counts as a collision and fails the episode (<code class="docutils literal notranslate"><span class="pre">--collision</span></code>).</p>
+<p>Each eval worker writes <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code> (per-episode values and aggregates) and
+<code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code> (one record per episode) to its output directory under <code class="docutils literal notranslate"><span class="pre">runs/</span></code>,
+plus a LeRobot dataset of the rollouts (<code class="docutils literal notranslate"><span class="pre">--save-lerobot</span></code>, on by default in pipeline runs)
+and per-step CSVs with <code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code>. At the end the pipeline merges the workers
+into one run directory with per-skill success rates (<code class="docutils literal notranslate"><span class="pre">skill_success.json</span></code>), and with
+<code class="docutils literal notranslate"><span class="pre">--wandb</span></code> into one W&amp;B run; see <a class="reference internal" href="evals/launch_eval.html#outputs"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> outputs</span></a>.</p>
+<p>See <a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a> for every metric, the output formats and how to add a
+task-specific metric, and the <a class="reference internal" href="evals/evaluate.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</span></a> for the
+scoring flags and for capturing failed episodes for TAMPER.</p>
+<section id="easily-measuring-partial-progress-from-the-pddl-goal">
+<h3>Easily measuring partial progress from the PDDL goal<a class="headerlink" href="#easily-measuring-partial-progress-from-the-pddl-goal" title="Link to this heading">#</a></h3>
+<p>Success alone says nothing about how far a failed episode got. Because every episode comes
+with a PDDL goal, the eval system measures partial progress for every task automatically, with no
+task-specific code, and measures it the same way for all tasks.</p>
+<p><strong>Where the goal comes from.</strong> Each episode carries its PDDL goal (the queue setup’s
+<code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code>), for example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(and (on_table block_a workspace_table) (on block_b block_a) (on block_c block_b))
+</pre></div>
+</div>
+<p>When the gym task is generated,
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/tamp/blocks/template/codegen.py"><code class="docutils literal notranslate"><span class="pre">codegen.py</span></code></a>
+compiles each conjunct of each goal into a batched check on the live simulation state
+(<code class="docutils literal notranslate"><span class="pre">_goal_conj_&lt;k&gt;</span></code>, which calls <code class="docutils literal notranslate"><span class="pre">batched_goal_conjunct</span></code> in
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/tamp/blocks/pddl_goal_tensor_conversions.py"><code class="docutils literal notranslate"><span class="pre">pddl_goal_tensor_conversions.py</span></code></a>).
+At reset, <code class="docutils literal notranslate"><span class="pre">set_episode_goal</span></code> selects each environment’s own goal, and fails rather than
+grade an episode against a goal the task was not compiled for. The supported predicates
+are <code class="docutils literal notranslate"><span class="pre">on</span></code>, <code class="docutils literal notranslate"><span class="pre">on_table</span></code>, <code class="docutils literal notranslate"><span class="pre">on_left</span></code>, <code class="docutils literal notranslate"><span class="pre">on_right</span></code>, <code class="docutils literal notranslate"><span class="pre">on_front</span></code>, <code class="docutils literal notranslate"><span class="pre">on_back</span></code>, <code class="docutils literal notranslate"><span class="pre">next_to</span></code>, <code class="docutils literal notranslate"><span class="pre">ori_of</span></code>,
+<code class="docutils literal notranslate"><span class="pre">clear</span></code> and <code class="docutils literal notranslate"><span class="pre">pick_obstructs</span></code>; <code class="docutils literal notranslate"><span class="pre">ori_of</span></code> accepts a yaw error up to <code class="docutils literal notranslate"><span class="pre">--goal-ori-yaw-tol-deg</span></code>
+(40 degrees by default).</p>
+<p><strong>Every step</strong>, the task reports <code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code>, whether conjunct <code class="docutils literal notranslate"><span class="pre">c</span></code> holds (for example
+<code class="docutils literal notranslate"><span class="pre">(on</span> <span class="pre">block_b</span> <span class="pre">block_a)</span></code>), and <code class="docutils literal notranslate"><span class="pre">goal_success</span></code>: all conjuncts hold and the settle gate passes
+(the goal blocks are at rest and the gripper is open). The settle gate only affects
+<code class="docutils literal notranslate"><span class="pre">goal_success</span></code>, not the conjunct counts.</p>
+<p><strong>Each episode</strong> counts the conjuncts in the goal (GT), those true at the start (IT), those
+true at the end (CT), and those true at some point, and reports
+<code class="docutils literal notranslate"><span class="pre">partial_progress</span> <span class="pre">=</span> <span class="pre">(CT</span> <span class="pre">-</span> <span class="pre">IT)</span> <span class="pre">/</span> <span class="pre">(GT</span> <span class="pre">-</span> <span class="pre">IT)</span></code>, which lies in <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]</span></code>.</p>
+<p>In the goal above, <code class="docutils literal notranslate"><span class="pre">block_a</span></code> starts on the table, so IT = 1 and GT = 3. Finishing the stack
+gives 1.0, placing only <code class="docutils literal notranslate"><span class="pre">block_b</span></code> gives 0.5, and ending with none of the three conjuncts
+holding gives -0.5. When the goal already holds at the start (GT = IT), <code class="docutils literal notranslate"><span class="pre">partial_progress</span></code>
+is NaN and left out of the mean.</p>
+<p><strong>Where it appears:</strong></p>
+<ul class="simple">
+<li><p>per episode in <code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code>: <code class="docutils literal notranslate"><span class="pre">partial_progress</span></code>, the <code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts*</span></code>
+counts, and a <code class="docutils literal notranslate"><span class="pre">goal_progress</span></code> entry per conjunct with its PDDL text, its <code class="docutils literal notranslate"><span class="pre">initial</span></code>,
+<code class="docutils literal notranslate"><span class="pre">first_true_step</span></code> and <code class="docutils literal notranslate"><span class="pre">final</span></code> values and its change-point <code class="docutils literal notranslate"><span class="pre">trace</span></code>;</p></li>
+<li><p>as the <code class="docutils literal notranslate"><span class="pre">partial_progress</span></code> aggregate in <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code>;</p></li>
+<li><p>as <code class="docutils literal notranslate"><span class="pre">mean_partial_progress</span></code> in the W&amp;B aggregates table, with a goal-progress plot per
+episode in the episodes table’s <code class="docutils literal notranslate"><span class="pre">goal_progress</span></code> column.</p></li>
+</ul>
+<p>See <a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a> for every goal-progress key.</p>
+</section>
+</section>
+<section id="setting-up-a-new-policy-server">
+<h2>Setting up a new policy server<a class="headerlink" href="#setting-up-a-new-policy-server" title="Link to this heading">#</a></h2>
+<p>Any model can be evaluated with this pipeline by wrapping it in a small policy-server
+interface. See <a class="reference internal" href="imitation_learning/new_policy_server.html"><span class="std std-doc">Setting up a new policy server</span></a>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="imitation_learning/new_policy_server.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Setting up a new policy server</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="evals/replay.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Replaying Actions from a Dataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-you-can-do-with-it">What you can do with it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-goals-for-our-evaluation-system">Design goals for our evaluation system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-run-the-eval-pipeline-creating-an-environment-and-task">Before you run the eval pipeline: creating an environment and task</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-eval-pipeline">How to run the eval pipeline</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start-with-launch-eval-py">Quick start with <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#high-level-conditioning-modes">High-level conditioning modes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-evaluate-py-directly">Running <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> directly</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#episode-scoring-and-outputs">Episode scoring and outputs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#easily-measuring-partial-progress-from-the-pddl-goal">Easily measuring partial progress from the PDDL goal</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-new-policy-server">Setting up a new policy server</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user_guide/workflows/evaluations.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

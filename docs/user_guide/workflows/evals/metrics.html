@@ -1,0 +1,1078 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Eval Metrics &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/evals/metrics';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="launch_eval.py Reference" href="launch_eval.html" />
+    <link rel="prev" title="Replaying Actions from a Dataset" href="replay.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ToyBlocks  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Workflows</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/local.html">Running the pipeline on this machine</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Pre-training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Eval Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../evaluations.html" class="nav-link">Policy Evaluation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Eval Metrics</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="eval-metrics">
+<h1>Eval Metrics<a class="headerlink" href="#eval-metrics" title="Link to this heading">#</a></h1>
+<p>ToyBlocks records evaluation metrics at three granularities: <strong>per-step</strong>, <strong>per-episode</strong>, and <strong>across-episode</strong>. All metrics flow through a common pipeline and are saved automatically at the end of every eval run.</p>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MetricsTracker          per-step tensors   RecordMetrics         blocksuite.eval.run_eval
+(utils/metrics.py)  ──────────────────►  (wrappers/             (run by scripts/evaluate.py)
+                       dict[str,            record_metrics.py)    │
+                       Tensor[num_envs]]        │                 ├─► eval_results.json (per episode + aggregates)
+                                                ├─► CSV per step  └─► eval_episodes.json (one record per episode)
+                                                └─► episode summaries
+</pre></div>
+</div>
+<section id="metricstracker">
+<h3>MetricsTracker<a class="headerlink" href="#metricstracker" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/utils/metrics.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/metrics.py</span></code></a></p>
+<p>Core per-step metric computation. Instantiated once in <code class="docutils literal notranslate"><span class="pre">BaseEnv.__init__</span></code> when any <code class="docutils literal notranslate"><span class="pre">track_*</span></code> config flag is enabled. Each call to <code class="docutils literal notranslate"><span class="pre">step()</span></code> reads the current simulation state (joint data, EE frame, contact sensor) and returns a flat <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">Tensor[num_envs]]</span></code>. All values are scalar-per-environment tensors.</p>
+<p><code class="docutils literal notranslate"><span class="pre">BaseEnv</span></code> merges these tensors into <code class="docutils literal notranslate"><span class="pre">info[&quot;stats&quot;]</span></code> via its <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> method, making them available to downstream wrappers.</p>
+</section>
+<section id="recordmetrics">
+<h3>RecordMetrics<a class="headerlink" href="#recordmetrics" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/wrappers/record_metrics.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/wrappers/record_metrics.py</span></code></a></p>
+<p>A <code class="docutils literal notranslate"><span class="pre">gym.Wrapper</span></code> that sits between the environment and <code class="docutils literal notranslate"><span class="pre">RecordEpisode</span></code>. It does three things:</p>
+<ol class="arabic simple">
+<li><p><strong>Episode summaries</strong> – accumulates per-step stats and, when an episode ends, injects <code class="docutils literal notranslate"><span class="pre">{key}/mean</span></code>, <code class="docutils literal notranslate"><span class="pre">{key}/min</span></code>, <code class="docutils literal notranslate"><span class="pre">{key}/max</span></code>, and <code class="docutils literal notranslate"><span class="pre">{key}/final</span></code> into <code class="docutils literal notranslate"><span class="pre">info[&quot;final_info&quot;][&quot;episode&quot;]</span></code>.</p></li>
+<li><p><strong>Goal-progress summaries</strong> – the boolean goal stats (<code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_success</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_blocks_settled</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_gripper_open</span></code>; see “Goal-progress metrics” below) also get <code class="docutils literal notranslate"><span class="pre">{key}/initial</span></code> and <code class="docutils literal notranslate"><span class="pre">{key}/first_true_step</span></code>. They are also traced step by step and attached to the finished episode as change points (<code class="docutils literal notranslate"><span class="pre">info[&quot;final_info&quot;][&quot;goal_trace&quot;]</span></code>, <code class="docutils literal notranslate"><span class="pre">[[step,</span> <span class="pre">value],</span> <span class="pre">...]</span></code>, starting with <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">initial]</span></code>). Both are timed with the env’s episode clock (<code class="docutils literal notranslate"><span class="pre">episode_length_buf</span></code>), which eval stops during hold steps (PD-switch settles, chunk-boundary waits, wave parking), so they line up with <code class="docutils literal notranslate"><span class="pre">first_success_step</span></code> and <code class="docutils literal notranslate"><span class="pre">episode_len</span></code>.</p></li>
+<li><p><strong>Per-step CSVs</strong> – when an <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> is provided (<code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> passes one only with <code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code>), buffers every step’s stats and writes one CSV file per completed episode to <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/step_metrics/</span></code>, named <code class="docutils literal notranslate"><span class="pre">env{idx}_episode_NNNN.csv</span></code> where <code class="docutils literal notranslate"><span class="pre">{idx}</span></code> is the sub-environment index and <code class="docutils literal notranslate"><span class="pre">NNNN</span></code> is a per-env episode counter. In queue-driven evals, the CSVs of “phantom” episodes (an env auto-reset after the queue drained) are dropped, as their videos and trajectories are.</p></li>
+</ol>
+</section>
+<section id="the-eval-loop">
+<h3>The eval loop<a class="headerlink" href="#the-eval-loop" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py"><code class="docutils literal notranslate"><span class="pre">scripts/evaluate.py</span></code></a> parses the arguments (<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code></a>) and runs the eval loop in <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/run_eval.py"><code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval</span></code></a>. When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, …) to the summaries from <code class="docutils literal notranslate"><span class="pre">RecordMetrics</span></code>. At the end of the run it writes:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">_save_results</span></code> in <code class="docutils literal notranslate"><span class="pre">utils/dataset_recording_utils.py</span></code>) – the raw value of each episode metric as a JSON list, plus mean, std, min, max, and count for every metric across episodes.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code></strong> (the episode table in <code class="docutils literal notranslate"><span class="pre">utils/wandb_logging.py</span></code>) – one record per episode with its prompt, source-episode provenance, metrics, goal progress and video paths (fields listed under “eval_episodes.json” in <a class="reference internal" href="#output-format">Output format</a>). The same records make up the W&amp;B episodes table.</p></li>
+</ul>
+<p>A single <code class="docutils literal notranslate"><span class="pre">evaluate.py</span> <span class="pre">--wandb</span></code> run logs its own W&amp;B run. Pipeline runs instead merge every worker’s <code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code> and <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code> into one W&amp;B run through <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/wandb_consolidate.py"><code class="docutils literal notranslate"><span class="pre">scripts/wandb_consolidate.py</span></code></a>, which logs an episodes table with the expert videos and a goal-progress plot per episode, an aggregates table and the headline metrics, and the offline diagnostic plots of one representative episode per worker.</p>
+</section>
+</section>
+<section id="available-metrics">
+<h2>Available metrics<a class="headerlink" href="#available-metrics" title="Link to this heading">#</a></h2>
+<section id="episode-metrics">
+<h3>Episode metrics<a class="headerlink" href="#episode-metrics" title="Link to this heading">#</a></h3>
+<p>Always recorded when <code class="docutils literal notranslate"><span class="pre">record_metrics=True</span></code> (the default in <code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code>). These appear in <code class="docutils literal notranslate"><span class="pre">info[&quot;final_info&quot;][&quot;episode&quot;]</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">return</span></code></p></td>
+<td><p>Cumulative reward over the episode</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">episode_len</span></code></p></td>
+<td><p>Number of steps in the episode</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reward</span></code></p></td>
+<td><p>Mean reward per step (<code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">/</span> <span class="pre">episode_len</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">success_once</span></code></p></td>
+<td><p>Whether the task succeeded at any point during the episode</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">success_at_end</span></code></p></td>
+<td><p>Whether the task was in a success state at the final step</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">first_success_step</span></code></p></td>
+<td><p>Episode step at which the task first succeeded (NaN if it never did)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fail_once</span></code></p></td>
+<td><p>Whether a failure state was reached at any point</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fail_at_end</span></code></p></td>
+<td><p>Whether the task was in a failure state at the final step</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="eval-loop-metrics">
+<h3>Eval-loop metrics<a class="headerlink" href="#eval-loop-metrics" title="Link to this heading">#</a></h3>
+<p>Added per episode by <code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval</span></code>, only in the runs where they apply:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>When</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">collision</span></code>, <code class="docutils literal notranslate"><span class="pre">collision_count</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--collision</span> <span class="pre">end</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">penalize</span></code></p></td>
+<td><p>Whether, and how many times, a non-target block moved more than 2 cm or 15 deg. A collision fails the episode: <code class="docutils literal notranslate"><span class="pre">success_once</span></code> and <code class="docutils literal notranslate"><span class="pre">success_at_end</span></code> are forced to false.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">success_once_ignore_collision</span></code>, <code class="docutils literal notranslate"><span class="pre">success_at_end_ignore_collision</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--collision</span> <span class="pre">penalize</span></code></p></td>
+<td><p>The two successes before the collision penalty. <code class="docutils literal notranslate"><span class="pre">--collision</span> <span class="pre">off</span></code> scores no collisions at all.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sub_goals</span></code>, <code class="docutils literal notranslate"><span class="pre">sub_goal_success</span></code></p></td>
+<td><p>Oracle and Molmo2 runs</p></td>
+<td><p>Per sub-goal, in order: its name and whether it succeeded (<code class="docutils literal notranslate"><span class="pre">sub_goal_success_ignore_collision</span></code> too under <code class="docutils literal notranslate"><span class="pre">penalize</span></code>). The aggregate gets a rate per skill: <code class="docutils literal notranslate"><span class="pre">sub_goal_success_pick</span></code>, <code class="docutils literal notranslate"><span class="pre">_place</span></code>, <code class="docutils literal notranslate"><span class="pre">_flip</span></code>, <code class="docutils literal notranslate"><span class="pre">_rotate</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hl_done</span></code></p></td>
+<td><p>Learned-HL runs</p></td>
+<td><p>Whether the HL model emitted its <code class="docutils literal notranslate"><span class="pre">done</span></code> token during the episode</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hl_calls</span></code></p></td>
+<td><p>Learned-HL runs</p></td>
+<td><p>Number of HL model queries in the episode</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oracle_done</span></code></p></td>
+<td><p>Oracle-HL runs</p></td>
+<td><p>Whether oracle plan completion ended the episode</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oracle_success_backstop</span></code></p></td>
+<td><p>Oracle-HL runs</p></td>
+<td><p>Whether 10 consecutive successful steps ended the episode instead</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oracle_stuck</span></code></p></td>
+<td><p>Oracle-HL runs, or with a comparison oracle</p></td>
+<td><p>Whether the oracle plan got stuck. It ends the episode for the oracle HL; a comparison oracle only flags it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ll_oracle_failures</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--ll-oracle</span></code> runs</p></td>
+<td><p>Skills the low-level oracle could not execute (no feasible parameters, a failed motion plan, an effect that did not hold); Molmo2 is asked again each time</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ll_skill_stops</span></code>, <code class="docutils literal notranslate"><span class="pre">ll_pause_steps</span></code></p></td>
+<td><p>Play-mode LL checkpoints</p></td>
+<td><p>Number of times the LL predicted play mode -1 (stop), and number of steps it predicted 0 (pause)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">partial_progress</span></code></p></td>
+<td><p>Autogen PDDL tasks</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(final</span> <span class="pre">-</span> <span class="pre">initial)</span> <span class="pre">/</span> <span class="pre">(total</span> <span class="pre">-</span> <span class="pre">initial)</span></code> over the goal conjuncts, in <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]</span></code>; NaN when the goal already held at the start</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">replay_*</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--replay</span></code></p></td>
+<td><p>Divergence from the recording; see <a class="reference internal" href="replay.html#replay-metrics"><span class="std std-ref">Dataset Replay</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">render_replay_status</span></code>, <code class="docutils literal notranslate"><span class="pre">block_identity_status</span></code></p></td>
+<td><p>Render replay, <code class="docutils literal notranslate"><span class="pre">--replay_block_identity</span></code></p></td>
+<td><p>Whether the episode’s recorded render parameters and block letters/colours were applied. In <code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code> only.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>On learned-HL runs (<code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">molmo2_maniflow</span></code>) the HL model owns termination: its <code class="docutils literal notranslate"><span class="pre">done</span></code> token ends the episode, and an episode without a <code class="docutils literal notranslate"><span class="pre">done</span></code> runs out <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code> instead of stopping on goal-success. So <code class="docutils literal notranslate"><span class="pre">success_once</span> <span class="pre">&amp;&amp;</span> <span class="pre">!hl_done</span></code> identifies episodes where the goal was reached but the HL model failed to call it. Under the default <code class="docutils literal notranslate"><span class="pre">--episode_end</span> <span class="pre">goal</span></code>, oracle-HL runs end on oracle plan completion or after success holds for 10 consecutive steps, and plain LL, random and zero-action paths end on instant goal-success. <code class="docutils literal notranslate"><span class="pre">--episode_end</span> <span class="pre">horizon</span></code> runs every episode to <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code>. <code class="docutils literal notranslate"><span class="pre">--episode_end</span> <span class="pre">ll_done</span></code> (play-mode LL checkpoints, no learned HL) ends an episode when the LL predicts play mode -1, or at <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code>; <code class="docutils literal notranslate"><span class="pre">success_at_end</span></code> then says whether the goal still holds and <code class="docutils literal notranslate"><span class="pre">ll_skill_stops</span></code> (1 vs 0) whether the LL stopped or timed out. Replay always uses <code class="docutils literal notranslate"><span class="pre">horizon</span></code>. Instead of the single <code class="docutils literal notranslate"><span class="pre">episode_length_s</span></code> timeout, <code class="docutils literal notranslate"><span class="pre">--expert_timeout_scale</span></code> (<code class="docutils literal notranslate"><span class="pre">--expert-timeout-scale</span></code> on the launcher) ends each queue episode after that multiple of its own expert demonstration’s duration.</p>
+</section>
+<section id="goal-progress-metrics">
+<h3>Goal-progress metrics<a class="headerlink" href="#goal-progress-metrics" title="Link to this heading">#</a></h3>
+<p>Autogen PDDL tasks (generated by <code class="docutils literal notranslate"><span class="pre">tamp/blocks/template/codegen.py</span></code>) report goal progress as per-step boolean stats:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code></p></td>
+<td><p>Whether conjunct <code class="docutils literal notranslate"><span class="pre">&lt;c&gt;</span></code> of the episode’s PDDL goal holds, e.g. <code class="docutils literal notranslate"><span class="pre">(on</span> <span class="pre">block_x</span> <span class="pre">block_w)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">goal_success</span></code></p></td>
+<td><p>Whether the whole goal holds, including the settle gate below</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">goal_blocks_settled</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_gripper_open</span></code></p></td>
+<td><p>The settle gate’s terms: the goal blocks have stopped moving and the gripper is open</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each gets the usual <code class="docutils literal notranslate"><span class="pre">/mean</span></code>, <code class="docutils literal notranslate"><span class="pre">/min</span></code>, <code class="docutils literal notranslate"><span class="pre">/max</span></code>, <code class="docutils literal notranslate"><span class="pre">/final</span></code> summaries plus <code class="docutils literal notranslate"><span class="pre">/initial</span></code> and <code class="docutils literal notranslate"><span class="pre">/first_true_step</span></code> (see <code class="docutils literal notranslate"><span class="pre">RecordMetrics</span></code> above). In <code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code>, each record also gets:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">goal_progress</span></code>: one entry per goal conjunct, with its <code class="docutils literal notranslate"><span class="pre">predicate</span></code> text, its <code class="docutils literal notranslate"><span class="pre">initial</span></code>, <code class="docutils literal notranslate"><span class="pre">first_true_step</span></code>, <code class="docutils literal notranslate"><span class="pre">final</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code> and <code class="docutils literal notranslate"><span class="pre">mean</span></code> values, and its change-point <code class="docutils literal notranslate"><span class="pre">trace</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts</span></code>, <code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts_initial</span></code>, <code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts_final</span></code>, <code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts_ever</span></code>: the number of conjuncts in total, true at the start, true at the end, and true at some point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">goal_success_trace</span></code> (and <code class="docutils literal notranslate"><span class="pre">goal_blocks_settled_trace</span></code> / <code class="docutils literal notranslate"><span class="pre">goal_gripper_open_trace</span></code> when traced).</p></li>
+</ul>
+</section>
+<section id="joint-metrics">
+<h3>Joint metrics<a class="headerlink" href="#joint-metrics" title="Link to this heading">#</a></h3>
+<p>Enabled by <code class="docutils literal notranslate"><span class="pre">--track_joint_metrics</span></code> or <code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code> (both on by default in <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code>).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">joint_pos_norm</span></code></p></td>
+<td><p>L2 norm of the joint position vector</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">joint_vel_norm</span></code></p></td>
+<td><p>L2 norm of the joint velocity vector</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">joint_accel_norm</span></code></p></td>
+<td><p>L2 norm of the joint acceleration vector (finite-differenced from velocity)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">joint_effort_norm</span></code></p></td>
+<td><p>L2 norm of applied torques (when available)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">joint_pos/{name}</span></code></p></td>
+<td><p>Position of individual joint (one column per joint, e.g. <code class="docutils literal notranslate"><span class="pre">joint_pos/panda_joint1</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">joint_vel/{name}</span></code></p></td>
+<td><p>Velocity of individual joint</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">joint_accel/{name}</span></code></p></td>
+<td><p>Acceleration of individual joint</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">joint_effort/{name}</span></code></p></td>
+<td><p>Applied torque on individual joint</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="end-effector-metrics">
+<h3>End-effector metrics<a class="headerlink" href="#end-effector-metrics" title="Link to this heading">#</a></h3>
+<p>Enabled by <code class="docutils literal notranslate"><span class="pre">--track_ee_metrics</span></code> or <code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code> (both on by default in <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code>). Requires a <code class="docutils literal notranslate"><span class="pre">FrameTransformer</span></code> sensor for the EE (configured automatically for supported robots).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ee_pos_x</span></code>, <code class="docutils literal notranslate"><span class="pre">ee_pos_y</span></code>, <code class="docutils literal notranslate"><span class="pre">ee_pos_z</span></code></p></td>
+<td><p>World-frame EE position components</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ee_quat_w</span></code>, <code class="docutils literal notranslate"><span class="pre">ee_quat_x</span></code>, <code class="docutils literal notranslate"><span class="pre">ee_quat_y</span></code>, <code class="docutils literal notranslate"><span class="pre">ee_quat_z</span></code></p></td>
+<td><p>World-frame EE orientation as a quaternion (w, x, y, z)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ee_vel_norm</span></code></p></td>
+<td><p>L2 norm of EE linear velocity (finite-differenced from position)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ee_accel_norm</span></code></p></td>
+<td><p>L2 norm of EE linear acceleration</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="collision-metrics">
+<h3>Collision metrics<a class="headerlink" href="#collision-metrics" title="Link to this heading">#</a></h3>
+<p>Enabled by the env-config option <code class="docutils literal notranslate"><span class="pre">--env-cfg.track-collisions</span></code> (it is not an <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> flag, and <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> does not expose it). Adds an Isaac Lab <code class="docutils literal notranslate"><span class="pre">ContactSensor</span></code> to every robot body, which increases VRAM usage. These contact forces are separate from the block-displacement <code class="docutils literal notranslate"><span class="pre">collision</span></code> metric above.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">contact_force_norm</span></code></p></td>
+<td><p>Sum of per-body contact force norms across all robot bodies</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bodies_in_contact</span></code></p></td>
+<td><p>Number of robot bodies with contact force above the sensor threshold</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">env_collision_count</span></code></p></td>
+<td><p>Cumulative count of body-in-contact events over the episode</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">self_collision_count</span></code></p></td>
+<td><p>Cumulative count of self/filter-pair contacts (requires filter paths)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">contact_force/{body}/x,y,z</span></code></p></td>
+<td><p>Per-body 3D net contact force in world frame (e.g. <code class="docutils literal notranslate"><span class="pre">contact_force/panda_link3/x</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">contact_pair/{body}/{filter}/x,y,z</span></code></p></td>
+<td><p>Per (body, filter-object) pair 3D force. Only available when <code class="docutils literal notranslate"><span class="pre">--env-cfg.collision-filter-prim-paths</span></code> is set. Filter name is the last path segment (e.g. <code class="docutils literal notranslate"><span class="pre">contact_pair/panda_link7/Block/z</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="task-specific-metrics">
+<h3>Task-specific metrics<a class="headerlink" href="#task-specific-metrics" title="Link to this heading">#</a></h3>
+<p>Individual tasks add their own metrics by overriding <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>. These appear under <code class="docutils literal notranslate"><span class="pre">stats/</span></code> in <code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code>. For example, the <strong>Lift</strong> task adds:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">object_to_goal_dist</span></code></p></td>
+<td><p>L2 distance from the object to the goal position</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">object_to_tcp_dist</span></code></p></td>
+<td><p>L2 distance from the object to the end-effector</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The align, flip, isolate, push-stacked and rotate tasks add <code class="docutils literal notranslate"><span class="pre">object_to_tcp_dist</span></code> too.</p>
+</section>
+</section>
+<section id="output-format">
+<h2>Output format<a class="headerlink" href="#output-format" title="Link to this heading">#</a></h2>
+<p>Every run writes both JSON files; <code class="docutils literal notranslate"><span class="pre">step_metrics/</span></code> is written only with <code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>runs/&lt;run_name&gt;/
+├── eval_results.json
+├── eval_episodes.json
+└── step_metrics/
+    ├── env0_episode_0000.csv
+    ├── env0_episode_0001.csv
+    ├── env1_episode_0000.csv
+    └── ...
+</pre></div>
+</div>
+<section id="eval-results-json">
+<h3>eval_results.json<a class="headerlink" href="#eval-results-json" title="Link to this heading">#</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+  "blocksuite_commit": "...",
+  "blocksuite_branch": "...",
+  "blocksuite_dirty": false,
+  "submodule_commits": { ... },
+  "args": { ... },
+  "num_episodes": 10,
+  "elapsed_seconds": 42.3,
+  "per_episode": {
+    "return": [1.2, 0.8, ...],
+    "success_once": [1.0, 0.0, ...],
+    "stats/ee_pos_x/mean": [0.61, 0.59, ...],
+    ...
+  },
+  "per_episode_goal_conjuncts": [["(on block_x block_w)", ...], ...],
+  "metrics": {
+    "return": { "mean": 0.95, "std": 0.21, "min": 0.3, "max": 1.5, "count": 10 },
+    "stats/joint_vel_norm/mean": { "mean": 0.12, "std": 0.03, ... },
+    ...
+  }
+}
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blocksuite_commit</span></code>, <code class="docutils literal notranslate"><span class="pre">blocksuite_branch</span></code>, <code class="docutils literal notranslate"><span class="pre">blocksuite_dirty</span></code> and <code class="docutils literal notranslate"><span class="pre">submodule_commits</span></code> record the checkout the run used (the dirty check ignores submodules).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">per_episode</span></code> – one list per metric key, where element <em>i</em> is the value for episode <em>i</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">per_episode_goal_conjuncts</span></code> – for autogen PDDL tasks, the PDDL text of each <code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code> of episode <em>i</em> (<code class="docutils literal notranslate"><span class="pre">null</span></code> for episodes without goal labels).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metrics</span></code> – across-episode aggregates (mean, std, min, max, count) for every metric key. The aggregation is NaN-safe, so NaN values (e.g. <code class="docutils literal notranslate"><span class="pre">first_success_step</span></code> of a failed episode) are left out.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">success_efficiency</span></code> – Molmo2 HL runs only: the mean, over successful episodes, of the HL commands the eval took divided by the commands the source demonstration took.</p></li>
+</ul>
+<p>Episode-level stat keys are prefixed with <code class="docutils literal notranslate"><span class="pre">stats/</span></code> and suffixed with the aggregation (<code class="docutils literal notranslate"><span class="pre">/mean</span></code>, <code class="docutils literal notranslate"><span class="pre">/min</span></code>, <code class="docutils literal notranslate"><span class="pre">/max</span></code>, <code class="docutils literal notranslate"><span class="pre">/final</span></code>). For example, <code class="docutils literal notranslate"><span class="pre">stats/ee_pos_x/mean</span></code> is the mean of <code class="docutils literal notranslate"><span class="pre">ee_pos_x</span></code> over all steps in a single episode.</p>
+</section>
+<section id="eval-episodes-json">
+<h3>eval_episodes.json<a class="headerlink" href="#eval-episodes-json" title="Link to this heading">#</a></h3>
+<p>A JSON list with one record per scored episode, built by <code class="docutils literal notranslate"><span class="pre">EpisodeResultsTable</span></code> in <code class="docutils literal notranslate"><span class="pre">utils/wandb_logging.py</span></code>. It is written at the end of every run and rewritten once the LeRobot recorder has closed, when the output episode indices are known. Fields that do not apply to a run are <code class="docutils literal notranslate"><span class="pre">null</span></code> or absent.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[
+  {
+    "sim_env_idx": 0,
+    "episode_idx_for_sim_env": 0,
+    "prompt": "put the red block on the blue block",
+    "pddl_goal": "(and (on block_x block_w))",
+    "source_dataset_path": "data/datasets/my_dataset",
+    "source_dataset_episode_idx": 12,
+    "expert_episode_length": 310,
+    "init_frame_index": 0,
+    "success_once": 1.0,
+    "episode_len": 287,
+    "collision": 0.0,
+    "goal_progress": [{"index": 0, "predicate": "(on block_x block_w)", "initial": 0.0, "first_true_step": 241, ...}],
+    "num_goal_conjuncts": 1,
+    "partial_progress": 1.0,
+    "step_dt_s": 0.04,
+    "video_path": ".../sensor_obs_videos/env0_episode_0000.mp4",
+    "output_lerobot_dataset_dir": ".../my_eval_success",
+    "output_lerobot_episode_index": 0,
+    ...
+  },
+  ...
+]
+</pre></div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Group</p></th>
+<th class="head"><p>Fields</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Identity</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sim_env_idx</span></code>, <code class="docutils literal notranslate"><span class="pre">episode_idx_for_sim_env</span></code></p></td>
+<td><p>The sub-env index and its per-env episode counter: the same pair that names the videos and step-metric CSVs.</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">output_lerobot_dataset_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">output_lerobot_episode_index</span></code></p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--save_lerobot</span></code>: the recorded dataset (success or failure split) and the episode’s index in it.</p></td>
+</tr>
+<tr class="row-even"><td><p>Task</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prompt</span></code>, <code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code></p></td>
+<td><p>The language prompt the policy received and the episode’s PDDL goal.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Source episode</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source_dataset_path</span></code>, <code class="docutils literal notranslate"><span class="pre">source_dataset_episode_idx</span></code>, <code class="docutils literal notranslate"><span class="pre">source_dataset_episode_id</span></code></p></td>
+<td><p>Queue evals: the dataset episode the eval was initialized from.</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">expert_episode_length</span></code>, <code class="docutils literal notranslate"><span class="pre">expert_episode_seconds</span></code></p></td>
+<td><p>Length of that expert demonstration, in frames and seconds.</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">init_frame_index</span></code>, <code class="docutils literal notranslate"><span class="pre">init_after_hl_action</span></code></p></td>
+<td><p>The source frame the eval started from: 0 unless the queue was told to start after a given high-level action.</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">expert_videos</span></code>, <code class="docutils literal notranslate"><span class="pre">expert_video_path</span></code>, <code class="docutils literal notranslate"><span class="pre">expert_video_start_s</span></code></p></td>
+<td><p>Per-camera clip metadata of the expert demonstration, and the path and start time of the front-preferred camera’s clip.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Metrics</p></td>
+<td><p>the episode and eval-loop metrics</p></td>
+<td><p>Every key of the result table (success, length, collision, sub-goal, oracle, HL and play-mode counters, status fields; see “Episode metrics” and “Eval-loop metrics” in <a class="reference internal" href="#available-metrics">Available metrics</a>), plus every <code class="docutils literal notranslate"><span class="pre">replay_*</span></code> scalar.</p></td>
+</tr>
+<tr class="row-even"><td><p>Goal progress</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">goal_progress</span></code>, <code class="docutils literal notranslate"><span class="pre">num_goal_conjuncts*</span></code>, <code class="docutils literal notranslate"><span class="pre">partial_progress</span></code></p></td>
+<td><p>Autogen PDDL tasks: one entry per goal conjunct (<code class="docutils literal notranslate"><span class="pre">index</span></code>, <code class="docutils literal notranslate"><span class="pre">metric_key</span></code>, <code class="docutils literal notranslate"><span class="pre">predicate</span></code>, <code class="docutils literal notranslate"><span class="pre">initial</span></code>, <code class="docutils literal notranslate"><span class="pre">first_true_step</span></code>, <code class="docutils literal notranslate"><span class="pre">final</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">trace</span></code>) and the counts derived from them; see “Goal-progress metrics” above.</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">goal_success_trace</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_blocks_settled_trace</span></code>, <code class="docutils literal notranslate"><span class="pre">goal_gripper_open_trace</span></code></p></td>
+<td><p>Change points <code class="docutils literal notranslate"><span class="pre">[[step,</span> <span class="pre">value],</span> <span class="pre">...]</span></code> over the episode clock.</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">goal_objects</span></code>, <code class="docutils literal notranslate"><span class="pre">step_dt_s</span></code></p></td>
+<td><p>The goal’s blocks, in the order of the per-block settle-gate stats, and the control period (to convert steps to seconds).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Videos</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">video_path</span></code></p></td>
+<td><p>The sensor-observation MP4 (<code class="docutils literal notranslate"><span class="pre">--save_sensor_obs_video</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source_episode_video_path</span></code></p></td>
+<td><p>The extracted expert video (<code class="docutils literal notranslate"><span class="pre">--save_expert_video</span></code>, or <code class="docutils literal notranslate"><span class="pre">--wandb</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hl_overlay_prev_action_video_path</span></code>, <code class="docutils literal notranslate"><span class="pre">hl_latency_video_path</span></code></p></td>
+<td><p>The HL overlay and HL latency videos, when written.</p></td>
+</tr>
+<tr class="row-even"><td><p>Other</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">episode_seconds</span></code></p></td>
+<td><p>W&amp;B runs only: <code class="docutils literal notranslate"><span class="pre">episode_len</span></code> divided by the video frame rate.</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">policy_input_*</span></code></p></td>
+<td><p>With <code class="docutils literal notranslate"><span class="pre">--save_diagnostic_plots</span></code>: paths of the policy-input verification panels.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The per-camera expert first frames shown in the W&amp;B table are left out of the JSON.</p>
+</section>
+<section id="per-step-csvs">
+<h3>Per-step CSVs<a class="headerlink" href="#per-step-csvs" title="Link to this heading">#</a></h3>
+<p>Each CSV has one row per simulation step and one column per metric. The first column is <code class="docutils literal notranslate"><span class="pre">step</span></code> (0-indexed). All values are raw floats from that step.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>step,joint_pos_norm,joint_vel_norm,...,ee_pos_x,ee_pos_y,...,contact_force_norm,...
+0,3.118,1.039,...,1.612,-1.001,...,0.0,...
+1,3.143,1.310,...,1.607,-1.005,...,0.0,...
+</pre></div>
+</div>
+<p>When running with <code class="docutils literal notranslate"><span class="pre">num_envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, each sub-environment gets its own set of CSVs named <code class="docutils literal notranslate"><span class="pre">env{idx}_episode_NNNN.csv</span></code>, where <code class="docutils literal notranslate"><span class="pre">{idx}</span></code> is the env index and <code class="docutils literal notranslate"><span class="pre">NNNN</span></code> is a per-env episode counter that increments each time that env finishes an episode. If the evaluation ends mid-episode, partial files are saved with a <code class="docutils literal notranslate"><span class="pre">_partial</span></code> suffix.</p>
+</section>
+</section>
+<section id="cli-flags">
+<h2>CLI flags<a class="headerlink" href="#cli-flags" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Enable both joint and EE metrics (equivalent to <code class="docutils literal notranslate"><span class="pre">--track_joint_metrics</span> <span class="pre">--track_ee_metrics</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--track_joint_metrics</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Track per-step joint position, velocity, acceleration, and effort</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--track_ee_metrics</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Track per-step end-effector position, orientation, velocity, and acceleration</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--save_step_metrics</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Write the per-step CSVs. Off by default: they cost a host copy of every stat on every step, and the episode summaries do not depend on them</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--collision</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
+<td><p>Block-displacement collision scoring: <code class="docutils literal notranslate"><span class="pre">end</span></code>, <code class="docutils literal notranslate"><span class="pre">penalize</span></code> or <code class="docutils literal notranslate"><span class="pre">off</span></code> (see “Eval-loop metrics” above)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The contact-force metrics are configured through env-config fields (<code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/base_env_cfg.py</span></code>), set with <code class="docutils literal notranslate"><span class="pre">--env-cfg.&lt;field&gt;</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Env-config option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env-cfg.track-collisions</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Track per-step collision forces and counts. Adds a <code class="docutils literal notranslate"><span class="pre">ContactSensor</span></code> to the scene (increases VRAM)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--env-cfg.collision-filter-prim-paths</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Prim path expressions for collision filter targets (e.g. <code class="docutils literal notranslate"><span class="pre">'{ENV_REGEX_NS}/Block'</span></code>). Only used with <code class="docutils literal notranslate"><span class="pre">track-collisions</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env-cfg.collision-filter-body-names</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Robot body names to create per-body filter sensors for (e.g. <code class="docutils literal notranslate"><span class="pre">panda_link7</span> <span class="pre">panda_link8</span></code>). Required together with <code class="docutils literal notranslate"><span class="pre">collision-filter-prim-paths</span></code> to get <code class="docutils literal notranslate"><span class="pre">contact_pair/</span></code> metrics. Each listed body gets a lightweight single-body contact sensor</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code> is OR-ed with the two finer flags, so to turn joint and EE tracking off pass all three negations: <code class="docutils literal notranslate"><span class="pre">--no-track_metrics</span> <span class="pre">--no-track_joint_metrics</span> <span class="pre">--no-track_ee_metrics</span></code>.</p>
+<p>Example with zero actions (no policy server needed, useful for sanity-checking metrics collection):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task<span class="w"> </span>Blocksuite-Lift-v0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--env-cfg.track-collisions<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--env-cfg.collision-filter-prim-paths<span class="w"> </span><span class="s1">'{ENV_REGEX_NS}/Block'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--env-cfg.collision-filter-body-names<span class="w"> </span>panda_link7<span class="w"> </span>panda_link8<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--save_step_metrics<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--num_envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_eval_steps<span class="w"> </span><span class="m">200</span>
+</pre></div>
+</div>
+<p>The same options apply to a run against a policy server; see the
+<a class="reference internal" href="evaluate.html#running-against-a-policy-server-by-hand"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</span></a>.</p>
+</section>
+<section id="how-to-extend">
+<h2>How to extend<a class="headerlink" href="#how-to-extend" title="Link to this heading">#</a></h2>
+<section id="add-a-task-specific-metric">
+<h3>Add a task-specific metric<a class="headerlink" href="#add-a-task-specific-metric" title="Link to this heading">#</a></h3>
+<p>Override <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> in your task environment. Call <code class="docutils literal notranslate"><span class="pre">super().evaluate()</span></code> first so that <code class="docutils literal notranslate"><span class="pre">MetricsTracker</span></code> stats are included, then add your own entries to the <code class="docutils literal notranslate"><span class="pre">stats</span></code> sub-dict.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"stats"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s2">"my_distance"</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">root_pos_w</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_pos</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>The value must be a <code class="docutils literal notranslate"><span class="pre">[num_envs]</span></code> tensor. It will automatically appear in the per-step CSVs and episode summaries.</p>
+</section>
+<section id="add-a-new-metricstracker-category">
+<h3>Add a new MetricsTracker category<a class="headerlink" href="#add-a-new-metricstracker-category" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Add a boolean flag to <code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> (in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/base_env_cfg.py</span></code>):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">track_my_sensor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Add a corresponding <code class="docutils literal notranslate"><span class="pre">--track_my_sensor</span></code> field to the <code class="docutils literal notranslate"><span class="pre">Args</span></code> dataclass in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code> and wire it into the env config in <code class="docutils literal notranslate"><span class="pre">_make_env</span></code> (<code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/dataset_recording_utils.py</span></code>), next to <code class="docutils literal notranslate"><span class="pre">track_joint_metrics</span></code>.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">MetricsTracker.__init__</span></code>, initialize any buffers gated on the new flag.</p></li>
+<li><p>Add a <code class="docutils literal notranslate"><span class="pre">_compute_my_sensor_metrics()</span></code> method that returns <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">Tensor[num_envs]]</span></code>.</p></li>
+<li><p>Call it from <code class="docutils literal notranslate"><span class="pre">MetricsTracker.step()</span></code>:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_track_my_sensor</span><span class="p">:</span>
+    <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_compute_my_sensor_metrics</span><span class="p">())</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>If the sensor needs setup during scene creation, add the initialization logic to <code class="docutils literal notranslate"><span class="pre">BaseEnv._setup_scene()</span></code> (similar to how <code class="docutils literal notranslate"><span class="pre">ContactSensor</span></code> is added when <code class="docutils literal notranslate"><span class="pre">track_collisions</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="replay.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Replaying Actions from a Dataset</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="launch_eval.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture">Architecture</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#metricstracker">MetricsTracker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#recordmetrics">RecordMetrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-eval-loop">The eval loop</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-metrics">Available metrics</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#episode-metrics">Episode metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eval-loop-metrics">Eval-loop metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#goal-progress-metrics">Goal-progress metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#joint-metrics">Joint metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-effector-metrics">End-effector metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#collision-metrics">Collision metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#task-specific-metrics">Task-specific metrics</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-format">Output format</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eval-results-json">eval_results.json</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eval-episodes-json">eval_episodes.json</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#per-step-csvs">Per-step CSVs</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-flags">CLI flags</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-extend">How to extend</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-a-task-specific-metric">Add a task-specific metric</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-a-new-metricstracker-category">Add a new MetricsTracker category</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/evals/metrics.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
