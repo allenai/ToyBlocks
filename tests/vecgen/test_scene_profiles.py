@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.utils.reset_states_io import (
+from toyblocks.utils.reset_states_io import (
     load_reset_states,
     load_reset_states_with_profiles,
     pack_reset_states,
@@ -151,7 +151,7 @@ class _FakeTemplateEnv:
 
 
 def _vec_sim(base_env: _FakeTemplateEnv) -> Any:
-    from blocksuite.vecgen.sim import VecSim
+    from toyblocks.vecgen.sim import VecSim
 
     sim = VecSim.__new__(VecSim)
     sim.base_env = base_env
@@ -186,7 +186,7 @@ def test_vecgen_block_sizes_are_the_spawned_profile_per_env() -> None:
 def test_vecgen_engine_names_the_profile_with_no_reset_state() -> None:
     from collections import deque
 
-    from blocksuite.vecgen.engine import Engine, EngineConfig
+    from toyblocks.vecgen.engine import Engine, EngineConfig
 
     recorded = [_profile(0, 0.040)]
     package = [_profile(0, 0.050), _profile(1, 0.040)]

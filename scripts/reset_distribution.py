@@ -1,17 +1,17 @@
 import tyro
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 simulation_app = launch_app()
 from dataclasses import dataclass
 from typing import Annotated
-from blocksuite.cli.base_args import BaseArgs, add_env_cfg_args
+from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args
 import gymnasium as gym
-import blocksuite.tasks  # noqa: F401
+import toyblocks.tasks  # noqa: F401
 @add_env_cfg_args
 @dataclass
 class Args(BaseArgs):
     num_envs: Annotated[int, tyro.conf.arg(aliases=["-n"])] = 1
     """Number of parallel environments."""
-    task: str = "Blocksuite-Lift-v0"
+    task: str = "ToyBlocks-Lift-v0"
     """The task to run."""
     seed: Annotated[int, tyro.conf.arg(aliases=["-s"])] = 0
     """The seed to use"""
@@ -34,7 +34,7 @@ def main(args: Args):
     # create environment
     env = gym.make(args.task, cfg=env_cfg)
     if args.headless:
-        from blocksuite.viewer.viewer import Viewer, ViewerCfg
+        from toyblocks.viewer.viewer import Viewer, ViewerCfg
         viewer = Viewer(cfg=ViewerCfg(
             include_cameras=True,
             env_ids=list(range(min(args.num_envs, 16))),

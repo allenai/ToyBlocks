@@ -24,7 +24,7 @@ for training.
 Point the annotator at the merged dataset and give it a number of parallel workers:
 
 ```bash
-python src/blocksuite/data_annotation/annotate_target_xy.py \
+python src/toyblocks/data_annotation/annotate_target_xy.py \
     data/datasets/merged/train/<experiment-id> -j 64
 ```
 

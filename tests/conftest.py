@@ -1,4 +1,4 @@
-"""Shared pytest configuration for blocksuite tests.
+"""Shared pytest configuration for ToyBlocks tests.
 
 `pytest_addoption` must live in the rootdir conftest, so the `--scene`,
 `--rollout-case`, `--write-rollout-golden` and `--write-policy-input-golden`

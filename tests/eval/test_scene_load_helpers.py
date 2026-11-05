@@ -7,7 +7,7 @@ Two pieces, neither of which any other test reaches:
   raise is the shell script's entire error path -- it is what turns "the PDDL
   randomization annotations never reached codegen" into a failing CI step rather
   than a run that quietly verifies the same scene twice.
-- The comparison primitives in ``blocksuite.eval.scene_verification`` that the
+- The comparison primitives in ``toyblocks.eval.scene_verification`` that the
   GPU rollout golden is built out of. Their branches (a shape change, a key-set
   change, a missing golden section) only fire when something has already gone
   wrong on a GPU box, so they are exactly the code most likely to be broken when
@@ -22,16 +22,16 @@ from __future__ import annotations
 
 import pytest
 
-from blocksuite.eval.scene_verification import (
-    SceneMismatchReport,
-    compare_array,
-    compare_key_set,
-    malformed_golden,
-)
 from tests.eval.pick_profile_episodes import (
     group_by_profile,
     pick_episodes,
     profile_key,
+)
+from toyblocks.eval.scene_verification import (
+    SceneMismatchReport,
+    compare_array,
+    compare_key_set,
+    malformed_golden,
 )
 
 

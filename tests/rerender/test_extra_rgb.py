@@ -28,7 +28,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-from blocksuite.vecgen.recording._video_encoder import _VideoEncoderProcess as VP  # noqa: E402
+from toyblocks.vecgen.recording._video_encoder import _VideoEncoderProcess as VP  # noqa: E402
 
 _failures = []
 
@@ -196,7 +196,7 @@ def main():
     # Asserting f"observation.images.{cam}_224" == "observation.images.camera:front_camera_224"
     # would compare an f-string to its own expansion and pass no matter what the recorder does.
     # Read the key the RECORDER actually builds, and evaluate it against a real camera name.
-    rec = (Path(__file__).resolve().parents[2] / "src" / "blocksuite" / "vecgen" / "recording"
+    rec = (Path(__file__).resolve().parents[2] / "src" / "toyblocks" / "vecgen" / "recording"
            / "lerobot_recorder.py").read_text()
     # Specifically the SIDECAR declaration -- the plain RGB feature is declared first and a
     # loose pattern matches that one instead.

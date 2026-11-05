@@ -1,6 +1,6 @@
 """Success rate and average time per skill, from the eval logs the GUI writes.
 
-Reads ``eval_log_<date>.json`` (see ``blocksuite.serving.sim2real.rollout.eval_log``)
+Reads ``eval_log_<date>.json`` (see ``toyblocks.serving.sim2real.rollout.eval_log``)
 and reduces the graded commands to one row per skill.
 
 A verdict means one of two different things, and the two are never pooled:
@@ -47,7 +47,7 @@ class Verdict:
     """One graded command, plus the run header it was graded under.
 
     Deliberately parsed here rather than through
-    ``blocksuite.eval.skill_success.verdicts``: that reader carries the clip
+    ``toyblocks.eval.skill_success.verdicts``: that reader carries the clip
     export pipeline with it (numpy, the recordings reader), and a success-rate
     table should not need any of that, nor break if that package goes away.
     """

@@ -10,11 +10,11 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from blocksuite.serving.obs_transforms.maniflow import ManiflowObsTransform
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+from tests.serving.policy_input_fixture import build_obs
+from toyblocks.serving.obs_transforms.maniflow import ManiflowObsTransform
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
     ManiflowBlocksTableObsTransform,
 )
-from tests.serving.policy_input_fixture import build_obs
 
 _EJBL_PATCH = (
     "hvla.training.trainer_utils.depth_aug.elastic_jbl_depth.add_ejbl_depth_noise"
@@ -128,7 +128,7 @@ def test_unknown_augment_depth_raises() -> None:
 
 
 def test_require_depth_aug_raises_when_unsupported(monkeypatch: pytest.MonkeyPatch) -> None:
-    import blocksuite.serving.maniflow_serving_utils as msu
+    import toyblocks.serving.maniflow_serving_utils as msu
 
     monkeypatch.setattr(msu, "depth_aug_supported", lambda _profile: False)
     with pytest.raises(RuntimeError, match="--depth-aug"):
@@ -136,7 +136,7 @@ def test_require_depth_aug_raises_when_unsupported(monkeypatch: pytest.MonkeyPat
 
 
 def test_ejbl_transform_init_fails_when_unsupported(monkeypatch: pytest.MonkeyPatch) -> None:
-    import blocksuite.serving.maniflow_serving_utils as msu
+    import toyblocks.serving.maniflow_serving_utils as msu
 
     monkeypatch.setattr(msu, "depth_aug_supported", lambda _profile: False)
     with pytest.raises(RuntimeError, match="--depth-aug"):

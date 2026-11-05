@@ -1,6 +1,6 @@
 """CPU tests for replaying a rerendered dataset's recorded renders in eval.
 
-Covers the parts of :mod:`blocksuite.eval.render_replay` that decide *which* record an
+Covers the parts of :mod:`toyblocks.eval.render_replay` that decide *which* record an
 episode gets -- the merged-episode -> (problem, local index) mapping, the per-problem
 count check, the per-episode field check, the flags hash -- plus the empty-local-lights
 fix and the ``--wave_resets`` bookkeeping. Each dataset is a tmp_path LeRobot skeleton
@@ -20,8 +20,8 @@ import pyarrow.parquet as pq
 import pytest
 import torch
 
-from blocksuite.eval import render_replay as rr
-from blocksuite.eval.render_replay import (
+from toyblocks.eval import render_replay as rr
+from toyblocks.eval.render_replay import (
     STATUS_APPLIED,
     STATUS_COUNT_MISMATCH,
     STATUS_FIELD_MISMATCH,
@@ -184,7 +184,7 @@ def test_stage_writes_the_status_into_the_setup(tmp_path: Path) -> None:
 
 def _bound_replay(root: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[RecordedRenderReplay, dict]:
     """A replay "bound" to a fake 2-env scene, with every USD applier recorded."""
-    from blocksuite.domain_randomization import interpreter, lights
+    from toyblocks.domain_randomization import interpreter, lights
 
     calls: dict[str, list] = {"apply_record": [], "local_lights": [], "cameras": []}
     monkeypatch.setattr(
@@ -260,7 +260,7 @@ def test_globals_reuse_records_applied_earlier(
 def test_globals_pass_keeps_the_recorded_local_sun_on(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from blocksuite.domain_randomization import interpreter
+    from toyblocks.domain_randomization import interpreter
 
     sun: dict[str, Any] = {"ltype": "distant", "intensity": 577.0, "_slot": 0}
     root = _merged(tmp_path, {"pa": 1}, {"pa": [_record(0, local_lights=[sun])]})
@@ -295,7 +295,7 @@ def test_apply_staged_is_a_noop_until_bound(tmp_path: Path) -> None:
 
 
 def test_kit_args_match_drsession() -> None:
-    from blocksuite.domain_randomization.session import DRSession
+    from toyblocks.domain_randomization.session import DRSession
 
     flags = {"carb_settings": {"/rtx/rendermode": "RealTimePathTracing", "a/b": True}}
     assert rr.kit_args_from_flags(flags) == DRSession.kit_args(flags)

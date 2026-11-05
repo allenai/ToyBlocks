@@ -10,10 +10,10 @@ from pathlib import Path
 
 import yaml
 
-from blocksuite.domain_randomization.block_colors import hsv_to_rgb, parse_palette
-from blocksuite.domain_randomization.glyphs import resolve_glyph_sets
+from toyblocks.domain_randomization.block_colors import hsv_to_rgb, parse_palette
+from toyblocks.domain_randomization.glyphs import resolve_glyph_sets
 
-FLAGS = (Path(__file__).resolve().parents[2] / "src" / "blocksuite" / "domain_randomization" / "flags"
+FLAGS = (Path(__file__).resolve().parents[2] / "src" / "toyblocks" / "domain_randomization" / "flags"
          / "rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml")
 UPSIDE_DOWN = set("IHNOSZX")   # scripts/task_gen/stack_three.py UPSIDE_DOWN_SYMMETRIC_LETTERS
 CASE = set("COPSUVWXZ")        # scripts/task_gen/stack_three.py CASE_SYMMETRIC_LETTERS

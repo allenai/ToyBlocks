@@ -16,7 +16,7 @@ Usage:
 import argparse, concurrent.futures as cf, glob, json, os, re, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-from blocksuite.vecgen.recording._video_validate import has_moov, count_frames  # noqa: E402
+from toyblocks.vecgen.recording._video_validate import has_moov, count_frames  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("dataset_dir")

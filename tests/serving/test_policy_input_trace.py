@@ -33,18 +33,25 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.eval.policy_input_debug import (
+from tests.serving.policy_input_fixture import (
+    FIXTURE_BATCH,
+    build_obs,
+    build_target_heatmap,
+    load_stats,
+    normalizer_for,
+)
+from toyblocks.eval.policy_input_debug import (
     _STATE_BLOCKS_BY_DIM,
     _state_rows,
 )
-from blocksuite.serving.maniflow_serving_utils import (
+from toyblocks.serving.maniflow_serving_utils import (
     _summarize_heatmap_peaks,
     _summarize_value,
     state_norm_metadata,
     summarize_model_inputs,
 )
-from blocksuite.serving.obs_transforms.maniflow import STATE_DIM_LAYOUTS
-from blocksuite.serving.policy_input_trace import (
+from toyblocks.serving.obs_transforms.maniflow import STATE_DIM_LAYOUTS
+from toyblocks.serving.policy_input_trace import (
     _depth_hw,
     _heatmap_hw,
     _image_hwc_uint8,
@@ -53,14 +60,7 @@ from blocksuite.serving.policy_input_trace import (
     render_hl_input_panel,
     render_ll_input_panel,
 )
-from blocksuite.utils.wandb_logging import _HL_INPUT_PANEL_RE, _LL_INPUT_PANEL_RE
-from tests.serving.policy_input_fixture import (
-    FIXTURE_BATCH,
-    build_obs,
-    build_target_heatmap,
-    load_stats,
-    normalizer_for,
-)
+from toyblocks.utils.wandb_logging import _HL_INPUT_PANEL_RE, _LL_INPUT_PANEL_RE
 
 HEATMAP_PEAK_XY = (61, 148)
 
@@ -399,7 +399,7 @@ def _wire_for_panel(
     tensors the model receives, so feeding it hand-built arrays would test the
     matplotlib calls and nothing else.
     """
-    from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+    from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
         ManiflowBlocksTableObsTransform,
     )
 

@@ -8,8 +8,8 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from blocksuite.domain_randomization.block_variables import BlockIdentity
-from blocksuite.utils.episode_dataset import load_setups
+from toyblocks.domain_randomization.block_variables import BlockIdentity
+from toyblocks.utils.episode_dataset import load_setups
 
 RENDERED = "(and (on_table block_green workspace_table) (on block_l block_green))"
 SOURCE = "(and (on_table block_blue workspace_table) (on block_5 block_blue))"

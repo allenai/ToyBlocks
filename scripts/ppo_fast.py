@@ -1,4 +1,4 @@
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 import tyro
 simulation_app = launch_app()
 import os
@@ -26,15 +26,15 @@ from torch.utils.tensorboard import SummaryWriter
 import wandb
 from tensordict import from_module
 from tensordict.nn import CudaGraphModule
-from blocksuite.cli.base_args import BaseArgs, add_env_cfg_args
+from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args
 import isaaclab_tasks  # noqa: F401
-import blocksuite.tasks  # noqa: F401
+import toyblocks.tasks  # noqa: F401
 import isaaclab.sim as sim_utils  # noqa: F401
-from blocksuite.tasks.base_env import BaseEnv
-from blocksuite.wrappers.flatten import FlattenObservationWrapper
-from blocksuite.rl import _AGENTS
-from blocksuite.robots.actuator_profiles import actuators_to_gains
-from blocksuite.utils import common_utils
+from toyblocks.tasks.base_env import BaseEnv
+from toyblocks.wrappers.flatten import FlattenObservationWrapper
+from toyblocks.rl import _AGENTS
+from toyblocks.robots.actuator_profiles import actuators_to_gains
+from toyblocks.utils import common_utils
 @add_env_cfg_args
 @dataclasses.dataclass
 class Args(BaseArgs):
@@ -48,7 +48,7 @@ class Args(BaseArgs):
     """if toggled, cuda will be enabled by default"""
     track: bool = False
     """if toggled, this experiment will be tracked with Weights and Biases"""
-    wandb_project_name: str = "Blocksuite-RL"
+    wandb_project_name: str = "ToyBlocks-RL"
     """the wandb's project name"""
     wandb_entity: Optional[str] = None
     """the entity (team) of wandb's project"""
@@ -70,7 +70,7 @@ class Args(BaseArgs):
     """whether to allow viser to expose a public url (handy for beaker runs)"""
 
     # Environment specific arguments
-    task: str = "Blocksuite-Lift-v0"
+    task: str = "ToyBlocks-Lift-v0"
     """the id of the environment"""
     env_vectorization: str = "gpu"
     """the type of environment vectorization to use"""
@@ -317,7 +317,7 @@ if __name__ == "__main__":
     base_envs: BaseEnv = envs.unwrapped
     num_eval_steps = int(env_cfg.episode_length_s / (env_cfg.sim.dt * env_cfg.decimation))
     if not args.disable_viewer:
-        from blocksuite.viewer.viewer import Viewer, ViewerCfg
+        from toyblocks.viewer.viewer import Viewer, ViewerCfg
         viewer = Viewer(cfg=ViewerCfg(
             env_ids=list(range(min(args.num_envs, 16))),
             share_url=args.share_url,
@@ -427,7 +427,7 @@ if __name__ == "__main__":
                 name=run_name,
                 save_code=True,
                 group=args.wandb_group,
-                tags=["ppo", "walltime_efficient", "blocksuite", f"GPU:{torch.cuda.get_device_name()}"]
+                tags=["ppo", "walltime_efficient", "toyblocks", f"GPU:{torch.cuda.get_device_name()}"]
             )
             config_path = f"runs/{run_name}/config.json"
             dst = shutil.copy(config_path, wandb.run.dir)

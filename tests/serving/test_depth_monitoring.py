@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from blocksuite.serving.depth_monitoring import summarize_depth_meters, summarize_wire_depth_batch
+from toyblocks.serving.depth_monitoring import summarize_depth_meters, summarize_wire_depth_batch
 
 
 def test_summarize_depth_meters_zeros_and_probe_shelf() -> None:

@@ -14,11 +14,11 @@ goal sampling. The planner/executor/recorder are unchanged. Along the way we fou
 RL-executor bug** (batched observations built from the wrong block) that also affects the classic
 pipeline — that fix is **PR #206**.
 
-The DFA layer lives in `src/blocksuite/playdata/dfa/`. Author strategies in YAML; run them via
+The DFA layer lives in `src/toyblocks/playdata/dfa/`. Author strategies in YAML; run them via
 `scripts/generate_play_data.py --dfa-spec <yaml>`.
 
-Full authoring guide: **`src/blocksuite/playdata/dfa/AUTHORING.md`**. Grammar reference: the module
-docstring in `dfa/engine.py`. Live vocabulary: `python -c "from blocksuite.playdata.dfa import catalog"`.
+Full authoring guide: **`src/toyblocks/playdata/dfa/AUTHORING.md`**. Grammar reference: the module
+docstring in `dfa/engine.py`. Live vocabulary: `python -c "from toyblocks.playdata.dfa import catalog"`.
 
 ---
 
@@ -48,7 +48,7 @@ Two workflow docs were published as artifacts this session (also reproducible):
 
 ## 2. File map (all new/changed this session)
 
-**New DFA subpackage** `src/blocksuite/playdata/dfa/`:
+**New DFA subpackage** `src/toyblocks/playdata/dfa/`:
 - `engine.py` — typed `DFASpec`/`Transition`/`GuardSpec`/`MoveSpec`/`EffectSpec` + `DFAGoalPolicy`. Its
   module docstring is the **spec grammar**.
 - `registries.py` — the vocabulary: `GUARDS`/`EFFECTS`/`MOVES` dicts + `catalog()`. All guard/effect/move
@@ -72,11 +72,11 @@ Two workflow docs were published as artifacts this session (also reproducible):
 - `scripts/render_orientations.py` — renders a block in all 24 orientations from the front camera
   (used to define `FOUND_ORIS`).
 
-**RL-executor fixes** (the big bug — see §5): `src/blocksuite/tamp/blocks/executors/`
+**RL-executor fixes** (the big bug — see §5): `src/toyblocks/tamp/blocks/executors/`
 `ReOrientTrajectory.py`, `RotateTrajectory.py`, `PushTrajectory.py`, `NudgeTrajectory.py`,
 `IsolateTrajectory.py`.
 
-**Domain**: `src/blocksuite/tamp/blocks/domain.pddl` — `isolate` action commented out (see §5).
+**Domain**: `src/toyblocks/tamp/blocks/domain.pddl` — `isolate` action commented out (see §5).
 
 ---
 
@@ -87,16 +87,16 @@ Two workflow docs were published as artifacts this session (also reproducible):
 python scripts/task_gen/find_as.py --count 5 --out-dir outputs/find_as/tasks --seed 42
 
 # 2. Env package + 16 reset states (Isaac; needs OMNI_KIT_ACCEPT_EULA=yes)
-python scripts/generate_task_from_pddl.py --domain_path src/blocksuite/tamp/blocks \
+python scripts/generate_task_from_pddl.py --domain_path src/toyblocks/tamp/blocks \
   --pddl outputs/find_as/tasks/<problem>.pddl \
   --num_reset_states 16 --num_envs 16 --num_scene_profiles 8 \
   --output_dir outputs/find_as --headless
 
 # 3. Run a DFA strategy (stage 2+3 interleaved)
-python scripts/generate_play_data.py --domain_path src/blocksuite/tamp/blocks \
+python scripts/generate_play_data.py --domain_path src/toyblocks/tamp/blocks \
   --pddl_problem_file outputs/find_as/tasks/<problem>.pddl \
   --env_path outputs/find_as/<slug> \
-  --dfa-spec src/blocksuite/playdata/dfa/library/find_as_structured.yaml \
+  --dfa-spec src/toyblocks/playdata/dfa/library/find_as_structured.yaml \
   --dfa-param letter=A --dfa-param target_count=3 --dfa-param max_picks=40 \
   --num-envs 8 --num-planners 4 --max-plan-time 50 --max-plans-total 600 \
   --data_dir datasets/<out> --status-log-seconds 60 \
@@ -221,7 +221,7 @@ the disk paths. Artifact publish had a transient 502 outage mid-session (recover
   issue), but `on_table_side` has no goal-checker, so the episode's goal-reached flag reads False
   (episode still kept; the DFA marks "sided" in memory, not via the goal check).
 - Every strategy needs a `REJECT`/budget exit or it loops forever.
-- Validate a spec offline: `python -c "from blocksuite.playdata.dfa import load_dfa_spec; load_dfa_spec('<yaml>')"`.
+- Validate a spec offline: `python -c "from toyblocks.playdata.dfa import load_dfa_spec; load_dfa_spec('<yaml>')"`.
 - pkill-then-launch in one shell line can abort the launch (nonzero pkill) — separate the commands.
 
 ---

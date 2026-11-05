@@ -6,7 +6,7 @@ import tyro
 
 import wandb
 
-WANDB_PROJECT_NAME = "blocksuite-ci"
+WANDB_PROJECT_NAME = "toyblocks-ci"
 DATETIME_NOW = datetime.datetime.now().strftime("%m%d%y-%H:%M:%S")
 
 

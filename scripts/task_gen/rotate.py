@@ -33,7 +33,7 @@ import argparse
 import random
 from typing import Dict, List, Optional
 
-from blocksuite.task_gen import (
+from toyblocks.task_gen import (
     And,
     Block,
     Clear,
@@ -43,7 +43,7 @@ from blocksuite.task_gen import (
     OriOf,
     ProblemSpec,
 )
-from blocksuite.task_gen.orientations import (
+from toyblocks.task_gen.orientations import (
     ORIENTATIONS,
     YAW_CCW,
     YAW_CW,

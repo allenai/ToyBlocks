@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diff datasets A (blocksuite) vs B (classic) on the columns ManiFlow consumes.
+"""Diff datasets A (ToyBlocks) vs B (classic) on the columns ManiFlow consumes.
 
 Only the maniflow-consumed numeric columns are compared (state proprio + action
 target + pd_mode); images and unused columns are ignored. Both datasets are keyed
@@ -119,7 +119,7 @@ for key, dim, short, grp in present:
             ax.legend(fontsize=6)
 for k in range(p, len(axes)):
     axes[k].axis("off")
-fig.suptitle("ManiFlow-consumed columns: value distributions  A=blocksuite (blue)  B=classic (red)",
+fig.suptitle("ManiFlow-consumed columns: value distributions  A=ToyBlocks (blue)  B=classic (red)",
              fontsize=12)
 fig.tight_layout(rect=(0, 0, 1, 0.97))
 fig.savefig(OUT / "maniflow_diff_dist.png", dpi=120)
@@ -136,7 +136,7 @@ def traj_panel(ax, key, dimidx, title):
     Am, Bm = np.array(Am), np.array(Bm)
     ax.fill_between(GRID, Am.min(0), Am.max(0), color="#1f77b4", alpha=0.15, lw=0)
     ax.fill_between(GRID, Bm.min(0), Bm.max(0), color="#d62728", alpha=0.15, lw=0)
-    ax.plot(GRID, Am.mean(0), color="#1f77b4", lw=2, label="A blocksuite")
+    ax.plot(GRID, Am.mean(0), color="#1f77b4", lw=2, label="A toyblocks")
     ax.plot(GRID, Bm.mean(0), color="#d62728", lw=2, label="B classic")
     ax.set_title(title, fontsize=8)
     ax.tick_params(labelsize=6); ax.grid(True, alpha=0.25)

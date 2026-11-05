@@ -3,7 +3,7 @@
 Launches Isaac, builds the generated task for a dataset, applies each requested
 episode's recorded setup exactly the way the live queue eval does (via
 ``apply_setup`` inside ``_reset_idx``), then runs the shared
-``blocksuite.eval.scene_verification`` checks: structured scene diff
+``toyblocks.eval.scene_verification`` checks: structured scene diff
 (table height, blocks present, block/table poses, block sizes, camera
 intrinsics and pose) plus first-frame image comparison (MAE / MSE / SSIM +
 side-by-side PNGs). Writes a report JSON and the comparison PNGs, and exits
@@ -24,7 +24,7 @@ is the only place a live observation, the dataset's ground truth and the
 committed golden is the *observation contract* -- keys, dtypes, ranks, native
 resolution, emitted wire layout -- keyed by scene preset and carrying no
 episode-specific numbers, which is what keeps it stable across datagen runs. See
-``blocksuite.eval.policy_input_verification``.
+``toyblocks.eval.policy_input_verification``.
 
 **First-frame SSIM carries a hard floor** (``--min-first-frame-ssim``, default
 0.90) per verified camera, alongside the reported MAE / MSE / SSIM family. What
@@ -78,7 +78,7 @@ if "--headless" not in sys.argv and "--no-headless" not in sys.argv:
 if "--enable_cameras" not in sys.argv and "--enable-cameras" not in sys.argv:
     sys.argv.append("--enable_cameras")
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()
 
@@ -90,16 +90,16 @@ import numpy as np
 import tyro
 
 import isaaclab_tasks  # noqa: F401
-import blocksuite.tasks  # noqa: F401
+import toyblocks.tasks  # noqa: F401
 import gymnasium as gym
 
-from blocksuite.cli.base_args import BaseArgs, add_env_cfg_args
-from blocksuite.utils.episode_dataset import (
+from toyblocks.cli.base_args import BaseArgs, add_env_cfg_args
+from toyblocks.utils.episode_dataset import (
     CUBE_SCALE_DECIMALS,
     load_setups,
 )
-from blocksuite.eval.policy_input_verification import append_policy_input_diffs
-from blocksuite.eval.scene_verification import (
+from toyblocks.eval.policy_input_verification import append_policy_input_diffs
+from toyblocks.eval.scene_verification import (
     FieldDiff,
     SceneMismatchReport,
     compare_first_frames,
@@ -207,7 +207,7 @@ class Args(BaseArgs):
     verify_policy_input: bool = True
     """Also feed the reset observation through the ManiFlow obs transform and
     check what the policy would actually receive (see
-    ``blocksuite.eval.policy_input_verification``). Needs ``depth`` in
+    ``toyblocks.eval.policy_input_verification``). Needs ``depth`` in
     ``--obs-mode``, since the transform is driven at its widest layout."""
     policy_input_golden_dir: str = "tests/eval/goldens"
     """Where the per-scene-preset observation-contract golden lives. The CPU
@@ -470,7 +470,7 @@ def run(args: Args) -> int:
     # the env. Skipping it here would let this diagnostic verify a different
     # scene_preset_id than the live eval uses, which makes its table_height_delta
     # comparison meaningless (the delta is relative to the preset baseline).
-    from blocksuite.utils.dataset_provenance import reconcile_env_cfg_with_dataset
+    from toyblocks.utils.dataset_provenance import reconcile_env_cfg_with_dataset
 
     reconcile_env_cfg_with_dataset(env_cfg, args.dataset_path)
 
@@ -491,7 +491,7 @@ def run(args: Args) -> int:
     base_env.queue_client = _OneShotQueueClient(warmup)
     env.reset()
     if args.ingest_camera_intrinsics:
-        from blocksuite.utils.dataset_provenance import ingest_dataset_camera_intrinsics
+        from toyblocks.utils.dataset_provenance import ingest_dataset_camera_intrinsics
         ingest_dataset_camera_intrinsics(
             base_env,
             args.dataset_path,

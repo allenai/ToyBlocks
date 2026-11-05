@@ -49,13 +49,13 @@ from scipy.spatial.transform import Rotation
 import rcs
 from rcs import common as rcs_common
 
-from blocksuite.serving.sim2real.rollout.episode_replay import (
+from toyblocks.serving.sim2real.rollout.episode_replay import (
     _load_episode,
     _load_episodes_meta,
     _stack,
 )
 
-# scripts/sim2real/<this file> -> parents[2] is the blocksuite repo root.
+# scripts/sim2real/<this file> -> parents[2] is the ToyBlocks repo root.
 LOG_ROOT = Path(__file__).resolve().parents[2] / "outputs" / "replay_logs"
 
 JOINTS = [f"joint {j + 1}" for j in range(7)]

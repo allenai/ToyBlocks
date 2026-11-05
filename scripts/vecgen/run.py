@@ -1,11 +1,11 @@
 """Vectorized datagen: sample -> FF -> batched skills -> verify, in one Isaac process.
 
 Example (red_tower_3, 16 envs, 32 episodes):
-    python scripts/vecgen/run.py --env-path src/blocksuite/tasks/autogen/red_tower_3 \
-        --pddl src/blocksuite/tamp/blocks/problems/red_tower_3.pddl --num-envs 16 \
+    python scripts/vecgen/run.py --env-path src/toyblocks/tasks/autogen/red_tower_3 \
+        --pddl src/toyblocks/tamp/blocks/problems/red_tower_3.pddl --num-envs 16 \
         --episodes 32 --headless
 
-Play data (``--play``, see :mod:`blocksuite.vecgen.play`): each reset state plays a chain of
+Play data (``--play``, see :mod:`toyblocks.vecgen.play`): each reset state plays a chain of
 policy-chosen goals (balanced pnp / flip / rotate by default in the pipeline), each goal one
 FF call from the live symbolic state, with no reset between plans; no TAMP:
     python scripts/vecgen/run.py --play --env-path <pkg> --pddl <scene.pddl> --num-envs 8 \
@@ -28,52 +28,52 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()
 
 import torch  # noqa: E402
 
-from blocksuite.playdata.domain_filter import list_actions, write_filtered_domain  # noqa: E402
-from blocksuite.playdata.goal_policy import RandomGoalPolicy  # noqa: E402
-from blocksuite.playdata.goal_proposer import (  # noqa: E402
+from toyblocks.playdata.domain_filter import list_actions, write_filtered_domain  # noqa: E402
+from toyblocks.playdata.goal_policy import RandomGoalPolicy  # noqa: E402
+from toyblocks.playdata.goal_proposer import (  # noqa: E402
     GOAL_FAMILIES,
     GoalProposerCfg,
     RandomGoalProposer,
 )
-from blocksuite.playdata.skill_balance import (  # noqa: E402
+from toyblocks.playdata.skill_balance import (  # noqa: E402
     BalancedSkillCfg,
     BalancedSkillGoalPolicy,
 )
-from blocksuite.tamp.blocks.template.codegen import extract_goal_block  # noqa: E402
-from blocksuite.vecgen.engine import Engine, EngineConfig  # noqa: E402
-from blocksuite.vecgen.geometry import Geometry  # noqa: E402
-from blocksuite.vecgen.play import PlayConfig, PlayEngine  # noqa: E402
-from blocksuite.vecgen.program import Program  # noqa: E402
-from blocksuite.vecgen.sim import PHYSICS_STEPS_PER_TICK, VecSim, make_env  # noqa: E402
-from blocksuite.vecgen.skills.base import Skill  # noqa: E402
-from blocksuite.vecgen.skills.flip import Flip  # noqa: E402
-from blocksuite.vecgen.skills.pnp import Pick, Place  # noqa: E402
-from blocksuite.vecgen.skills.rotate import Rotate  # noqa: E402
-from blocksuite.vecgen.symbolic.derived import derived_facts  # noqa: E402
-from blocksuite.vecgen.symbolic.ff import (  # noqa: E402
+from toyblocks.tamp.blocks.template.codegen import extract_goal_block  # noqa: E402
+from toyblocks.vecgen.engine import Engine, EngineConfig  # noqa: E402
+from toyblocks.vecgen.geometry import Geometry  # noqa: E402
+from toyblocks.vecgen.play import PlayConfig, PlayEngine  # noqa: E402
+from toyblocks.vecgen.program import Program  # noqa: E402
+from toyblocks.vecgen.sim import PHYSICS_STEPS_PER_TICK, VecSim, make_env  # noqa: E402
+from toyblocks.vecgen.skills.base import Skill  # noqa: E402
+from toyblocks.vecgen.skills.flip import Flip  # noqa: E402
+from toyblocks.vecgen.skills.pnp import Pick, Place  # noqa: E402
+from toyblocks.vecgen.skills.rotate import Rotate  # noqa: E402
+from toyblocks.vecgen.symbolic.derived import derived_facts  # noqa: E402
+from toyblocks.vecgen.symbolic.ff import (  # noqa: E402
     domain_without_actions,
     plan_problems,
     run_ff,
 )
-from blocksuite.vecgen.symbolic.pddl import (  # noqa: E402
+from toyblocks.vecgen.symbolic.pddl import (  # noqa: E402
     Fact,
     Problem,
     parse_problem,
     render_problem,
 )
-from blocksuite.vecgen.symbolic.predicates import assert_goal_supported  # noqa: E402
-from blocksuite.vecgen.symbolic.programs import (  # noqa: E402
+from toyblocks.vecgen.symbolic.predicates import assert_goal_supported  # noqa: E402
+from toyblocks.vecgen.symbolic.programs import (  # noqa: E402
     UNSUPPORTED,
     UnsupportedAction,
     program_from_plan,
 )
-from blocksuite.vecgen.symbolic.state import derive_init_facts  # noqa: E402
+from toyblocks.vecgen.symbolic.state import derive_init_facts  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -84,7 +84,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="PDDL problem; omitted when --env-path holds problems.json (problem streaming)",
     )
-    ap.add_argument("--domain", default="src/blocksuite/tamp/blocks/domain.pddl")
+    ap.add_argument("--domain", default="src/toyblocks/tamp/blocks/domain.pddl")
     ap.add_argument(
         "--exclude-actions",
         default="",
@@ -241,7 +241,7 @@ def parse_args() -> argparse.Namespace:
     play.add_argument(
         "--dfa-spec",
         default=None,
-        help="YAML/JSON DFA strategy (e.g. src/blocksuite/playdata/dfa/library/flip_search.yaml) "
+        help="YAML/JSON DFA strategy (e.g. src/toyblocks/playdata/dfa/library/flip_search.yaml) "
         "choosing the goals instead of random / balanced sampling; on ACCEPT / REJECT the env "
         "restarts from a fresh reset state",
     )
@@ -508,7 +508,7 @@ def main() -> int:
     )
     recorder = None
     if args.record:
-        from blocksuite.vecgen.recorder import LeRobotRecorder
+        from toyblocks.vecgen.recorder import LeRobotRecorder
 
         goal_text = goal_block[problem.name]
         recorder = LeRobotRecorder(
@@ -672,7 +672,7 @@ def _run_play(
         return derived_facts(prob.blocks, ctx.block_poses()[ids][:, cols], ctx.sizes[ids][:, cols])
 
     if args.dfa_spec:
-        from blocksuite.playdata.dfa import DFAGoalPolicy, glyph_of, load_dfa_spec
+        from toyblocks.playdata.dfa import DFAGoalPolicy, glyph_of, load_dfa_spec
 
         spec = load_dfa_spec(args.dfa_spec, overrides=_parse_dfa_params(args.dfa_param))
         policy: Any = DFAGoalPolicy(spec, seed=args.seed, glyph_of=glyph_of)

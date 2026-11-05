@@ -4,7 +4,7 @@ The path under test (``ManiflowObsTransform.transform`` -> ``_normalize_state``
 -> ``select_and_validate_obs``) is a pure function, so its input only has to be
 **fixed**, not realistic -- which is what lets these goldens be regenerated with
 no GPU, no Isaac and no committed binary fixture. Realism does not disappear, it
-moves: ``blocksuite.eval.policy_input_verification`` records the *layout* of the
+moves: ``toyblocks.eval.policy_input_verification`` records the *layout* of the
 live observation from the Isaac lane, and ``test_fixture_matches_sim.py`` checks
 :func:`build_obs` against it, so the structural assumptions made here are
 verified rather than assumed.
@@ -38,7 +38,7 @@ import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from blocksuite.serving.maniflow_serving_utils import (
+from toyblocks.serving.maniflow_serving_utils import (
     ManiFlowNormalizationMixin,
     TRAIN_MAX_DEPTH_M,
 )
@@ -256,7 +256,7 @@ def _gripper_depth(rng: np.random.Generator, batch: int) -> np.ndarray:
 
 
 def build_obs(batch: int = FIXTURE_BATCH) -> dict[str, Any]:
-    """The seeded blocksuite-shaped observation the goldens are computed over.
+    """The seeded toyblocks-shaped observation the goldens are computed over.
 
     Carries every key :class:`ManiflowBlocksTableObsTransform` can read, so one
     observation covers the depth branch, the ptmap branch and the

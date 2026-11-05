@@ -9,10 +9,10 @@ from collections import deque
 
 import torch
 
-from blocksuite.vecgen.play import PlayConfig, PlayEngine, program_skills, read_symbolic_state
-from blocksuite.vecgen.program import Program, SkillCall
-from blocksuite.vecgen.symbolic.pddl import Fact, Problem
-from blocksuite.vecgen.symbolic.programs import program_from_plan
+from toyblocks.vecgen.play import PlayConfig, PlayEngine, program_skills, read_symbolic_state
+from toyblocks.vecgen.program import Program, SkillCall
+from toyblocks.vecgen.symbolic.pddl import Fact, Problem
+from toyblocks.vecgen.symbolic.programs import program_from_plan
 
 EDGE = 0.04
 TABLE = torch.tensor([0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
@@ -33,8 +33,8 @@ def _problem(blocks: list[str]) -> Problem:
 def test_play_imports_without_tamp() -> None:
     code = (
         "import sys; sys.modules['tmp3'] = None\n"
-        "import blocksuite.vecgen.play, blocksuite.playdata.skill_balance, "
-        "blocksuite.playdata.abandon, blocksuite.playdata.goal_proposer\n"
+        "import toyblocks.vecgen.play, toyblocks.playdata.skill_balance, "
+        "toyblocks.playdata.abandon, toyblocks.playdata.goal_proposer\n"
     )
     proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr

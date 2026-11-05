@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from blocksuite.utils.prompt_resolver import (
+from toyblocks.utils.prompt_resolver import (
     IDLE_PROMPT_PLACEHOLDER,
     PromptResolver,
     parse_prompt_for_setup,
@@ -45,7 +45,7 @@ def test_resolver_prompts_with_its_flag(flag: bool) -> None:
 
 @pytest.mark.parametrize("flag,label", [(False, "Stack 1 5 BLUE"), (True, "Stack F L GREEN")])
 def test_hl_stack_prompt_follows_replay_block_identity(flag: bool, label: str) -> None:
-    from blocksuite.serving.molmo2_hl import stack_label
+    from toyblocks.serving.molmo2_hl import stack_label
 
     assert stack_label(policy_goal(_RERENDER_SETUP, flag)) == label
 

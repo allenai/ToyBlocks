@@ -2,18 +2,18 @@ from pathlib import Path
 
 import pytest
 
-from blocksuite.vecgen.symbolic.ff import (
+from toyblocks.vecgen.symbolic.ff import (
     default_ff_binary,
     parse_ff_output,
     parse_ff_states,
     run_ff,
 )
-from blocksuite.vecgen.symbolic.pddl import Fact, parse_problem, render_problem
-from blocksuite.vecgen.symbolic.programs import program_from_plan
+from toyblocks.vecgen.symbolic.pddl import Fact, parse_problem, render_problem
+from toyblocks.vecgen.symbolic.programs import program_from_plan
 
 ROOT = Path(__file__).resolve().parents[2]
-DOMAIN = ROOT / "src/blocksuite/tamp/blocks/domain.pddl"
-RED_TOWER = ROOT / "src/blocksuite/tamp/blocks/problems/red_tower_3.pddl"
+DOMAIN = ROOT / "src/toyblocks/tamp/blocks/domain.pddl"
+RED_TOWER = ROOT / "src/toyblocks/tamp/blocks/problems/red_tower_3.pddl"
 
 
 def test_parse_red_tower():
@@ -116,7 +116,7 @@ GOAL_TREE_PROBLEM = """
 
 
 def test_parse_goal_tree(tmp_path):
-    from blocksuite.vecgen.symbolic.pddl import And, Not, Or
+    from toyblocks.vecgen.symbolic.pddl import And, Not, Or
 
     path = tmp_path / "goal_tree.pddl"
     path.write_text(GOAL_TREE_PROBLEM)
@@ -138,8 +138,8 @@ def test_parse_goal_tree(tmp_path):
 def test_goal_tree_satisfied():
     import torch
 
-    from blocksuite.vecgen.symbolic.pddl import And, Not, Or
-    from blocksuite.vecgen.symbolic.predicates import ORI_QUATERNIONS, goal_facts_satisfied
+    from toyblocks.vecgen.symbolic.pddl import And, Not, Or
+    from toyblocks.vecgen.symbolic.predicates import ORI_QUATERNIONS, goal_facts_satisfied
 
     # block_a on the table at o10, block_b on top of it at o1; table top at z=0, 4 cm cubes
     size = 0.04

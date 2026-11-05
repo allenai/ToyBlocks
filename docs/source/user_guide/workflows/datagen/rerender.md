@@ -32,7 +32,7 @@ success labels.
 
 Re-rendered pixels match an original in-physics rendering closely but not exactly, because
 driver and scene-version differences remain. See
-[DETERMINISM.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/DETERMINISM.md)
+[DETERMINISM.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/DETERMINISM.md)
 for exactly what is bit-reproducible and what is not.
 
 ## Where it fits
@@ -54,7 +54,7 @@ python scripts/rerender/rerender.py <dataset_dir> \
     --env_file <env_package>/env.py \
     --output <out_dir> \
     --max_episodes 20 --num_envs 8 \
-    --flags src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
+    --flags src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 ```
 
 For an *unmerged* dataset, with one directory per problem, drop `--env_file`. The env is then
@@ -66,7 +66,7 @@ that is the experiment's own `envs/` directory:
 python scripts/rerender/rerender.py data/datasets/unmerged/<experiment-id>/execution \
     --envs_dir data/datasets/unmerged/<experiment-id>/envs \
     --output <out_dir> --max_episodes 20 \
-    --flags src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache.yaml
+    --flags src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache.yaml
 ```
 
 `rerender.py` often hangs during Isaac teardown after it finishes; see
@@ -107,7 +107,7 @@ sidecars (`--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 --rgb_GOP 
 
 The flags YAML draws HDRI backdrops from the `polyhaven` and `indoor-2018` pools. Where to get
 each, and what happens when one is missing, is in
-[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops).
 
 The pipeline flags for this stage are:
 
@@ -174,7 +174,7 @@ randomization is configured, and it is recorded in every problem's `render_param
 dataset's visual provenance. `rerender.py --flags` has no default; the pipeline's
 `--rerender-flags` defaults to the RI training set's YAML.
 
-Four presets live in `src/blocksuite/domain_randomization/flags/`:
+Four presets live in `src/toyblocks/domain_randomization/flags/`:
 
 | Preset | Use |
 |---|---|
@@ -184,10 +184,10 @@ Four presets live in `src/blocksuite/domain_randomization/flags/`:
 | `rerender_flags_open_hybrid_camera_rand_only.yaml` | Camera randomization only. |
 
 The two `allrand` presets sample HDRI backdrops from the `polyhaven` and `indoor-2018` pools; see
-[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops).
 
 To write your own, see the
-[YAML reference](https://github.com/allenai/blocksuite/blob/release/src/blocksuite/domain_randomization/YAML_REFERENCE.md).
+[YAML reference](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md).
 It covers every top-level key, the value forms the resolver accepts, and, importantly, *when*
 each value is drawn: per wave, per episode or per env.
 
@@ -391,6 +391,6 @@ against that.
 - [Running locally](local.md): the local pipeline, and the gate that decides what gets merged
 - [Execution](execution.md): the stage that produces the trajectories this stage replays
 - [Merge](merge.md): how re-rendered problems become one training dataset
-- [YAML reference](https://github.com/allenai/blocksuite/blob/release/src/blocksuite/domain_randomization/YAML_REFERENCE.md): every randomization key
-- [DETERMINISM.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/DETERMINISM.md): what is reproducible, and what is not
-- [README_local.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md): the two pipeline render modes, HDRI backdrops, and the invariants behind the gate
+- [YAML reference](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md): every randomization key
+- [DETERMINISM.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/DETERMINISM.md): what is reproducible, and what is not
+- [README_local.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md): the two pipeline render modes, HDRI backdrops, and the invariants behind the gate

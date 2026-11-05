@@ -15,7 +15,7 @@ import sys
 
 import pytest
 
-# The venv's Warp before the app starts, as blocksuite.cli.isaac_app.launch_app does: Isaac
+# The venv's Warp before the app starts, as toyblocks.cli.isaac_app.launch_app does: Isaac
 # Sim's omni.warp.core otherwise puts its bundled (older) Warp first on sys.path, and every
 # test collected after this one would import cuRobo against it.
 import warp  # noqa: F401

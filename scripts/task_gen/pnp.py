@@ -27,7 +27,7 @@ Usage:
 import argparse
 import random
 
-from blocksuite.task_gen import (
+from toyblocks.task_gen import (
     And,
     Block,
     Clear,
@@ -38,7 +38,7 @@ from blocksuite.task_gen import (
     OriOf,
     ProblemSpec,
 )
-from blocksuite.task_gen.resolved_init import ResolvedInit
+from toyblocks.task_gen.resolved_init import ResolvedInit
 
 MODES = ("stack", "unstack", "all")
 

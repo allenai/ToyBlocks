@@ -31,21 +31,21 @@ import pytest
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from blocksuite.serving.maniflow_serving_utils import (
-    derive_model_input_spec,
-    postprocess_actions,
-    select_and_validate_obs,
-    stats_from_train_data_stats,
-)
-from blocksuite.serving.obs_transforms.maniflow import ManiflowObsTransform
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
 from tests.serving.policy_input_fixture import (
     _Normalizer,
     load_fixture,
     load_stats,
     to_torch,
+)
+from toyblocks.serving.maniflow_serving_utils import (
+    derive_model_input_spec,
+    postprocess_actions,
+    select_and_validate_obs,
+    stats_from_train_data_stats,
+)
+from toyblocks.serving.obs_transforms.maniflow import ManiflowObsTransform
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
 )
 
 # Camera resolution the dummy obs are rendered at: deliberately NOT 224 so the
@@ -57,7 +57,7 @@ def dummy_obs(
     batch: int = 2,
     gripper_joints: int = 1,
 ) -> dict[str, Any]:
-    """A blocksuite-shaped observation with distinguishable values per block.
+    """A toyblocks-shaped observation with distinguishable values per block.
 
     Each state block gets its own decade (arm 1-7, joint_vel 11-17, ee 21-23,
     gripper 100) so a concat-order mistake shows up as a wrong number rather than
@@ -250,8 +250,8 @@ def test_use_target_front_crop_mirrors_front_rgb_but_not_client_obs_keys():
     spec = derive_model_input_spec(cfg, fw)
     assert spec["obs_shapes"]["target_front_crop_rgb"] == spec["obs_shapes"]["front_rgb"]
     assert spec["use_target_front_crop"] == 50
-    from blocksuite.serving.maniflow_serving_utils import client_advertised_obs_keys
-    from blocksuite.serving.serve_maniflow_policy import _maniflow_server_metadata
+    from toyblocks.serving.maniflow_serving_utils import client_advertised_obs_keys
+    from toyblocks.serving.serve_maniflow_policy import _maniflow_server_metadata
 
     assert "target_front_crop_rgb" not in client_advertised_obs_keys(spec["obs_shapes"])
     meta = _maniflow_server_metadata(

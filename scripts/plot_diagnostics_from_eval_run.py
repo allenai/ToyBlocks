@@ -22,7 +22,7 @@ index that also names the ``control_diagnostics_offline/episode_{N}/`` folder
 and ``M`` is the sub-env that ran it. The online run only writes these for
 episodes whose queue setup carried its source videos; here every recorded
 episode gets one per camera. They are built by the same renderer the eval loop
-uses (:func:`~blocksuite.utils.wandb_logging.render_first_frame_comparison`),
+uses (:func:`~toyblocks.utils.wandb_logging.render_first_frame_comparison`),
 but the eval side comes from the recorded video rather than the reset
 observation. On runs recorded with the row-layout marker below, video frame 0
 is the reset state; on older runs it is one env step later.
@@ -31,8 +31,8 @@ Plot step ``j`` is ground-truth row ``j``: the state at ``j``, the command
 taken from it, and the PD gains that command ran under. Where a run's rows land
 depends on how it was recorded:
 
-- Runs whose ``meta/info.json`` has a ``blocksuite_row_layout`` key (or, if
-  recorded before the key moved there, a ``meta/blocksuite_row_layout.json``
+- Runs whose ``meta/info.json`` has a ``toyblocks_row_layout`` key (or, if
+  recorded before the key moved there, a ``meta/toyblocks_row_layout.json``
   file) already use that layout (row 0 is the reset state, gains travel with the action), so rows stay
   at their own step. The terminal row (``action.is_valid == False``) keeps its
   state and gains but plots no command.
@@ -111,8 +111,8 @@ import pandas as pd
 import pyarrow.dataset as pa_ds
 import tyro
 
-from blocksuite.eval.plots import save_eval_plots
-from blocksuite.utils.wandb_logging import (
+from toyblocks.eval.plots import save_eval_plots
+from toyblocks.utils.wandb_logging import (
     _IMAGE_VIDEO_KEY_PREFIX,
     _extract_expert_first_frame,
     render_first_frame_comparison,
@@ -138,15 +138,15 @@ _GAIN_COLUMNS: dict[str, str] = {
 }
 # BaseEnvCfg.scene.env_spacing, i.e. what a run that did not pass --env-spacing used.
 _DEFAULT_ENV_SPACING = 5.0
-# Mirrors blocksuite.vecgen.recording.lerobot_recorder.ROW_LAYOUT_INFO_KEY (not imported: that
+# Mirrors toyblocks.vecgen.recording.lerobot_recorder.ROW_LAYOUT_INFO_KEY (not imported: that
 # module needs Isaac).
-_ROW_LAYOUT_INFO_KEY = "blocksuite_row_layout"
+_ROW_LAYOUT_INFO_KEY = "toyblocks_row_layout"
 # Marker file used by recordings made before the key moved into meta/info.json.
-_ROW_LAYOUT_FILENAME = "blocksuite_row_layout.json"
+_ROW_LAYOUT_FILENAME = "toyblocks_row_layout.json"
 GOAL_PROGRESS_FILENAME = "goal_progress.png"
 # Legend labels longer than this are cut; the full text stays in eval_episodes.json.
 _GOAL_LABEL_MAX_CHARS = 70
-# Mirror the settle gate in blocksuite.tamp.blocks.pddl_goal_tensor_conversions (not
+# Mirror the settle gate in toyblocks.tamp.blocks.pddl_goal_tensor_conversions (not
 # imported: that module needs torch); tests check they still match.
 _SETTLED_LIN_VEL = 0.1
 _SETTLED_ANG_VEL = 0.5
@@ -349,8 +349,8 @@ def _enrich_replay_specs_with_expert_videos(
     if not needs_enrichment:
         return specs
 
-    from blocksuite.utils.tamp_dataset import EpisodeSpec as TampEpisodeSpec
-    from blocksuite.utils.tamp_dataset import iter_episode_video_clips
+    from toyblocks.utils.tamp_dataset import EpisodeSpec as TampEpisodeSpec
+    from toyblocks.utils.tamp_dataset import iter_episode_video_clips
 
     gt_root = Path(gt_dataset_path)
     enriched: list[EpisodeSpec] = []

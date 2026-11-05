@@ -2,7 +2,7 @@
 
 Example usage:
 
-    from blocksuite.task_gen import (
+    from toyblocks.task_gen import (
         ProblemSpec, Block, Distractor, And, Or, Pred,
         OnTable, On, Clear, OriOf, HandEmpty,
     )
@@ -38,8 +38,8 @@ Example usage:
     spec.generate(count=50, out_dir="./tasks", seed=42)
 """
 
-from blocksuite.task_gen.blocks import Block, Distractor, DistractorPool
-from blocksuite.task_gen.predicates import (
+from toyblocks.task_gen.blocks import Block, Distractor, DistractorPool
+from toyblocks.task_gen.predicates import (
     And,
     Clear,
     Exists,
@@ -54,7 +54,7 @@ from blocksuite.task_gen.predicates import (
     Pred,
     Raw,
 )
-from blocksuite.task_gen.problem_spec import ProblemSpec
+from toyblocks.task_gen.problem_spec import ProblemSpec
 
 __all__ = [
     "ProblemSpec",

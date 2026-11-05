@@ -10,7 +10,7 @@ The videos are hardlinked rather than copied, so the merged dataset's videos tak
 space. The flip side of that choice is covered under [Common pitfalls](#common-pitfalls).
 
 The command-line tool is `scripts/datagen/merge_datasets.py`, a thin wrapper around
-`blocksuite.vecgen.recording.merge`.
+`toyblocks.vecgen.recording.merge`.
 
 ## Where it fits
 

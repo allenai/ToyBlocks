@@ -10,7 +10,7 @@ enter the mixer at neighbouring points.
 import numpy as np
 import pytest
 
-from blocksuite.domain_randomization.seeds import (episode_rng, episode_rng_hashed,
+from toyblocks.domain_randomization.seeds import (episode_rng, episode_rng_hashed,
                                                    rng_for_episode, _stable_seed_salt)
 
 

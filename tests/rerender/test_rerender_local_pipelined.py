@@ -40,7 +40,7 @@ def mod():
 def _args(mod, *extra: str):
     return mod.build_parser().parse_args([
         "--experiment-id", "x", "--rerender",
-        "--rerender-flags", "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml",
+        "--rerender-flags", "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml",
         *extra,
     ])
 
@@ -382,7 +382,7 @@ def _real_render_params(episode_records, *, total_episodes, empty_reason=None) -
     local_render_state came to branch on "total_episodes" -- a key render_params_payload has
     never emitted (it serializes that argument as "episodes_total").
     """
-    from blocksuite.domain_randomization.render_params import render_params_payload
+    from toyblocks.domain_randomization.render_params import render_params_payload
 
     return render_params_payload(
         {"env_file": None, "sources": []}, {}, 30, False, {}, episode_records, True, {},
@@ -580,7 +580,7 @@ def test_pipelined_mode_checks_the_flags_yaml_too():
     and burned ~245s of Kit startup per problem before dying."""
     r = subprocess.run(
         [sys.executable, str(PIPELINE), "--experiment-id", "_g", "--rerender",
-         "--rerender-flags", "/root/blocksuite/src/blocksuite/domain_randomization/flags/x.yaml"],
+         "--rerender-flags", "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml"],
         capture_output=True, text=True, cwd=ROOT, timeout=600,
     )
     assert r.returncode != 0 and "readable on THIS machine" in (r.stdout + r.stderr)

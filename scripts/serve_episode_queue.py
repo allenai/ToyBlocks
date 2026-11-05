@@ -1,10 +1,10 @@
 """Standalone HTTP queue server for episode setups.
 
 Serves a fixed list of per-episode setups (see ``docs/source/user_guide/workflows/evals/launch_eval.md`` and
-:mod:`blocksuite.utils.episode_queue`) one at a time. Multiple
+:mod:`toyblocks.utils.episode_queue`) one at a time. Multiple
 ``scripts/evaluate.py`` clients can poll the same server to consume a shared
 queue without duplicating episodes. Input is a LeRobot dataset directory;
-setups come from :func:`blocksuite.utils.episode_dataset.load_setups`.
+setups come from :func:`toyblocks.utils.episode_dataset.load_setups`.
 
 Endpoints:
     GET /next          -> {"setup": <dict|null>}  (null when empty)
@@ -24,7 +24,7 @@ per-episode ``--expert_timeout_scale`` budget is always the binding timeout.
 
 Cube-scale slot routing: block scale is non-sim-state (baked at spawn), so the
 generated env spawns one env per distinct recorded ``cube_scale`` (slot ``i`` =
-the i-th value in :func:`~blocksuite.utils.episode_dataset.distinct_cube_scales`).
+the i-th value in :func:`~toyblocks.utils.episode_dataset.distinct_cube_scales`).
 When the loaded setups carry ``cube_scale``, this server groups them by that slot
 and serves env ``i`` (which passes the slot it was spawned at) only episodes whose
 size matches its spawned blocks. Codegen and this server derive the identical slot
@@ -44,7 +44,7 @@ from collections import deque
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils.episode_dataset import (
     CUBE_SCALE_DECIMALS,
     dataset_fps,
     distinct_cube_scales,

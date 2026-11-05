@@ -13,7 +13,7 @@ import isaaclab.sim as sim_utils
 from isaaclab.assets import Articulation
 from isaaclab.sim import SimulationContext
 
-from blocksuite.robots.configs.fr3_soft import FRANKA_DROID_ARTICULATION_CFG
+from toyblocks.robots.configs.fr3_soft import FRANKA_DROID_ARTICULATION_CFG
 
 
 @dataclass

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import torch
 
-from blocksuite.vecgen.symbolic.derived import FLIP_DIRS, relocation_scores
+from toyblocks.vecgen.symbolic.derived import FLIP_DIRS, relocation_scores
 
 Z = 0.03  # block centre on the table (base frame)
 

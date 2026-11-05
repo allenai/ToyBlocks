@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Single combined figure: per joint, blocksuite value, TAMP value, and their diff.
+"""Single combined figure: per joint, ToyBlocks value, TAMP value, and their diff.
 
 For each of the 7 arm joints one panel shows (left axis, rad) the env-mean joint
-position from the blocksuite (blocks_vectorized) run and the TAMP (blocks-classic)
+position from the ToyBlocks (blocks_vectorized) run and the TAMP (blocks-classic)
 run replaying the same CuRobo plan, and (right axis, rad) their signed difference
 classic - vectorized. Within-pipeline env spread is ~0, so the env-mean is
 representative.
@@ -27,7 +27,7 @@ OUT = Path(os.environ.get("RG_OUT", "scratchpad/red_green_2block/test1"))
 if not OUT.is_absolute():
     OUT = REPO / OUT
 
-bv = np.load(OUT / "joint_log.npz", allow_pickle=True)          # blocksuite / vectorized
+bv = np.load(OUT / "joint_log.npz", allow_pickle=True)          # ToyBlocks / vectorized
 cl = np.load(OUT / "joint_log_classic.npz", allow_pickle=True)  # TAMP / classic
 
 names = [str(n) for n in bv["joint_names"]]
@@ -43,7 +43,7 @@ BV_C, CL_C, D_C = "#1f77b4", "#d62728", "#2ca02c"  # blue / red / green
 
 fig, axes = plt.subplots(3, 3, figsize=(18, 11))
 fig.suptitle(
-    "Test 1 combined — same CuRobo plan: blocksuite (blue) vs TAMP classic (red), "
+    "Test 1 combined — same CuRobo plan: ToyBlocks (blue) vs TAMP classic (red), "
     "diff = classic - vectorized (green, right axis)",
     fontsize=13,
 )
@@ -53,7 +53,7 @@ handles_labels = None
 for j in range(J):
     ax = axes.flat[j]
     ax.plot(steps, tgt[:, j], color="0.7", linewidth=0.9, linestyle=":", label="target", zorder=1)
-    ax.plot(steps, bv_mean[:, j], color=BV_C, linewidth=1.4, label="blocksuite (vectorized)", zorder=3)
+    ax.plot(steps, bv_mean[:, j], color=BV_C, linewidth=1.4, label="toyblocks (vectorized)", zorder=3)
     ax.plot(steps, cl_mean[:, j], color=CL_C, linewidth=1.4, linestyle="--",
             label="TAMP (classic)", zorder=4)
     ax.set_title(names[j], fontsize=10)
@@ -93,7 +93,7 @@ ax = axes.flat[8]
 ax.axis("off")
 peak = np.abs(diff).max(axis=0)
 final = np.abs(diff[-1])
-lines = ["blocksuite = blocks_vectorized", "TAMP = blocks-classic (matched fr3 USD + stiff gains)",
+lines = ["toyblocks = blocks_vectorized", "TAMP = blocks-classic (matched fr3 USD + stiff gains)",
          "", "peak |classic - vectorized| (rad):"]
 lines += [f"  {names[j].replace('panda_', ''):7s} peak {peak[j]:.4f}  final {final[j]:.4f}"
           for j in range(J)]

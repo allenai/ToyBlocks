@@ -1,8 +1,8 @@
-"""Unit tests for :class:`~blocksuite.serving.hl_latency.HLLatencyBuffer`."""
+"""Unit tests for :class:`~toyblocks.serving.hl_latency.HLLatencyBuffer`."""
 
 from __future__ import annotations
 
-from blocksuite.serving.hl_latency import HLLatencyBuffer
+from toyblocks.serving.hl_latency import HLLatencyBuffer
 
 
 def _payload(tag: str) -> dict[str, str]:

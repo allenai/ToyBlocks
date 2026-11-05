@@ -7,7 +7,7 @@ resolution nobody should have to know about.
 
 Built on the ``FieldDiff`` / ``SceneMismatchReport`` / :func:`compare_array` /
 :func:`compare_key_set` / :func:`malformed_golden` vocabulary in
-:mod:`blocksuite.eval.scene_verification` -- the same one the rollout golden
+:mod:`toyblocks.eval.scene_verification` -- the same one the rollout golden
 uses -- so there is one comparison framework in the repo rather than a second
 one living in ``tests/``.
 
@@ -35,7 +35,7 @@ from typing import Any
 
 import numpy as np
 
-from blocksuite.eval.scene_verification import (
+from toyblocks.eval.scene_verification import (
     FieldDiff,
     SceneMismatchReport,
     compare_array,

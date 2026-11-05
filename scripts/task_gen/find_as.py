@@ -14,8 +14,8 @@ Usage:
 
 import argparse
 
-from blocksuite.tamp.blocks.glyph_blocks import block_name, block_type
-from blocksuite.task_gen import And, Block, Clear, OnTable, OriOf, ProblemSpec
+from toyblocks.tamp.blocks.glyph_blocks import block_name, block_type
+from toyblocks.task_gen import And, Block, Clear, OnTable, OriOf, ProblemSpec
 
 # Five distinct distractor letter sets (6 each, no A) -> five different scenes.
 DISTRACTOR_SETS = [

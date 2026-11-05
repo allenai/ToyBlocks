@@ -18,7 +18,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from blocksuite.domain_randomization import glyphs as G
+from toyblocks.domain_randomization import glyphs as G
 
 ATLAS = (Path(__file__).resolve().parents[2] / "assets" / "objects" / "train_blocks_large"
          / "usd" / "Textures" / "alphabet_block_large_decals_albedotransparency.png")

@@ -139,7 +139,7 @@ def test_discover_jobs_expands_members(src: Path, tmp_path: Path) -> None:
 
 def test_render_params_record_the_member() -> None:
     sys.path.insert(0, str(RERENDER.parents[1] / "src"))
-    from blocksuite.domain_randomization.render_params import render_params_payload
+    from toyblocks.domain_randomization.render_params import render_params_payload
 
     job = {"out_dir": "/o/m1", "sources": [("/s/g/blocks_success", True)], "env_file": None,
            "group": GROUP, "member": MEMBERS[0]}

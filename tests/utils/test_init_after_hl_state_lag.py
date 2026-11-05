@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pyarrow as pa
 
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils.episode_dataset import (
     _COL_HIGH_LEVEL_ACTION,
     _COL_HIGH_LEVEL_STATE,
     _init_row_after_hl_action,

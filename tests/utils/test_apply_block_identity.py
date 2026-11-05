@@ -9,10 +9,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 import torch
 
-from blocksuite.domain_randomization import block_colors, glyphs
-from blocksuite.domain_randomization.block_variables import BlockIdentity
-from blocksuite.utils import episode_queue
-from blocksuite.utils.episode_queue import _apply_block_identity
+from toyblocks.domain_randomization import block_colors, glyphs
+from toyblocks.domain_randomization.block_variables import BlockIdentity
+from toyblocks.utils import episode_queue
+from toyblocks.utils.episode_queue import _apply_block_identity
 
 _GLYPH_USD = f"{glyphs.SUPPORTED_LIBRARY}/block_1.usd"
 _SPECS: dict[str, dict[str, Any]] = {
@@ -156,13 +156,13 @@ def test_apply_setup_paints_only_with_flag(flag: bool) -> None:
     base_env.robot.articulation.data.joint_pos = torch.zeros(1, 8)
     with (
         patch(
-            "blocksuite.utils.calibrated_camera_intrinsics.apply_calibrated_camera_intrinsics_for_env"
+            "toyblocks.utils.calibrated_camera_intrinsics.apply_calibrated_camera_intrinsics_for_env"
         ),
-        patch("blocksuite.utils.episode_queue._park_unused_blocks"),
-        patch("blocksuite.utils.episode_queue._apply_table_height"),
-        patch("blocksuite.utils.episode_queue._apply_eval_table_z_offset", return_value=0.0),
-        patch("blocksuite.utils.episode_queue._apply_recorded_friction"),
-        patch("blocksuite.utils.episode_queue._apply_block_identity") as paint,
+        patch("toyblocks.utils.episode_queue._park_unused_blocks"),
+        patch("toyblocks.utils.episode_queue._apply_table_height"),
+        patch("toyblocks.utils.episode_queue._apply_eval_table_z_offset", return_value=0.0),
+        patch("toyblocks.utils.episode_queue._apply_recorded_friction"),
+        patch("toyblocks.utils.episode_queue._apply_block_identity") as paint,
     ):
         episode_queue.apply_setup(base_env, 0, {})
     assert paint.called is flag

@@ -38,7 +38,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PROBLEM_ID = "problem_000000"
-# Keep in sync with blocksuite.tamp.blocks.glyph_blocks.EVAL_DEFAULT_GLYPH_LIBRARY.
+# Keep in sync with toyblocks.tamp.blocks.glyph_blocks.EVAL_DEFAULT_GLYPH_LIBRARY.
 DEFAULT_USD_LIBRARY = "train_blocks_large"
 
 # -- Per-policy defaults --
@@ -101,7 +101,7 @@ _POLICY_DEFAULTS = {
 def task_slug_from_dataset_path(dataset_path: str) -> str:
     """LeRobot dataset directory basename with ``-`` replaced by ``_``.
 
-    Keep in sync with :func:`blocksuite.tamp.blocks.template.codegen.task_slug_from_dataset_path`
+    Keep in sync with :func:`toyblocks.tamp.blocks.template.codegen.task_slug_from_dataset_path`
     (can't import directly — codegen pulls Isaac via the pddl_goal_tensor_conversions chain).
     """
     name = os.path.basename(os.path.normpath(dataset_path))
@@ -691,7 +691,7 @@ def main() -> None:
         "evals; queue_test under --smoke-test).",
     )
     p.add_argument(
-        "--wandb-project", default="blocksuite-eval", help="Wandb project for serve + eval runs."
+        "--wandb-project", default="toyblocks-eval", help="Wandb project for serve + eval runs."
     )
     p.add_argument(
         "--wandb",
@@ -823,7 +823,7 @@ def main() -> None:
         _require_maniflow_obs_transform(obs_transform, "--depth-aug")
         if str(args.depth_aug).strip().lower() not in ("ejbl",):
             raise SystemExit(f"--depth-aug must be 'ejbl' when set, got {args.depth_aug!r}")
-        from blocksuite.serving.maniflow_serving_utils import require_depth_aug_supported
+        from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
 
         require_depth_aug_supported(str(args.depth_aug).strip().lower())
     if args.enable_crop:

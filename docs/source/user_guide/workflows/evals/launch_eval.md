@@ -1,9 +1,9 @@
 # `launch_eval.py` Reference
 
-[`scripts/launch_eval.py`](https://github.com/allenai/blocksuite/blob/main/scripts/launch_eval.py)
+[`scripts/launch_eval.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/launch_eval.py)
 is the recommended entry point for evaluation. It does not run anything itself: it turns
 its flags into the environment variables of
-[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/blocksuite/blob/main/scripts/eval/run_eval_pipeline.sh),
+[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/run_eval_pipeline.sh),
 the one pipeline that starts the policy server, generates the gym task from the dataset,
 serves the episode queue, runs the eval workers and merges the results (see
 [Policy Evaluation](../evaluations.md)). This page lists every flag it accepts.
@@ -77,7 +77,7 @@ too while `--policy` is left at its default, so pass `--policy maniflow` togethe
 ## The episode queue
 
 Every eval episode starts from a recorded episode of `--dataset-path`. The pipeline starts
-[`scripts/serve_episode_queue.py`](https://github.com/allenai/blocksuite/blob/main/scripts/serve_episode_queue.py),
+[`scripts/serve_episode_queue.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/serve_episode_queue.py),
 a small HTTP server (port 8001) that loads one setup per dataset episode at startup and
 hands them out one at a time. All eval workers pull from this one queue, so each episode
 runs exactly once across all GPUs:
@@ -234,7 +234,7 @@ What each part of the scene is rebuilt from:
 
 To confirm that the eval scene matches the dataset it was generated from:
 
-- [`scripts/eval/verify_dataset_loading.py`](https://github.com/allenai/blocksuite/blob/main/scripts/eval/verify_dataset_loading.py)
+- [`scripts/eval/verify_dataset_loading.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/verify_dataset_loading.py)
   (standalone, needs a GPU) applies each requested episode's setup to a freshly reset
   environment, all in one Isaac session, and writes a scene diff (table height, blocks
   present, block and table poses, block sizes, camera intrinsics and pose), first-frame
@@ -314,7 +314,7 @@ To check what was applied, look at each episode's `render_replay_status` and
 The four HL latency flags decouple the high-level conditioning (the oracle for
 `--policy maniflow`, the Molmo2 forward for `--policy molmo2_maniflow`) from per-step
 low-level inference, in milliseconds of sim time
-(`sim_time_ms = step * step_dt * 1000`; see `src/blocksuite/serving/hl_latency.py`). All
+(`sim_time_ms = step * step_dt * 1000`; see `src/toyblocks/serving/hl_latency.py`). All
 default to 0, which runs the HL on every LL inference with no delay:
 
 - **K** (`--hl-update-interval-ms`): invoke the HL at most once per K ms and buffer its
@@ -364,15 +364,15 @@ default), `<out_subdir>` from the profile or `--out-subdir`, and `<problem_id>` 
 directory holds `launch_params.json` (the resolved launch parameters, including the
 commit), `launch_command.sh` (the command line), `std_out_err.log` (the pipeline log
 followed by that worker's output) and `skill_success.json` (per-skill success rates from
-[`scripts/skill_success_from_eval_run.py`](https://github.com/allenai/blocksuite/blob/main/scripts/skill_success_from_eval_run.py)).
+[`scripts/skill_success_from_eval_run.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/skill_success_from_eval_run.py)).
 
-At the end, [`scripts/merge_eval_runs.py`](https://github.com/allenai/blocksuite/blob/main/scripts/merge_eval_runs.py)
+At the end, [`scripts/merge_eval_runs.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/merge_eval_runs.py)
 merges the workers into one run directory, `runs/<task>-v0/<policy>/<out_subdir>/<problem_id>/<run_id>/`,
 with every worker's episodes in one `eval_episodes.json`, the merged success LeRobot
 dataset (moved out of the workers; the failure datasets stay in them) and its own
 `skill_success.json`.
 
-With `--wandb`, [`scripts/wandb_consolidate.py`](https://github.com/allenai/blocksuite/blob/main/scripts/wandb_consolidate.py)
+With `--wandb`, [`scripts/wandb_consolidate.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/wandb_consolidate.py)
 merges every worker into one W&B run named `<policy>__<task>-v0__<out_subdir>` (needs
 `WANDB_API_KEY`). It carries `summary/run_stats_table` (one row of headline numbers:
 success rates, episode lengths against the expert's, timeout rate, throughput),
@@ -553,7 +553,7 @@ render and block-identity flags work together.
 | Flag | Default | Description |
 |---|---|---|
 | `--wandb` | off | Log the run to W&B, merging every worker into one run. Also extracts each episode's expert video for the episodes table. |
-| `--wandb-project` | `blocksuite-eval` | W&B project. |
+| `--wandb-project` | `toyblocks-eval` | W&B project. |
 | `--out-subdir` | profile | Output subdirectory under `runs/<task>-v0/<policy>/`. |
 | `--policy-name` | from `--policy` | Policy label used in W&B names and output paths. Currently only the default works: the pipeline also reads this label to choose the policy server, so any other value stops it with `unknown POLICY_NAME`. |
 | `--problem-id` | `problem_000000` | `<problem_id>` segment of the output path. |

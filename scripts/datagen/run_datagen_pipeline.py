@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end pipeline for blocksuite datagen experiments.
+"""End-to-end pipeline for ToyBlocks datagen experiments.
 
 Pipeline:
   task-gen            Generate PDDL tasks              (task_gen/rotate.py)
@@ -258,7 +258,7 @@ RERENDER_ITEM_PREFIX = "rerender:"
 RUN_LOCAL_RENDER = Path(__file__).resolve().parents[2] / "scripts" / "rerender" / "run_local_render.py"
 #: The RI training set's domain-randomization flags (glyph + colour train split, symmetric).
 RERENDER_FLAGS_DEFAULT = (
-    "src/blocksuite/domain_randomization/flags/"
+    "src/toyblocks/domain_randomization/flags/"
     "rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"
 )
 #: RI's video sidecars and GOPs; --rerender-extra (appended after) overrides any of them.
@@ -596,12 +596,12 @@ def merge_shipped_problems(base_dir: Path) -> list[str]:
     """
     if not base_dir.is_dir():
         return []
-    # Same path dance as scripts/datagen/merge_datasets.py, for runs where blocksuite is not
+    # Same path dance as scripts/datagen/merge_datasets.py, for runs where ToyBlocks is not
     # installed in the interpreter.
     src = str(Path(__file__).resolve().parents[2] / "src")
     if src not in sys.path:
         sys.path.insert(0, src)
-    from blocksuite.vecgen.recording.merge import (  # noqa: PLC0415
+    from toyblocks.vecgen.recording.merge import (  # noqa: PLC0415
         get_dataset_paths,
         problem_name_from_dataset_path,
     )
@@ -1726,8 +1726,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--domain-path",
-        default="src/blocksuite/tamp/blocks",
-        help="Path to the TAMP domain (default: src/blocksuite/tamp/blocks)",
+        default="src/toyblocks/tamp/blocks",
+        help="Path to the TAMP domain (default: src/toyblocks/tamp/blocks)",
     )
     parser.add_argument(
         "--usd-library",
@@ -1894,13 +1894,13 @@ def main() -> int:
 
     # ── Pin git commit for reproducibility across stages ─────────────
     # Passed as --branch to the stage scripts (which accept branch names or SHAs).
-    blocksuite_commit_sha = subprocess.run(
+    toyblocks_commit_sha = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         capture_output=True,
         text=True,
         check=True,
     ).stdout.strip()
-    log.info("Pinned commit: blocksuite=%s", blocksuite_commit_sha)
+    log.info("Pinned commit: ToyBlocks=%s", toyblocks_commit_sha)
 
     # ── Paths ──────────────────────────────────────────────────────────
     # Absolute: the rerender staging symlinks and the per-stage subprocesses must not depend
@@ -1980,7 +1980,7 @@ def main() -> int:
             if isinstance(v, (str, int, float, bool, list, type(None)))
         },
         "experiment_id": exp,
-        "blocksuite_commit_sha": blocksuite_commit_sha,
+        "toyblocks_commit_sha": toyblocks_commit_sha,
         "scene_preset_id": template_cfg["scene_preset_id"],
         "robot_id": template_cfg["robot_id"],
         "enabled_steps": enabled,
@@ -2364,7 +2364,7 @@ def main() -> int:
         result = run(
             [
                 sys.executable,
-                "src/blocksuite/data_annotation/annotate_target_xy.py",
+                "src/toyblocks/data_annotation/annotate_target_xy.py",
                 merge_output_dir,
                 "-j",
                 str(args.annotate_num_workers),

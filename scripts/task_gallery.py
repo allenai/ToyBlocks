@@ -467,7 +467,7 @@ def main() -> int:
     )
     ap.add_argument("--out-dir", default="gallery", help="Where to write index.html and clips")
     ap.add_argument("--camera", default=DEFAULT_CAMERA, help="Camera to pull the clip from")
-    ap.add_argument("--title", default="Blocksuite TAMP task gallery")
+    ap.add_argument("--title", default="ToyBlocks TAMP task gallery")
     ap.add_argument("--serve", action="store_true", help="Serve the gallery over HTTP")
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--no-build", action="store_true", help="Serve an existing gallery dir as-is")

@@ -219,8 +219,8 @@ if __name__ == "__main__":
     import numpy as np
     import gymnasium as gym
     from isaaclab_tasks.utils import parse_env_cfg
-    from blocksuite.domain_randomization.render_sim import PHYS_STEP_PER_RENDER_INTERVAL, RenderSim
-    from blocksuite.vecgen.recording.lerobot_recorder import IsaacDataRecorderLeRobot
+    from toyblocks.domain_randomization.render_sim import PHYS_STEP_PER_RENDER_INTERVAL, RenderSim
+    from toyblocks.vecgen.recording.lerobot_recorder import IsaacDataRecorderLeRobot
 
     import importlib.util
     _spec = importlib.util.spec_from_file_location(
@@ -239,11 +239,11 @@ if __name__ == "__main__":
     T.IsaacDataRecorderLeRobot = IsaacDataRecorderLeRobot
     T.simulation_app = simulation_app
 
-    from blocksuite.domain_randomization import interpreter as DR
-    from blocksuite.domain_randomization import render_params as RP
-    from blocksuite.domain_randomization import camera as DRCAM
-    from blocksuite.domain_randomization import resolve as DRRES
-    from blocksuite.domain_randomization.assets import AssetPaths
+    from toyblocks.domain_randomization import interpreter as DR
+    from toyblocks.domain_randomization import render_params as RP
+    from toyblocks.domain_randomization import camera as DRCAM
+    from toyblocks.domain_randomization import resolve as DRRES
+    from toyblocks.domain_randomization.assets import AssetPaths
     _assets = AssetPaths.with_search_paths(args.assets_paths)
     print(f"[from_params] asset map: {DRRES.asset_source_summary(_assets.hdri_dirs)}")
 
@@ -371,7 +371,7 @@ if __name__ == "__main__":
     # (skybox, GI, exposure/tonemap) is whatever the wave collectively set, while per-env prims
     # (env_sphere, local lights, table material) stay per-slot. plan_waves puts every episode in an
     # env spawned at its recorded block size.
-    from blocksuite.domain_randomization.replay import park_inactive_objects
+    from toyblocks.domain_randomization.replay import park_inactive_objects
     for wi_plan, placed in enumerate(waves_plan):
         chunk = [(sidx, ep, rec) for _env, sidx, ep, rec in placed]
         slots = [env for env, _sidx, _ep, _rec in placed]

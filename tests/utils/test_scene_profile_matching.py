@@ -17,9 +17,9 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.eval.scene_verification import _read_block_sizes
-from blocksuite.utils.episode_queue import _check_spawned_block_size
-from blocksuite.utils.reset_states_io import (
+from toyblocks.eval.scene_verification import _read_block_sizes
+from toyblocks.utils.episode_queue import _check_spawned_block_size
+from toyblocks.utils.reset_states_io import (
     load_reset_states,
     load_reset_states_with_profiles,
     pack_reset_states,

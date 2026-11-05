@@ -24,7 +24,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 PIPELINE = ROOT / "scripts/datagen/run_datagen_pipeline.py"
 GENERATOR = ROOT / "scripts/generate_task_from_pddl.py"
-BASE_ARGS = ROOT / "src/blocksuite/cli/base_args.py"
+BASE_ARGS = ROOT / "src/toyblocks/cli/base_args.py"
 
 
 def _pipeline_module():
@@ -126,7 +126,7 @@ def _run_pipeline(*flags: str):
     return r.returncode, r.stdout + r.stderr
 
 
-CAMTEST = "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml"
+CAMTEST = "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml"
 
 
 def test_profiles_above_the_rerender_floor_are_refused():

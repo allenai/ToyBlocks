@@ -34,8 +34,8 @@ cd "${REPO_ROOT}"
 
 python ${POST_MORTEM_CMD} scripts/ppo_fast.py \
     --headless \
-    --exp-name ppo-Blocksuite-Flip-v0-0 \
-    --task Blocksuite-Isolate-v0 \
+    --exp-name ppo-ToyBlocks-Flip-v0-0 \
+    --task ToyBlocks-Isolate-v0 \
     --num-envs ${NUM_ENVS} \
     --num_minibatches ${NUM_MINIBATCHES} \
     --update-epochs 8 \
@@ -53,6 +53,6 @@ python ${POST_MORTEM_CMD} scripts/ppo_fast.py \
     ${SHARE_URL_CMD} \
     --exp-name ${RUN_NAME} \
     --disable-viewer \
-    --wandb-project-name Blocksuite-RL \
+    --wandb-project-name ToyBlocks-RL \
     --wandb-entity ai2-robotics
 

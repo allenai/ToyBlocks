@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from blocksuite.serving.obs_transforms.depth_ptmap_bounds import (
+from toyblocks.serving.obs_transforms.depth_ptmap_bounds import (
     DEFAULT_FRANKA_PER_CAMERA_PTMAP_BOUNDS,
     mask_depth_m_by_z_bounds,
     z_bounds_for_depth_key,

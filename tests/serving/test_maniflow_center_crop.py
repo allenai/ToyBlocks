@@ -5,19 +5,19 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from blocksuite.serving.obs_transforms.maniflow import (
-    ManiflowObsTransform,
-    _center_crop_box,
-    _center_crop_resize_nearest_nhw,
-)
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
 from tests.serving.policy_input_fixture import (
     FIXTURE_CAM_HW,
     FIXTURE_INTRINSICS,
     build_obs,
     build_target_heatmap,
+)
+from toyblocks.serving.obs_transforms.maniflow import (
+    ManiflowObsTransform,
+    _center_crop_box,
+    _center_crop_resize_nearest_nhw,
+)
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
 )
 
 

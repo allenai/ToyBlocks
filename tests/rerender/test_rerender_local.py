@@ -19,7 +19,7 @@ PIPELINE = ROOT / "scripts/datagen/run_datagen_pipeline.py"
 RERENDER = ROOT / "scripts/rerender/rerender.py"
 #: A real, locally-readable flags YAML. --rerender-flags has no default, so every run that
 #: re-renders has to name one.
-CAMTEST = ROOT / "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml"
+CAMTEST = ROOT / "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml"
 
 
 def _pipeline_module():
@@ -62,7 +62,7 @@ def test_rejects_pipelined_rerender_too():
 def test_rejects_a_flags_yaml_that_is_not_local():
     """A YAML that exists only inside the rerender image cannot drive a local render."""
     rc, out = _run("--rerender-local", "--rerender-flags",
-                   "/root/blocksuite/src/blocksuite/domain_randomization/flags/x.yaml")
+                   "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml")
     assert rc != 0 and "readable on THIS machine" in out
 
 
@@ -81,7 +81,7 @@ def argv():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
         "--experiment-id", "x", "--rerender-local",
-        "--rerender-flags", "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml",
+        "--rerender-flags", "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml",
     ])
     return mod, mod.local_rerender_argv(args, Path("/b/rr/src/problem_x"),
                                         Path("/b/rr/out/job_local"), "/b/envs")
@@ -141,7 +141,7 @@ def test_every_skipped_camera_survives_rerender_argparse():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
         "--experiment-id", "x", "--rerender-local",
-        "--rerender-flags", "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml",
+        "--rerender-flags", "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml",
         "--rerender-skip-cameras", "left_camera", "gripper_camera",
     ])
     cmd = mod.local_rerender_argv(args, Path("/b/rr/src/p"), Path("/b/rr/out/job_local"), "/b/envs")
@@ -160,7 +160,7 @@ def test_staged_dir_is_named_problem_star():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
         "--experiment-id", "x", "--rerender-local",
-        "--rerender-flags", "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml",
+        "--rerender-flags", "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml",
     ])
     steps = mod.local_rerender_steps(args, "/b", "/b/envs", "problem_abc")
     joined = " ".join(steps)
@@ -179,7 +179,7 @@ def _steps():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
         "--experiment-id", "x", "--rerender-local",
-        "--rerender-flags", "src/blocksuite/domain_randomization/flags/rerender_flags_camtest.yaml",
+        "--rerender-flags", "src/toyblocks/domain_randomization/flags/rerender_flags_camtest.yaml",
     ])
     return mod, mod.local_rerender_steps(args, "/b", "/b/envs", "problem_abc")
 
@@ -297,7 +297,7 @@ def test_rerender_extra_cannot_steer_a_problem_out_of_the_merge():
 
 
 # ------------------------------------------------------------------ multiplex / original pass
-ALLRAND = ROOT / "src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache.yaml"
+ALLRAND = ROOT / "src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache.yaml"
 
 
 def _mx_args(mod, *extra: str, flags=None):

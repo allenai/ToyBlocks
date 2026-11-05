@@ -9,13 +9,13 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import summarize_model_inputs
-from blocksuite.serving.policy_input_trace import render_ll_input_panel
-from blocksuite.utils.wandb_logging import _LL_INPUT_PANEL_RE
+from toyblocks.serving.maniflow_serving_utils import summarize_model_inputs
+from toyblocks.serving.policy_input_trace import render_ll_input_panel
+from toyblocks.utils.wandb_logging import _LL_INPUT_PANEL_RE
 from tests.serving.policy_input_fixture import build_obs, build_target_heatmap, normalizer_for
 from tests.serving.test_policy_input_trace import HEATMAP_PEAK_XY
 
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
     ManiflowBlocksTableObsTransform,
 )
 

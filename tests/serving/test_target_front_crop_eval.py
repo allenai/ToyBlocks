@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import (
+from tests.serving.policy_input_fixture import build_obs
+from toyblocks.serving.maniflow_serving_utils import (
     crop_centered_on_target,
     inject_target_front_crop_rgb,
 )
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
     ManiflowBlocksTableObsTransform,
 )
-from tests.serving.policy_input_fixture import build_obs
 
 
 def test_crop_centered_on_target_matches_size() -> None:

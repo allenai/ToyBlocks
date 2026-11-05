@@ -2,8 +2,8 @@ import math
 
 import torch
 
-from blocksuite.vecgen.math import quat_yaw
-from blocksuite.vecgen.symbolic.predicates import (
+from toyblocks.vecgen.math import quat_yaw
+from toyblocks.vecgen.symbolic.predicates import (
     ORI_QUATERNIONS,
     classify_orientation,
     clear,
@@ -20,7 +20,7 @@ def test_ori_of_and_classify_all_canonical():
     assert torch.equal(classify_orientation(ORI_QUATERNIONS), idx)
     # 30 deg yaw perturbation keeps the class; 60 deg does not satisfy ori_of (40 deg yaw tol)
     yaw30 = quat_yaw(torch.full((24,), math.radians(30.0)))
-    from blocksuite.vecgen.math import quat_mul
+    from toyblocks.vecgen.math import quat_mul
 
     q30 = quat_mul(yaw30, ORI_QUATERNIONS)
     assert bool(ori_of(q30, idx).all())
@@ -48,7 +48,7 @@ def _pose(x: float, y: float, z: float) -> torch.Tensor:
 
 
 def test_side_relations():
-    from blocksuite.vecgen.symbolic.predicates import (
+    from toyblocks.vecgen.symbolic.predicates import (
         on_back,
         on_front,
         on_left,
@@ -80,8 +80,8 @@ def test_side_relations():
 def test_goal_facts_side_relations_and_unknown_predicate_raises():
     import pytest
 
-    from blocksuite.vecgen.symbolic.pddl import Fact, Not
-    from blocksuite.vecgen.symbolic.predicates import assert_goal_supported, goal_facts_satisfied
+    from toyblocks.vecgen.symbolic.pddl import Fact, Not
+    from toyblocks.vecgen.symbolic.predicates import assert_goal_supported, goal_facts_satisfied
 
     # word "CA" in a line: block_c to the right of block_a, plus a far-away block_t
     poses = torch.stack([_pose(0.5, 0.0, 0.02), _pose(0.5, 0.045, 0.02), _pose(0.3, -0.2, 0.02)])
@@ -107,8 +107,8 @@ def test_goal_facts_side_relations_and_unknown_predicate_raises():
 
 
 def test_derive_init_facts_keeps_declared_relations(tmp_path):
-    from blocksuite.vecgen.symbolic.pddl import Fact, parse_problem
-    from blocksuite.vecgen.symbolic.state import derive_init_facts
+    from toyblocks.vecgen.symbolic.pddl import Fact, parse_problem
+    from toyblocks.vecgen.symbolic.state import derive_init_facts
 
     path = tmp_path / "isolate.pddl"
     path.write_text(

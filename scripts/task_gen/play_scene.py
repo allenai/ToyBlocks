@@ -11,8 +11,8 @@ Usage:
 """
 import argparse
 
-from blocksuite.tamp.blocks.glyph_blocks import block_name, block_type
-from blocksuite.task_gen import And, Block, Clear, On, OnTable, ProblemSpec
+from toyblocks.tamp.blocks.glyph_blocks import block_name, block_type
+from toyblocks.task_gen import And, Block, Clear, On, OnTable, ProblemSpec
 
 
 def build_spec(

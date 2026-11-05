@@ -35,7 +35,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from scipy.spatial.transform import Rotation
 
-# Default = sim2real front camera OffsetCfg (src/blocksuite/scenes/sim2real.py).
+# Default = sim2real front camera OffsetCfg (src/toyblocks/scenes/sim2real.py).
 # convention="ros" => the quaternion orients the OPTICAL frame in the base frame.
 DEFAULT_OFFSET_POS = (0.944958, 0.000714, 0.48414)
 DEFAULT_OFFSET_QUAT_ROS_WXYZ = (-0.3265056, 0.6272114, 0.6272114, -0.3265056)
@@ -51,7 +51,7 @@ def corrected_world_pose(offset_pos, offset_quat_ros_wxyz) -> np.ndarray:
     The annotator computes ``R_cw = (Rq_world @ W2O).T`` and needs that to equal
     ``R_parent_from_optical.T``; solving gives ``Rq_world = R_parent_from_optical @ W2O.T``.
     """
-    from blocksuite.data_annotation.annotation_utils import _WORLD_TO_OPTICAL
+    from toyblocks.data_annotation.annotation_utils import _WORLD_TO_OPTICAL
 
     q = np.asarray(offset_quat_ros_wxyz, dtype=float)
     R_parent_from_optical = Rotation.from_quat(q[[1, 2, 3, 0]]).as_matrix()
@@ -110,7 +110,7 @@ def fix_split(split_dir: Path, pose: np.ndarray, backup: bool) -> int:
 
 
 def annotate(split_dir: Path, workers: int) -> None:
-    import blocksuite.data_annotation.annotate_target_xy as m
+    import toyblocks.data_annotation.annotate_target_xy as m
 
     cmd = [sys.executable, m.__file__, str(split_dir), "-j", str(workers)]
     print(f"  [annotate] {' '.join(cmd)}")

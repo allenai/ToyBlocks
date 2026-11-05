@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 PIPELINE = REPO / "scripts" / "datagen" / "run_datagen_pipeline.py"
-MERGE = REPO / "src" / "blocksuite" / "vecgen" / "recording" / "merge.py"
+MERGE = REPO / "src" / "toyblocks" / "vecgen" / "recording" / "merge.py"
 
 
 def _default_merge_cameras() -> list[str]:

@@ -9,7 +9,7 @@ import numpy as np
 import pyarrow.parquet as pq
 import pytest
 
-from blocksuite.vecgen.recording._stitch import stitch_datasets
+from toyblocks.vecgen.recording._stitch import stitch_datasets
 
 # Needs the real LeRobot (the CPU CI lane has none); test_recorder_rows stands in a stub then.
 if not hasattr(pytest.importorskip("lerobot.datasets.lerobot_dataset").LeRobotDataset, "create"):

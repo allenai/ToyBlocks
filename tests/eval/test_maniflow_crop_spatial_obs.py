@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from blocksuite.eval.maniflow_spatial_obs import inject_maniflow_hl_spatial_obs
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+from tests.serving.policy_input_fixture import build_obs
+from toyblocks.eval.maniflow_spatial_obs import inject_maniflow_hl_spatial_obs
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
     ManiflowBlocksTableObsTransform,
 )
-from tests.serving.policy_input_fixture import build_obs
 
 
 def test_inject_maniflow_hl_spatial_obs_enables_crop_transform() -> None:

@@ -9,9 +9,9 @@ import inspect
 
 import yaml
 
-from blocksuite.domain_randomization.session import DRSession
+from toyblocks.domain_randomization.session import DRSession
 
-YAMLS = sorted(glob.glob("src/blocksuite/domain_randomization/flags/rerender_flags_*.yaml"))
+YAMLS = sorted(glob.glob("src/toyblocks/domain_randomization/flags/rerender_flags_*.yaml"))
 
 
 def _rerender_inline_kit_args(flags):

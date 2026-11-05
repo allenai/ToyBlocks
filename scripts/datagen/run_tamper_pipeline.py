@@ -218,7 +218,7 @@ def run_local(args: argparse.Namespace, problems: list[Problem]) -> int:
 
         if not args.skip_annotate and args.record_videos:
             result = run([
-                sys.executable, "src/blocksuite/data_annotation/annotate_target_xy.py",
+                sys.executable, "src/toyblocks/data_annotation/annotate_target_xy.py",
                 problem_data_dir, "-j", args.annotate_workers,
             ])
             if result.returncode != 0:
@@ -284,7 +284,7 @@ def main() -> int:
 
     # Pipeline knobs
     parser.add_argument("--domain_path", "--domain-path", dest="domain_path",
-                        default="src/blocksuite/tamp/blocks")
+                        default="src/toyblocks/tamp/blocks")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--exec-num-envs", type=int, default=32,
                         help="Parallel vecgen envs; rounded up to a multiple of the package's "

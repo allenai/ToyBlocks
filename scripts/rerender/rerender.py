@@ -48,7 +48,7 @@ if __name__ == "__main__":  # forkserver/spawn workers re-run this module -> mus
     # ~2-3GB server (torch+lerobot+av, no Isaac). MUST run before importing isaaclab.
     import multiprocessing as _mp  # noqa: E402
     _ENC_CTX = _mp.get_context("forkserver")
-    _ENC_CTX.set_forkserver_preload(["blocksuite.vecgen.recording._video_encoder"])
+    _ENC_CTX.set_forkserver_preload(["toyblocks.vecgen.recording._video_encoder"])
     _warm = _ENC_CTX.Process(target=int)  # trivial -> forces the (clean, pre-Isaac) server to start now
     _warm.start(); _warm.join()
 
@@ -376,26 +376,26 @@ if __name__ == "__main__":  # (import-safety) app launch + isaaclab imports only
     except Exception as e:
         print(f"[rerender] could not build kit_args from carb_settings: {e}")
 
-    # The glyph feature spans BOTH repos: this file calls into blocksuite's
-    # domain_randomization, and TAMP is pinned by blocksuite's submodule pointer, so the two
-    # halves can land at different times. On 2026-10-06 blocksuite main pinned a TAMP that calls
+    # The glyph feature spans BOTH repos: this file calls into toyblocks's
+    # domain_randomization, and TAMP is pinned by toyblocks's submodule pointer, so the two
+    # halves can land at different times. On 2026-10-06 ToyBlocks main pinned a TAMP that calls
     # interpreter.sample_wave_task_letters while main's own interpreter had no such function and
     # no glyphs.py at all: every fragment of every run died with AttributeError and the worker
     # then WEDGED at SM 2% holding its GPUs. Check the pairing up front, where the exit code is
     # still honest and no Kit startup has been paid for.
     if (_early.get("randomize_task_letters") if isinstance(_early, dict) else False):
         try:
-            from blocksuite.domain_randomization import interpreter as _probe
+            from toyblocks.domain_randomization import interpreter as _probe
         except Exception as _e:                       # noqa: BLE001
-            raise SystemExit(f"[rerender] randomize_task_letters is set but blocksuite's "
+            raise SystemExit(f"[rerender] randomize_task_letters is set but toyblocks's "
                              f"domain_randomization could not be imported: {_e}")
         _need = [f for f in ("sample_wave_task_letters", "apply_wave_task_letters")
                  if not hasattr(_probe, f)]
         if _need:
             raise SystemExit(
-                f"[rerender] randomize_task_letters is set, but this blocksuite checkout is "
-                f"missing {_need} (and almost certainly src/blocksuite/domain_randomization/"
-                f"glyphs.py). Update blocksuite to a commit carrying glyphs.py, or remove "
+                f"[rerender] randomize_task_letters is set, but this ToyBlocks checkout is "
+                f"missing {_need} (and almost certainly src/toyblocks/domain_randomization/"
+                f"glyphs.py). Update ToyBlocks to a commit carrying glyphs.py, or remove "
                 f"randomize_task_letters from the flags file.")
 
     # Refuse an impossible flag/argv combination BEFORE the app launches. Raised from main() the
@@ -426,13 +426,13 @@ if __name__ == "__main__":  # (import-safety) app launch + isaaclab imports only
     import gymnasium as gym  # noqa: E402
     from isaaclab_tasks.utils import parse_env_cfg  # noqa: E402
     from isaaclab.assets.rigid_object.rigid_object import RigidObject  # noqa: E402
-    from blocksuite.domain_randomization.render_sim import (  # noqa: E402
+    from toyblocks.domain_randomization.render_sim import (  # noqa: E402
         PHYS_STEP_PER_RENDER_INTERVAL, RenderSim,
     )
-    # blocksuite's recorder (the one vecgen datagen and eval use): GPU-side frame snapshot + copy in
+    # toyblocks's recorder (the one vecgen datagen and eval use): GPU-side frame snapshot + copy in
     # the frame-build thread, shared-memory frame slots instead of pickling, parallel encoder
     # processes (--num_writers), lossless depth at x265 ultrafast (same decoded values).
-    from blocksuite.vecgen.recording.lerobot_recorder import (  # noqa: E402
+    from toyblocks.vecgen.recording.lerobot_recorder import (  # noqa: E402
         IsaacDataRecorderLeRobot, EncoderProcessError,
     )
 
@@ -444,7 +444,7 @@ EXIT_ENCODER_DIED = 3
 FPS = 25
 # Robot joint constants now live in the shared DR package (dagger replays frames with
 # them too); re-exported here under their original names.
-from blocksuite.domain_randomization.replay import (  # noqa: E402
+from toyblocks.domain_randomization.replay import (  # noqa: E402
     ARM_JOINTS, GRIPPER_DRIVE_JOINT, GRIPPER_MIMIC,
 )
 
@@ -578,8 +578,8 @@ class _robot_camera_options:
         self.skip_depth = skip_depth
 
     def __enter__(self):
-        from blocksuite.scenes import SCENE_PRESETS
-        from blocksuite.utils import common_utils as _cu
+        from toyblocks.scenes import SCENE_PRESETS
+        from toyblocks.utils import common_utils as _cu
         self._cu, self._orig = _cu, _cu.apply_camera_overrides_json
         preset = set(SCENE_PRESETS["sim2real"].camera_cfgs)
         opts = self
@@ -632,7 +632,7 @@ def build_simulator(task_id: str, num_envs: int, device: str, flags: dict):
     rid = getattr(env_cfg, "robot_id", None)
     if rid is not None:
         try:
-            from blocksuite.robots import REGISTERED_ROBOTS
+            from toyblocks.robots import REGISTERED_ROBOTS
             if rid not in REGISTERED_ROBOTS:
                 fb = _remap_robot_id(rid, REGISTERED_ROBOTS)
                 print(f"[rerender] robot_id '{rid}' not registered; remapping to '{fb}' "
@@ -649,7 +649,7 @@ def build_simulator(task_id: str, num_envs: int, device: str, flags: dict):
     # Compat: stub any missing goal-conversion helper (replay ignores live goal eval).
     try:
         import torch as _torch
-        import blocksuite.tamp.blocks.pddl_goal_tensor_conversions as _gtc
+        import toyblocks.tamp.blocks.pddl_goal_tensor_conversions as _gtc
         def _rr_goal_stub(env, *a, **k):
             return _torch.ones(env.num_envs, dtype=_torch.bool, device=env.device)
         if not getattr(_gtc, "_rr_stub_installed", False):
@@ -806,31 +806,31 @@ def discover_jobs(datasets_root: str, output_root: str,
 
 # load_episodes now lives in the shared DR package so dagger (and any other
 # consumer) can build the same episode records; imported at module scope below.
-from blocksuite.domain_randomization import episodes as _dr_episodes  # noqa: E402
-from blocksuite.domain_randomization.episodes import load_episodes  # noqa: E402
+from toyblocks.domain_randomization import episodes as _dr_episodes  # noqa: E402
+from toyblocks.domain_randomization.episodes import load_episodes  # noqa: E402
 
 # _resolve_joint_ids / _set_table_height moved to the shared DR package. Imported under
 # their original names so rerender_from_params' T._resolve_joint_ids still resolves.
-from blocksuite.domain_randomization.replay import (  # noqa: E402
+from toyblocks.domain_randomization.replay import (  # noqa: E402
     _resolve_joint_ids, _set_table_height, park_inactive_objects,
 )
 
 # _moving_cameras moved to the shared DR package (dagger needs the same selection).
-from blocksuite.domain_randomization.replay import _moving_cameras  # noqa: E402
+from toyblocks.domain_randomization.replay import _moving_cameras  # noqa: E402
 
 
 # --- Per-episode randomization defaults (overridable in flags.yaml `randomize`) ---
 # Angles are camera-local degrees; vertical_fov_deg perturbs the VERTICAL field of view.
 # HDRI/skybox pool + table-material defaults, the pure HDRI resolver, and the SkyBuckets picker now
-# live in the reusable blocksuite.domain_randomization package (shared with eval; no module globals).
+# live in the reusable toyblocks.domain_randomization package (shared with eval; no module globals).
 # rerender keeps the old private names as thin adapters so every call site is unchanged -- a render
 # render_params diff confirms byte-identical DR sampling.
-from blocksuite.domain_randomization import resolve as _dr_resolve
-from blocksuite.domain_randomization.assets import (
+from toyblocks.domain_randomization import resolve as _dr_resolve
+from toyblocks.domain_randomization.assets import (
     default_hdri_dir as _dr_default_hdri_dir,
     default_table_materials as _dr_default_table_materials,
 )
-from blocksuite.domain_randomization.buckets import (
+from toyblocks.domain_randomization.buckets import (
     SkyBuckets as _PkgSkyBuckets,
     bucket_weight as _bucket_weight,
     bucket_seq as _bucket_seq,
@@ -858,9 +858,9 @@ def _SkyBuckets(flag, rng):
     return _PkgSkyBuckets(flag, rng, DEFAULT_HDRI_DIR)
 
 
-# Camera / seed-salt / dome-stage randomization moved to blocksuite.domain_randomization.{camera,seeds,skybox}
+# Camera / seed-salt / dome-stage randomization moved to toyblocks.domain_randomization.{camera,seeds,skybox}
 # (per-concern modules). Names re-bound so rerender call sites are unchanged.
-from blocksuite.domain_randomization import camera as _dr_camera, seeds as _dr_seeds, skybox as _dr_skybox
+from toyblocks.domain_randomization import camera as _dr_camera, seeds as _dr_seeds, skybox as _dr_skybox
 _stable_seed_salt = _dr_seeds._stable_seed_salt
 _problem_seed_salt = _dr_seeds._problem_seed_salt
 RAND_KEYS = _dr_camera.RAND_KEYS
@@ -894,9 +894,9 @@ _apply_skybox = _dr_skybox._apply_skybox
 # on the prim directly (like the dome). Empirically its effect on the enclosed tabletop is
 # modest (small radius, below the ground), but this lets the skybox flow control it for a
 # cleaner HDRI look / lighting DR. See scene_lights in the flags docstring.
-# Exposure/carb and scene-light randomization moved to blocksuite.domain_randomization.{exposure,lights}
+# Exposure/carb and scene-light randomization moved to toyblocks.domain_randomization.{exposure,lights}
 # (per-concern modules). Names re-bound so rerender call sites are unchanged.
-from blocksuite.domain_randomization import exposure as _dr_exposure, lights as _dr_lights
+from toyblocks.domain_randomization import exposure as _dr_exposure, lights as _dr_lights
 _EXPOSURE_KEYS = _dr_exposure._EXPOSURE_KEYS
 _dump_exposure_settings = _dr_exposure._dump_exposure_settings
 _apply_exposure = _dr_exposure._apply_exposure
@@ -912,9 +912,9 @@ _sample_episode_local_lights = _dr_lights._sample_episode_local_lights
 _apply_local_lights = _dr_lights._apply_local_lights
 _setup_global_sun = _dr_lights._setup_global_sun
 _apply_global_sun = _dr_lights._apply_global_sun
-# env_sphere backdrop randomization moved to blocksuite.domain_randomization.env_sphere
+# env_sphere backdrop randomization moved to toyblocks.domain_randomization.env_sphere
 # (per-concern module). Names re-bound so rerender call sites are unchanged.
-from blocksuite.domain_randomization import env_sphere as _dr_env_sphere
+from toyblocks.domain_randomization import env_sphere as _dr_env_sphere
 ENV_SPHERE_ROOT = _dr_env_sphere.ENV_SPHERE_ROOT
 _make_uv_sphere_mesh = _dr_env_sphere._make_uv_sphere_mesh
 _set_camera_far_clip = _dr_env_sphere._set_camera_far_clip
@@ -930,9 +930,9 @@ def _sample_episode_env_spheres(spec, episode_indices, seed):
 _apply_link_camera_mount_offsets = _apply_camera_local_offsets
 
 
-# Table material randomization moved to blocksuite.domain_randomization.materials (per-concern
+# Table material randomization moved to toyblocks.domain_randomization.materials (per-concern
 # module: pure samplers + pxr appliers). Names re-bound so rerender call sites are unchanged.
-from blocksuite.domain_randomization import materials as _dr_materials
+from toyblocks.domain_randomization import materials as _dr_materials
 MATERIAL_VEC2_KEYS = _dr_materials.MATERIAL_VEC2_KEYS
 MATERIAL_VEC3_KEYS = _dr_materials.MATERIAL_VEC3_KEYS
 MATERIAL_JITTER_KEYS = _dr_materials.MATERIAL_JITTER_KEYS
@@ -958,14 +958,14 @@ _apply_episode_materials = _dr_materials._apply_episode_materials
 def _resolve_material_specs(flags):
     """Adapter: inject rerender default table-material library (was the DEFAULT_TABLE_MATERIALS global)."""
     return _dr_materials._resolve_material_specs(flags, DEFAULT_TABLE_MATERIALS)
-# render_params.json writer + DR flags loader moved to blocksuite.domain_randomization.
+# render_params.json writer + DR flags loader moved to toyblocks.domain_randomization.
 # {render_params, config} (reusable by eval). Names re-bound so rerender call sites are unchanged;
 # the run-args block (was inline from args_cli) is supplied here via _rp_args().
-from blocksuite.domain_randomization import render_params as _dr_rp, config as _dr_config
-from blocksuite.domain_randomization import build as _dr_build
+from toyblocks.domain_randomization import render_params as _dr_rp, config as _dr_config
+from toyblocks.domain_randomization import build as _dr_build
 import scene_swap as _scene_swap
-from blocksuite.domain_randomization import interpreter as _dr_interp
-from blocksuite.domain_randomization.assets import AssetPaths as _AssetPaths
+from toyblocks.domain_randomization import interpreter as _dr_interp
+from toyblocks.domain_randomization.assets import AssetPaths as _AssetPaths
 _ASSETS = None                              # ordered HDRI/skybox roots; built in main() from --assets_paths
 
 
@@ -1163,7 +1163,7 @@ def _src_episode_index(ds_path):
     caller can then fetch one episode at a time instead of holding the whole split resident.
     """
     import pyarrow.parquet as pq
-    from blocksuite.domain_randomization.episodes import FAILED_ATTEMPT_COL, flag_values
+    from toyblocks.domain_randomization.episodes import FAILED_ATTEMPT_COL, flag_values
     out = []
     for f in sorted((Path(ds_path) / "data").glob("chunk-*/file-*.parquet")):
         # A corrupt SOURCE file must not take the render process down. Observed 2026-09-11:
@@ -1231,7 +1231,7 @@ def _bc_palette_for_run(flags):
     spec = (flags or {}).get("randomize_block_colors")
     if not spec:
         return None
-    from blocksuite.domain_randomization.block_colors import parse_palette
+    from toyblocks.domain_randomization.block_colors import parse_palette
     return parse_palette(spec)
 
 
@@ -1421,7 +1421,7 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    from blocksuite.domain_randomization.episodes import drop_failed_attempt_rows
+    from toyblocks.domain_randomization.episodes import drop_failed_attempt_rows
 
     OWNED = passthrough_owned_columns(task_letters)
     src_by_split = {}
@@ -1575,13 +1575,13 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
                             # episode's mapping. Owning this column instead took the recorder's
                             # index into its own one-row "manipulation" table, discarding the
                             # real instruction text entirely.
-                            from blocksuite.domain_randomization.glyphs import rewrite_tokens
+                            from toyblocks.domain_randomization.glyphs import rewrite_tokens
                             # Every episode in the split goes through here, including any with
                             # no glyphs (empty mapping -> text unchanged). Rebuilding only SOME of
                             # them would leave the rest indexing the old table.
                             gm = ep_glyphs.get((split, int(oidx))) or {}
                             cm = ep_block_colors.get((split, int(oidx))) or {}
-                            from blocksuite.domain_randomization.block_colors import (
+                            from toyblocks.domain_randomization.block_colors import (
                                 rewrite_tokens as rewrite_colors)
                             tmap = src_task_txt[split]
                             interned = new_tasks.setdefault(split, {})
@@ -1607,7 +1607,7 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
                             # Rewrite the SOURCE goal -- the recorder's is empty in a re-render,
                             # which is why owning this column produced an all-null one -- so the
                             # symbolic task names the glyphs actually rendered.
-                            from blocksuite.domain_randomization.glyphs import rewrite_tokens
+                            from toyblocks.domain_randomization.glyphs import rewrite_tokens
                             gm = ep_glyphs[(split, int(oidx))]
                             vals = col.to_pylist() if hasattr(col, "to_pylist") else list(col)
                             col = pa.array([rewrite_tokens(v, gm) if v else v for v in vals],
@@ -1616,7 +1616,7 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
                             # Same rule as glyphs, different vocabulary: for a cuboid the colour
                             # word IS the referring expression, so a recoloured block whose goal
                             # still says "red" is a real contradiction, not a cosmetic one.
-                            from blocksuite.domain_randomization.block_colors import (
+                            from toyblocks.domain_randomization.block_colors import (
                                 rewrite_tokens as rewrite_colors)
                             cm = ep_block_colors[(split, int(oidx))]
                             vals = col.to_pylist() if hasattr(col, "to_pylist") else list(col)
@@ -1629,7 +1629,7 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
                         # glyph_map cannot survive by being OWNED: this loop iterates
                         # src_schema.names, so when the source lacks the column it must be added
                         # the way camera columns a camera-less source lacks are added.
-                        from blocksuite.domain_randomization.glyphs import glyph_map_json
+                        from toyblocks.domain_randomization.glyphs import glyph_map_json
                         _gm = ep_glyphs.get((split, int(oidx))) or {}
                         _gcol = pa.chunked_array(
                             [pa.array([glyph_map_json(_gm) if _gm else ""] * n, type=pa.string())])
@@ -1654,7 +1654,7 @@ def _patch_data_from_source(out_dir, job, episode_records, cam_delta=None, verbo
                         # declares this column, and appending a second field makes the parquet
                         # unreadable (ArrowInvalid: Multiple matches) -- the bug the glyph branch
                         # above had to be fixed for. Do not reintroduce it here.
-                        from blocksuite.domain_randomization.block_variables import (
+                        from toyblocks.domain_randomization.block_variables import (
                             block_variable_map_json)
                         _vm = block_variable_map_json(
                             ep_glyphs.get((split, int(oidx))) or None,
@@ -1795,7 +1795,7 @@ def _scene_static_bases(static_cams, cam_base_pose, sim):
     """
     try:
         import torch
-        from blocksuite.utils.tf import world_pose_to_local
+        from toyblocks.utils.tf import world_pose_to_local
         from isaaclab.utils.math import convert_camera_frame_orientation_convention
     except Exception:                                    # noqa: BLE001
         return {}
@@ -2825,9 +2825,9 @@ def replay_job(sim, job: Dict[str, Any], max_episodes: Optional[int],
             try:
                 import json as _json
 
-                from blocksuite.domain_randomization.build import (dump_render_context,
+                from toyblocks.domain_randomization.build import (dump_render_context,
                                                                    dump_render_products)
-                from blocksuite.domain_randomization.materials import dump_applied_materials
+                from toyblocks.domain_randomization.materials import dump_applied_materials
                 _probe = {"who": "rerender",
                           "materials": dump_applied_materials(_ir.object_specs,
                                                               _ir.object_shader_prims),
@@ -2853,7 +2853,7 @@ def replay_job(sim, job: Dict[str, Any], max_episodes: Optional[int],
         # Per-env block glyph swap: sample BEFORE the record loop so the recorded map and the
         # shader written later in the camera window are the same draw (interpreter caches it on
         # _ir and the applier reuses it). Empty dict when the flag is off.
-        # Gated on the FLAG, not called unconditionally: a blocksuite that predates glyphs.py
+        # Gated on the FLAG, not called unconditionally: a ToyBlocks that predates glyphs.py
         # has no such attribute, and reaching for it broke every run on main (see the pairing
         # check in __main__). Both helpers already no-op when the flag is off, so this only
         # changes which repo has to be new enough.
@@ -2923,7 +2923,7 @@ def replay_job(sim, job: Dict[str, Any], max_episodes: Optional[int],
             # camera saw rather than what we intended.
             _bcm = (getattr(_ir, "block_colors_applied", None) or {}).get(i) or {}
             if _bcm:
-                from blocksuite.domain_randomization.block_colors import block_randomization_record
+                from toyblocks.domain_randomization.block_colors import block_randomization_record
                 rec["block_randomization"] = block_randomization_record(
                     _bcm, getattr(_ir, "block_palette", None))
                 recorder.set_cuboid_color_map(_bcm, env_idx=i,

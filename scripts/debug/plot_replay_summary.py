@@ -28,9 +28,9 @@ if not OUT.is_absolute():
 
 DS = {"A": np.load(OUT / "dsA.npz"), "B": np.load(OUT / "dsB.npz")}
 CELLS = [  # (dataset, sim, file, color, linestyle, kind)
-    ("A", "blocksuite", "replay_A_in_blocksuite.npz", "#1f77b4", "-",  "self"),
+    ("A", "toyblocks", "replay_A_in_toyblocks.npz", "#1f77b4", "-",  "self"),
     ("A", "classic",    "replay_A_in_classic.npz",    "#1f77b4", "--", "cross"),
-    ("B", "blocksuite", "replay_B_in_blocksuite.npz", "#d62728", "--", "cross"),
+    ("B", "toyblocks", "replay_B_in_toyblocks.npz", "#d62728", "--", "cross"),
     ("B", "classic",    "replay_B_in_classic.npz",    "#d62728", "-",  "self"),
 ]
 GRID = np.linspace(0.0, 1.0, 120)
@@ -102,14 +102,14 @@ bmean = {(ds, sim): data[(ds, sim)].mean() for ds, sim, *_ in CELLS}
 lines = [
     "READING THIS PLOT",
     "",
-    "blue = dataset A (blocksuite)",
+    "blue = dataset A (toyblocks)",
     "red  = dataset B (classic)",
     "solid = self  dashed = cross",
     "",
     "Flat & low  = the sim reproduces",
     "the recorded arm motion.",
     "",
-    f"B→blocksuite mean {bmean[('B','blocksuite')]*57.3:.2f}°",
+    f"B→toyblocks mean {bmean[('B','toyblocks')]*57.3:.2f}°",
     f"B→classic    mean {bmean[('B','classic')]*57.3:.2f}°",
     "  → B identical in both sims",
     "",

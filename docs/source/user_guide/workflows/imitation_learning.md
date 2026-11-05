@@ -133,7 +133,7 @@ python scripts/launch_eval.py --policy maniflow \
 ```
 
 The policy server imports `hvla` from the `maniflow-tb` submodule, and the eval pipeline refuses
-to start if that checkout is not the commit blocksuite pins (`git submodule update --init
+to start if that checkout is not the commit ToyBlocks pins (`git submodule update --init
 maniflow-tb` fixes it). A checkpoint trained with this code is on Hugging Face,
 [allenai/maniflow-tb](https://huggingface.co/allenai/maniflow-tb), with the same layout
 (`hf download allenai/maniflow-tb --local-dir <dir>`). See [Policy Evaluation](evaluations.md)

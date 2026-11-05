@@ -52,7 +52,7 @@ these are very different amounts of work, and the original version of this docum
 ### What a goal can say
 
 This is the hard constraint everything else follows from. A goal is a conjunction of literals
-drawn from `SUPPORTED_GOAL_PREDICATES` in `src/blocksuite/tamp/blocks/pddl_goal_tensor_conversions.py`,
+drawn from `SUPPORTED_GOAL_PREDICATES` in `src/toyblocks/tamp/blocks/pddl_goal_tensor_conversions.py`,
 because `generate_task_from_pddl.py` needs a vectorized checker for every literal:
 
 ```

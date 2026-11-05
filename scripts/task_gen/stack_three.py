@@ -55,12 +55,12 @@ import argparse
 import random
 from dataclasses import dataclass
 
-from blocksuite.tamp.blocks.glyph_blocks import LETTERS, block_name, block_type
-from blocksuite.task_gen import And, Block, Clear, NextTo, On, OnTable, Or, OriOf, Pred, ProblemSpec
-from blocksuite.task_gen.height_capped_spec import HeightCappedSpec
-from blocksuite.task_gen.orientations import ORIENTATIONS, flip, yaw
-from blocksuite.task_gen.predicates import Expr
-from blocksuite.task_gen.resolved_init import ResolvedInit
+from toyblocks.tamp.blocks.glyph_blocks import LETTERS, block_name, block_type
+from toyblocks.task_gen import And, Block, Clear, NextTo, On, OnTable, Or, OriOf, Pred, ProblemSpec
+from toyblocks.task_gen.height_capped_spec import HeightCappedSpec
+from toyblocks.task_gen.orientations import ORIENTATIONS, flip, yaw
+from toyblocks.task_gen.predicates import Expr
+from toyblocks.task_gen.resolved_init import ResolvedInit
 
 #: One cube per color; names and PDDL types match ``template/codegen.py`` and ``domain.pddl``.
 COLOR_CUBES: dict[str, tuple[str, str]] = {

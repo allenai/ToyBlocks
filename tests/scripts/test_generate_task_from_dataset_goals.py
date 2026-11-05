@@ -26,12 +26,12 @@ BVM = json.dumps({
 @pytest.fixture
 def codegen(monkeypatch: pytest.MonkeyPatch) -> types.ModuleType:
     # The script launches Isaac and imports Isaac Lab arg types at import time.
-    isaac_app = types.ModuleType("blocksuite.cli.isaac_app")
+    isaac_app = types.ModuleType("toyblocks.cli.isaac_app")
     isaac_app.launch_app = lambda: None  # type: ignore[attr-defined]
-    base_args = types.ModuleType("blocksuite.cli.base_args")
+    base_args = types.ModuleType("toyblocks.cli.base_args")
     base_args.BaseArgs = type("BaseArgs", (), {})  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "blocksuite.cli.isaac_app", isaac_app)
-    monkeypatch.setitem(sys.modules, "blocksuite.cli.base_args", base_args)
+    monkeypatch.setitem(sys.modules, "toyblocks.cli.isaac_app", isaac_app)
+    monkeypatch.setitem(sys.modules, "toyblocks.cli.base_args", base_args)
     spec = importlib.util.spec_from_file_location("generate_task_from_dataset_under_test", _SCRIPT)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)

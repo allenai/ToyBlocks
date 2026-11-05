@@ -7,7 +7,7 @@ ToyBlocks only provides the interface.
 **1. Subclass `BasePolicy`** in your model's package:
 
 ```python
-from blocksuite.serving import BasePolicy
+from toyblocks.serving import BasePolicy
 
 class MyPolicy(BasePolicy):
     def __init__(self):
@@ -23,17 +23,17 @@ least an `"actions"` key. Any extra ndarray keys returned alongside it are made
 available to the eval loop on `PolicyClientAdapter.last_aux` (this is how
 `action_pd_mode` is passed through).
 
-**2. Serve it** using `blocksuite.serving.PolicyServer`:
+**2. Serve it** using `toyblocks.serving.PolicyServer`:
 
 ```python
-from blocksuite.serving import PolicyServer
+from toyblocks.serving import PolicyServer
 server = PolicyServer(MyPolicy(), host="0.0.0.0", port=8000)
 server.serve_forever()
 ```
 
 There is no generic launcher script; wrap these lines in your own entry point.
-`src/blocksuite/serving/serve_maniflow_policy.py` (run as
-`python -m blocksuite.serving.serve_maniflow_policy`) is a complete example: a `tyro` CLI that
+`src/toyblocks/serving/serve_maniflow_policy.py` (run as
+`python -m toyblocks.serving.serve_maniflow_policy`) is a complete example: a `tyro` CLI that
 loads the ManiFlow checkpoint into a `BasePolicy` and serves it with `PolicyServer`.
 
 Point [`evaluate.py`](../evals/evaluate.md) at the server with `--policy_host` and
@@ -42,6 +42,6 @@ Point [`evaluate.py`](../evals/evaluate.md) at the server with `--policy_host` a
 
 **3. (Optional) Add an observation transform** if your model expects a different
 observation format than the ToyBlocks env produces. Subclass `BaseObsTransform` in
-`src/blocksuite/serving/obs_transforms/` and register it in `_lazy_registry`, then use
+`src/toyblocks/serving/obs_transforms/` and register it in `_lazy_registry`, then use
 `--obs_transform <name>` at eval time. Transforms can also override
 `action_postprocess` to rewrite the policy response before the action chunk broker.

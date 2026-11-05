@@ -55,7 +55,7 @@ def _install_sim_stubs() -> None:
 
 _install_sim_stubs()
 
-from blocksuite.vecgen.recording.lerobot_recorder import (  # noqa: E402
+from toyblocks.vecgen.recording.lerobot_recorder import (  # noqa: E402
     next_free_shard,
     shard_dir_for,
 )

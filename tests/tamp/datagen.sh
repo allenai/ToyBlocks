@@ -84,11 +84,11 @@ fi
 TMP_DIR="/tmp/$(whoami)"
 mkdir -p "${TMP_DIR}"
 
-# blocksuite has NO PDDL-problem generator (its scripts only CONSUME PDDLs).
+# ToyBlocks has NO PDDL-problem generator (its scripts only CONSUME PDDLs).
 # Start block_r at o17; goal o2 + on block_red1 -> REORIENT then PNP_TABLE_BLOCK.
 # The three ;*_range annotations are read by
 # codegen.parse_pddl_randomization_ranges_from_text and match the checked-in
-# production problems (src/blocksuite/tamp/blocks/problems/flip.pddl); using
+# production problems (src/toyblocks/tamp/blocks/problems/flip.pddl); using
 # narrower ranges here would test something large-scale datagen never runs.
 cat << 'EOF' > "${TMP_DIR}/flip_pnp_r_on_red.pddl"
 (define (problem flip-pnp-r-on-red)
@@ -186,7 +186,7 @@ select_task() {
         *)
             echo "Unknown --task '$1'. Use [flip_pnp|rotate|all]"; exit 1 ;;
     esac
-    ENV_PATH="src/blocksuite/tasks/autogen/${TASK_SLUG}"
+    ENV_PATH="src/toyblocks/tasks/autogen/${TASK_SLUG}"
 }
 
 codegen_task_from_pddl() {
@@ -194,8 +194,8 @@ codegen_task_from_pddl() {
 
     python ${POST_MORTEM_CMD} scripts/generate_task_from_pddl.py \
         --pddl "${PDDL_PATH}" \
-        --domain_path src/blocksuite/tamp/blocks \
-        --output_dir src/blocksuite/tasks/autogen \
+        --domain_path src/toyblocks/tamp/blocks \
+        --output_dir src/toyblocks/tasks/autogen \
         --num_reset_states 32 \
         --num_envs 8 \
         "${SCENE_ARGS[@]}" \

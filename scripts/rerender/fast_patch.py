@@ -24,7 +24,7 @@ Usage:
   python fast_patch.py --dataset data/datasets/unmerged/DS \\
       --src data/datasets/unmerged/bigblocks_flip_a/execution \\
       --envs_dir data/datasets/unmerged/bigblocks_flip_a/envs \\
-      --flags src/blocksuite/domain_randomization/flags/rerender_flags_..._nocamrand.yaml
+      --flags src/toyblocks/domain_randomization/flags/rerender_flags_..._nocamrand.yaml
 
   --dry_run stops after the scan and prints the patch list.
 """

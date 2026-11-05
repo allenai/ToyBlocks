@@ -1,7 +1,7 @@
 import torch
 
-from blocksuite.vecgen.program import EnvProgramState, Phase, Program, SkillCall
-from blocksuite.vecgen.segments import Segment, SegmentTable, interpolate_rows
+from toyblocks.vecgen.program import EnvProgramState, Phase, Program, SkillCall
+from toyblocks.vecgen.segments import Segment, SegmentTable, interpolate_rows
 
 
 def test_segment_table_gather_and_hold():
@@ -103,7 +103,7 @@ def test_settle_tol_hold_is_a_cap():
 
 def test_settle_tol_hold_ends_when_error_stops_shrinking():
     """A joint parked in its deadband short of the tolerance must not burn the whole hold cap."""
-    from blocksuite.vecgen.segments import SETTLE_STALL_TICKS
+    from toyblocks.vecgen.segments import SETTLE_STALL_TICKS
 
     dev = torch.device("cpu")
     table = SegmentTable(num_envs=1, dof=1, capacity=4, device=dev)

@@ -30,7 +30,7 @@ from pathlib import Path
 
 import tyro
 
-from blocksuite.utils.wandb_logging import read_episode_rows
+from toyblocks.utils.wandb_logging import read_episode_rows
 
 # HL actions that carry no skill of their own (TAMP bookkeeping / free motion).
 _IGNORED_HL_ACTIONS = frozenset({"", "init", "move_to", "nudge", "stop", "done", "reach-goal"})

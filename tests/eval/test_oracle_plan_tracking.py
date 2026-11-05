@@ -18,10 +18,10 @@ from typing import Any
 import pytest
 import torch
 
-from blocksuite.eval.oracle import live_state as ls
+from toyblocks.eval.oracle import live_state as ls
 
 ROOT = Path(__file__).resolve().parents[2]
-DOMAIN = ROOT / "src/blocksuite/tamp/blocks/domain.pddl"
+DOMAIN = ROOT / "src/toyblocks/tamp/blocks/domain.pddl"
 TABLE = "workspace_table"
 
 ON_TABLE_ABC = (
@@ -124,8 +124,8 @@ def test_adapter_sizes_come_from_the_bound_envs_spawn(monkeypatch: pytest.Monkey
         ("tmp3.Backends._shared.quat_ops", quat_ops),
     ):
         monkeypatch.setitem(sys.modules, name, mod)
-    monkeypatch.delitem(sys.modules, "blocksuite.eval.oracle.sim_adapter", raising=False)
-    from blocksuite.eval.oracle.sim_adapter import BaseEnvOracleSimAdapter
+    monkeypatch.delitem(sys.modules, "toyblocks.eval.oracle.sim_adapter", raising=False)
+    from toyblocks.eval.oracle.sim_adapter import BaseEnvOracleSimAdapter
 
     cuboid = types.SimpleNamespace(size=(1.0, 0.8, 0.05))  # a CuboidCfg's fields
     multi = types.SimpleNamespace(assets_cfg=[types.SimpleNamespace(size=(0.1,) * 3), cuboid], asset_indices=[0, 1])
@@ -144,7 +144,7 @@ def test_adapter_sizes_come_from_the_bound_envs_spawn(monkeypatch: pytest.Monkey
     assert adapter.get_rigid_object("block_a").get_size(0) == (0.05, 0.05, 0.05)
     with pytest.raises(ValueError, match="not found"):
         adapter.get_rigid_object("block_zz")
-    sys.modules.pop("blocksuite.eval.oracle.sim_adapter")  # built on the stand-ins
+    sys.modules.pop("toyblocks.eval.oracle.sim_adapter")  # built on the stand-ins
 
 
 # --------------------------------------------------------------------------
@@ -196,14 +196,14 @@ class _Sim:
 
 @pytest.fixture
 def make_oracle(monkeypatch: pytest.MonkeyPatch) -> Any:
-    from blocksuite.eval.oracle import recovering
-    from blocksuite.tamp.blocks import pddl_goal_tensor_conversions as g
-    from blocksuite.vecgen.symbolic.ff import default_ff_binary
+    from toyblocks.eval.oracle import recovering
+    from toyblocks.tamp.blocks import pddl_goal_tensor_conversions as g
+    from toyblocks.vecgen.symbolic.ff import default_ff_binary
 
     try:
         default_ff_binary()
     except FileNotFoundError:
-        pytest.skip("needs the FF binary (make -C src/blocksuite/vecgen/symbolic/ff_planner)")
+        pytest.skip("needs the FF binary (make -C src/toyblocks/vecgen/symbolic/ff_planner)")
     monkeypatch.setattr(g, "batched_goal_conjunct", lambda env, p, a: torch.tensor([env.holds(p, a)]))
     monkeypatch.setattr(
         g, "resolve_root_pose_w", lambda env, n: torch.tensor([[0.5, 0.0, env.z(n), 1.0, 0.0, 0.0, 0.0]])

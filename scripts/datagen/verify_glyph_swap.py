@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 import pyarrow.parquet as pq
 
-from blocksuite.data_annotation.annotation_utils import resolve_frame_camera_model
+from toyblocks.data_annotation.annotation_utils import resolve_frame_camera_model
 
 RGBK = "observation.images.camera:front_camera"
 

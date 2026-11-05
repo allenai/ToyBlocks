@@ -1,10 +1,10 @@
-"""blocksuite.playdata.abandon: transport detection and follow-up pick goals."""
+"""toyblocks.playdata.abandon: transport detection and follow-up pick goals."""
 import random
 from typing import Any
 
 import pytest
 
-from blocksuite.playdata.abandon import (
+from toyblocks.playdata.abandon import (
     blocks_below,
     followup_actions_enabled,
     followup_pnp_goal,
@@ -13,7 +13,7 @@ from blocksuite.playdata.abandon import (
     is_transport_step,
     transport_num_waypoints,
 )
-from blocksuite.playdata.symbolic_state import SymbolicState
+from toyblocks.playdata.symbolic_state import SymbolicState
 
 TABLE = "workspace_table"
 

@@ -15,7 +15,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()  # consumes --headless / --enable_cameras from argv
 
@@ -26,7 +26,7 @@ import numpy as np
 import gymnasium as gym
 import torch
 from isaaclab_tasks.utils import parse_env_cfg
-from blocksuite.tamp.blocks.pddl_goal_tensor_conversions import ORI_QUATERNIONS
+from toyblocks.tamp.blocks.pddl_goal_tensor_conversions import ORI_QUATERNIONS
 
 # Camera-verified orientations where the letter face is visible (registries.FOUND_ORIS).
 ACCEPTING = {"o2", "o6", "o10", "o14", "o17", "o18", "o19", "o20"}

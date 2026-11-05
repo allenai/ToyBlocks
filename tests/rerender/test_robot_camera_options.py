@@ -6,7 +6,7 @@ edits the sim2real preset, and BaseEnv adds the robot's cameras (gripper_camera)
 rerender._robot_camera_options wraps common_utils.apply_camera_overrides_json (which BaseEnv calls
 right after adding robot cameras) for the duration of gym.make.
 
-The class is loaded from rerender.py's source by AST, with blocksuite stubbed: no Isaac, no GPU.
+The class is loaded from rerender.py's source by AST, with toyblocks stubbed: no Isaac, no GPU.
 """
 import ast
 import sys
@@ -34,19 +34,19 @@ def _load_class():
     return ns["_robot_camera_options"]
 
 
-def _stub_blocksuite(calls):
+def _stub_toyblocks(calls):
     preset = {"front_camera": SimpleNamespace(width=1280, height=720, data_types=["rgb"])}
-    scenes = types.ModuleType("blocksuite.scenes")
+    scenes = types.ModuleType("toyblocks.scenes")
     scenes.SCENE_PRESETS = {"sim2real": SimpleNamespace(camera_cfgs=preset)}
-    cu = types.ModuleType("blocksuite.utils.common_utils")
+    cu = types.ModuleType("toyblocks.utils.common_utils")
     cu.apply_camera_overrides_json = lambda cfg: calls.append("orig")
-    utils = types.ModuleType("blocksuite.utils")
+    utils = types.ModuleType("toyblocks.utils")
     utils.common_utils = cu
-    pkg = types.ModuleType("blocksuite")
+    pkg = types.ModuleType("toyblocks")
     pkg.__path__ = []
     utils.__path__ = []
-    sys.modules.update({"blocksuite": pkg, "blocksuite.scenes": scenes, "blocksuite.utils": utils,
-                        "blocksuite.utils.common_utils": cu})
+    sys.modules.update({"toyblocks": pkg, "toyblocks.scenes": scenes, "toyblocks.utils": utils,
+                        "toyblocks.utils.common_utils": cu})
     return cu
 
 
@@ -64,7 +64,7 @@ def main():
 
     print("A: no options -> the hook is untouched")
     calls: list = []
-    cu = _stub_blocksuite(calls)
+    cu = _stub_toyblocks(calls)
     orig = cu.apply_camera_overrides_json
     with opts_cls(None, None, False):
         _check("hook not wrapped", cu.apply_camera_overrides_json is orig, True)
@@ -99,10 +99,10 @@ if __name__ == "__main__":
 
 
 def test_main():
-    # main() swaps stub blocksuite modules into sys.modules; put the real ones back for the
+    # main() swaps stub toyblocks modules into sys.modules; put the real ones back for the
     # tests that run after it in the same session.
     def ours(k: str) -> bool:
-        return k == "blocksuite" or k.startswith("blocksuite.")
+        return k == "toyblocks" or k.startswith("toyblocks.")
 
     saved = {k: v for k, v in sys.modules.items() if ours(k)}
     try:

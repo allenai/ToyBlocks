@@ -8,9 +8,9 @@ Run:
 import pytest
 import torch
 
-from blocksuite.tasks._template._template_env_cfg import TemplateEnvCfg
-from blocksuite.tasks._template._template_env import TemplateEnv
-from blocksuite.utils.randomization_utils import randomize_rigid_body_friction, set_rigid_body_friction
+from toyblocks.tasks._template._template_env_cfg import TemplateEnvCfg
+from toyblocks.tasks._template._template_env import TemplateEnv
+from toyblocks.utils.randomization_utils import randomize_rigid_body_friction, set_rigid_body_friction
 from tests.helpers import SCENE_ROBOT_MAP, teardown_sim
 
 

@@ -20,15 +20,15 @@ import pandas as pd
 import torch
 
 try:
-    import blocksuite.tasks.base_env  # noqa: F401
+    import toyblocks.tasks.base_env  # noqa: F401
 except ImportError:
     # RecordMetrics only uses BaseEnv as an annotation; without Isaac Lab, stand it in.
-    _base_env_stub = types.ModuleType("blocksuite.tasks.base_env")
+    _base_env_stub = types.ModuleType("toyblocks.tasks.base_env")
     _base_env_stub.BaseEnv = gym.Env  # type: ignore[attr-defined]
-    sys.modules["blocksuite.tasks.base_env"] = _base_env_stub
+    sys.modules["toyblocks.tasks.base_env"] = _base_env_stub
 
-from blocksuite.utils.wandb_logging import _goal_progress_fields
-from blocksuite.wrappers.record_metrics import RecordMetrics
+from toyblocks.utils.wandb_logging import _goal_progress_fields
+from toyblocks.wrappers.record_metrics import RecordMetrics
 from scripts import wandb_consolidate
 from scripts import plot_diagnostics_from_eval_run as plot_script
 from scripts.plot_diagnostics_from_eval_run import (
@@ -151,7 +151,7 @@ def test_record_metrics_csv_rows_carry_episode_clock(tmp_path: Path) -> None:
 
 
 def test_record_metrics_skips_trace_when_buffer_too_large(monkeypatch) -> None:
-    import blocksuite.wrappers.record_metrics as record_metrics
+    import toyblocks.wrappers.record_metrics as record_metrics
 
     monkeypatch.setattr(record_metrics, "_TRACE_MAX_BYTES", 1)
     env = _ClockEnv(num_envs=1, max_episode_length=10)
@@ -314,7 +314,7 @@ def test_goal_slot_names_prefer_record_then_predicate_tokens() -> None:
 
 
 def test_settle_thresholds_mirror_the_gate() -> None:
-    from blocksuite.tamp.blocks import pddl_goal_tensor_conversions as gate
+    from toyblocks.tamp.blocks import pddl_goal_tensor_conversions as gate
 
     assert plot_script._SETTLED_LIN_VEL == gate._SETTLED_LIN_VEL
     assert plot_script._SETTLED_ANG_VEL == gate._SETTLED_ANG_VEL

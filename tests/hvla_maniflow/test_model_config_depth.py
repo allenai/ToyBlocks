@@ -7,13 +7,13 @@ from typing import Any
 import numpy as np
 import pytest
 
-from blocksuite.serving.maniflow_serving_utils import (
+from tests.serving.policy_input_fixture import load_depth_fixture, to_torch
+from toyblocks.serving.maniflow_serving_utils import (
     TRAIN_MAX_DEPTH_M,
     derive_model_input_spec,
     select_and_validate_obs,
 )
-from blocksuite.serving.obs_transforms.maniflow import ManiflowObsTransform
-from tests.serving.policy_input_fixture import load_depth_fixture, to_torch
+from toyblocks.serving.obs_transforms.maniflow import ManiflowObsTransform
 
 DUMMY_CAM_HW = (180, 320)
 

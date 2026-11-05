@@ -1,8 +1,8 @@
 # LeRobot dataset recording
 
-blocksuite has one LeRobot recorder,
-[`IsaacDataRecorderLeRobot`](../src/blocksuite/vecgen/recording/lerobot_recorder.py) in
-`blocksuite.vecgen.recording`. It is a port of TAMP's `tmp3.DataRecorder` recorder (the one
+ToyBlocks has one LeRobot recorder,
+[`IsaacDataRecorderLeRobot`](../src/toyblocks/vecgen/recording/lerobot_recorder.py) in
+`toyblocks.vecgen.recording`. It is a port of TAMP's `tmp3.DataRecorder` recorder (the one
 TAMP stage 3 uses) and needs nothing from TAMP. Eval (`scripts/evaluate.py --save_lerobot`)
 records with it, so an eval rollout and a datagen episode have the same schema, the same row
 layout and the same video formats.
@@ -18,7 +18,7 @@ Recording samples the sim after a step, so a sample carries s_k beside the comma
 it; the recorder holds each frame one record call and moves the next call's action block onto it.
 The PD-gain columns (`observation.state.current_*`) and `action.pd_mode` move with the action.
 The recorder supports per-step gain switching. Current datagen uses one uniform gain profile,
-so within a dataset these columns stay constant. Every dataset's `meta/info.json` carries `blocksuite_row_layout`.
+so within a dataset these columns stay constant. Every dataset's `meta/info.json` carries `toyblocks_row_layout`.
 
 Eval envs auto-reset inside `env.step`, so the sample taken on an episode's last step is already
 the next episode's s_0. `record_step_batched(reset_env_ids=...)` holds that sample as the next
@@ -68,7 +68,7 @@ Optional columns (constructor flags, off for datagen, on for eval):
 
 `set_pending_pd_modes_batched` overrides the stiffness-derived `action.pd_mode` for a step.
 Eval computes `action.ee_target` with
-[`ArticulationEEFK`](../src/blocksuite/vecgen/recording/articulation_fk.py) (the sim robot's own
+[`ArticulationEEFK`](../src/toyblocks/vecgen/recording/articulation_fk.py) (the sim robot's own
 kinematics, checked against the observed EE pose); datagen passes its cuRobo FK.
 
 ## Throughput and memory
@@ -91,9 +91,9 @@ copied to the host in one transfer, camera images converted to their recorded dt
   module and never re-import the caller's script (which launches Isaac): ~0.35-0.65 GB each.
 - **Bounded RAM.** Frames in flight may take `TMP3_RECORDER_INFLIGHT_GB` (default
   min(4 GiB, RAM / 4)), split across the writers; with an arena, half of a writer's share is the
-  arena. Past the budget, frames are spilled to node-local disk (`BLOCKSUITE_RECORDER_SPILL_DIR`,
+  arena. Past the budget, frames are spilled to node-local disk (`TOYBLOCKS_RECORDER_SPILL_DIR`,
   else the video staging root, else `/tmp`; never network storage) and read back in order. The caller only
-  waits when that disk is short of space (`BLOCKSUITE_RECORDER_SPILL_MIN_FREE_GB`, default 20).
+  waits when that disk is short of space (`TOYBLOCKS_RECORDER_SPILL_MIN_FREE_GB`, default 20).
   The spill is a burst buffer: an encoder that is slower than the simulation for good fills it.
 - **Encode cost.** Depth (lossless 12-bit, GOP 2) is the expensive stream; x265 runs it at
   `ultrafast`, which changes speed and memory, not the decoded values (640x360: 273 fps per

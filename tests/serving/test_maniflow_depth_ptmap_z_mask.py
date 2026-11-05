@@ -7,11 +7,11 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from blocksuite.serving.obs_transforms.depth_ptmap_bounds import (
+from toyblocks.serving.obs_transforms.depth_ptmap_bounds import (
     DEFAULT_FRANKA_PER_CAMERA_PTMAP_BOUNDS,
     z_bounds_for_depth_key,
 )
-from blocksuite.serving.obs_transforms.maniflow import ManiflowObsTransform
+from toyblocks.serving.obs_transforms.maniflow import ManiflowObsTransform
 
 
 def _depth_inputs_with_patches(
@@ -75,7 +75,7 @@ def test_per_camera_ptmap_bounds_override() -> None:
 
 
 def test_transform_kwargs_from_server_metadata_ptmap_bounds() -> None:
-    from blocksuite.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
+    from toyblocks.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
 
     bounds = {
         "front_depth": {"min": [-0.6, -0.4, 0.4], "max": [0.6, 0.3, 1.0]},

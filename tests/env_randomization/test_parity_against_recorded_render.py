@@ -17,9 +17,9 @@ import os
 
 import pytest
 
-from blocksuite.domain_randomization import interpreter as I
-from blocksuite.domain_randomization.camera import _sample_episode_offsets
-from blocksuite.domain_randomization.seeds import _stable_seed_salt
+from toyblocks.domain_randomization import interpreter as I
+from toyblocks.domain_randomization.camera import _sample_episode_offsets
+from toyblocks.domain_randomization.seeds import _stable_seed_salt
 
 # Every reference run available locally, cheapest rung first. A run writes TWO render_params
 # -- an empty `blocks/` split and the real one -- so name the real path explicitly.
@@ -109,7 +109,7 @@ def _require(R, concern):
 
 
 def test_local_lights_reproduce_the_recorded_run(recording):
-    from blocksuite.domain_randomization import lights as LI
+    from toyblocks.domain_randomization import lights as LI
     R = recording; eps = R["episodes"]
     spec = (R["flags"].get("scene_lights") or {}).get("local_lights")
     if not spec:
@@ -130,8 +130,8 @@ def test_materials_reproduce_the_recorded_run(recording):
     """render_params records the APPLIED form (rec['materials'] = wave_materials, straight off
     _apply_episode_materials), which flattens the sampler's {material_name, props} into
     {name, **props}. Values must match through that mapping."""
-    from blocksuite.domain_randomization import materials as MAT
-    from blocksuite.domain_randomization.assets import AssetPaths
+    from toyblocks.domain_randomization import materials as MAT
+    from toyblocks.domain_randomization.assets import AssetPaths
     R = recording; _require(R, "materials"); eps = R["episodes"]
     salt, _ = _salt_and_base(R)
     specs = MAT._resolve_material_specs(R["flags"], AssetPaths.default().table_materials)
@@ -156,8 +156,8 @@ def test_env_sphere_reproduces_the_recorded_run(recording):
     """Same post-apply mapping: the record keeps the texture BASENAME and calls the rotation
     `rotation_deg`, where the sampler returns a full path and `rotation`."""
     import os as _os
-    from blocksuite.domain_randomization import env_sphere as ES
-    from blocksuite.domain_randomization.assets import AssetPaths
+    from toyblocks.domain_randomization import env_sphere as ES
+    from toyblocks.domain_randomization.assets import AssetPaths
     R = recording; _require(R, "env_sphere"); eps = R["episodes"]
     spec = R["flags"].get("env_sphere")
     if not spec:

@@ -54,14 +54,6 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import (
-    derive_model_input_spec,
-    select_and_validate_obs,
-)
-from blocksuite.serving.obs_transforms.maniflow import STATE_DIM_LAYOUTS
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
 from tests.serving import golden_harness as goldens
 from tests.serving.policy_input_fixture import (
     FIXTURE_BATCH,
@@ -74,6 +66,14 @@ from tests.serving.policy_input_fixture import (
     stats_action_mode,
     stats_name,
     to_torch,
+)
+from toyblocks.serving.maniflow_serving_utils import (
+    derive_model_input_spec,
+    select_and_validate_obs,
+)
+from toyblocks.serving.obs_transforms.maniflow import STATE_DIM_LAYOUTS
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
 )
 
 # Golden name -> the config fixture it is computed against. ``state9_depth``
