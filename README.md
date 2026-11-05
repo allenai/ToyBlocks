@@ -7,6 +7,7 @@
 <h3 align="center">
   <a href="https://allenai.org/blog/toyblocks">Blog post</a> &nbsp;|&nbsp;
   <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/index.html">Docs</a> &nbsp;|&nbsp;
+  <a href="https://console.cloud.google.com/storage/browser/toyblocks-data">Data</a> &nbsp;|&nbsp;
   Tech report (coming soon)
 </h3>
 
