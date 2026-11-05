@@ -1,0 +1,10 @@
+[submodule "curobo-v2"]
+	path = curobo
+	url = https://github.com/NVlabs/curobo.git
+[submodule "maniflow-tb"]
+	path = maniflow-tb
+	url = https://github.com/allenai/maniflow-tb.git
+	ignore = untracked
+[submodule "molmo2"]
+	path = molmo2
+	url = https://github.com/allenai/molmo2.git

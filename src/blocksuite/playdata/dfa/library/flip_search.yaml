@@ -1,0 +1,53 @@
+# Flip-search strategy: pick a random block, flip it forward a few times, and
+# check whether the target letter has become readable to the camera. If so,
+# accept; otherwise pick another block. Give up after `max_picks` attempts.
+#
+# Nothing here is search-specific except the guard/move NAMES and their params —
+# a different strategy is a different arrangement of the same registry keys.
+# See blocksuite.playdata.dfa.engine for the full grammar, and
+# blocksuite.playdata.dfa.registries.catalog() for the available names.
+name: flip_search
+initial: PICK
+
+# Per-env memory: n counts flips of the current block, picks counts attempts.
+memory: { n: 0, picks: 0 }
+
+# Run-level knobs; override on the CLI with --dfa-param letter=Q etc.
+params:
+  letter: R
+  flips_per_block: 1
+  max_picks: 20
+
+states:
+  # Bind a fresh random (clear) block to `c`, reset the flip counter, count the
+  # attempt. Pure transition (no emit) -> chains straight into FLIP in one step.
+  PICK:
+    - guard: always
+      effects:
+        - bind_random_block: { var: c, clear_only: true }
+        - reset: { name: n }
+        - incr: { name: picks }
+      next: FLIP
+
+  # Flip `c` in a random direction up to flips_per_block times (a self-loop
+  # gated by the counter), then check. Random directions random-walk over faces
+  # so the block can reach any orientation ("flip at random to reveal it").
+  FLIP:
+    - guard: { counter_lt: { name: n, n: $flips_per_block } }
+      emit: { flip: { var: c, direction: random } }
+      effects: [ { incr: { name: n } } ]
+      next: FLIP
+    - guard: always
+      next: CHECK
+
+  # Found it -> ACCEPT. Out of attempts -> REJECT. Otherwise pick another block.
+  CHECK:
+    # Found = the letter face is visible to the front camera. The default
+    # accepting set is the 8 camera-verified orientations (registries.FOUND_ORIS);
+    # use `upright_letter` instead if you only want the strictly-upright o2.
+    - guard: { found_letter: { letter: $letter } }
+      next: ACCEPT
+    - guard: { counter_ge: { name: picks, n: $max_picks } }
+      next: REJECT
+    - guard: always
+      next: PICK

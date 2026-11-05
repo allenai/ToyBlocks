@@ -1,0 +1,41 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: check-added-large-files
+    args: ["--maxkb=1024"]
+  - id: check-case-conflict
+  - id: check-merge-conflict
+  - id: check-symlinks
+  # A shebang'd .sh committed at 100644 has to be run as `bash foo.sh`, which
+  # every README then has to remember. Sourced libraries (scripts/eval/_common.sh,
+  # scripts/utils/*.sh) carry no shebang, so they are correctly exempt.
+  - id: check-shebang-scripts-are-executable
+  - id: check-yaml
+  - id: check-json
+  - id: check-toml
+  - id: check-xml
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: debug-statements
+  - id: pretty-format-json
+    args: ["--autofix", "--indent=4", "--no-sort-keys"]
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.15.9
+  hooks:
+  - id: ruff-check
+    args: [--fix, --exit-non-zero-on-fix]
+  - id: ruff-format
+
+- repo: local
+  hooks:
+      - id: ty-check
+        name: Custom ty hook for linting our changes
+        entry: ty check --python ${VIRTUAL_ENV}/bin/python --exit-zero
+        language: system
+        verbose: true
+        types_or: [python, pyi]
+        require_serial: true
+        pass_filenames: true

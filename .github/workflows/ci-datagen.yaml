@@ -1,0 +1,159 @@
+name: Core CI/CD checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'curobo'
+      - 'curobo/**'
+      - 'molmo2'
+      - 'molmo2/**'
+      - 'maniflow-tb'
+      - 'maniflow-tb/**'
+      - 'tests/tamp/**'
+      - 'tests/replay/**'
+      - 'tests/eval/**'
+      - 'tests/hvla_maniflow/**'
+      - 'tests/env_randomization/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'asset_manifest.json'
+      - '.github/workflows/ci-datagen.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'curobo'
+      - 'curobo/**'
+      - 'molmo2'
+      - 'molmo2/**'
+      - 'maniflow-tb'
+      - 'maniflow-tb/**'
+      - 'tests/tamp/**'
+      - 'tests/replay/**'
+      - 'tests/eval/**'
+      - 'tests/hvla_maniflow/**'
+      - 'tests/env_randomization/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'asset_manifest.json'
+      - '.github/workflows/ci-datagen.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci-datagen-test:
+    runs-on: [self-hosted, linux, x64]
+
+    steps:
+      - name: Clean workspace completely
+        run: rm -rf ${{ github.workspace }} && mkdir -p ${{ github.workspace }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+          clean: true
+
+      - name: Debug - Show file info
+        run: |
+          echo "=== Git status ==="
+          git status
+
+      - name: Configure Git credentials for private repos
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Setup minimal dev environment
+        run: |
+          eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
+          git submodule update --init curobo maniflow-tb molmo2
+          uv venv --python 3.11
+          source .venv/bin/activate
+          uv pip install "setuptools<81" wheel packaging
+          uv pip install -e .[dev,isaac,torch-cu128]
+          uv pip install -e .[dev,isaac,torch-cu128,tamp,maniflow]
+          # No --type: the manifest is nested ({"train_blocks": {"usd": "20260527"}}) and the
+          # downloader only unpacks that shape in "auto" mode. With --type usd it binds `version`
+          # to the inner dict and dies in relative_path with
+          #   TypeError: unsupported operand type(s) for /: 'PosixPath' and 'dict'
+          # get-toyblocks-assets already defaults to --type auto.
+          get-toyblocks-assets --asset-manifest asset_manifest.json
+
+      # First, and independent of datagen: seeded free-space rollouts diffed
+      # against the committed goldens, one per PD-gain case (the datagen/eval
+      # robot at its defaults, the same robot under PD_STIFF_GAINS, and the
+      # soft config). It is the only check here that can see a dynamics drift
+      # (controller gains, actuator profile, solver settings, an Isaac bump) --
+      # everything below compares a static scene. CI never passes
+      # --write-rollout-golden: the committed trajectories are the baseline, and
+      # a job that re-recorded them would report success against itself. A
+      # genuine cross-GPU spread is a reason to widen JOINT_POS_TOL in a reviewed
+      # commit, not to overwrite the goldens.
+      #
+      # The whole directory runs in one pytest invocation: conftest.py launches
+      # Isaac at import, so the block-size / table-height / friction files that
+      # accompany the golden share that single cold start and cost only their env
+      # creations. They gate the assumption both scripts below depend on -- that
+      # randomization yields 8 distinct profiles.
+      # CPU pytest against the pinned maniflow-tb checkout (ptmap depth bounds, etc.).
+      # Kept out of ci-unit.yaml so PR unit tests stay submodule-free.
+      - name: ManiFlow + HVLA integration tests (CPU)
+        run: |
+          source .venv/bin/activate
+          pytest tests/hvla_maniflow -v
+
+      - name: Env randomization suite (incl. dynamics golden)
+        run: |
+          source .venv/bin/activate
+          pytest tests/env_randomization -v
+
+      # No separate success-rate gate: run_all_stages in datagen.sh already
+      # applies the per-task threshold (0.9 for both, calibrated from a measured
+      # runner execution) plus a MIN_POLICIES floor on the denominator, and exits
+      # 1, so a second jq step here would only be a copy that can drift out of
+      # sync with it.
+      - name: Run datagen tests
+        run: |
+          source .venv/bin/activate
+          ./tests/tamp/datagen.sh --mode all --task flip_pnp --record-data --no-ui --use-wandb
+
+      # Second scene: rotate runs droid_with_box_table, so the two recorded
+      # datasets carry different scene_ids and the eval-side reconciliation
+      # below is checking something.
+      - name: Run datagen tests (rotate, droid_with_box_table)
+        run: |
+          source .venv/bin/activate
+          ./tests/tamp/datagen.sh --mode all --task rotate --record-data --no-ui --use-wandb
+
+      # Must stay in this job: the runner wipes the workspace at job start, so a
+      # separate job would not see datasets/*_test/.
+      - name: Verify eval rebuilds each dataset's scene
+        run: |
+          source .venv/bin/activate
+          ./tests/eval/scene_load.sh
+
+      # Without this a scene or SSIM finding is undiagnosable from the log: the
+      # reports carry every field diff with its tolerance and margin, and the
+      # PNGs are the dataset-vs-sim overlay.
+      - name: Upload scene-load reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-scene-load
+          path: runs/eval_scene_load/**
+          if-no-files-found: warn
+
+      # - name: Run replay tests
+      #   run: |
+      #     source .venv/bin/activate
+      #     mkdir -p test_output
+      #     python scripts/evaluate.py --task flip_pnp_r_on_red-v0 --replay_lerobot_dataset datasets/pnp_test/blocks_success --max_replay_episodes 4 --control_mode arm_joint_gripper_binary --obs_mode rgb+state --num_envs 1 --device cuda:0 --headless --output_dir test_output/replay_flip_pnp_r_on_red --save_sensor_obs_video --save_replay_comparison_video
+      #     python tests/replay/push_to_wandb.py --output-dir test_output/replay_flip_pnp_r_on_red
+      #     python tests/replay/replay_analysis.py || exit 1

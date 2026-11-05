@@ -1,0 +1,334 @@
+ignore_hl_actions:
+  - nudge
+  - init
+  - move_to
+  - stop 
+  - STOP
+non_removable_bodies:
+  - franka
+  - table
+robots:
+  frank: IsaacRobot
+config_map:
+  done: 
+    HL_ARGS: [] 
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      noop_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidLiftTrajectory(noop_traj)
+    effect: []
+    execution_sequence: ["init_gripper_open_traj", "noop_traj"]
+  
+  reach-goal:
+    HL_ARGS: []
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      noop_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidLiftTrajectory(noop_traj)
+    effect: []
+    execution_sequence: ["init_gripper_open_traj", "noop_traj"]
+
+  isolate:
+    HL_ARGS: ['robot', 'obj', "table"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      # isolate_pose first: PreIsolatePoseGenerator offsets the start toward it (training reset)
+      isolate_pose: ["IsolatePoseGenerator", "ManipPose"]
+      pre_isolate_pose: ["PreIsolatePoseGenerator", "ManipPose"]
+      pre_isolate_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      isolate_traj: ["IsolateTrajectoryGenerator", "IsolateTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidIsolatePose(isolate_pose)
+      - IsValidPreRLPose(pre_isolate_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:pre_isolate_pose,pre_isolate_traj)
+      - IsValidIsolateTrajectory(isolate_traj)
+    effect:
+      - on_table(obj, table)
+      # the isolated block has room for a grasp (nearest block >= 7 cm) and a reachable grasp
+      - pickable(obj)
+    execution_sequence: ["init_gripper_open_traj", "pre_isolate_traj", "isolate_traj"]
+
+  pnp_table_table: 
+    HL_ARGS: ['robot', 'obj', "table", "ori", "ori2"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      post_grasp: ["PostGraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      grasp_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      place_pose: ["OnTablePlacePoseGenerator", "ManipPose"]
+      pre_place_pose: ["PrePlacePoseGenerator", "ManipPose"]
+      place_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      place_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      lift_traj: ["LinearMotionPlanGenerator", "LinearTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidPostGraspPose(post_grasp)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj)
+      - IsValidMotionPlan(target_frame:obj,pose_end:post_grasp,grasp_delta_traj)
+      - IsValidPlacePose(place_pose)
+      - IsValidPrePlacePose(pre_place_pose)
+      - IsValidMotionPlan(target_frame:table,pose_end:pre_place_pose,place_traj)
+      - IsValidMotionPlan(target_frame:table,pose_end:place_pose,place_delta_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+      - IsValidLiftTrajectory(lift_traj)
+    effect:
+      - on_table(obj, table)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "grasp_delta_traj", "place_traj", "place_delta_traj", "gripper_open_traj", "lift_traj"] 
+    attach: obj
+
+  move_to_side:
+    HL_ARGS: ['robot', 'obj', "table"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      move_to_side_pose: ["MoveToSidePlacePoseGenerator", "ManipPose"]
+      move_to_side_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj) 
+      - IsValidMoveToSidePose(move_to_side_pose)
+      - IsValidMotionPlan(target_frame:table,pose_end:move_to_side_pose,move_to_side_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+    effect:
+      - on_table(obj, table)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "move_to_side_traj", "gripper_open_traj"]
+    attach: obj
+
+  move_to_center:
+    HL_ARGS: ['robot', 'obj', "table"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      move_to_center_pose: ["OnTablePlacePoseGenerator", "ManipPose"]
+      move_to_center_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj)
+      - IsValidPlacePose(move_to_center_pose)
+      - IsValidMotionPlan(target_frame:table,pose_end:move_to_center_pose,move_to_center_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+    effect:
+      - on_table(obj, table)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "move_to_center_traj", "gripper_open_traj"]
+    attach: obj
+
+  pnp_block_table:
+    HL_ARGS: ['robot', 'obj', "obj2", "table", "ori", "ori2"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      post_grasp: ["PostGraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      grasp_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      place_pose: ["OnTablePlacePoseGenerator", "ManipPose"]
+      pre_place_pose: ["PrePlacePoseGenerator", "ManipPose"]
+      place_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      place_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidPostGraspPose(post_grasp)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj)
+      - IsValidMotionPlan(target_frame:obj, pose_end:post_grasp, grasp_delta_traj)
+      - IsValidPlacePose(place_pose)
+      - IsValidPrePlacePose(pre_place_pose)
+      - IsValidMotionPlan(target_frame:table,pose_end:pre_place_pose,place_traj)
+      - IsValidMotionPlan(target_frame:table, pose_end:place_pose,place_delta_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+    effect:
+      - on_table(obj, table)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "grasp_delta_traj", "place_traj", "place_delta_traj", "gripper_open_traj"] 
+    attach: obj
+
+  pnp_table_block:
+    HL_ARGS: ['robot', 'obj', "target_obj", "table", "ori", "ori2"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      post_grasp: ["PostGraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      grasp_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      place_pose: ["OnBlockAlignedPlacePoseGenerator", "ManipPose"]
+      pre_place_pose: ["PrePlacePoseGenerator", "ManipPose"]
+      place_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      place_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidPostGraspPose(post_grasp)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj)
+      - IsValidMotionPlan(target_frame:obj,pose_end:post_grasp,grasp_delta_traj)
+      - IsValidPlacePose(place_pose)
+      - IsValidPrePlacePose(pre_place_pose)
+      - IsValidMotionPlan(target_frame:target_obj,pose_end:pre_place_pose,place_traj)
+      - IsValidMotionPlan(target_frame:target_obj,pose_end:place_pose,place_delta_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+    effect:
+      - on(obj, target_obj)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "grasp_delta_traj", "place_traj", "place_delta_traj", "gripper_open_traj"]
+    attach: obj 
+
+  pnp_block_block:
+    HL_ARGS: ['robot', 'obj', "obj2", "target_obj", "ori", "ori2"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      gripper_close_traj: ["GripperCloseStateGenerator", "GripperCloseTrajectory"]
+      gpose: ["GraspPoseGenerator", "ManipPose"]
+      post_grasp: ["PostGraspPoseGenerator", "ManipPose"]
+      grasp_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      grasp_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      place_pose: ["OnBlockAlignedPlacePoseGenerator", "ManipPose"]
+      pre_place_pose: ["PrePlacePoseGenerator", "ManipPose"]
+      place_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      place_delta_traj: ["IKInterpTrajectoryGenerator", "IKInterpTrajectory"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGraspPose(gpose)
+      - IsValidPostGraspPose(post_grasp)
+      - IsValidMotionPlan(target_frame:obj,pose_end:gpose,grasp_traj)
+      - IsValidGripperCloseTrajectory(gripper_close_traj)
+      - IsValidMotionPlan(target_frame:obj,pose_end:post_grasp,grasp_delta_traj)
+      - IsValidPlacePose(place_pose)
+      - IsValidPrePlacePose(pre_place_pose)
+      - IsValidMotionPlan(target_frame:target_obj,pose_end:pre_place_pose,place_traj)
+      - IsValidMotionPlan(target_frame:target_obj,pose_end:place_pose,place_delta_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+    effect:
+      - on(obj, target_obj)
+    execution_sequence: ["init_gripper_open_traj", "grasp_traj", "gripper_close_traj", "grasp_delta_traj", "place_traj", "place_delta_traj", "gripper_open_traj"]
+    attach: obj
+
+
+  push_to_right:
+    HL_ARGS: ['robot', 'obj', "target_obj", "table"]
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      current_robot_pose: ["CurrentJointStateGenerator", "ManipJointState"]
+      current_object_pose: ["CurrentObjectPoseGenerator", "ManipPose"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      pre_push_pose: ["PreRLPoseGenerator", "ManipPose"]
+      pre_push_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      pre_nudge_pose: ["PreRLPoseGenerator", "ManipPose"]
+      pre_nudge_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      push_pose: ["NearRightPoseGenerator", "ManipPose"]
+      push_traj: ["PushTrajectoryGenerator", "PushTrajectory"]
+      nudge_pose: ["OnRightPoseGenerator", "ManipPose"]
+      nudge_traj: ["NudgeTrajectoryGenerator", "NudgeTrajectory"]
+      nudge_retract_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+      
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+      - IsValidPreRLPose(pre_push_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:pre_push_pose,pre_push_traj)
+      - IsValidOnRightPose(nudge_pose)
+      - IsValidNearRightPose(push_pose)
+      - IsValidPushTrajectory(push_traj)
+      - IsValidPreRLPose(pre_nudge_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:pre_nudge_pose,pre_nudge_traj)
+      - IsValidNudgeTrajectory(nudge_traj)
+      - IsValidRotateRetractTrajectory(nudge_retract_traj)
+    effect:
+      - on_right(obj, target_obj)
+    execution_sequence: ["init_gripper_open_traj", "pre_push_traj", "push_traj", "pre_nudge_traj", "nudge_traj", "nudge_retract_traj"]
+  
+  push_next_to:
+    HL_ARGS: ['robot', 'obj', "target_obj", "table"]
+    LL_ARGS:
+      current_robot_pose: ["CurrentJointStateGenerator", "ManipJointState"]
+      current_object_pose: ["CurrentObjectPoseGenerator", "ManipPose"]
+      gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      pre_push_pose: ["PreRLPoseGenerator", "ManipPose"]
+      pre_push_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      push_stage1_pose: ["WithinPushRangePoseGenerator", "ManipPose"]
+      push_stage1_traj: ["PushTrajectoryGenerator", "PushTrajectory"]
+      push_stage2_pose: ["NearPoseGenerator", "ManipPose"]
+      push_stage2_traj: ["PushTrajectoryGenerator", "PushTrajectory"]
+      push_retract_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+      pre_nudge_pose: ["PreRLPoseGenerator", "ManipPose"]
+      pre_nudge_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      nudge_pose: ["NextToPoseGenerator", "ManipPose"]
+      nudge_traj: ["NudgeTrajectoryGenerator", "NudgeTrajectory"]
+      nudge_retract_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(gripper_open_traj)
+      - IsValidPreRLPose(pre_push_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:pre_push_pose,pre_push_traj)
+      - IsValidNextToPose(nudge_pose)
+      - IsValidNearPose(push_stage2_pose)
+      - IsValidWithinPushRangePose(push_stage1_pose)
+      - IsValidPushTrajectory(push_pose:push_stage1_pose,push_stage1_traj)
+      - IsValidPushTrajectory(push_pose:push_stage2_pose,push_stage2_traj)
+      - IsValidLiftTrajectory(push_retract_traj)
+      - IsValidPreRLPose(pre_nudge_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:pre_nudge_pose,pre_nudge_traj)
+      - IsValidNudgeTrajectory(nudge_traj)
+      - IsValidNudgeRetractTrajectory(nudge_retract_traj)
+    effect:
+      - next_to(obj, target_obj)
+    execution_sequence: ["gripper_open_traj", "pre_push_traj", "push_stage1_traj", "push_stage2_traj", "push_retract_traj", "pre_nudge_traj", "nudge_traj", "nudge_retract_traj"]
+
+  rotate:
+    HL_ARGS: ['robot', 'obj', 'direction', 'ori', 'ori2', 'table']
+    LL_ARGS:
+      init_gripper_open_traj: ["GripperOpenStateGenerator", "GripperOpenTrajectory"]
+      start_pose: ["PreRLPoseGenerator", "ManipPose"]
+      rotate_start_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      rotate_pose: ["RotatePoseGenerator", "ManipPose"]
+      rotate_traj: ["RotateTrajectoryGenerator", "RotateTrajectory"]
+      rotate_retract_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+    precondition:
+      - IsValidGripperOpenTrajectory(init_gripper_open_traj)
+      - IsValidRotateStartPose(target_frame:obj,start_pose)
+      - IsValidMotionPlan(target_frame:obj,pose_end:start_pose,rotate_start_traj)
+      - IsValidRotatePose(rotate_pose)
+      - IsValidRotateTrajectory(rotate_traj)
+      - IsValidRotateRetractTrajectory(rotate_retract_traj)
+    effect:
+      - ori_of(obj, ori2)
+    execution_sequence: ["init_gripper_open_traj", "rotate_start_traj","rotate_traj","rotate_retract_traj"]
+
+  reorient:
+    HL_ARGS: ['robot', 'obj', 'direction', 'ori', 'ori2', 'table']
+    LL_ARGS:
+      start_pose: ["PreReorientRLPoseGenerator", "ManipPose"]
+      reorient_start_traj: ["MotionPlanGenerator", "ManipTrajectory"]
+      reorient_pose: ["ReOrientPoseGenerator", "ManipPose"]
+      reorient_traj: ["ReOrientTrajectoryGenerator", "ReOrientTrajectory"]
+      reorient_retract_traj: ["LiftTrajectoryGenerator", "LiftTrajectory"]
+    precondition:
+      - IsValidReOrientStartPose(target_frame:obj,start_pose)
+      - IsValidMotionPlan(target_frame:obj, pose_end:start_pose,reorient_start_traj)
+      - IsValidReOrientPose(reorient_pose)
+      - IsValidReOrientTrajectory(reorient_traj)
+      - IsValidReOrientRetractTrajectory(reorient_retract_traj)
+    effect:
+      - ori_of(obj, ori2)
+    execution_sequence: ["reorient_start_traj", "reorient_traj","reorient_retract_traj"]

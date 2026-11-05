@@ -1,0 +1,84 @@
+# Structured find-the-A-blocks search.
+#
+# Pick a random block that has NOT already been resolved (neither found to be an A
+# nor set aside as a non-A). Look at it, then flip it through a fixed sequence to
+# expose its other faces to the camera: forward, left, left, left —
+# checking after each flip. If an A face is revealed, count that block and move on.
+# (This 4-flip sequence still reaches a found-orientation from all 24 possible
+# starting poses — verified offline against FOUND_ORIS — so the second forward
+# flip that used to be here was redundant.)
+# If the whole sequence reveals no A, push the block to the side to mark it checked,
+# then pick another from the remaining blocks. Accept once `target_count` distinct A
+# blocks are found; give up when no unresolved block is left, or after `max_picks`.
+#
+# Ground truth is used only to (a) turn each flip into a single-action PDDL goal and
+# (b) decide "found" as a camera stand-in — never to choose which block or which
+# flip. The pick is blind and random.
+name: find_as_structured
+initial: PICK
+
+# found = distinct A blocks revealed; sided = blocks checked and moved aside.
+memory: { found: [], sided: [], picks: 0 }
+
+params:
+  letter: A
+  target_count: 3
+  max_picks: 40
+
+states:
+  PICK:
+    - guard: { collected_ge: { name: found, n: $target_count } }
+      next: ACCEPT
+    - guard: { counter_ge: { name: picks, n: $max_picks } }
+      next: REJECT
+    - guard: always
+      effects:
+        - bind_random_block: { var: c, clear_only: true, avoid: [found, sided] }
+        - incr: { name: picks }
+      next: LOOK
+
+  # LOOK checks the block's current (unflipped) top face, then starts the sequence.
+  # Every subsequent state checks the face the PREVIOUS flip brought up.
+  LOOK:
+    - guard: { not: { is_bound: { var: c } } }   # nothing left to pick -> give up
+      next: REJECT
+    - guard: { block_is_found_letter: { var: c, letter: $letter } }
+      effects: [ { list_add: { name: found, var: c } } ]
+      next: PICK
+    - guard: always
+      emit: { flip: { var: c, direction: forward } }   # flip #1 (forward)
+      next: L1
+
+  L1:
+    - guard: { block_is_found_letter: { var: c, letter: $letter } }
+      effects: [ { list_add: { name: found, var: c } } ]
+      next: PICK
+    - guard: always
+      emit: { flip: { var: c, direction: left } }      # flip #2 (left)
+      next: L2
+
+  L2:
+    - guard: { block_is_found_letter: { var: c, letter: $letter } }
+      effects: [ { list_add: { name: found, var: c } } ]
+      next: PICK
+    - guard: always
+      emit: { flip: { var: c, direction: left } }      # flip #3 (left)
+      next: L3
+
+  L3:
+    - guard: { block_is_found_letter: { var: c, letter: $letter } }
+      effects: [ { list_add: { name: found, var: c } } ]
+      next: PICK
+    - guard: always
+      emit: { flip: { var: c, direction: left } }      # flip #4 (left)
+      next: DONE
+
+  # After the full sequence: last check, else set the block aside as a non-A.
+  DONE:
+    - guard: { block_is_found_letter: { var: c, letter: $letter } }
+      effects: [ { list_add: { name: found, var: c } } ]
+      next: PICK
+    - guard: always
+      effects: [ { list_add: { name: sided, var: c } } ]
+      emit: { move_to_side: { var: c } }
+      next: PICK

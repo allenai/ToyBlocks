@@ -1,0 +1,18 @@
+{
+    "objects": {
+        "train_blocks": {"usd": "20260527"},
+        "train_blocks_legacy_match":  {"usd": "20260527"},
+        "robot_workstation":  {"usd": "20260527"},
+        "train_blocks_large": {"usd": "20260925"}
+    },
+    "robots": {
+        "franka_droid": {"usd": "20260609"},
+        "franka_droid_legacy":  {"usd": "20260527"}
+    },
+    "scenes": {
+        "toyblocks_real":  {"usd": "20260901"}
+    },
+    "environments": {
+        "polyhaven": "20261105"
+    }
+}

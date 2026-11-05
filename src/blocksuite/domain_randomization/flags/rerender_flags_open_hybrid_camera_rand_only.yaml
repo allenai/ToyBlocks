@@ -1,0 +1,63 @@
+# Variant of ..._full_backdrop with a DARKER, SHARPER-SHADOW sun_shadow bucket, weighted higher.
+# Same normalized backdrop (every skybox visible) + neutral rooms GI. Changes vs full_backdrop:
+#   * sun_shadow probability 0.2 -> 0.6 (majority) so more hard-shadow frames appear.
+#   * sun_shadow is LESS BRIGHT: lower GI (skybox_intensity) + lower ISO + NO fill -> the shadowed
+#     side stays dark, giving strong CONTRAST against the sun-lit side.
+#   * sharper sun: local_lights angle 0.2-0.7 -> 0.1-0.3 deg (smaller angular size = crisper penumbra).
+#   * open_hybrid (soft/bright, no sun) unchanged, weight 0.8 -> 0.4.
+# Backdrop still emissive_normalize (target/median-lum) so it's visible even in the darker bucket.
+carb_settings:
+  "/persistent/rtx/modes/rt/enabled": true
+  "/persistent/rtx/modes/rt2/enabled": true
+  "/persistent/rtx/rendermode": RealTimePathTracing
+  "/rtx/rendermode": RealTimePathTracing
+#hide_objects: ["backdrop"]
+
+
+exposure:
+  auto: false
+  seed: 7
+
+# scene_lights:
+#   fill_intensity: 0
+#   fill_auto_ratio: 0.35
+#   local_lights:
+#     link_per_env: true
+#     seed: 5
+#     count: 1
+#     lights:
+#       - type: distant
+#         intensity: [300, 700]          # sun (fires only in sun_shadow); strong vs the lowered ambient
+#         color: {temperature: [4300, 6700]}
+#         angle: [0.1, 0.3]              # was [0.2,0.7] -> sharper shadow edges (smaller angular size)
+#         elevation: [28, 58]
+#         azimuth: [0, 360]
+
+# ------ only using env_sphere change the overall light colors ------
+# env_sphere:                            # BACKDROP = full diverse pool, normalized so all are visible
+#   exhaust_before_repeat: true
+#   sets:
+#     - {set: polyhaven/all}
+#     - {set: indoor-2018/all}
+#   shuffle: true
+#   seed: 7
+#   material: usdpreview
+#   emissive: true
+#   emissive_normalize: true
+#   emissive_intensity: [0.15, 0.28]
+#   emissive_clamp: [0.05, 100.0]
+#   cast_shadows: true #false
+#   backdrop_only: false #true
+#   radius: 200
+#   far_clip: 800
+#   rotation_deg: 0
+
+
+randomize:
+  position_offset_cm: [3, 3, 3]
+  pitch_deg: 5
+  yaw_deg: 5
+  roll_deg: 2
+  vertical_fov_deg: 3
+  seed: 0
+  cameras: {gripper_camera: {position_offset_cm: [0.5, 0.5, 0.5], pitch_deg: 1, yaw_deg: 1, roll_deg: 1, vertical_fov_deg: 0.5}}

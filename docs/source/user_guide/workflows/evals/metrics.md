@@ -1,0 +1,335 @@
+# Eval Metrics
+
+ToyBlocks records evaluation metrics at three granularities: **per-step**, **per-episode**, and **across-episode**. All metrics flow through a common pipeline and are saved automatically at the end of every eval run.
+
+## Architecture
+
+```text
+MetricsTracker          per-step tensors   RecordMetrics         blocksuite.eval.run_eval
+(utils/metrics.py)  ──────────────────►  (wrappers/             (run by scripts/evaluate.py)
+                       dict[str,            record_metrics.py)    │
+                       Tensor[num_envs]]        │                 ├─► eval_results.json (per episode + aggregates)
+                                                ├─► CSV per step  └─► eval_episodes.json (one record per episode)
+                                                └─► episode summaries
+```
+
+### MetricsTracker
+
+[`src/blocksuite/utils/metrics.py`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/utils/metrics.py)
+
+Core per-step metric computation. Instantiated once in `BaseEnv.__init__` when any `track_*` config flag is enabled. Each call to `step()` reads the current simulation state (joint data, EE frame, contact sensor) and returns a flat `dict[str, Tensor[num_envs]]`. All values are scalar-per-environment tensors.
+
+`BaseEnv` merges these tensors into `info["stats"]` via its `evaluate()` method, making them available to downstream wrappers.
+
+### RecordMetrics
+
+[`src/blocksuite/wrappers/record_metrics.py`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/wrappers/record_metrics.py)
+
+A `gym.Wrapper` that sits between the environment and `RecordEpisode`. It does three things:
+
+1. **Episode summaries** -- accumulates per-step stats and, when an episode ends, injects `{key}/mean`, `{key}/min`, `{key}/max`, and `{key}/final` into `info["final_info"]["episode"]`.
+2. **Goal-progress summaries** -- the boolean goal stats (`goal_conj_<c>`, `goal_success`, `goal_blocks_settled`, `goal_gripper_open`; see "Goal-progress metrics" below) also get `{key}/initial` and `{key}/first_true_step`. They are also traced step by step and attached to the finished episode as change points (`info["final_info"]["goal_trace"]`, `[[step, value], ...]`, starting with `[1, initial]`). Both are timed with the env's episode clock (`episode_length_buf`), which eval stops during hold steps (PD-switch settles, chunk-boundary waits, wave parking), so they line up with `first_success_step` and `episode_len`.
+3. **Per-step CSVs** -- when an `output_dir` is provided (`evaluate.py` passes one only with `--save_step_metrics`), buffers every step's stats and writes one CSV file per completed episode to `<output_dir>/step_metrics/`, named `env{idx}_episode_NNNN.csv` where `{idx}` is the sub-environment index and `NNNN` is a per-env episode counter. In queue-driven evals, the CSVs of "phantom" episodes (an env auto-reset after the queue drained) are dropped, as their videos and trajectories are.
+
+### The eval loop
+
+[`scripts/evaluate.py`](https://github.com/allenai/blocksuite/blob/main/scripts/evaluate.py) parses the arguments ([`src/blocksuite/eval/args.py`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/eval/args.py)) and runs the eval loop in [`blocksuite.eval.run_eval`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/eval/run_eval.py). When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, ...) to the summaries from `RecordMetrics`. At the end of the run it writes:
+
+- **`eval_results.json`** (`_save_results` in `utils/dataset_recording_utils.py`) -- the raw value of each episode metric as a JSON list, plus mean, std, min, max, and count for every metric across episodes.
+- **`eval_episodes.json`** (the episode table in `utils/wandb_logging.py`) -- one record per episode with its prompt, source-episode provenance, metrics, goal progress and video paths (fields listed under "eval_episodes.json" in [Output format](#output-format)). The same records make up the W&B episodes table.
+
+A single `evaluate.py --wandb` run logs its own W&B run. Pipeline runs instead merge every worker's `eval_episodes.json` and `eval_results.json` into one W&B run through [`scripts/wandb_consolidate.py`](https://github.com/allenai/blocksuite/blob/main/scripts/wandb_consolidate.py), which logs an episodes table with the expert videos and a goal-progress plot per episode, an aggregates table and the headline metrics, and the offline diagnostic plots of one representative episode per worker.
+
+## Available metrics
+
+### Episode metrics
+
+Always recorded when `record_metrics=True` (the default in `BaseEnvCfg`). These appear in `info["final_info"]["episode"]`.
+
+| Key | Description |
+|---|---|
+| `return` | Cumulative reward over the episode |
+| `episode_len` | Number of steps in the episode |
+| `reward` | Mean reward per step (`return / episode_len`) |
+| `success_once` | Whether the task succeeded at any point during the episode |
+| `success_at_end` | Whether the task was in a success state at the final step |
+| `first_success_step` | Episode step at which the task first succeeded (NaN if it never did) |
+| `fail_once` | Whether a failure state was reached at any point |
+| `fail_at_end` | Whether the task was in a failure state at the final step |
+
+### Eval-loop metrics
+
+Added per episode by `blocksuite.eval.run_eval`, only in the runs where they apply:
+
+| Key | When | Description |
+|---|---|---|
+| `collision`, `collision_count` | `--collision end` (default) or `penalize` | Whether, and how many times, a non-target block moved more than 2 cm or 15 deg. A collision fails the episode: `success_once` and `success_at_end` are forced to false. |
+| `success_once_ignore_collision`, `success_at_end_ignore_collision` | `--collision penalize` | The two successes before the collision penalty. `--collision off` scores no collisions at all. |
+| `sub_goals`, `sub_goal_success` | Oracle and Molmo2 runs | Per sub-goal, in order: its name and whether it succeeded (`sub_goal_success_ignore_collision` too under `penalize`). The aggregate gets a rate per skill: `sub_goal_success_pick`, `_place`, `_flip`, `_rotate`. |
+| `hl_done` | Learned-HL runs | Whether the HL model emitted its `done` token during the episode |
+| `hl_calls` | Learned-HL runs | Number of HL model queries in the episode |
+| `oracle_done` | Oracle-HL runs | Whether oracle plan completion ended the episode |
+| `oracle_success_backstop` | Oracle-HL runs | Whether 10 consecutive successful steps ended the episode instead |
+| `oracle_stuck` | Oracle-HL runs, or with a comparison oracle | Whether the oracle plan got stuck. It ends the episode for the oracle HL; a comparison oracle only flags it. |
+| `ll_oracle_failures` | `--ll-oracle` runs | Skills the low-level oracle could not execute (no feasible parameters, a failed motion plan, an effect that did not hold); Molmo2 is asked again each time |
+| `ll_skill_stops`, `ll_pause_steps` | Play-mode LL checkpoints | Number of times the LL predicted play mode -1 (stop), and number of steps it predicted 0 (pause) |
+| `partial_progress` | Autogen PDDL tasks | `(final - initial) / (total - initial)` over the goal conjuncts, in `[-1, 1]`; NaN when the goal already held at the start |
+| `replay_*` | `--replay` | Divergence from the recording; see [Dataset Replay](replay.md#replay_-metrics) |
+| `render_replay_status`, `block_identity_status` | Render replay, `--replay_block_identity` | Whether the episode's recorded render parameters and block letters/colours were applied. In `eval_episodes.json` only. |
+
+On learned-HL runs (`--policy molmo2_maniflow`) the HL model owns termination: its `done` token ends the episode, and an episode without a `done` runs out `episode_length_s` instead of stopping on goal-success. So `success_once && !hl_done` identifies episodes where the goal was reached but the HL model failed to call it. Under the default `--episode_end goal`, oracle-HL runs end on oracle plan completion or after success holds for 10 consecutive steps, and plain LL, random and zero-action paths end on instant goal-success. `--episode_end horizon` runs every episode to `episode_length_s`. `--episode_end ll_done` (play-mode LL checkpoints, no learned HL) ends an episode when the LL predicts play mode -1, or at `episode_length_s`; `success_at_end` then says whether the goal still holds and `ll_skill_stops` (1 vs 0) whether the LL stopped or timed out. Replay always uses `horizon`. Instead of the single `episode_length_s` timeout, `--expert_timeout_scale` (`--expert-timeout-scale` on the launcher) ends each queue episode after that multiple of its own expert demonstration's duration.
+
+### Goal-progress metrics
+
+Autogen PDDL tasks (generated by `tamp/blocks/template/codegen.py`) report goal progress as per-step boolean stats:
+
+| Key | Description |
+|---|---|
+| `goal_conj_<c>` | Whether conjunct `<c>` of the episode's PDDL goal holds, e.g. `(on block_x block_w)` |
+| `goal_success` | Whether the whole goal holds, including the settle gate below |
+| `goal_blocks_settled`, `goal_gripper_open` | The settle gate's terms: the goal blocks have stopped moving and the gripper is open |
+
+Each gets the usual `/mean`, `/min`, `/max`, `/final` summaries plus `/initial` and `/first_true_step` (see `RecordMetrics` above). In `eval_episodes.json`, each record also gets:
+
+- `goal_progress`: one entry per goal conjunct, with its `predicate` text, its `initial`, `first_true_step`, `final`, `max` and `mean` values, and its change-point `trace`.
+- `num_goal_conjuncts`, `num_goal_conjuncts_initial`, `num_goal_conjuncts_final`, `num_goal_conjuncts_ever`: the number of conjuncts in total, true at the start, true at the end, and true at some point.
+- `goal_success_trace` (and `goal_blocks_settled_trace` / `goal_gripper_open_trace` when traced).
+
+### Joint metrics
+
+Enabled by `--track_joint_metrics` or `--track_metrics` (both on by default in `evaluate.py`).
+
+| Key | Description |
+|---|---|
+| `joint_pos_norm` | L2 norm of the joint position vector |
+| `joint_vel_norm` | L2 norm of the joint velocity vector |
+| `joint_accel_norm` | L2 norm of the joint acceleration vector (finite-differenced from velocity) |
+| `joint_effort_norm` | L2 norm of applied torques (when available) |
+| `joint_pos/{name}` | Position of individual joint (one column per joint, e.g. `joint_pos/panda_joint1`) |
+| `joint_vel/{name}` | Velocity of individual joint |
+| `joint_accel/{name}` | Acceleration of individual joint |
+| `joint_effort/{name}` | Applied torque on individual joint |
+
+### End-effector metrics
+
+Enabled by `--track_ee_metrics` or `--track_metrics` (both on by default in `evaluate.py`). Requires a `FrameTransformer` sensor for the EE (configured automatically for supported robots).
+
+| Key | Description |
+|---|---|
+| `ee_pos_x`, `ee_pos_y`, `ee_pos_z` | World-frame EE position components |
+| `ee_quat_w`, `ee_quat_x`, `ee_quat_y`, `ee_quat_z` | World-frame EE orientation as a quaternion (w, x, y, z) |
+| `ee_vel_norm` | L2 norm of EE linear velocity (finite-differenced from position) |
+| `ee_accel_norm` | L2 norm of EE linear acceleration |
+
+### Collision metrics
+
+Enabled by the env-config option `--env-cfg.track-collisions` (it is not an `evaluate.py` flag, and `launch_eval.py` does not expose it). Adds an Isaac Lab `ContactSensor` to every robot body, which increases VRAM usage. These contact forces are separate from the block-displacement `collision` metric above.
+
+| Key | Description |
+|---|---|
+| `contact_force_norm` | Sum of per-body contact force norms across all robot bodies |
+| `bodies_in_contact` | Number of robot bodies with contact force above the sensor threshold |
+| `env_collision_count` | Cumulative count of body-in-contact events over the episode |
+| `self_collision_count` | Cumulative count of self/filter-pair contacts (requires filter paths) |
+| `contact_force/{body}/x,y,z` | Per-body 3D net contact force in world frame (e.g. `contact_force/panda_link3/x`) |
+| `contact_pair/{body}/{filter}/x,y,z` | Per (body, filter-object) pair 3D force. Only available when `--env-cfg.collision-filter-prim-paths` is set. Filter name is the last path segment (e.g. `contact_pair/panda_link7/Block/z`). |
+
+### Task-specific metrics
+
+Individual tasks add their own metrics by overriding `evaluate()`. These appear under `stats/` in `eval_results.json`. For example, the **Lift** task adds:
+
+| Key | Description |
+|---|---|
+| `object_to_goal_dist` | L2 distance from the object to the goal position |
+| `object_to_tcp_dist` | L2 distance from the object to the end-effector |
+
+The align, flip, isolate, push-stacked and rotate tasks add `object_to_tcp_dist` too.
+
+## Output format
+
+Every run writes both JSON files; `step_metrics/` is written only with `--save_step_metrics`:
+
+```text
+runs/<run_name>/
+├── eval_results.json
+├── eval_episodes.json
+└── step_metrics/
+    ├── env0_episode_0000.csv
+    ├── env0_episode_0001.csv
+    ├── env1_episode_0000.csv
+    └── ...
+```
+
+### eval_results.json
+
+```text
+{
+  "blocksuite_commit": "...",
+  "blocksuite_branch": "...",
+  "blocksuite_dirty": false,
+  "submodule_commits": { ... },
+  "args": { ... },
+  "num_episodes": 10,
+  "elapsed_seconds": 42.3,
+  "per_episode": {
+    "return": [1.2, 0.8, ...],
+    "success_once": [1.0, 0.0, ...],
+    "stats/ee_pos_x/mean": [0.61, 0.59, ...],
+    ...
+  },
+  "per_episode_goal_conjuncts": [["(on block_x block_w)", ...], ...],
+  "metrics": {
+    "return": { "mean": 0.95, "std": 0.21, "min": 0.3, "max": 1.5, "count": 10 },
+    "stats/joint_vel_norm/mean": { "mean": 0.12, "std": 0.03, ... },
+    ...
+  }
+}
+```
+
+- `blocksuite_commit`, `blocksuite_branch`, `blocksuite_dirty` and `submodule_commits` record the checkout the run used (the dirty check ignores submodules).
+- `per_episode` -- one list per metric key, where element *i* is the value for episode *i*.
+- `per_episode_goal_conjuncts` -- for autogen PDDL tasks, the PDDL text of each `goal_conj_<c>` of episode *i* (`null` for episodes without goal labels).
+- `metrics` -- across-episode aggregates (mean, std, min, max, count) for every metric key. The aggregation is NaN-safe, so NaN values (e.g. `first_success_step` of a failed episode) are left out.
+- `success_efficiency` -- Molmo2 HL runs only: the mean, over successful episodes, of the HL commands the eval took divided by the commands the source demonstration took.
+
+Episode-level stat keys are prefixed with `stats/` and suffixed with the aggregation (`/mean`, `/min`, `/max`, `/final`). For example, `stats/ee_pos_x/mean` is the mean of `ee_pos_x` over all steps in a single episode.
+
+### eval_episodes.json
+
+A JSON list with one record per scored episode, built by `EpisodeResultsTable` in `utils/wandb_logging.py`. It is written at the end of every run and rewritten once the LeRobot recorder has closed, when the output episode indices are known. Fields that do not apply to a run are `null` or absent.
+
+```text
+[
+  {
+    "sim_env_idx": 0,
+    "episode_idx_for_sim_env": 0,
+    "prompt": "put the red block on the blue block",
+    "pddl_goal": "(and (on block_x block_w))",
+    "source_dataset_path": "data/datasets/my_dataset",
+    "source_dataset_episode_idx": 12,
+    "expert_episode_length": 310,
+    "init_frame_index": 0,
+    "success_once": 1.0,
+    "episode_len": 287,
+    "collision": 0.0,
+    "goal_progress": [{"index": 0, "predicate": "(on block_x block_w)", "initial": 0.0, "first_true_step": 241, ...}],
+    "num_goal_conjuncts": 1,
+    "partial_progress": 1.0,
+    "step_dt_s": 0.04,
+    "video_path": ".../sensor_obs_videos/env0_episode_0000.mp4",
+    "output_lerobot_dataset_dir": ".../my_eval_success",
+    "output_lerobot_episode_index": 0,
+    ...
+  },
+  ...
+]
+```
+
+| Group | Fields | Description |
+|---|---|---|
+| Identity | `sim_env_idx`, `episode_idx_for_sim_env` | The sub-env index and its per-env episode counter: the same pair that names the videos and step-metric CSVs. |
+| | `output_lerobot_dataset_dir`, `output_lerobot_episode_index` | With `--save_lerobot`: the recorded dataset (success or failure split) and the episode's index in it. |
+| Task | `prompt`, `pddl_goal` | The language prompt the policy received and the episode's PDDL goal. |
+| Source episode | `source_dataset_path`, `source_dataset_episode_idx`, `source_dataset_episode_id` | Queue evals: the dataset episode the eval was initialized from. |
+| | `expert_episode_length`, `expert_episode_seconds` | Length of that expert demonstration, in frames and seconds. |
+| | `init_frame_index`, `init_after_hl_action` | The source frame the eval started from: 0 unless the queue was told to start after a given high-level action. |
+| | `expert_videos`, `expert_video_path`, `expert_video_start_s` | Per-camera clip metadata of the expert demonstration, and the path and start time of the front-preferred camera's clip. |
+| Metrics | the episode and eval-loop metrics | Every key of the result table (success, length, collision, sub-goal, oracle, HL and play-mode counters, status fields; see "Episode metrics" and "Eval-loop metrics" in [Available metrics](#available-metrics)), plus every `replay_*` scalar. |
+| Goal progress | `goal_progress`, `num_goal_conjuncts*`, `partial_progress` | Autogen PDDL tasks: one entry per goal conjunct (`index`, `metric_key`, `predicate`, `initial`, `first_true_step`, `final`, `max`, `mean`, `trace`) and the counts derived from them; see "Goal-progress metrics" above. |
+| | `goal_success_trace`, `goal_blocks_settled_trace`, `goal_gripper_open_trace` | Change points `[[step, value], ...]` over the episode clock. |
+| | `goal_objects`, `step_dt_s` | The goal's blocks, in the order of the per-block settle-gate stats, and the control period (to convert steps to seconds). |
+| Videos | `video_path` | The sensor-observation MP4 (`--save_sensor_obs_video`). |
+| | `source_episode_video_path` | The extracted expert video (`--save_expert_video`, or `--wandb`). |
+| | `hl_overlay_prev_action_video_path`, `hl_latency_video_path` | The HL overlay and HL latency videos, when written. |
+| Other | `episode_seconds` | W&B runs only: `episode_len` divided by the video frame rate. |
+| | `policy_input_*` | With `--save_diagnostic_plots`: paths of the policy-input verification panels. |
+
+The per-camera expert first frames shown in the W&B table are left out of the JSON.
+
+### Per-step CSVs
+
+Each CSV has one row per simulation step and one column per metric. The first column is `step` (0-indexed). All values are raw floats from that step.
+
+```text
+step,joint_pos_norm,joint_vel_norm,...,ee_pos_x,ee_pos_y,...,contact_force_norm,...
+0,3.118,1.039,...,1.612,-1.001,...,0.0,...
+1,3.143,1.310,...,1.607,-1.005,...,0.0,...
+```
+
+When running with `num_envs > 1`, each sub-environment gets its own set of CSVs named `env{idx}_episode_NNNN.csv`, where `{idx}` is the env index and `NNNN` is a per-env episode counter that increments each time that env finishes an episode. If the evaluation ends mid-episode, partial files are saved with a `_partial` suffix.
+
+## CLI flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `--track_metrics` | on | Enable both joint and EE metrics (equivalent to `--track_joint_metrics --track_ee_metrics`) |
+| `--track_joint_metrics` | on | Track per-step joint position, velocity, acceleration, and effort |
+| `--track_ee_metrics` | on | Track per-step end-effector position, orientation, velocity, and acceleration |
+| `--save_step_metrics` | off | Write the per-step CSVs. Off by default: they cost a host copy of every stat on every step, and the episode summaries do not depend on them |
+| `--collision` | `end` | Block-displacement collision scoring: `end`, `penalize` or `off` (see "Eval-loop metrics" above) |
+
+The contact-force metrics are configured through env-config fields (`BaseEnvCfg` in `src/blocksuite/tasks/base_env_cfg.py`), set with `--env-cfg.<field>`:
+
+| Env-config option | Default | Description |
+|---|---|---|
+| `--env-cfg.track-collisions` | off | Track per-step collision forces and counts. Adds a `ContactSensor` to the scene (increases VRAM) |
+| `--env-cfg.collision-filter-prim-paths` | none | Prim path expressions for collision filter targets (e.g. `'{ENV_REGEX_NS}/Block'`). Only used with `track-collisions` |
+| `--env-cfg.collision-filter-body-names` | none | Robot body names to create per-body filter sensors for (e.g. `panda_link7 panda_link8`). Required together with `collision-filter-prim-paths` to get `contact_pair/` metrics. Each listed body gets a lightweight single-body contact sensor |
+
+`--track_metrics` is OR-ed with the two finer flags, so to turn joint and EE tracking off pass all three negations: `--no-track_metrics --no-track_joint_metrics --no-track_ee_metrics`.
+
+Example with zero actions (no policy server needed, useful for sanity-checking metrics collection):
+
+```bash
+uv run python scripts/evaluate.py \
+    --task Blocksuite-Lift-v0 \
+    --env-cfg.track-collisions \
+    --env-cfg.collision-filter-prim-paths '{ENV_REGEX_NS}/Block' \
+    --env-cfg.collision-filter-body-names panda_link7 panda_link8 \
+    --save_step_metrics \
+    --num_envs 4 --num_eval_steps 200
+```
+
+The same options apply to a run against a policy server; see the
+[`evaluate.py` Reference](evaluate.md#running-against-a-policy-server-by-hand).
+
+## How to extend
+
+### Add a task-specific metric
+
+Override `evaluate()` in your task environment. Call `super().evaluate()` first so that `MetricsTracker` stats are included, then add your own entries to the `stats` sub-dict.
+
+```python
+def evaluate(self) -> dict:
+    result = super().evaluate()
+    stats = result.setdefault("stats", {})
+    stats["my_distance"] = torch.linalg.norm(
+        self.object.data.root_pos_w - self.target_pos, dim=-1
+    )
+    return result
+```
+
+The value must be a `[num_envs]` tensor. It will automatically appear in the per-step CSVs and episode summaries.
+
+### Add a new MetricsTracker category
+
+1. Add a boolean flag to `BaseEnvCfg` (in `src/blocksuite/tasks/base_env_cfg.py`):
+
+```python
+track_my_sensor: bool = False
+```
+
+2. Add a corresponding `--track_my_sensor` field to the `Args` dataclass in `src/blocksuite/eval/args.py` and wire it into the env config in `_make_env` (`src/blocksuite/utils/dataset_recording_utils.py`), next to `track_joint_metrics`.
+
+3. In `MetricsTracker.__init__`, initialize any buffers gated on the new flag.
+
+4. Add a `_compute_my_sensor_metrics()` method that returns `dict[str, Tensor[num_envs]]`.
+
+5. Call it from `MetricsTracker.step()`:
+
+```python
+if self._track_my_sensor:
+    stats.update(self._compute_my_sensor_metrics())
+```
+
+6. If the sensor needs setup during scene creation, add the initialization logic to `BaseEnv._setup_scene()` (similar to how `ContactSensor` is added when `track_collisions` is `True`).

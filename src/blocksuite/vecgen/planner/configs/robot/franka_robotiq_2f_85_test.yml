@@ -1,0 +1,110 @@
+##
+## Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+##
+## NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+## property and proprietary rights in and to this material, related
+## documentation and any modifications thereto. Any use, reproduction,
+## disclosure or distribution of this material and related documentation
+## without an express license agreement from NVIDIA CORPORATION or
+## its affiliates is strictly prohibited.
+##
+
+robot_cfg:
+  kinematics:
+    use_usd_kinematics: False
+    isaac_usd_path: ""
+    usd_path: "robot/franka_robotiq2/franka_robotiq_2f_85/updated_franka.usd"
+    usd_robot_root: "/panda"
+    usd_flip_joints: {}
+
+    urdf_path: "robot/franka_robotiq2/franka_robotiq_2f_85.urdf"
+    asset_root_path: "robot/franka_robotiq2"
+    base_link: "base_link"
+    ee_link: "robotiq_arg2f_base_link"
+    collision_link_names:
+      [
+        "panda_link0",
+        "panda_link1",
+        "panda_link2",
+        "panda_link3",
+        "panda_link4",
+        "panda_link5",
+        "panda_link6",
+        "panda_link7",
+        "robotiq_arg2f_base_link",
+        "left_outer_finger",
+        "right_outer_finger",
+        "left_inner_finger_pad",
+        "right_inner_finger_pad",
+        "attached_object",
+      ]
+    collision_spheres: "spheres/franka_mesh.yml"
+    collision_sphere_buffer: 0.004 # 0.0025
+    extra_collision_spheres: {"attached_object": 4}
+    use_global_cumul: True
+    self_collision_ignore:
+      {
+        "panda_link0": ["panda_link1", "panda_link2"],
+        "panda_link1": ["panda_link2", "panda_link3", "panda_link4"],
+        "panda_link2": ["panda_link3", "panda_link4"],
+        "panda_link3": ["panda_link4", "panda_link6"],
+        "panda_link4":
+          ["panda_link5", "panda_link6", "panda_link7", "panda_link8"],
+        "panda_link5": ["panda_link6", "panda_link7", "robotiq_arg2f_base_link"],
+        "panda_link6": ["panda_link7", "robotiq_arg2f_base_link", "attached_object"],
+        "panda_link7": ["robotiq_arg2f_base_link", "attached_object"],
+        robotiq_arg2f_base_link: [left_outer_finger, right_outer_finger, left_inner_finger_pad, right_inner_finger_pad, attached_object],
+        left_outer_finger: [right_outer_finger, right_inner_finger_pad, left_inner_finger_pad, attached_object],
+        right_outer_finger: [right_inner_finger_pad, left_inner_finger_pad, attached_object],
+        left_inner_finger_pad: [right_inner_finger_pad, attached_object],
+        right_inner_finger_pad: [attached_object],
+        attached_object: [],
+      }
+
+    self_collision_buffer:
+      {
+        "panda_link0": 0.1,
+        "panda_link1": 0.05,
+        "panda_link2": 0.0,
+        "panda_link3": 0.0,
+        "panda_link4": 0.0,
+        "panda_link5": 0.0,
+        "panda_link6": 0.0,
+        "panda_link7": 0.0,
+        "robotiq_arg2f_base_link": 0.0,
+        "left_outer_finger": 0.0,
+        "right_outer_finger": 0.0,
+        "left_inner_finger_pad": 0.0,
+        "right_inner_finger_pad": 0.0,
+        "attached_object": 0.0,
+      }
+    #link_names: ["panda_link4"]
+    mesh_link_names:
+      [
+        "panda_link0",
+        "panda_link1",
+        "panda_link2",
+        "panda_link3",
+        "panda_link4",
+        "panda_link5",
+        "panda_link6",
+        "panda_link7",
+        "robotiq_arg2f_base_link",
+        "left_outer_finger",
+        "right_outer_finger",
+        "left_inner_finger_pad",
+        "right_inner_finger_pad",
+        "attached_object",
+      ]
+    lock_joints: {"finger_joint": 0.0}
+    extra_links: {"attached_object":{"parent_link_name": "robotiq_arg2f_base_link" ,
+    "link_name": "attached_object", "fixed_transform": [0,0,0,1,0,0,0], "joint_type":"FIXED",
+    "joint_name": "attach_joint" }}
+    cspace:
+      joint_names: ["panda_joint1","panda_joint2","panda_joint3","panda_joint4", "panda_joint5",
+      "panda_joint6","panda_joint7", "finger_joint"]
+      retract_config: [0.0, -1.3, 0.0, -2.5, 0.0, 1.0, 0., 0.]
+      null_space_weight: [1,1,1,1,1,1,1,1]
+      cspace_distance_weight: [1,1,1,1,1,1,1,1]
+      max_acceleration: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+      max_jerk: [87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0, 12.0]

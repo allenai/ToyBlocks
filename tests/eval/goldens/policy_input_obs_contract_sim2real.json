@@ -1,0 +1,134 @@
+{
+  "identity": {
+    "cameras": [
+      "front_camera",
+      "gripper_camera"
+    ],
+    "depth_keys": [
+      "front_depth",
+      "gripper_depth"
+    ],
+    "obs_mode": "rgb+state+depth",
+    "robot_id": "fr3_robotiq_gripper_softer",
+    "scene_preset_id": "sim2real",
+    "state_dim": 19,
+    "transform_class": "ManiflowBlocksTableObsTransform"
+  },
+  "resolution": {
+    "front_camera": [
+      360,
+      640
+    ],
+    "gripper_camera": [
+      360,
+      640
+    ]
+  },
+  "structure": {
+    "agent/ee_pos": {
+      "dtype": "float32",
+      "shape": [
+        3
+      ]
+    },
+    "agent/joint_pos": {
+      "dtype": "float32",
+      "shape": [
+        13
+      ]
+    },
+    "agent/joint_vel": {
+      "dtype": "float32",
+      "shape": [
+        13
+      ]
+    },
+    "images/front_camera/depth": {
+      "dtype": "float32",
+      "ndim": 4,
+      "trailing_channels": 1
+    },
+    "images/front_camera/intrinsics": {
+      "dtype": "float32",
+      "shape": [
+        3,
+        3
+      ]
+    },
+    "images/front_camera/rgb": {
+      "dtype": "uint8",
+      "ndim": 4,
+      "trailing_channels": 3
+    },
+    "images/gripper_camera/depth": {
+      "dtype": "float32",
+      "ndim": 4,
+      "trailing_channels": 1
+    },
+    "images/gripper_camera/intrinsics": {
+      "dtype": "float32",
+      "shape": [
+        3,
+        3
+      ]
+    },
+    "images/gripper_camera/rgb": {
+      "dtype": "uint8",
+      "ndim": 4,
+      "trailing_channels": 3
+    }
+  },
+  "wire": {
+    "agent_pos": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        19
+      ]
+    },
+    "camera_intrinsics": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        2,
+        4
+      ]
+    },
+    "front_depth": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        1,
+        224,
+        224
+      ]
+    },
+    "front_rgb": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ]
+    },
+    "gripper_depth": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        1,
+        224,
+        224
+      ]
+    },
+    "gripper_rgb": {
+      "dtype": "float32",
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ]
+    }
+  }
+}

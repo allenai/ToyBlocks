@@ -1,0 +1,396 @@
+# Stage 4: Re-rendering
+
+Execution records what the robot and the blocks did, but by default it records no camera images.
+Re-rendering adds them. It produces **new camera videos for episodes that were already recorded**
+by replaying each episode frame by frame: the robot and objects are placed at their recorded
+poses, with no physics stepping and no replanning, and each frame is rendered under domain
+randomization. The randomization covers lighting and sky images, table and block materials,
+camera poses and field of view, and block letters and colours.
+
+The renderer is a plain script you can run on a single GPU of this machine. To run it as part
+of a pipeline run, see [Through the pipeline](#through-the-pipeline) and
+[Running locally](local.md).
+
+## Why the pixels are a separate stage
+
+Keeping rendering apart from execution has several benefits:
+
+- One expensive planning-and-physics run can be rendered many times with different visuals, for
+  example N copies per episode or separate train and test letter sets, **without re-planning**.
+- Rendering can run later, or on a different GPU, separately from data generation.
+- The render settings sampled for each episode are recorded, so evaluation can reproduce an
+  episode's look.
+
+Because execution does not spawn cameras by default, re-rendering is not an optional extra for a
+dataset with video: it is **where the video comes from**.
+
+### What re-rendering does not change
+
+The state and action trajectory is identical across re-renders; only the pixels and the camera
+columns differ. Re-rendering cannot fix a bad episode, change what the robot did, or alter the
+success labels.
+
+Re-rendered pixels match an original in-physics rendering closely but not exactly, because
+driver and scene-version differences remain. See
+[DETERMINISM.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/DETERMINISM.md)
+for exactly what is bit-reproducible and what is not.
+
+## Where it fits
+
+- **Input:** the recorded datasets from [stage 3, execution](execution.md), the env packages
+  they were recorded with, and a flags YAML describing the randomization.
+- **Output:** a re-rendered copy of each dataset, with camera videos, read by [merge](merge.md).
+
+The stage is optional in the pipeline, enabled with `--rerender` or `--rerender-local`, but it is
+the only way to get camera videos without recording them during execution.
+
+## Running it
+
+The quickest way to try it is to re-render a handful of episodes from an existing dataset on your
+own GPU. This is also the best way to preview a flags YAML before committing to a large run:
+
+```bash
+python scripts/rerender/rerender.py <dataset_dir> \
+    --env_file <env_package>/env.py \
+    --output <out_dir> \
+    --max_episodes 20 --num_envs 8 \
+    --flags src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
+```
+
+For an *unmerged* dataset, with one directory per problem, drop `--env_file`. The env is then
+matched automatically per problem from `<datasets_dir>/envs/<problem_name>/env.py`. Use
+`--envs_dir` when the env packages live somewhere other than next to the data. For a pipeline run
+that is the experiment's own `envs/` directory:
+
+```bash
+python scripts/rerender/rerender.py data/datasets/unmerged/<experiment-id>/execution \
+    --envs_dir data/datasets/unmerged/<experiment-id>/envs \
+    --output <out_dir> --max_episodes 20 \
+    --flags src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache.yaml
+```
+
+`rerender.py` often hangs during Isaac teardown after it finishes; see
+[Common pitfalls](#common-pitfalls) for how to run it safely.
+
+## Through the pipeline
+
+Add `--rerender` or `--rerender-local` to a pipeline run. Both re-render each problem on this
+machine as soon as its execution finishes, and the merge then uses the re-rendered episodes
+instead of the execution data. They are alternatives, and passing both is refused:
+
+- `--rerender` (pipelined) queues each problem's render as its own item in the shared GPU-slot
+  pool, so it can overlap the next execution when a slot is free.
+- `--rerender-local` (coupled) runs the render as an extra step in the same job as that
+  problem's execution, holding the slot the execution just used.
+
+Both produce identical pixels. [Running locally](local.md#re-rendering-locally) explains which to
+pick, the measured throughput difference, and the three-state gate that decides what the merge
+ships.
+
+```bash
+python scripts/datagen/run_datagen_pipeline.py --rerender-local \
+    --experiment-id my_run --output-root data \
+    --task-gen-script scripts/task_gen/flip.py --task-gen-count 4 \
+    --vecgen-problems-per-env 1 --exec-num-envs 8 --vecgen-episodes 16 \
+    --local-gpu-workers 2
+```
+
+With no other render flags this renders the way the RI training set was rendered: the
+`rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` flags, one copy per episode,
+`left_camera` skipped, failure episodes skipped, and the 224-px RGB and `rg8_55_224` depth
+sidecars (`--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 --rgb_GOP 2`). Override any
+`rerender.py` option with `--rerender-extra`, in the `=` form:
+
+```bash
+--rerender-extra="--extra_depth g12_224"
+```
+
+The flags YAML draws HDRI backdrops from the `polyhaven` and `indoor-2018` pools. Where to get
+each, and what happens when one is missing, is in
+[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+
+The pipeline flags for this stage are:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--rerender` | off | Re-render each problem as its own item in the GPU-slot pool (pipelined). |
+| `--rerender-local` | off | Re-render each problem inside its execution job (coupled). Cannot be combined with `--rerender` or `--vecgen-record-videos`. |
+| `--rerender-flags` | `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | The domain-randomization flags YAML, as a path readable on this machine. The default is the RI training set's. |
+| `--rerender-n` | 1 | The number of re-rendered copies per source episode. |
+| `--rerender-skip-cameras` | `left_camera` | Cameras not to render. Pass the flag with no names to render every camera. |
+| `--rerender-skip-failure-episodes` | on | Render only successful episodes. The merge keeps only those anyway. `--no-rerender-skip-failure-episodes` renders both splits. |
+| `--rerender-extra` | none | Extra `rerender.py` options, appended last so they override the defaults above, written as one quoted `=` string. `--output`, `--envs_dir`, `--episodes_file`, `--episode_offset` and `--max_episodes` are dropped with a warning, because the pipeline owns them. |
+| `--render-non-randomized` | off | Also render one pass with the randomized sections removed; see [Multiplexing](#multiplexing-n-copies-and-the-original). |
+| `--render-non-randomized-flags` | derived | The flags YAML for that pass, instead of the derived one. |
+| `--rerender-local-num-envs` | 8 | Envs per render wave. Must be at least `--num-scene-profiles`. |
+| `--rerender-local-stall-timeout` | 3600 | Kill a render that prints nothing for this many seconds. |
+| `--rerender-local-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video, instead of finalizing it as `incomplete_videos`. |
+
+Despite their names, the `--rerender-local-*` flags apply to both modes.
+
+## Output
+
+Every rendered split gets a `meta/render_params.json` describing how it was rendered. Its
+top-level keys are:
+
+| Key | Meaning |
+|---|---|
+| `rendered_at`, `rerender_script` | When the render ran, and which script ran it. |
+| `completed` | Whether the render reached a final state, **not** whether it succeeded; see [Common pitfalls](#common-pitfalls). |
+| `status` | `complete`, `incomplete_videos` or `failed`. |
+| `video_defects` | The exact `(episode, feature)` videos that are missing, for a patch pass. |
+| `empty_reason` | Why a finished render recorded nothing, when it recorded nothing. |
+| `episodes_recorded` | The number of episodes in **this split**. |
+| `episodes_total` | The expected total for the whole problem, across all splits. May be `null`. |
+| `mode`, `fps` | `render-only` or `physics-step`, and the recording rate. |
+| `env_file`, `source_datasets` | What was rendered, and from where. |
+| `flags`, `flags_sha256`, `flags_resolved_sha256` | The randomization, the digest of the literal file, and the digest of the resolved dict. Group shards by the **resolved** digest. |
+| `dr_seeding` | Which seeding mode produced these values. A consumer must branch on it. |
+| `initial` | The scene as actually built: cameras, materials and lights. |
+| `episodes` | Per-episode records, including `src_episode_index` and `iter`. |
+| `split_group` | Present only for a `--split_groups` member. |
+
+`completed` and `video_defects` together give three states, so a gap in the output is neither
+silently accepted nor treated as a total failure:
+
+| `completed` | `video_defects` | Meaning |
+|---|---|---|
+| `true` | `[]` | Whole and usable. |
+| `true` | non-empty | Usable but incomplete. The listed videos are missing and need a patch pass. |
+| `false` | — | The problem must be re-rendered. |
+
+### Validating the output
+
+Metadata alone cannot prove a render is good, so check the videos themselves:
+
+```bash
+python scripts/rerender/validate_dataset_videos.py <out_dir>
+```
+
+## The flags YAML
+
+A flags YAML is what makes two renders of the same episode look different. It is the only place
+randomization is configured, and it is recorded in every problem's `render_params.json` as the
+dataset's visual provenance. `rerender.py --flags` has no default; the pipeline's
+`--rerender-flags` defaults to the RI training set's YAML.
+
+Four presets live in `src/blocksuite/domain_randomization/flags/`:
+
+| Preset | Use |
+|---|---|
+| `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | The RI training set's render and the pipeline default: `allrand_texcache` plus the train glyph split (symmetry-preserving) and per-env block colours. |
+| `rerender_flags_allrand_texcache.yaml` | All-random lighting, materials and cameras, without glyph or colour swaps. |
+| `rerender_flags_camtest.yaml` | A small camera preset for quick tests. It randomizes nothing; see [Common pitfalls](#common-pitfalls). |
+| `rerender_flags_open_hybrid_camera_rand_only.yaml` | Camera randomization only. |
+
+The two `allrand` presets sample HDRI backdrops from the `polyhaven` and `indoor-2018` pools; see
+[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+
+To write your own, see the
+[YAML reference](https://github.com/allenai/blocksuite/blob/release/src/blocksuite/domain_randomization/YAML_REFERENCE.md).
+It covers every top-level key, the value forms the resolver accepts, and, importantly, *when*
+each value is drawn: per wave, per episode or per env.
+
+## Multiplexing: N copies and the original
+
+Often you want several visual variants of the same trajectory, for example to make a policy
+robust to lighting. `-N` replays each source episode N times, each time with freshly sampled
+randomization. The state and action trajectory is identical across the copies and only the pixels
+and camera columns differ, so the result has **N×** the source's episodes and frames. Each output
+episode records its `src_episode_index` and `iter`.
+
+In the pipeline, `--render-non-randomized` adds one further pass with the randomized sections of
+the YAML removed, making the merged dataset **(N+1)×** the source:
+
+```bash
+--rerender-n 3 --render-non-randomized
+```
+
+That extra pass is a separate invocation into a sibling job directory, not an extra `-N`
+iteration. One process has one flags dict, applied before the sim is built, and the per-wave
+settings (dome, skybox, exposure, sun) are global to the scene. So an "un-randomized" copy sharing
+a wave with randomized ones would still be lit by that wave's draw.
+
+**"Without randomization" keeps the scene and drops the draws.** Dropping the YAML entirely gives
+a *different scene*, not the same scene unrandomized: backdrop geometry returns, GI and
+reflections go off, and `render_mode` and `env_spacing` revert. The derived YAML therefore keeps
+`cameras`, `hide_objects`, `env_spacing`, `render_mode`, `carb_settings` and `texture_cache`,
+drops everything else, and passes `--enable_gi` when the source had a skybox. It is written to
+`<experiment>/rerender/non_randomized_flags.yaml`, with a header naming what was dropped. You can
+replace it with `--render-non-randomized-flags`.
+
+A problem counts as rendered only when **every** pass has landed. Otherwise a failed original
+pass would contribute N copies where N+1 were promised, and nothing would report it.
+
+## Reproducing a recorded look
+
+Because each episode's sampled settings are recorded, a render can be reproduced later:
+
+```bash
+python scripts/rerender/rerender_from_params.py --help
+```
+
+Pass the `dr_seeding` mode recorded in the dataset's own `render_params.json`.
+
+## Flags
+
+These are the options of `rerender.py`. `datasets_dir` is positional and `--output` is required;
+everything else has a default.
+
+### Source and output
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `datasets_dir` | (positional, required) | The root containing the recorded dataset or datasets. |
+| `--output` | (required) | The output directory. It mirrors the structure of the input. |
+| `--env_file` | `None` | The env package's `env.py`. Ignored for unmerged datasets, which are matched per problem. |
+| `--envs_dir` | `None` | A root holding per-problem env packages as `<envs_dir>/<problem>/env.py`. Takes precedence over both of the above. |
+| `--assets_paths` | `None` | Extra asset search roots for HDRIs and skyboxes, searched in order before the repo default (`assets/environments`). Use it when the HDRI pools live somewhere else, for example on another disk. The `RERENDER_HDRI_DIR` environment variable does the same for the default root. |
+| `--copy_source_data` | off | Replace the recorder's re-derived `data/` with a copy of the source's. Off by default, because the source data is canonical and can be copied or symlinked instead. |
+
+### Episode selection
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--max_episodes` | all | The maximum number of episodes re-rendered per source dataset. |
+| `--skip_failure_episodes` | off | Render only `blocks_success`. The merge keeps only that split anyway, so for a merge-bound run the failure split is pure cost. This **renumbers the global episode index**, so such a run cannot resume an output built without it. |
+| `--episodes_file` | `None` | Render only the listed episodes, for a targeted patch. Output episodes are renumbered per split, but each records its `src_episode_index`. |
+| `--episode_offset` | `None` | Select a fragment for parallel rendering: the global slice `[offset, offset+max_episodes)`. Overrides `--episodes_file`. |
+| `--fragment_invariant` | **on** | Keep the full per-problem episode list inside a fragment, so render-uids, wave grouping and randomization draws match a single-machine run. Reassembling the fragments then gives a merge that is byte-identical to one big run. |
+| `--split_groups` | off | Render each member of a vecgen `problem_grp_*` directory as its own unit. Must match how execution was run. |
+
+### Cameras and video streams
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--skip_cameras` | `None` | Cameras **not to spawn**. They are dropped before the scene is created, so both their RGB and depth are absent and their render cost is never paid. Names work with or without the `camera:` prefix. |
+| `--skip_depth` | off | Do not render or record the main depth stream. Cannot be combined with `--extra_depth`. |
+| `--depth_format` | `12bit` | How the main depth is stored. `12bit` is native `gray12le`; `rg8` is the same uint12 packed into lossless 8-bit RGB, about 3x larger but much faster to read at random positions. Neither loses precision. |
+| `--depth_codec` | `hevc` | `hevc` encodes about 15x faster; `av1` produces smaller files. Both are lossless 12-bit millimetres. |
+| `--depth_gop` | `1` | The keyframe interval for the main depth. `1` is the friendliest for random access and the largest; higher values are smaller and faster to encode, at the cost of seeking. |
+| `--rgb_GOP` | `2` | The keyframe interval for the main RGB. `0` lets SVT-AV1 choose. |
+| `--extra_rgb` | `None` | Also write a 224-px RGB video per camera, in the HVLA training sidecar layout. It is resized with Pillow BILINEAR; ffmpeg `scale` is **not** equivalent. |
+| `--extra_depth` | `None` | Also write a 224-px depth video per camera: `rg8_224`, `g12_224` or `rg8_55_224`. `g12_224` and `rg8_224` are lossless and decode to identical depth, `g12_224` at a fraction of the size. `rg8_55_224` packs 10 bits (R = mm >> 5, G = mm & 31) and **clips at 1023 mm**; it is what the RI training set and the pipeline default use. |
+| `--extra_rgb_GOP` | `0` | The keyframe interval for the `--extra_rgb` sidecars. `0` lets SVT-AV1 choose. The pipeline passes `2`. |
+| `--render_scale` | `None` | Scale the preset cameras' resolution while keeping the field of view. Requires `--skip_cameras gripper_camera left_camera`, because robot-mounted cameras are not scaled. |
+| `--camera_base` | `data` | Where each camera's starting pose comes from before randomization. `data` reproduces the calibration the source was captured with; `scene` uses the built SceneConfig. Unusable recorded values fall back to `scene` **with a warning**, never silently. |
+| `--match_recorded_cameras` | off | (Experimental.) Override extrinsics and intrinsics with the recorded values. Camera overrides in the flags YAML always take precedence. |
+
+### Randomization and seeding
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--flags` | `None` | The randomization YAML. |
+| `-N`, `--renders_per_episode` | `1` | The number of renders per source episode. See [Multiplexing](#multiplexing-n-copies-and-the-original). |
+| `--dr_seeding` | `hash` | How per-episode draws are seeded: `hash` (the default), `indexed`, or the legacy `stream`. |
+| `--material_baseline_revert` | off | Reset every writable material key to the asset's own value before each draw. Without it, a key the chosen material leaves out keeps the previous episode's value, so materials bleed across episodes. Off by default because it changes the rendered output. |
+| `--enable_gi` | off | Turn on RTX global illumination and reflections. Enabled automatically when the YAML has a `skybox` block. |
+
+The seeding modes differ in how an episode's values are derived. `stream` seeds one RNG over the
+whole episode list, so an episode's values depend on how many episodes come before it. `indexed`
+and `hash` derive each episode independently, which is what lets a patch jump straight to a
+missing episode.
+
+### Performance and rendering
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--num_envs` | `8` | The number of parallel envs, which is also the replay batch size. Use a multiple of 8, or fewer than 8. |
+| `--num_writers` | `1` | Encoder processes per render process. Raise it when the encoder, not the GPU, is the bottleneck. |
+| `--wave_sort_block` | `10` | Group episodes of similar length into a *wave* (a batch of episodes rendered together), within blocks of this many waves. A wave renders every env until its longest episode ends, so rendering in source order wasted about 36% of rendered env-frames on measured runs. |
+| `--scene_swap` | **on** | At each problem boundary, make the live scene match that problem's block set. Costs nothing when consecutive problems share a set. `--no-scene_swap` skips mismatched problems instead. |
+| `--scene_swap_warmup` | `0` | Extra RTX passes after a scene swap, so the denoiser can converge. |
+| `--rtx_warmup_frames` | `1` | Extra render passes at `t==0` of each batch, so temporal renderers converge and frame 0 has no warm-up artifact. Try 8–16 if artifacts persist. |
+| `--antialiasing` | preset (DLSS) | `Off`, `FXAA`, `TAA`, `DLSS` or `DLAA`. `Off` and `FXAA` work on single frames; the others carry a temporal history that is empty on frame 0. |
+| `--disable_dlss` | off | A shortcut for `--antialiasing FXAA`. Ignored if `--antialiasing` is given. |
+| `--skip_initial_step` | off | Skip the physics settle at construction time. Safe, because the replay overrides all state on every frame. |
+| `--physics_step` | off | Run one physics step per frame instead of rendering only. This removes occasional duplicate frames at the cost of slight drift. The default is to place everything and render, with no physics. |
+| `--env_spacing` | `None` (5.0) | Override the scene's env spacing. Larger spacing stops a neighbouring env's backdrop from leaking into a camera's peripheral view when a skybox is used. |
+
+### Resume, integrity and debugging
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--resume` | off | Skip problems whose output already has `render_params.completed == true`. See [Common pitfalls](#common-pitfalls) before using it. |
+| `--fail_on_video_defects` | off | Mark a problem incomplete, forcing a full re-render, if any video could not be published. Off by default: the problem stays complete with `status=incomplete_videos` and an exact list of missing videos for a patch pass (`scripts/rerender/fast_patch.py`). |
+| `--passthrough_source_columns` | **on** | Copy every column from the matching source episode, so the two datasets differ only where the re-render is authoritative. |
+| `--patch_actions_from_source` | **on** | Copy the source's `action.*` columns. Superseded by the flag above. |
+| `--dump_scene` | off | Print the stage layout and exit. |
+| `--dump_probe` | `None` | Write the applied material values, live carb settings and render products to JSON after the first wave, then continue. |
+| `--show_gizmos` | off | Keep debug visualization markers in the render. Hidden by default. |
+
+## Common pitfalls
+
+### `rerender.py` hangs after it finishes
+
+`rerender.py` prints `all jobs done` and then often **hangs in Isaac teardown**. Run it through
+`scripts/rerender/run_local_render.py`, which watches for that marker and kills the process group
+30 s later; the pipeline always does. Never judge success from the exit status; judge it from the
+marker and the result on disk.
+
+```bash
+python scripts/rerender/run_local_render.py -- python scripts/rerender/rerender.py <dataset_dir> ...
+```
+
+### `completed: true` does not mean the render produced data
+
+`completed: true` means the render reached a final state, not that it *has data*. It is written
+so that a re-run does not retry the problem forever, so it is also written when the recorded block
+size is not in the problem's size table, or when every source parquet is unreadable. Those cases write a
+`render_params.json` but **no `info.json`**, and `info.json` is what merge actually needs. Note
+also that there is no `total_episodes` key; the problem-wide count is `episodes_total`.
+
+### A broken render can still look complete
+
+**Metadata cannot see a broken render.** A host-RAM out-of-memory error during encoding produces
+videos that fail with `moov atom not found`, inside a dataset whose `render_params.json` still
+says `completed: true`. Always run `validate_dataset_videos.py`, shown under [Output](#output),
+before using a re-rendered dataset.
+
+### `rerender_flags_camtest.yaml` produces identical copies
+
+`rerender_flags_camtest.yaml` has **no random section at all**. An `-N 4` run with it produces
+four pixel-identical copies, while every size-based check still reports 4x. Use it only to test
+the camera rig, never to check that randomization works.
+
+### Mixing seeding modes in one dataset
+
+**Never mix two `--dr_seeding` modes within one dataset**, because each produces different
+values. To reproduce or patch an existing dataset, pass the mode recorded in its
+`meta/render_params.json`.
+
+### Two renders into the same output delete each other's work
+
+`--resume` **`rmtree`s a non-finalized `<output>/<problem>`**. So two renders pointed at the same
+problem directory delete each other's work rather than failing. Never run two renders against the
+same output problem directory.
+
+### Checking `-N` by file size gives the wrong answer
+
+To confirm that `-N` really multiplied the dataset, count episodes, frames and distinct video
+files, **never bytes**. Merge hardlinks videos into the merged tree, so `du` of the merged
+directory is meaningless, and different draws compress differently (measured at 2.055× for N=2,
+not 2×).
+
+The failure a size check cannot catch is N copies that are pixel-identical because nothing was
+randomized. Check that the copies actually *differ*: there should be distinct
+`observation.camera_pose.*` values per episode under camera randomization, and differing
+**depth** frames. Depth is deterministic and RGB is not, so RGB can prove a change but never its
+absence.
+
+## Next
+
+[Merge](merge.md) the re-rendered problems into one training dataset. Once this stage is marked
+complete, the merge reads `rerender/out/job_*` and nothing else, so a problem that was never
+re-rendered simply will not appear. See
+[what counts as "rendered"](local.md#what-counts-as-rendered) for how the local flow guards
+against that.
+
+## See also
+
+- [Running locally](local.md): the local pipeline, and the gate that decides what gets merged
+- [Execution](execution.md): the stage that produces the trajectories this stage replays
+- [Merge](merge.md): how re-rendered problems become one training dataset
+- [YAML reference](https://github.com/allenai/blocksuite/blob/release/src/blocksuite/domain_randomization/YAML_REFERENCE.md): every randomization key
+- [DETERMINISM.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/DETERMINISM.md): what is reproducible, and what is not
+- [README_local.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md): the two pipeline render modes, HDRI backdrops, and the invariants behind the gate

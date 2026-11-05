@@ -1,0 +1,10 @@
+[analysis]
+allowed-unresolved-imports = ["omni.**", "isaacsim.**"]
+
+[environment]
+extra-paths = [
+    "${VIRTUAL_ENV}/lib/python3.11/site-packages/isaaclab/source/isaaclab/",
+    "${VIRTUAL_ENV}/lib/python3.11/site-packages/isaaclab/source/isaaclab_assets/",
+    "${VIRTUAL_ENV}/lib/python3.11/site-packages/isaaclab/source/isaaclab_rl/",
+    "${VIRTUAL_ENV}/lib/python3.11/site-packages/isaaclab/source/isaaclab_tasks/",
+]

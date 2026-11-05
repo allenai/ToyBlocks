@@ -1,0 +1,56 @@
+# Find N letter blocks by honest random-walk search.
+#
+# Pick a random clear block, flip/rotate it a few times at random (a random walk
+# over orientations — never a targeted reorient), then check whether it is now a
+# revealed target letter. Accumulate distinct revealed target blocks; accept once
+# `target_count` of them have been found, give up after `max_picks`.
+#
+# Ground truth is used ONLY to (a) turn each random flip/rotate into a concrete
+# single-action PDDL goal and (b) decide "found" as a stand-in for the camera —
+# both are perception/labeling, never action selection. The block choice and the
+# move choice are random and driven by the per-env RNG, so every environment runs
+# an independent search (different blocks, different sequence).
+name: find_as
+initial: PICK
+
+# n = moves done on the current block; picks = attempts; found = distinct A blocks revealed.
+memory: { n: 0, picks: 0, found: [] }
+
+params:
+  letter: A
+  target_count: 3
+  moves_per_block: 2
+  max_picks: 60
+
+states:
+  PICK:
+    - guard: always
+      effects:
+        - bind_random_block: { var: c, clear_only: true }
+        - reset: { name: n }
+        - incr: { name: picks }
+      next: MOVE
+
+  # Random walk: flip OR rotate the picked block in a random direction, up to
+  # moves_per_block times, then look.
+  MOVE:
+    - guard: { counter_lt: { name: n, n: $moves_per_block } }
+      emit: { flip_or_rotate: { var: c, rotate_prob: 0.5 } }
+      effects: [ { incr: { name: n } } ]
+      next: MOVE
+    - guard: always
+      next: CHECK
+
+  # If the block we just walked is an A now visible to the camera, record it.
+  CHECK:
+    - guard: always
+      effects: [ { record_found_letter: { var: c, letter: $letter, into: found } } ]
+      next: DECIDE
+
+  DECIDE:
+    - guard: { collected_ge: { name: found, n: $target_count } }
+      next: ACCEPT
+    - guard: { counter_ge: { name: picks, n: $max_picks } }
+      next: REJECT
+    - guard: always
+      next: PICK

@@ -1,0 +1,5 @@
+# docker/eval.dockerfile builds from a fresh clone (docker/build_eval_image.sh), which needs .git
+# (jobs `git fetch` in the image) and the curobo / hvla / molmo2 submodules the repo
+# .dockerignore drops.
+**/__pycache__/
+*.egg-info/

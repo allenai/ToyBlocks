@@ -1,0 +1,226 @@
+[project]
+name = "blocksuite"
+version = "0.0.1"
+description = "blocksuite tasks"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "tyro>=1.0.13",
+    "viser>=1.0.29",
+    "yourdfpy",
+    "wandb",
+    "gymnasium",
+    "molmospaces-resources==0.0.1b13",
+    "usd-core",
+    # cv2 for everyone (isaaclab imports it): the headless build lerobot pulls is overridden away
+    # (see override-dependencies). <4.12: 4.12+ needs NumPy 2, numpy is pinned to 1.26.4.
+    "opencv-python<4.12",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
+[project.optional-dependencies]
+dev = [
+    "ipython",
+    "ipdb",
+    "ruff",
+    "ty",
+    "pre-commit",
+    "types-usd",
+    "pytest",
+]
+
+isaac = [
+    "isaaclab[isaacsim,all]==2.3.2.post1",
+]
+
+torch-cu128 = [
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "torchaudio>=2.7.0",
+]
+
+tamp = [
+    "setuptools<81",
+    "nvidia-curobo[cu12]",
+    "rerun-sdk",
+    "flask",
+    "av",
+    "lerobot==0.4.3",
+]
+
+# vecgen datagen (scripts/vecgen): the tamp extra without its debug viewers (rerun, flask)
+vecgen = [
+    "setuptools<81",
+    "nvidia-curobo[cu12]",
+    "av",
+    "lerobot==0.4.3",
+]
+
+none = [] # just a hacky default for buildx arg when building docker image
+
+maniflow = [
+    "timm",
+    "lerobot==0.4.3",
+    "matplotlib",
+    "scikit-image",
+    "msgpack",
+    "websockets",
+    # <26: pyarrow 26.0.0 (2026-10-09) requires NumPy >= 2.0 at import, and this project
+    # pins numpy==1.26.4 below. Unconstrained, every fresh install resolved 26 and died
+    # with "pyarrow requires NumPy 2.0 or newer, found 1.26.4" -- it broke ci-unit
+    # (2 collection errors in tests/eval) and ci-datagen (task gen crashed at import,
+    # which then surfaced as a missing reset_states.pkl). Lift together with the numpy pin.
+    "pyarrow<26",
+    # <3 for the same reason: pandas 3.x (pulled in by `datasets`) needs NumPy >= 2.0.2, and a
+    # fresh install resolved pandas 3.1.0, so every test importing it failed at collection
+    # ("Please upgrade numpy to >= 2.0.2 to use this pandas version"). Lift with the numpy pin.
+    "pandas<3",
+    "huggingface_hub>=1.3.4",
+    # <5.18: transformers 5.18.0 (2026-09-30) needs huggingface_hub >= 1.31, but the
+    # huggingface_hub override below replaces that requirement and resolves 1.16.1, so a
+    # fresh install died at import ("cannot import name 'ResolvedRevision'"), e.g. the
+    # policy server of every Beaker maniflow eval. Lift once the hub override allows 1.31.
+    "transformers<5.18",
+    "maniflow-tb",
+    "ai2-molmo2",
+    "torchmetrics",
+    "click==8.1.7",
+    "deepspeed"
+]
+
+deployment = [
+    "vlagents==0.2.0",
+    "rcs-core==0.7.2",
+    "rcs-fr3==0.7.2",
+    # "rcs-zed==0.7.2",
+    # "rcs-robotiq2f85==0.7.2,
+]
+
+docs = [
+    "pydata-sphinx-theme==0.18.0",
+    "sphinx==9.0.4",
+    "sphinx-autobuild==2025.8.25",
+    "myst-parser==5.1.0",
+    "sphinx-copybutton>=0.5.2",
+]
+
+[tool.uv]
+override-dependencies = [
+    # jax 0.10.x, jaxlib, tensorstore and onnx all require ml_dtypes>=0.5; pinning 0.4.1 makes
+    # `import jax` raise, which transformers 4.x hits via image_transforms when flax is present.
+    "ml-dtypes>=0.5.1",
+    "tensorstore==0.1.74",
+    "typing-extensions>=4.13.0",
+    "pywin32==306; sys_platform == 'win32'", # just for microslop and windowze
+
+    # In some cases, it install the latest one, that breaks things
+    "warp-lang<1.13",
+
+    # NOTE(wilbert): if using isaacsim|lab from nvidia's index, we need to force to use our version
+    # as the isaacsim|lab packages will require to install an old version of tyro, viser, and websockets
+    "tyro>=1.0.13",
+    "viser>=1.0.29",
+    "websockets>=13.1",
+    "lerobot==0.4.3",
+    # rcs-core 0.7.2 (deployment) caps gymnasium <0.30, but isaaclab pins 1.2.0 and lerobot needs
+    # >=1.1.1, so every env (sim, eval, sim2real's maniflow+deployment) failed to resolve.
+    "gymnasium==1.2.0",
+    # lerobot pulls opencv-python-headless, which overwrites the same cv2/ directory as the
+    # opencv-python that rcs_core/rcs_zed need, breaking cv2.imshow (no GTK backend).
+    # A never-true marker drops the headless requirement entirely.
+    "opencv-python-headless; sys_platform == 'never'",
+    "huggingface_hub>=1.3.4",
+    "numpy==1.26.4",
+    # pyarrow 26+ and pandas 3+ require NumPy 2.x; keep aligned with the numpy pin above.
+    "pyarrow<26",
+    "pandas<3",
+    "packaging==23.0",
+    # NOTE(wilbert): these overrides are needed for molmo2
+    "fsspec==2024.6.1",
+    # molmo2 pins transformers<5.0; keep molmo_flow's >=4.37.1 floor (plus the maniflow <5.18 cap) instead.
+    "transformers>=4.37.1,<5.18",
+]
+
+[tool.uv.sources]
+# NOTE(wilbert): uhmmm, seems this lerobot version is way too old (from 2025 T_T)
+# lerobot = { git = "https://github.com/huggingface/lerobot", rev = "0cf864870cf29f4738d3ade893e6fd13fbd7cdb5" }
+dlimp = { git = "https://github.com/kvablack/dlimp", rev = "ad72ce3a9b414db2185bc0b38461d4101a65477a" }
+
+isaacsim = { index = "nvidia" }
+isaaclab = { index = "nvidia" }
+nvidia-curobo = { editable = true, path = "./curobo/" }
+maniflow-tb = { editable = true, path = "./maniflow-tb/" }
+ai2-molmo2 = { editable = true, path = "./molmo2/" }
+
+torch = [
+    { index = "pytorch-cu128", extra = "torch-cu128" },
+]
+torchvision = [
+    { index = "pytorch-cu128", extra = "torch-cu128" },
+]
+torchaudio = [
+    { index = "pytorch-cu128", extra = "torch-cu128" },
+]
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com/"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = false
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # PEP8
+    "W",
+    # flake8-annotations
+    "ANN",
+]
+ignore = [
+    "C408", # don't complain about usage of dict() calls
+    "C901", # don't complain about function complexity
+    "E501", # don't complain about line-length (handled by line-length setting)
+    "B006", # defaults shouldn't be mutable
+    "UP015", # redundant mode arguments in open should be fine for now
+    "SIM117", # allow nested with statements for now
+    "SIM102", # don't be picky about nested if statements
+    "SIM114", # don't be picky about merging if branches using or
+    "B905", # allow zip() without `strict` parameter
+    "B026", # allow star-arg after keyword argument for now
+    "ANN001", #	missing-type-function-argument
+    "ANN201", # missing-return-type-undocumented-public-function
+    "ANN202", # missing-return-type-private-function
+    "ANN003", # missing-type-kwargs
+    "E402", # module-import-not-at-top-of-file
+    "ANN204", # don't complain about return statements in special methods (e.g. __init__)
+    "ANN401", # allow typing.Any in function signatures
+]

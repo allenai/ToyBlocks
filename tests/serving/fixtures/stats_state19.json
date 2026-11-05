@@ -1,0 +1,30 @@
+{
+  "observation.state.joint_position": {
+    "q01": [-1.0, -1.0, -1.0, -2.5, -1.0, 0.5, -1.0],
+    "q99": [1.0, 1.0, 1.0, -0.5, 1.0, 2.5, 1.0]
+  },
+  "observation.state.gripper_position": {
+    "q01": 0.0,
+    "q99": 0.04
+  },
+  "observation.state.joint_velocity": {
+    "q01": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+    "q99": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+  },
+  "observation.state.ee_position": {
+    "q01": [0.0, -0.5, 0.0],
+    "q99": [1.0, 0.5, 1.0]
+  },
+  "action.relative_joint_target": {
+    "q01": [-0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1],
+    "q99": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  },
+  "action.gripper_position": {
+    "q01": 0.0,
+    "q99": 1.0
+  },
+  "action.pd_mode": {
+    "q01": 0.0,
+    "q99": 1.0
+  }
+}

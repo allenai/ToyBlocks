@@ -1,0 +1,79 @@
+# Trimmed ManiFlow checkpoint config.yaml: the base 8-dim state (7 arm + 1
+# gripper), trained with ptmaps.
+#
+# Shaped like a real checkpoint config rather than like the minimum
+# derive_model_input_spec reads: same top-level blocks (datasets / framework /
+# trainer / run metadata), same key names and the same value vocabulary
+# (action_mode: abs, timm backbone strings, shape lists). A test that grows to
+# read another field then does not have to invent what a real config puts there.
+#
+# What is deliberately NOT here is anything hvla's _MANIFLOW_MM_DEFAULTS supplies
+# (ptmap_min, color_jitter, heatmap_backbone, encoder_output_dim, ...): a real
+# config omits those too, and this file is read WITHOUT that merge so that
+# tests/serving stays importable on a CPU box with no maniflow extra. A key the
+# defaults would have supplied shows up as an AttributeError, not a silent wrong
+# answer.
+#
+# The framework block DECLARES ptmaps (use_ptmap true, two *_ptmap obs entries)
+# while datasets.vla_data.include_ptmap is false. That disagreement is the whole
+# reason derive_model_input_spec reconciles the two -- the framework config comes
+# from the model definition and the dataset config from what it was actually
+# trained on -- so the fixture has to carry it or the strip path is never run.
+datasets:
+  vla_data:
+    action_mode: abs
+    data_mix: ci_state8
+    dataset_py: franka_multimodal
+    front_cam_key: observation.images.camera:front_camera
+    gripper_cam_key: observation.images.camera:gripper_camera
+    include_ptmap: false
+    per_device_batch_size: 128
+    use_depth: false
+    use_ft: false
+    val_ratio: 0.01
+framework:
+  encoder_type: spatial
+  heatmap_encoder_type: shared_rgb
+  horizon: 50
+  lang_injection_mode: token
+  language_conditioned: true
+  language_mode: action_only
+  n_action_steps: 25
+  n_emb: 768
+  n_head: 8
+  n_layer: 12
+  n_obs_steps: 1
+  name: ManiFlowMultiModal
+  num_inference_steps: 12
+  obs_as_global_cond: true
+  propr_mask_prob: 0.0
+  ptmap_backbone: convnextv2_tiny.fcmae_ft_in22k_in1k
+  ptmap_encoder_type: dense
+  qk_norm: true
+  qkv_bias: true
+  rgb_backbone: vit_base_patch16_clip_224.openai
+  shape_meta:
+    obs:
+      agent_pos:
+        shape: [8]
+      front_ptmap:
+        shape: [3, 224, 224]
+      front_rgb:
+        shape: [3, 224, 224]
+      gripper_ptmap:
+        shape: [3, 224, 224]
+      gripper_rgb:
+        shape: [3, 224, 224]
+  state_injection_mode: timestep_concat
+  target_injection_mode: null
+  target_sigma: 0.8
+  use_ptmap: true
+  use_rgb: true
+run_id: ci_state8_50_25_abs_token_shared_rgb
+seed: 42
+trainer:
+  learning_rate:
+    base: 0.0001
+  lr_scheduler_type: cosine
+  max_train_steps: 200000
+  save_format: safetensors

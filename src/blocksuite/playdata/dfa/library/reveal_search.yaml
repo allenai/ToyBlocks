@@ -1,0 +1,36 @@
+# Reveal-and-check search: pick a random block, reorient it to the readable
+# face (o2), and check whether the revealed block is the target letter. If so,
+# ACCEPT; otherwise pick another block. Give up after max_picks.
+#
+# Unlike flip_search (flip forward twice), this can actually reach the readable
+# orientation: forward flips only cycle faces about one axis and never hit o2,
+# whereas set_ori targets o2 directly (the reorient executor plans the flip).
+# This is the strategy that produces DFA accepts.
+name: reveal_search
+initial: PICK
+memory: { picks: 0 }
+params: { letter: R, max_picks: 8 }
+
+states:
+  PICK:
+    - guard: always
+      effects:
+        - bind_random_block: { var: c, clear_only: true }
+        - incr: { name: picks }
+      next: REVEAL
+
+  # Reorient the picked block so its lettered face is up and readable (o2).
+  REVEAL:
+    - guard: always
+      emit: { set_ori: { var: c, o: o2 } }
+      next: CHECK
+
+  # Revealed block is the target letter -> found it. Out of attempts -> give up.
+  CHECK:
+    # Found = the letter face is visible to the front camera (registries.FOUND_ORIS).
+    - guard: { found_letter: { letter: $letter } }
+      next: ACCEPT
+    - guard: { counter_ge: { name: picks, n: $max_picks } }
+      next: REJECT
+    - guard: always
+      next: PICK

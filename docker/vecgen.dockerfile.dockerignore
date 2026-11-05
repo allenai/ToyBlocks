@@ -1,0 +1,4 @@
+# docker/vecgen.dockerfile builds from a fresh clone (docker/build_vecgen_image.sh), which needs
+# .git (jobs `git fetch` in the image) and the curobo submodule the repo .dockerignore drops.
+**/__pycache__/
+*.egg-info/

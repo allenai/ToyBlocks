@@ -1,0 +1,14 @@
+# Camera-extrinsics + FOV test (jun15pnp). Positions are absolute in each camera's
+# offset frame (gripper offset is relative to the gripper link; front/left relative to
+# the env). Rotations left unchanged (only position + fov requested). fov_deg widens
+# each camera (larger field of view = wider shot).
+cameras:
+  gripper_camera:
+    position: [0.031, 0.074, 0.062]   # +Z ~0.04 up/toward the arm (was 0.022)
+    fov_deg: 105                       # was ~88
+  front_camera:
+    position: [2.4, 0.0, 1.15]         # further back + a touch higher (was 2.0,0,1.0)
+    fov_deg: 50                        # was ~38.5
+  left_camera:
+    position: [0.10, 0.55, 0.56]       # further out from the scene (was 0.15,0.40,0.45)
+    fov_deg: 115                       # was ~101

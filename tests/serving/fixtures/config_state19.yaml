@@ -1,0 +1,66 @@
+# Trimmed ManiFlow checkpoint config.yaml: the extended 19-dim state
+# (7 arm + 7 joint_vel + 3 ee_xyz + 1 gripper + 1 pd_mode), with ptmaps declared
+# and include_ptmap unset so the ptmap-stripping path is NOT taken here.
+# See config_state8.yaml for why this mirrors a real config's key set and why
+# nothing hvla's _MANIFLOW_MM_DEFAULTS would supply appears in it.
+#
+# It also differs from the other two on target_injection_mode (set here, so
+# target_heatmap is a model input) and on action_mode; config_state9.yaml lists
+# what each of the three fixtures is the only one to cover.
+datasets:
+  vla_data:
+    action_mode: rel
+    data_mix: ci_state19
+    dataset_py: franka_multimodal
+    front_cam_key: observation.images.camera:front_camera
+    gripper_cam_key: observation.images.camera:gripper_camera
+    per_device_batch_size: 128
+    use_depth: false
+    use_ft: false
+    val_ratio: 0.01
+framework:
+  encoder_type: spatial
+  heatmap_encoder_type: shared_rgb
+  horizon: 50
+  lang_injection_mode: token
+  language_conditioned: true
+  language_mode: action_only
+  n_action_steps: 25
+  n_emb: 768
+  n_head: 8
+  n_layer: 12
+  n_obs_steps: 1
+  name: ManiFlowMultiModal
+  num_inference_steps: 12
+  obs_as_global_cond: true
+  propr_mask_prob: 0.0
+  ptmap_backbone: convnextv2_tiny.fcmae_ft_in22k_in1k
+  ptmap_encoder_type: dense
+  qk_norm: true
+  qkv_bias: true
+  rgb_backbone: vit_base_patch16_clip_224.openai
+  shape_meta:
+    obs:
+      agent_pos:
+        shape: [19]
+      front_ptmap:
+        shape: [3, 224, 224]
+      front_rgb:
+        shape: [3, 224, 224]
+      gripper_ptmap:
+        shape: [3, 224, 224]
+      gripper_rgb:
+        shape: [3, 224, 224]
+  state_injection_mode: timestep_concat
+  target_injection_mode: cross_attention
+  target_sigma: 0.8
+  use_ptmap: true
+  use_rgb: true
+run_id: ci_state19_50_25_rel_token_shared_rgb
+seed: 42
+trainer:
+  learning_rate:
+    base: 0.0001
+  lr_scheduler_type: cosine
+  max_train_steps: 200000
+  save_format: safetensors

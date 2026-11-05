@@ -1,0 +1,8 @@
+{
+    "extraPaths": [
+        "./.venv/lib/python3.11/site-packages/isaaclab/source/isaaclab/",
+        "./.venv/lib/python3.11/site-packages/isaaclab/source/isaaclab_assets/",
+        "./.venv/lib/python3.11/site-packages/isaaclab/source/isaaclab_rl/",
+        "./.venv/lib/python3.11/site-packages/isaaclab/source/isaaclab_tasks/"
+    ]
+}

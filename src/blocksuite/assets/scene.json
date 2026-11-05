@@ -1,0 +1,335 @@
+{
+    "objects": {
+        "robot_mount": {
+            "name": "robot_mount",
+            "path": "./robot_mount/robot_mount.usd",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.035,
+                    "y": 0,
+                    "z": -0.011
+                },
+                "orient": {
+                    "w": 0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "robot_workstation": {
+            "name": "robot_workstation",
+            "path": "./workstation/robot_workstation.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.2975,
+                    "y": -0,
+                    "z": -0.7643
+                },
+                "orient": {
+                    "w": 0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "modular_wall_left_1": {
+            "name": "modular_wall_left_1",
+            "path": "./new_wall/modular_wall.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": 0.274,
+                    "y": -0.715,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "modular_wall_right_1": {
+            "name": "modular_wall_right_1",
+            "path": "./new_wall/modular_wall.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": 0.274,
+                    "y": 0.715,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "modular_wall_right_0": {
+            "name": "modular_wall_right_0",
+            "path": "./new_wall/modular_wall.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": 0.715,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "modular_wall_left_0": {
+            "name": "modular_wall_left_0",
+            "path": "./new_wall/modular_wall.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": -0.715,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "window_frame_bottom": {
+            "name": "window_frame_bottom",
+            "path": "./back_wall/window_frame.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": -0.2404,
+                    "z": 0.37405
+                },
+                "orient": {
+                    "w": -0.70711,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.70711
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "window_frame_top": {
+            "name": "window_frame_top",
+            "path": "./back_wall/window_frame.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": -0.24054,
+                    "z": 0.82333
+                },
+                "orient": {
+                    "w": -0.70711,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.70711
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "wall": {
+            "name": "wall",
+            "path": "./back_wall/back_wall_w_holes.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": 0,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": -0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "window_background_bottom": {
+            "name": "window_background_bottom",
+            "path": "./back_wall/window_background.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.72,
+                    "y": -0.2404,
+                    "z": 0.37405
+                },
+                "orient": {
+                    "w": -0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "window_background_top": {
+            "name": "window_background_top",
+            "path": "./back_wall/window_background.usda",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": -0.24054,
+                    "z": 0.82333
+                },
+                "orient": {
+                    "w": -0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "workspace_table": {
+            "name": "workspace_table",
+            "path": "./table/table.usda",
+            "enabled": true,
+            "rigidbody": true,
+            "transform": {
+                "translate": {
+                    "x": 0.4888000000000001,
+                    "y": 1.0853540288735533e-16,
+                    "z": 0.0
+                },
+                "orient": {
+                    "w": 0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        },
+        "FlatGrid": {
+            "name": "FlatGrid",
+            "path": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+            "enabled": true,
+            "transform": {
+                "translate": {
+                    "x": -0.71,
+                    "y": 0,
+                    "z": -0.76479
+                },
+                "orient": {
+                    "w": 0.7071067811865477,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.7071067811865475
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        }
+    },
+    "lights": {
+        "defaultLight": {
+            "name": "defaultLight",
+            "type": "DistantLight",
+            "parent": "Environment",
+            "enabled": false,
+            "intensity": 3000,
+            "angle": 1,
+            "shaping": {
+                "cone_angle_degrees": 180
+            },
+            "transform": {
+                "translate": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "orient": {
+                    "x": 0.2705980500730985,
+                    "y": 0.27059805007309845,
+                    "z": 0.6532814824381882,
+                    "w": 0.6532814824381883
+                },
+                "scale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            }
+        }
+    }
+}

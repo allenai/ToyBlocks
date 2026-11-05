@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<!-- Generated from model_full.usda PhysicsJoint transforms. No mesh assets are referenced. -->
+<robot name="fr3_model_full_robotiq_2f85">
+  <link name="base_link"/>
+  <link name="panda_link0"/>
+  <link name="panda_link1"/>
+  <link name="panda_link2"/>
+  <link name="panda_link3"/>
+  <link name="panda_link4"/>
+  <link name="panda_link5"/>
+  <link name="panda_link6"/>
+  <link name="panda_link7"/>
+  <link name="robotiq_arg2f_base_link"/>
+  <link name="left_outer_knuckle"/>
+  <link name="left_outer_finger"/>
+  <link name="left_inner_finger_link"/>
+  <link name="left_inner_knuckle"/>
+  <link name="left_inner_finger"/>
+  <link name="right_outer_knuckle"/>
+  <link name="right_outer_finger"/>
+  <link name="right_inner_finger_link"/>
+  <link name="right_inner_knuckle"/>
+  <link name="right_inner_finger"/>
+  <joint name="base_link_fixed_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="panda_link0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <joint name="panda_joint1" type="revolute">
+    <parent link="panda_link0"/>
+    <child link="panda_link1"/>
+    <origin xyz="0 0 0.333" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.743699821" upper="2.743699821" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint2" type="revolute">
+    <parent link="panda_link1"/>
+    <child link="panda_link2"/>
+    <origin xyz="0 0 0" rpy="-1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.783699967" upper="1.783699967" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint3" type="revolute">
+    <parent link="panda_link2"/>
+    <child link="panda_link3"/>
+    <origin xyz="0 -0.316 -1.0816219e-08" rpy="1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.900699867" upper="2.900699867" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint4" type="revolute">
+    <parent link="panda_link3"/>
+    <child link="panda_link4"/>
+    <origin xyz="0.0825 0 0" rpy="1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.042099811" upper="-0.1517999942" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint5" type="revolute">
+    <parent link="panda_link4"/>
+    <child link="panda_link5"/>
+    <origin xyz="-0.0825 0.384 -1.314376e-08" rpy="-1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.806499909" upper="2.806499909" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint6" type="revolute">
+    <parent link="panda_link5"/>
+    <child link="panda_link6"/>
+    <origin xyz="0 0 0" rpy="1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.544500001" upper="4.516900236" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_joint7" type="revolute">
+    <parent link="panda_link6"/>
+    <child link="panda_link7"/>
+    <origin xyz="0.088 0 0" rpy="1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.015899975" upper="3.015899975" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="panda_link7_to_robotiq_arg2f_base_link_fixed" type="fixed">
+    <parent link="panda_link7"/>
+    <child link="robotiq_arg2f_base_link"/>
+    <origin xyz="0 0 0.107" rpy="0 0 1.570796327"/>
+  </joint>
+  <joint name="finger_joint" type="revolute">
+    <parent link="robotiq_arg2f_base_link"/>
+    <child link="left_outer_knuckle"/>
+    <origin xyz="-0.0306011 0.00475 0.0657045" rpy="-1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="0.8999999727" effort="200" velocity="3.14"/>
+  </joint>
+  <joint name="left_outer_knuckle_to_left_outer_finger_fixed" type="fixed">
+    <parent link="left_outer_knuckle"/>
+    <child link="left_outer_finger"/>
+    <origin xyz="-0.0314249 0.00453223 -0.0102" rpy="0 0 -3.141592654"/>
+  </joint>
+  <joint name="left_inner_finger_joint" type="revolute">
+    <parent link="robotiq_arg2f_base_link"/>
+    <child link="left_inner_finger_link"/>
+    <origin xyz="-0.0127 -0.012 0.07222" rpy="-1.570796327 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.2967060077" upper="0.8999999727" effort="200" velocity="3.14"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="left_inner_knuckle_joint" type="revolute">
+    <parent link="left_inner_finger_link"/>
+    <child link="left_inner_knuckle"/>
+    <origin xyz="-0.0382079 -0.0425003 0.00295" rpy="-3.141592634 1.998808754e-08 3.8067378e-05"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.8726640326" upper="0.8999999727" effort="200" velocity="3.14"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="left_inner_knuckle_to_left_inner_finger_fixed" type="fixed">
+    <parent link="left_inner_knuckle"/>
+    <child link="left_inner_finger"/>
+    <origin xyz="-0.03778969798 -0.1039160008 -0.009099999245" rpy="-1.570796327 1.998808825e-08 2.117779678e-08"/>
+  </joint>
+  <joint name="right_outer_knuckle_joint" type="revolute">
+    <parent link="robotiq_arg2f_base_link"/>
+    <child link="right_outer_knuckle"/>
+    <origin xyz="0.0306011 -0.00475 0.0657045" rpy="-1.570796327 0 3.141592654"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="0.8999999727" effort="200" velocity="3.14"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="right_outer_knuckle_to_right_outer_finger_fixed" type="fixed">
+    <parent link="right_outer_knuckle"/>
+    <child link="right_outer_finger"/>
+    <origin xyz="-0.0314249 0.00453223 -0.0102" rpy="0 0 3.141592654"/>
+  </joint>
+  <joint name="right_inner_finger_joint" type="revolute">
+    <parent link="robotiq_arg2f_base_link"/>
+    <child link="right_inner_finger_link"/>
+    <origin xyz="0.0127 0.012 0.07222" rpy="-1.570796327 0 3.141592654"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.2967060077" upper="0.8999999727" effort="200" velocity="3.14"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="right_inner_knuckle_joint" type="revolute">
+    <parent link="right_inner_finger_link"/>
+    <child link="right_inner_knuckle"/>
+    <origin xyz="-0.0382079 -0.0425003 0.00295" rpy="3.141592654 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.8726640326" upper="0.8999999727" effort="200" velocity="3.14"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="right_inner_knuckle_to_right_inner_finger_fixed" type="fixed">
+    <parent link="right_inner_knuckle"/>
+    <child link="right_inner_finger"/>
+    <origin xyz="-0.0377897 -0.103916 -0.0091" rpy="-1.570796327 0 0"/>
+  </joint>
+</robot>

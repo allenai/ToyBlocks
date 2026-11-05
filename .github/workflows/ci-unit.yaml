@@ -1,0 +1,74 @@
+name: Unit tests (CPU)
+
+# CPU-only test tier. Everything under tests/serving, tests/tamp and tests/eval
+# is pure Python (codegen, PDDL parsing, obs transforms, model-config ingestion,
+# policy-input goldens and trace panels, dataset provenance, eval profile
+# selection) and must stay importable without Isaac Lab --
+# tests/env_randomization/conftest.py owns the AppLauncher, so the rootdir
+# conftest no longer pulls isaaclab at collection time. No path filter: this job
+# is fast enough to always run.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci-unit-tests:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup CPU environment
+        run: |
+          uv venv --python 3.11
+          source .venv/bin/activate
+          uv pip install "setuptools<81" wheel packaging
+          uv pip install -e '.[dev]'
+          # Installed individually because the extras that carry them (maniflow,
+          # isaac) also pull hvla / Isaac Lab, which a CPU box cannot install.
+          # These are exactly what the CPU tests import: torch + pillow for the
+          # obs transforms, omegaconf to read checkpoint configs, websockets +
+          # msgpack because blocksuite.serving.__init__ imports the websocket
+          # transport, pyarrow to build the LeRobot skeletons the provenance
+          # tests read, and matplotlib because the policy-input trace/debug panels
+          # render with it (tests/serving/test_policy_input_trace.py). A missing
+          # matplotlib is a lane misconfiguration and those tests fail loudly
+          # rather than skipping.
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+          # pyarrow is CONSTRAINED here as well as in pyproject: `uv pip install` of a bare
+          # name ignores both the lock and pyproject, so it would install whatever is
+          # newest AT RUN TIME. pyarrow 26.0.0 (2026-10-09) needs NumPy >= 2.0 while we
+          # pin numpy==1.26.4, which turned every PR red: "pyarrow requires NumPy 2.0
+          # or newer, found 1.26.4" at import. Keep this in step with pyproject, or
+          # drop the numpy pin.
+          uv pip install omegaconf pillow websockets msgpack "pyarrow<26" matplotlib
+
+      - name: Run CPU unit tests
+        run: |
+          source .venv/bin/activate
+          # The LeRobot recorder and merge tests are named explicitly: tests/vecgen is not
+          # collected here, and they stub the sim (and, when absent, PyAV/LeRobot)
+          # imports themselves; the stitch test skips without LeRobot.
+          # src/blocksuite/domain_randomization holds the camera/DR tests next to the code
+          # they cover, so the directories above do not collect them. Named here so
+          # the wave-intrinsics contract (recorded camera == rendered camera) is enforced.
+          pytest tests/serving tests/tamp tests/eval tests/rerender \
+            tests/vecgen/test_recorder_rows.py tests/vecgen/test_recorder_stitch.py \
+            tests/vecgen/test_merge.py \
+            src/blocksuite/domain_randomization -v
