@@ -30,7 +30,7 @@ if [ "$POLICY_NAME" = "maniflow" ] || [ "$POLICY_NAME" = "molmo2_maniflow" ]; th
   export H_VLA_PATH
   export PYTHONPATH="${PYTHONPATH:-}:${H_VLA_PATH}"
 
-  # No repo default for the checkpoint (a per-user weka path), so check it here rather
+  # No repo default for the checkpoint (it is machine-specific), so check it here rather
   # than letting the model load fail on an empty path.
   if [ -z "$MODEL_PATH" ]; then
     echo "MODEL_PATH is required for ${POLICY_NAME}; set it in scripts/eval/_common.sh or export it" >&2

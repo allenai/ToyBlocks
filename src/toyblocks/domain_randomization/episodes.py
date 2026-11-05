@@ -102,7 +102,7 @@ def load_episodes(dataset_path: Path, default_success: Optional[bool],
 
     ``keep`` (episode indices) converts only those episodes, after the ``max_episodes`` cap: a
     group dataset holds every member problem's episodes, and converting all ~200 to render one
-    member's ~24 took minutes per problem on Weka (render, 2026-11-02).
+    member's ~24 took minutes per problem on network storage.
 
     Unreadable parquet files are skipped and recorded in `LAST_SKIPPED_PARQUET`, which is reset on
     every call -- read it immediately after, before the next load overwrites it.

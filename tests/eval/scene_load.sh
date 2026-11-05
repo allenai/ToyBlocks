@@ -40,7 +40,7 @@
 set -o pipefail
 
 # Resolved from the script's own location, not `git rev-parse`: this has to work
-# in a plain working copy on a shared filesystem (weka), which is not a git repo.
+# in a plain working copy on a shared filesystem, which is not a git repo.
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "${REPO_ROOT}"
 

@@ -9,7 +9,7 @@ of the 224x224 pixels (max abs 35). So the resize is asserted against an indepen
 of the dataloader call, not against "some bilinear".
 
 The encoder settings must match maniflow-tb/scripts/rgb_conversion/reencode_to_224_batch.py,
-which produced the sidecars already on weka: libsvtav1, crf=26, preset=8, yuv420p, and NO -g.
+which produced the existing sidecars: libsvtav1, crf=26, preset=8, yuv420p, and NO -g.
 That last one is not cosmetic -- this recorder's own _GOP applied to a 224 sidecar inflated it
 5.81x (1,781,024 B against the stored 306,410 B) before it was caught. PyAV's OutputContainer is
 immutable, so the options dict cannot be spied on; section C asserts the *observable* consequence
@@ -170,7 +170,7 @@ def main():
         # the reference implementation's own argv (ffmpeg CLI, the exact flags encode_argv builds
         # for codec=av1) and compare. PyAV and the CLI mux slightly differently, so sizes agree to
         # within ~10% rather than exactly -- measured 1.10x here and 0.944x against the real
-        # sidecar on weka. The band is wide enough for that and far too tight for the failures
+        # existing sidecar. The band is wide enough for that and far too tight for the failures
         # that matter: forcing the recorder's GOP came in at 1.50x here and 5.81x on a real clip.
         ref_p = os.path.join(td, "ref.mp4")
         raw = b"".join(VP._resize_rgb_pil(im, 224).tobytes() for im in imgs)
@@ -196,7 +196,7 @@ def main():
         _check(f"size within muxer tolerance of the reference (ratio {ratio:.3f})",
                0.75 < ratio < 1.30, True)
 
-    print("\nE: the feature name matches the sidecars already on weka")
+    print("\nE: the feature name matches the existing sidecars")
     # Asserting f"observation.images.{cam}_224" == "observation.images.camera:front_camera_224"
     # would compare an f-string to its own expansion and pass no matter what the recorder does.
     # Read the key the RECORDER actually builds, and evaluate it against a real camera name.
@@ -210,7 +210,7 @@ def main():
         tmpl = m.group(1)
         cam_name, _extra_rgb = "camera:front_camera", "224"      # the names used in that f-string
         key = tmpl.replace("{cam_name}", cam_name).replace("{self._extra_rgb}", _extra_rgb)
-        _check("recorder's key is the on-weka sidecar name", key,
+        _check("recorder's key is the existing sidecar name", key,
                "observation.images.camera:front_camera_224")
         _check("no unexpanded placeholder left (the f-string uses these exact names)",
                "{" in key, False)

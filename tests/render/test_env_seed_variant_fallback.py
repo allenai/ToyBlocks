@@ -10,7 +10,7 @@ sep3_ai2_stack_PARTIAL5k: of its 167 source problems only 83 have an exactly-nam
 `sep3_ai2_reorient_fixed/envs`; the other 84 resolve solely through this fallback. A regression
 would not fail loudly per problem -- it would silently drop half the dataset.
 
-Pure path/AST work: no Isaac, no GPU, no weka.
+Pure path/AST work: no Isaac, no GPU, no datasets.
 """
 import ast
 import re

@@ -122,7 +122,7 @@ randomize:
 dr_schema: 3
 
 # RAM HDRI cache. Production allrand flags, unchanged above; this only rewrites the asset PATH
-# handed to USD to a tmpfs copy so the renderer's per-wave re-read hits memory instead of weka.
+# handed to USD to a tmpfs copy so the renderer's per-wave re-read hits memory instead of the disk.
 # Verified pixel-safe: depth video is bit-identical cache-on vs cache-off, RGB differs at 42.8 dB
 # (the DLSS run-to-run noise floor is ~27 dB, so the cache changes nothing real).
 #

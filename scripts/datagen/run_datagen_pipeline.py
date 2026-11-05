@@ -1061,7 +1061,7 @@ def mark_stage_complete(base: str, stage: str) -> None:
 
 
 def _rmtree_retry(target: Path, retries: int = 5, delay: float = 2.0) -> None:
-    """rmtree with retries to handle WekaFS metadata propagation delays."""
+    """rmtree with retries to handle network-filesystem metadata propagation delays."""
     for attempt in range(retries):
         try:
             shutil.rmtree(target)

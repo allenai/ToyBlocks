@@ -560,7 +560,7 @@ def test_coupled_mode_never_arms_the_scheduler(mod):
 def test_the_gate_fails_on_missing_problems_by_default(mod):
     src = PIPELINE.read_text()
     assert "if not args.merge_allow_missing_problems:" in src
-    assert "args.render_merge_incomplete" not in src.split("def main")[-1] or         src.count("args.render_merge_incomplete") == 1,         "the local gate must not key on the Beaker per-episode knob"
+    assert "args.render_merge_incomplete" not in src.split("def main")[-1] or         src.count("args.render_merge_incomplete") == 1,         "the local gate must not key on the per-episode --render_merge_incomplete knob"
     assert mod.build_parser().get_default("merge_allow_missing_problems") is False,         "a dataset must never silently drop problems by default"
 
 

@@ -195,7 +195,7 @@ def generate_env_from_pddl(args: Args, pddl_path: str, output_dir: str):
     # sitting in sys.path_importer_cache with a directory listing taken before
     # write_env_package created env_folder. That finder only refills its cache
     # when the directory mtime changes, so on a filesystem with coarse mtime
-    # granularity (weka/NFS: 1s) a package written within the same tick is
+    # granularity (some network filesystems: 1s) a package written within the same tick is
     # invisible and this import raises ModuleNotFoundError.
     importlib.invalidate_caches()
     importlib.import_module(f"{task_slug}")

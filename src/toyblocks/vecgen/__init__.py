@@ -1,1 +1,1 @@
-"""Vectorized datagen engine (see docs/datagen_revamp.md)."""
+"""Vectorized datagen engine (see docs/source/user_guide/workflows/datagen/execution.md)."""

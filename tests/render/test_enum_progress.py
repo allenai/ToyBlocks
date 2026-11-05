@@ -2,7 +2,7 @@
 
 The cold enumeration scan must never go silent, at any source size.
 
-enumerate_source_episodes walks every problem x split of the SOURCE -- O(problems) weka
+enumerate_source_episodes walks every problem x split of the SOURCE -- O(problems) filesystem
 round-trips -- before the orchestrator can print a plan. The old rule printed progress every 250
 problems and ONLY when the source had >=500 of them, so a 397-problem source (sep12) emitted
 nothing at all for the entire scan: 12 min of total silence after the last startup line. That is
