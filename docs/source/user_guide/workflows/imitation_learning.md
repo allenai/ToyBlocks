@@ -17,7 +17,7 @@ and runs it on this machine: `accelerate launch` on all visible GPUs by default,
 
 ## Setup
 
-These docs describe maniflow-tb commit `7b10edf` ("toyblocks release"), the commit the
+These docs describe maniflow-tb commit `c04eab7`, the commit the
 `maniflow-tb` submodule is pinned to. The `maniflow` extra installs it in editable mode, together
 with `molmo2` (see [Installation and Setup](installation_and_setup_instructions.md)):
 
