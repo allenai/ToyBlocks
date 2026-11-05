@@ -14,12 +14,13 @@ If you need to add details about your work (e.g. new rl script, new datagen scri
 
 This guide uses `uv` to set everything up. The setup instructions here are for setting up the evaluation environments and data generation systems.
 
-Prerequisites: an NVIDIA driver that supports CUDA 12.8 (570+), [`uv`](https://docs.astral.sh/uv/getting-started/installation/),
-and a GitHub SSH key with access to the `allenai` org (`blocksuite` and the `maniflow-tb` and `molmo2` submodules are private).
+Prerequisites: an NVIDIA driver that supports CUDA 12.8 (570+) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
+ToyBlocks and its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently
+internal to Ai2.
 
 ```bash
-git clone git@github.com:allenai/blocksuite.git
-cd blocksuite
+git clone https://github.com/allenai/ToyBlocks.git
+cd ToyBlocks
 
 # Create a virtual environment for py311 (required for isaacsim 5.1) and activate it
 uv venv --python 3.11

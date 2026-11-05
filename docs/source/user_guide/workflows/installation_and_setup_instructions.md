@@ -6,14 +6,14 @@ These instructions use `uv` and set up everything needed for evaluation, data ge
 
 - Linux with an NVIDIA GPU and a driver that supports CUDA 12.8 (driver 570 or newer).
 - [`uv`](https://docs.astral.sh/uv/getting-started/installation/) on your `PATH` (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
-- A GitHub SSH key with access to the `allenai` organization: `blocksuite` and the `maniflow-tb` and `molmo2` submodules are private and cloned over SSH (`ssh -T git@github.com` should greet you by name). The `curobo` submodule is public.
+- Git access to GitHub over HTTPS. ToyBlocks and its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
 - `tmux` (`sudo apt install tmux`): long-running jobs (pipeline runs, merges, renders) are run in detached `tmux` sessions so they survive a dropped connection.
 
 ## Setup
 
 ```bash
-git clone git@github.com:allenai/blocksuite.git
-cd blocksuite
+git clone https://github.com/allenai/ToyBlocks.git
+cd ToyBlocks
 
 # Create a virtual environment for Python 3.11 (required for Isaac Sim 5.1) and activate it
 uv venv --python 3.11
