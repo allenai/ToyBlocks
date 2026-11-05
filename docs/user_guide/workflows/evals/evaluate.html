@@ -570,11 +570,7 @@ width raises.</p>
 <td><p>none</p></td>
 <td><p>After the resize to 224, centre-crop RGB, depth and <code class="docutils literal notranslate"><span class="pre">target_heatmap</span></code> to <code class="docutils literal notranslate"><span class="pre">int(224</span> <span class="pre">*</span> <span class="pre">ratio)</span></code> and resize back (inference counterpart of <code class="docutils literal notranslate"><span class="pre">random_crop_ratio</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">0.95</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_aug</span></code></p></td>
-<td><p>none</p></td>
-<td><p>Live depth augmentation before the policy sees depth; <code class="docutils literal notranslate"><span class="pre">ejbl</span></code> matches HVLA’s <code class="docutils literal notranslate"><span class="pre">augment_depth</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--enable_crop</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--enable_crop</span></code></p></td>
 <td><p>off</p></td>
 <td><p>Build <code class="docutils literal notranslate"><span class="pre">target_front_crop_rgb</span></code> on the client from the native front camera and target pixels. Needs a checkpoint with <code class="docutils literal notranslate"><span class="pre">use_target_front_crop</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>.</p></td>
 </tr>

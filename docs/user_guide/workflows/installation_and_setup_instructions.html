@@ -367,7 +367,7 @@
 <ul class="simple">
 <li><p>Linux with an NVIDIA GPU and a driver that supports CUDA 12.8 (driver 570 or newer).</p></li>
 <li><p><a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a> on your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (<code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-LsSf</span> <span class="pre">https://astral.sh/uv/install.sh</span> <span class="pre">|</span> <span class="pre">sh</span></code>).</p></li>
-<li><p>Git access to GitHub over HTTPS. ToyBlocks and its <code class="docutils literal notranslate"><span class="pre">curobo</span></code>, <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> and <code class="docutils literal notranslate"><span class="pre">agentic_robotics</span></code> submodules are public; the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> submodule is currently internal to Ai2.</p></li>
+<li><p>Git access to GitHub over HTTPS. ToyBlocks and all of its submodules (<code class="docutils literal notranslate"><span class="pre">curobo</span></code>, <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code>, <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> and <code class="docutils literal notranslate"><span class="pre">agentic_robotics</span></code>) are public.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tmux</span></code> (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">tmux</span></code>): long-running jobs (pipeline runs, merges, renders) are run in detached <code class="docutils literal notranslate"><span class="pre">tmux</span></code> sessions so they survive a dropped connection.</p></li>
 </ul>
 </section>
@@ -435,7 +435,15 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 <section id="verify-the-installation">
 <h2>Verify the installation<a class="headerlink" href="#verify-the-installation" title="Link to this heading">#</a></h2>
-<p>With the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> group installed, generate one environment package from a checked-in problem and record a few episodes. This exercises Isaac Sim, cuRobo and LeRobot recording, and should end with a <code class="docutils literal notranslate"><span class="pre">RESULT</span> <span class="pre">episodes=4</span> <span class="pre">success=...</span></code> line:</p>
+<p>Run the installation checks from the repository root, with the virtual environment active:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/install<span class="w">                    </span><span class="c1"># seconds: packages, versions, submodules, assets</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMNI_KIT_ACCEPT_EULA</span><span class="o">=</span>YES
+pytest<span class="w"> </span>tests/install<span class="w"> </span>--install-gpu<span class="w">      </span><span class="c1"># several minutes: also Isaac Sim, cuRobo and vecgen</span>
+</pre></div>
+</div>
+<p>The first command checks each extra you installed and skips the others. For every installed extra, it checks that the packages are installed in the versions <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> allows and that what its workflows import imports. It also checks that the submodules the extra needs are checked out at the pinned commits and are the ones Python imports. Finally, it checks that the assets are downloaded. A failure names what is wrong and the command that fixes it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--install-gpu</span></code> also checks that PyTorch sees the GPU and that Isaac Sim starts headless with the right Warp. With the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> extra, it runs the vecgen check below, with and without videos. With the <code class="docutils literal notranslate"><span class="pre">agentic</span></code> extra, it imports the agentic skill servers.</p>
+<p>To run the vecgen check by hand: with the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> group installed, generate one environment package from a checked-in problem and record a few episodes. This exercises Isaac Sim, cuRobo and LeRobot recording, and should end with a <code class="docutils literal notranslate"><span class="pre">RESULT</span> <span class="pre">episodes=4</span> <span class="pre">success=...</span></code> line:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMNI_KIT_ACCEPT_EULA</span><span class="o">=</span>YES
 <span class="nv">problem</span><span class="o">=</span>src/toyblocks/tamp/blocks/problems/flip.pddl
 python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span>--domain_path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span><span class="se">\</span>
@@ -465,7 +473,7 @@ sphinx-build<span class="w"> </span>docs/source<span class="w"> </span>docs/buil
 </section>
 <section id="docker-images">
 <h2>Docker images<a class="headerlink" href="#docker-images" title="Link to this heading">#</a></h2>
-<p>Both images build from a fresh SSH clone of a git ref (so push your branch first) and are tagged with its short SHA:</p>
+<p>Both images build from a fresh clone of a git ref (so push your branch first) and are tagged with its short SHA:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># eval image: Isaac + cuRobo + maniflow-tb + molmo2 (policy servers and evaluate.py)</span>
 docker/build_eval_image.sh<span class="w"> </span>main<span class="w"> </span>/tmp/eval_img<span class="w">        </span><span class="c1"># -&gt; toyblocks-eval:&lt;sha&gt;</span>
 

@@ -1217,35 +1217,31 @@ render and block-identity flags work together.</p>
 <td><p>0.95 for ManiFlow transforms</p></td>
 <td><p>Centre-crop each resized 224x224 input to <code class="docutils literal notranslate"><span class="pre">int(224</span> <span class="pre">*</span> <span class="pre">ratio)</span></code> and resize it back, matching a checkpoint trained with <code class="docutils literal notranslate"><span class="pre">random_crop_ratio</span></code>; <code class="docutils literal notranslate"><span class="pre">1.0</span></code> feeds the full frame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth-aug</span></code></p></td>
-<td><p>none</p></td>
-<td><p>ManiFlow transforms only: live depth augmentation (<code class="docutils literal notranslate"><span class="pre">ejbl</span></code>). The pipeline installs <code class="docutils literal notranslate"><span class="pre">opencv-contrib</span></code> from the HVLA requirements when it is set.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--enable-crop</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--enable-crop</span></code></p></td>
 <td><p>off</p></td>
 <td><p>ManiFlow transforms only: build <code class="docutils literal notranslate"><span class="pre">target_front_crop_rgb</span></code> on the client.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--use-calibrated-cameras</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--use-calibrated-cameras</span></code></p></td>
 <td><p>on</p></td>
 <td><p>Use the fixed sim2real camera intrinsics; <code class="docutils literal notranslate"><span class="pre">--no-use-calibrated-cameras</span></code> uses each episode’s recorded intrinsics.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--use-render-params</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--use-render-params</span></code></p></td>
 <td><p>off</p></td>
 <td><p>On a rendered dataset, reproduce each episode’s camera pose, HDRI, table material, lights, exposure and backdrop. Needs <code class="docutils literal notranslate"><span class="pre">--no-use-calibrated-cameras</span></code>; with <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> add <code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--replay-block-identity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--replay-block-identity</span></code></p></td>
 <td><p>on</p></td>
 <td><p>On a glyph/colour-rendered dataset, paint each episode’s recorded block letters and colours and prompt with the recorded goal. Success is graded on the source block names either way.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code></p></td>
 <td><p>off</p></td>
 <td><p>Start episodes in waves, so each wave shares one episode’s recorded scene lighting. Needs a rendered dataset and <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>; not with <code class="docutils literal notranslate"><span class="pre">--replay</span></code> or calibrated cameras.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--eval-table-z-offset</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--eval-table-z-offset</span></code></p></td>
 <td><p>none</p></td>
 <td><p>Extra world-frame Z offset (m) for the table and blocks after the queue setup, e.g. <code class="docutils literal notranslate"><span class="pre">-0.02</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--replay-gripper-close-target</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--replay-gripper-close-target</span></code></p></td>
 <td><p>none</p></td>
 <td><p>Override the binary gripper close target (radians).</p></td>
 </tr>
