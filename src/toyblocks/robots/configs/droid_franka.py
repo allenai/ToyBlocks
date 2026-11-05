@@ -18,7 +18,7 @@ from toyblocks.robots.actions.relative_joint_position import RelativeJointPositi
 from toyblocks.robots.base_robot import BaseRobot, BaseRobotCfg
 from toyblocks.robots.registration import register_robot
 
-# NOTE(wilbert): this config uses an usd we don't have anywhere, maybe it came from nucleus. Be
+# NOTE: this config uses an usd we don't have anywhere, maybe it came from nucleus. Be
 # aware that this config doesn't work anymore, as it seems nobody is using it
 
 DROID_FRANKA = ArticulationCfg(
@@ -33,7 +33,7 @@ DROID_FRANKA = ArticulationCfg(
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=False,
             solver_position_iteration_count=8,
-            # NOTE (stao): Original codebase https://github.com/arhanjain/polaris/ uses iteration count of 64
+            # NOTE: Original codebase https://github.com/arhanjain/polaris/ uses iteration count of 64
             # From my testing it is possible to massively reduce that (to e.g. 8) with minor stability issues
             # once the other PD parameters are tuned
             # I believe 64 was used originally to try and get the mimic joints to converge better
@@ -76,7 +76,7 @@ DROID_FRANKA = ArticulationCfg(
         ),
         "gripper": ImplicitActuatorCfg(
             joint_names_expr=["finger_joint"],
-            # TODO (stao): @dongwon we need to tune this probably
+            # TODO: this probably needs tuning
             # I did also tune these lower to avoid some sim explosions caused by the gripper forcing the rest of the arm to move
             stiffness=1,
             damping=0.1,
@@ -114,7 +114,7 @@ EE_FRAME_TRANSFORMER_CFG = FrameTransformerCfg(
 ### Controller definitions ###
 
 ARM_RELATIVE_JOINT_TARGET_ACTION = RelativeJointPositionActionCfg(
-    # TODO (stao): this fixes gripper drifting issues but may or may not be harder for RL. Might need some tuning
+    # TODO: this fixes gripper drifting issues but may or may not be harder for RL. Might need some tuning
     joint_names=["panda_joint.*"],
     scale=0.2,
     clip={".*": (-1.0, 1.0)},

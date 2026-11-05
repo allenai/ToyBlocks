@@ -102,14 +102,6 @@ agentic = [
     "websockets",
 ]
 
-deployment = [
-    "vlagents==0.2.0",
-    "rcs-core==0.7.2",
-    "rcs-fr3==0.7.2",
-    # "rcs-zed==0.7.2",
-    # "rcs-robotiq2f85==0.7.2,
-]
-
 docs = [
     "pydata-sphinx-theme==0.18.0",
     "sphinx==9.0.4",
@@ -130,17 +122,16 @@ override-dependencies = [
     # In some cases, it install the latest one, that breaks things
     "warp-lang<1.13",
 
-    # NOTE(wilbert): if using isaacsim|lab from nvidia's index, we need to force to use our version
+    # NOTE: if using isaacsim|lab from nvidia's index, we need to force to use our version
     # as the isaacsim|lab packages will require to install an old version of tyro, viser, and websockets
     "tyro>=1.0.13",
     "viser>=1.0.29",
     "websockets>=13.1",
     "lerobot==0.4.3",
-    # rcs-core 0.7.2 (deployment) caps gymnasium <0.30, but isaaclab pins 1.2.0 and lerobot needs
-    # >=1.1.1, so every env (sim, eval, sim2real's maniflow+deployment) failed to resolve.
+    # isaaclab pins gymnasium 1.2.0 and lerobot needs >=1.1.1.
     "gymnasium==1.2.0",
     # lerobot pulls opencv-python-headless, which overwrites the same cv2/ directory as the
-    # opencv-python that rcs_core/rcs_zed need, breaking cv2.imshow (no GTK backend).
+    # opencv-python every install gets (see dependencies), breaking cv2.imshow (no GTK backend).
     # A never-true marker drops the headless requirement entirely.
     "opencv-python-headless; sys_platform == 'never'",
     "huggingface_hub>=1.3.4",
@@ -159,14 +150,14 @@ override-dependencies = [
     "fastapi>=0.123,<0.126",
     "uvicorn>=0.31.1",
     "idna>=3.18",
-    # NOTE(wilbert): these overrides are needed for molmo2
+    # NOTE: these overrides are needed for molmo2
     "fsspec==2024.6.1",
     # molmo2 pins transformers<5.0; keep molmo_flow's >=4.37.1 floor (plus the maniflow <5.18 cap) instead.
     "transformers>=4.37.1,<5.18",
 ]
 
 [tool.uv.sources]
-# NOTE(wilbert): uhmmm, seems this lerobot version is way too old (from 2025 T_T)
+# NOTE: uhmmm, seems this lerobot version is way too old (from 2025 T_T)
 # lerobot = { git = "https://github.com/huggingface/lerobot", rev = "0cf864870cf29f4738d3ade893e6fd13fbd7cdb5" }
 dlimp = { git = "https://github.com/kvablack/dlimp", rev = "ad72ce3a9b414db2185bc0b38461d4101a65477a" }
 

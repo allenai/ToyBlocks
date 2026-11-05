@@ -244,7 +244,7 @@ the failure count dropping and the remaining failures moving to harder states.
 
 ## Worked example
 
-Run end to end on one RTX 5090 (Nov 2026, `naman/dev`). The source was a
+Run end to end on one RTX 5090 (Nov 2026). The source was a
 16-episode vecgen stack-3 dataset with 10 blocks per scene.
 
 | Step | Command | Result |

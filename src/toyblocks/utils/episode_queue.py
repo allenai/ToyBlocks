@@ -87,8 +87,7 @@ def filter_setup_to_scene(setup: dict, scene_obj_names: Sequence[str]) -> dict:
     first.  Objects the scene has but the setup omits are left alone -- they keep their
     post-``_reset_idx`` value, as :func:`apply_setup` documents.
 
-    Copied from ``origin/bennedh/demo-2`` (commit 5834afa5) on 2026-09-02 so that
-    ``agentic_robotics``'s ``ToyBlocksEnv`` imports against this branch too.
+    Kept here so that ``agentic_robotics``'s ``ToyBlocksEnv`` can import it.
 
     :param setup: Setup dict as built by ``toyblocks.utils.episode_dataset.load_setups``
     :param scene_obj_names: Names of the scene's rigid objects
@@ -163,7 +162,7 @@ def apply_setup(
             env_idx, jp.tolist(), jp.numel(), num_joints,
         )
 
-    # TODO (rmh) - hardcoded 7-DOF; derive from env config
+    # TODO - hardcoded 7-DOF; derive from env config
     if "robot_gripper_position" in setup:
         if num_joints <= 7:
             raise ValueError(

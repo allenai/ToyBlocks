@@ -42,7 +42,7 @@ class LiftEnv(BaseEnv):
         return {"object_pos": object_pos, "object_quat": object_quat, "goal_pos": goal_pos, "object_to_tcp": object_to_tcp, "object_to_goal": object_to_goal, "tcp_pos": tcp_pos, "tcp_quat": tcp_quat}
 
     def _get_rewards(self) -> torch.Tensor:
-        # TODO (stao): isaac lab uses a _compute_intermediate_values method to avoid recomputing lines like below. not sure if we should adopt that as well
+        # TODO: isaac lab uses a _compute_intermediate_values method to avoid recomputing lines like below. not sure if we should adopt that as well
         # for ref, maniskill does the same but instead passes the output of get_observations as a dictionary to functions like _get_rewards
         object_to_tcp = self.ee_frame.data.target_pos_w[:, 0] - self.block.data.root_pos_w
         reach_reward = 1 - torch.tanh(object_to_tcp.norm(dim=-1) * 5)

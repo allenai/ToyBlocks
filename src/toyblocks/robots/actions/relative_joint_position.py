@@ -40,7 +40,7 @@ class RelativeJointPositionAction(JointAction):
                 if self._apply_max_target_per_joint:
                     assert len(self.cfg.max_target_diff_norm) == len(self._joint_ids)
     def process_actions(self, actions: torch.Tensor):
-        # NOTE (stao): default isaac lab action processing might be backwards, they scale + shift then clip.
+        # NOTE: default isaac lab action processing might be backwards, they scale + shift then clip.
         # store the raw actions
         self._raw_actions[:] = actions
         # clip actions

@@ -210,7 +210,7 @@ class Viewer:
         self._server.scene.add_grid("/ground", width=10.0, height=10.0, cell_size=0.1)
         
         self._robot_urdf_handles: dict[str, viser.extras.ViserUrdf] = dict()
-        # TODO (stao): copy isaac gui viewer pose
+        # TODO: copy isaac gui viewer pose
         self._server.initial_camera.position = (1.0, 1.0, 2.0)
         self._server.initial_camera.look_at = (0.0, 0.0, 0.0)
 

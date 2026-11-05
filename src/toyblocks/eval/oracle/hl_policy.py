@@ -1,6 +1,6 @@
 """Oracle high-level policy: an FF plan turned into per-tick pixel-coordinate action strings.
 
-Ported from the TAMP submodule's ``evals/oracle_hl_policy.py`` (pinned commit 34bb2901).
+Ported from the former TAMP submodule's ``evals/oracle_hl_policy.py``.
 The plan comes from FF (toyblocks's vendored ``vecgen/symbolic/ff_planner``), the camera
 from the live front-camera sensor, and the semantic argument layout from
 ``tamp/blocks/action_config.yaml``. Step effects are checked by the PDDL success gate's own

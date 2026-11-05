@@ -1,6 +1,6 @@
 # TAMP 
 
-<!-- TODO (stao): maybe remove this readme or incorporate it into some documentation for how to add a new domain, predicates etc. -->
+<!-- TODO: maybe remove this readme or incorporate it into some documentation for how to add a new domain, predicates etc. -->
 
 ## Code Structure
 
@@ -10,7 +10,7 @@
 `<domain>/problems`: holds all problem PDDL files. Each problem PDDL file corresponds with one data generator
 `<domain>/predicates`: holds all predicates for a given `<domain>`
 
-<!-- TODO (stao): currently organized so that we / others can add new domains. Need to evaluate how complicated that is. Also need to evaluate
+<!-- TODO: currently organized so that we / others can add new domains. Need to evaluate how complicated that is. Also need to evaluate
 whether predicates can be shared between domains? -->
 
 ## Generate environment code from PDDL

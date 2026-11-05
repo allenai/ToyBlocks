@@ -17,8 +17,8 @@ HTML ``#t=from,to`` media fragment).
 
 Usage:
     python scripts/task_gallery.py \\
-        --datasets-root data/datasets/unmerged --prefix jul26_hvla --out-dir data/gallery
-    python scripts/task_gallery.py --out-dir <dir> --serve --port 8080
+        --datasets-root data/datasets/unmerged --prefix <experiment-id> --out-dir data/gallery
+    python scripts/task_gallery.py --out-dir <dir> --no-build --serve --port 8080
 """
 
 from __future__ import annotations
@@ -459,8 +459,9 @@ def main() -> int:
     ap.add_argument(
         "--prefix",
         nargs="+",
-        default=["jul26_hvla"],
-        help="Experiment prefix(es) to scan for; families from all of them share one page",
+        default=None,
+        help="Experiment prefix(es) to scan for; families from all of them share one page "
+        "(required unless --no-build)",
     )
     ap.add_argument(
         "--family-suffix", default="_3b", help="Suffix the execution stage appends to family dirs"
@@ -474,6 +475,8 @@ def main() -> int:
     args = ap.parse_args()
 
     if not args.no_build:
+        if not args.prefix:
+            ap.error("--prefix is required to build the gallery (pass --no-build to only serve it)")
         build(args)
     if args.serve:
         serve(Path(args.out_dir), args.port)

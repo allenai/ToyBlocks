@@ -222,7 +222,7 @@ class AlignEnv(BaseEnv):
         return corner_points_rel_flat.reshape(N, K * 3)
 
     def _compute_goals(self):
-        # TODO (sumeetb): rename this. This fn actually computes everything rl-env specific that tamp won't 
+        # TODO: rename this. This fn actually computes everything rl-env specific that tamp won't 
         # need to compute or will get from somewhere else.
         self.goal_pos = self.goal.data.root_pos_w.clone() - self.scene.env_origins
         self.goal_pos[:, 2] = self.block_sizes[:,2] / 2 + self.table_height_offset

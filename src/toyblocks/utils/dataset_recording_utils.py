@@ -42,7 +42,7 @@ class _NumpyEncoder(json.JSONEncoder):
         try:
             return super().default(o)
         except TypeError:
-            # TODO (rmh) - falls back to repr(o); hides type bugs in serialized metrics
+            # TODO - falls back to repr(o); hides type bugs in serialized metrics
             return repr(o)
 
 

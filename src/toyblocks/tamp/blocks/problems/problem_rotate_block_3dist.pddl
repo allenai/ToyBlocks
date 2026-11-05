@@ -1,7 +1,7 @@
 (define (problem rotate_block_3dist)
     ; Variant of rotate_block.pddl that adds three distractor cuboids
     ; (block_red1 / block_green / block_blue), matching the scene used to
-    ; record /weka/robots-default/jasonl/TAMP/datasets/train/apr28_rotate_3dist.
+    ; record the apr28_rotate_3dist dataset.
     ; Goal is unchanged from rotate_block.pddl: rotate block_r from o1 to o2.
     (:domain blocks-tamp)
     (:objects

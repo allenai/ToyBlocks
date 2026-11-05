@@ -10,7 +10,7 @@ def _payload(tag: str) -> dict[str, str]:
 
 
 def test_prune_retains_entry_for_m_when_k_below_chunk_period() -> None:
-    """Reproduce Naman's K=0, M=500, 1000ms chunk: age must reach M after 2nd infer."""
+    """K=0, M=500 with a 1000ms chunk: age must reach M after 2nd infer."""
     chunk_ms = 1000.0
     buf = HLLatencyBuffer(
         update_interval_ms=0.0,
@@ -48,7 +48,7 @@ def test_prune_without_chunk_margin_drops_stale_entry() -> None:
 
 
 def test_k_ge_chunk_gives_expected_age() -> None:
-    """K=1000, M=500 with 1000ms chunks → served age 1000ms (Naman table)."""
+    """K=1000, M=500 with 1000ms chunks → served age 1000ms."""
     chunk_ms = 1000.0
     buf = HLLatencyBuffer(
         update_interval_ms=chunk_ms,

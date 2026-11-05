@@ -21,22 +21,28 @@ from toyblocks.domain_randomization import interpreter as I
 from toyblocks.domain_randomization.camera import _sample_episode_offsets
 from toyblocks.domain_randomization.seeds import _stable_seed_salt
 
-# Every reference run available locally, cheapest rung first. A run writes TWO render_params
-# -- an empty `blocks/` split and the real one -- so name the real path explicitly.
+# The reference render runs, cheapest rung first, are subdirectories of $TOYBLOCKS_PARITY_RENDERS
+# (one render output per run); without it the tests skip. A run writes TWO render_params -- an
+# empty `blocks/` split and the real one -- so name the real path explicitly.
+_RENDERS_ROOT = os.environ.get("TOYBLOCKS_PARITY_RENDERS", "")
+_REAL_PARAMS = os.path.join("blocks_success", "blocks_failure", "meta", "render_params.json")
 RECORDINGS = {
-    "rung0_PINNED_repro":
-        "/tmp/claude-1004/rung0_base/blocks_success/blocks_failure/meta/render_params.json",
-    "allrand_full":
-        "/tmp/claude-1004/allrand_ref/blocks_success/blocks_failure/meta/render_params.json",
-    "local_lights_only":
-        "/tmp/claude-1004/locallights_ref/blocks_success/blocks_failure/meta/render_params.json",
+    name: os.path.join(_RENDERS_ROOT, run, _REAL_PARAMS) if _RENDERS_ROOT else ""
+    for name, run in (
+        ("rung0_PINNED_repro", "rung0_base"),
+        ("allrand_full", "allrand_ref"),
+        ("local_lights_only", "locallights_ref"),
+    )
 }
+_NO_ROOT = "set TOYBLOCKS_PARITY_RENDERS to the directory holding the reference render runs"
 SALT_SOURCE = "blocks_success"          # basename of job["out_dir"] for these runs
 
 
 @pytest.fixture(params=sorted(RECORDINGS), ids=sorted(RECORDINGS))
 def recording(request):
     path = RECORDINGS[request.param]
+    if not path:
+        pytest.skip(_NO_ROOT)
     if not os.path.exists(path):
         pytest.skip(f"no recorded render at {path}")
     R = json.load(open(path))
@@ -48,6 +54,8 @@ def recording(request):
 def _recorded():
     """The rung-0 run, for the tests that pin the salt behaviour specifically."""
     p = RECORDINGS["rung0_PINNED_repro"]
+    if not p:
+        pytest.skip(_NO_ROOT)
     if not os.path.exists(p):
         pytest.skip(f"no recorded render at {p}; re-run the rung-0 baseline")
     return json.load(open(p))

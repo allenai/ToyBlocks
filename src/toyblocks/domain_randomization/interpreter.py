@@ -118,7 +118,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     sky_vb_prob = (float(_sky_vb_raw) if isinstance(_sky_vb_raw, (int, float))
                    and not isinstance(_sky_vb_raw, bool) else None)
     sky_visible_bg = bool(_sky_vb_raw) if sky_vb_prob is None else True
-    # per-problem diversity (b15373f0): salt the (possibly fixed) skybox seed with prob_salt so
+    # per-problem diversity: salt the (possibly fixed) skybox seed with prob_salt so
     # each problem draws a different HDRI/rotation sequence. rseed_base+prob_salt (not rseed) so an
     # explicit skybox.seed in the flags still diverges across problems.
     sky_rng = np.random.default_rng(int(sky.get("seed", rseed_base)) + 999 + prob_salt)
@@ -185,7 +185,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     # iso_dist: log, seed}. Disables auto-exposure once here; per-wave values sampled + applied
     # below (global, like the dome). Dumps the settings so we can VERIFY they exist + take effect. ---
     exp_spec = (flags or {}).get("exposure")
-    # rseed_base+prob_salt so a fixed exposure.seed still diverges per problem (b15373f0 policy).
+    # rseed_base+prob_salt so a fixed exposure.seed still diverges per problem (as above).
     exp_rng = (np.random.default_rng(int(exp_spec.get("seed", rseed_base)) + 777 + prob_salt)
                if exp_spec else None)
     if exp_spec is not None:
@@ -215,7 +215,7 @@ def setup(sim, flags, job=None, units=None, episodes=(), override_cams=None, *,
     # a yaml that worked before is bit-identical.
     scen_rng = scen_p = _sseed = _w = None
     if _scen_mix:
-        # rseed_base+prob_salt so a fixed scenarios.seed still diverges per problem (b15373f0 policy).
+        # rseed_base+prob_salt so a fixed scenarios.seed still diverges per problem (as above).
         _sseed = ((int(scen_spec.get("seed", rseed_base)) + prob_salt)
                   if isinstance(scen_spec, dict) else rseed)
         scen_rng = np.random.default_rng(_sseed + 31337)

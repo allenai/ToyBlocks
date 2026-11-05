@@ -26,7 +26,7 @@ FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.spawn.usd_path = FRANKA_ROBOTIQ_OLD_USD_
 FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.spawn.disable_gravity = True
 FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.spawn.activate_contact_sensors = True
 FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.init_state.pos = (0.0, 0.0, 0.0)
-# TODO (stao): @naman @jason where is updated_franka.usd from? Is it the same as used by other people e.g. Polaris (arhan's project)
+# TODO: where is updated_franka.usd from? Is it the same one Polaris (github.com/arhanjain/polaris) uses?
 FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.init_state.joint_pos = {
     "panda_joint1": 0.0,  # base rotation
     "panda_joint2": math.pi / 4,  # shoulder forward
@@ -62,7 +62,7 @@ FRANKA_ROBOTIQ_GRIPPER_ARTICULATION_CFG.actuators = {
         effort_limit=1.0,
         velocity_limit=1.0,
     ),
-    # NOTE (stao):this passive thing that isaac lab uses does not work for our franka robotiq robot. I don't know why :(
+    # NOTE:this passive thing that isaac lab uses does not work for our franka robotiq robot. I don't know why :(
     # "passive": ImplicitActuatorCfg(
     #     joint_names_expr=[".*_inner_finger_joint", ".*_inner_knuckle_joint", "right_outer_knuckle_joint"],
     #     stiffness=0.0,
@@ -99,7 +99,7 @@ EE_FRAME_TRANSFORMER_CFG = FrameTransformerCfg(
 ### Controller definitions ###
 
 ARM_RELATIVE_JOINT_TARGET_ACTION = RelativeJointPositionActionCfg(
-    # TODO (stao): this fixes gripper drifting issues but may or may not be harder for RL. Might need some tuning
+    # TODO: this fixes gripper drifting issues but may or may not be harder for RL. Might need some tuning
     joint_names=["panda_joint.*"],
     scale=0.2,
     clip={".*": (-1.0, 1.0)},  # Clip actions to [-1, 1] before scaling

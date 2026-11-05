@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# TODO(wilbert): get the ones that are built locally using the docker cli
+# TODO: get the ones that are built locally using the docker cli
 image_choices=(
     "toyblocks-main-base:latest"
     "toyblocks-main-maniflow:latest"

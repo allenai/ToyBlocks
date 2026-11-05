@@ -18,7 +18,7 @@ currently skipped until a block face annotation catalog is available.
 ``goal.hl_prompt``) when present; otherwise it converts ``setup["pddl_goal"]``
 via :func:`pddl_goal_to_prompt`.
 
-TODO(rmh): :func:`_collapse_typed_stack` is a deliberate hack that re-derives
+TODO: :func:`_collapse_typed_stack` is a deliberate hack that re-derives
 stack structure from the rendered quantified goal so same-type stacks read as
 "stack 2 red blocks". It is a stopgap until PDDL-goal-to-English is unified
 (ideally one canonical implementation shared with TAMP's ``goal_spec``).
@@ -204,7 +204,7 @@ def _type_noun(type_name: str) -> str:
 # ---------------------------------------------------------------------------
 # Orientation map — parsed from domain.pddl
 # ---------------------------------------------------------------------------
-# TODO(rmh): Orientation-to-face resolution is disabled until a block face
+# TODO: Orientation-to-face resolution is disabled until a block face
 # annotation catalog (block_catalog.json) exists that maps die-face constants
 # (one–six) to the actual symbols painted on each block's faces.  Without
 # that catalog, orientation prompts produce meaningless descriptions like
@@ -352,7 +352,7 @@ def _literal_to_english(
 def _collapse_typed_stack(body, var_types: dict[str, str]) -> str | None:
     """Collapse a same-type quantified stack goal into ``"stack N <color> blocks"``.
 
-    TODO(rmh): this is a hack. It re-derives stack structure from the already
+    TODO: this is a hack. It re-derives stack structure from the already
     lifted goal body (``on``/``on_table`` over quantified vars) purely to make
     the rendered English read naturally, instead of the goal being described
     properly at its source. It should remain a stopgap until goal-to-language
@@ -674,7 +674,7 @@ def pddl_goal_to_english(
         name = p["name"]
         args = p["args"]
 
-        # TODO(rmh): describe the target in painted-symbol terms once a block
+        # TODO: describe the target in painted-symbol terms once a block
         # face catalog exists; until then emit the raw orientation index.
         if name == "ori_of" and len(args) >= 2:
             logger.warning(
@@ -818,7 +818,7 @@ class PromptResolver:
     :meth:`prompt_for_env` returns :data:`IDLE_PROMPT_PLACEHOLDER` for env slots
     that never received a setup; drained-queue envs keep their last prompt.
 
-    # TODO(rmh): orientation map loading is disabled until a block face
+    # TODO: orientation map loading is disabled until a block face
     # annotation catalog is available.  Re-enable when block_catalog.json
     # lands and orientation prompts can reference painted symbols.
     """

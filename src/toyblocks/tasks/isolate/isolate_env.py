@@ -493,7 +493,7 @@ class IsolateEnv(BaseEnv):
             goal_yaw_quat[:, 3] = torch.sin((goal_theta + pmath.pi / 2) / 2)
             pointing_down = torch.zeros(b, 4, device=self.device)
             pointing_down[:, 1] = 1.0  # 180° around x-axis = pointing down
-            # (sumeetb): Original code for resetting the EE to yaw-align with the block-goal dir
+            # Original code for resetting the EE to yaw-align with the block-goal dir
             # ee_target_quat = math.quat_mul(goal_yaw_quat, pointing_down)
             ee_target_quat = math.quat_mul(
                 randomization_utils.random_quaterion(b, (0.0, 0.0), (0.0, 0.0), (-torch.pi, torch.pi), self.device),

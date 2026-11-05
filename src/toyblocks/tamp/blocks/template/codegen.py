@@ -859,7 +859,7 @@ def assert_goal_text_supported(goal_text: str, block_names: List[str]) -> None:
 
 
 def parse_pddl_randomization_ranges_from_text(text: str) -> Dict:
-    # NOTE (stao): in the future randomizations and PDDL will just be defined in python instead of having to make parsers
+    # NOTE: in the future randomizations and PDDL will just be defined in python instead of having to make parsers
     """Parse the randomization ranges from the PDDL text."""
     randomization_ranges = {}
     for line in text.split("\n"):
@@ -1301,7 +1301,7 @@ def generate_environment_code(
         template = f.read()
 
 
-    # NOTE (stao): Because we cannot reconfigure in isaac lab / change non-sim state randomizations such as cube scales, at runtime, we hardcode a max number of options
+    # NOTE: Because we cannot reconfigure in isaac lab / change non-sim state randomizations such as cube scales, at runtime, we hardcode a max number of options
     # and make sure during task gen and data gen, these MAX_NON_SIM_STATE_RANDOMIZATIONS are always used.
     # Also means number of parallel envs has to be a multiple of MAX_NON_SIM_STATE_RANDOMIZATIONS.
 
@@ -1403,7 +1403,7 @@ def generate_environment_code(
             env_slots = [i % MAX_NON_SIM_STATE_RANDOMIZATIONS for i in range(self.num_envs)]
         self.env_slots = env_slots
         self.env_slots_t = torch.tensor(env_slots, device=self.device, dtype=torch.long)
-        # NOTE (stao): I think we might want to just get rid most of the codegen code here and stick most of the code into the template_env.py file
+        # NOTE: I think we might want to just get rid most of the codegen code here and stick most of the code into the template_env.py file
         # Round-robin slots need num_envs to cover them evenly; an explicit map
         # spawns exactly the slots the queue needs.
         if getattr(self.cfg, "env_slots", ()):

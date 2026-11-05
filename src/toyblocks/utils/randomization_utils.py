@@ -49,7 +49,7 @@ ORI_QUATERNIONS = np.array([
 ])
 def random_cube_orientation_symmetry(n: int, device: torch.device):
     global ORI_QUATERNIONS
-    # NOTE (stao): this is copied from tamp codebase, not the best place to put this code...
+    # NOTE: this is copied from tamp codebase, not the best place to put this code...
     if isinstance(ORI_QUATERNIONS, np.ndarray):
         ORI_QUATERNIONS = torch.tensor(ORI_QUATERNIONS, device=device)
     return ORI_QUATERNIONS[torch.randint(0, ORI_QUATERNIONS.shape[0], (n,))]

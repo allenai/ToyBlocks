@@ -350,8 +350,8 @@ class Place(Skill):
         """What the rest of each env's program needs from this placement.
 
         Scans the skills after this place until the held block is picked again: its own
-        flips (by direction) and rotate, which the new spot should allow (naman/dev
-        02b9a693 reads the same requirement from the HL facts that made FF move the
+        flips (by direction) and rotate, which the new spot should allow (the TAMP place-pose
+        generator read the same requirement from the HL facts that made FF move the
         block), and the flips and rotates of other blocks that have not moved by then,
         which the new spot should not obstruct.
         """

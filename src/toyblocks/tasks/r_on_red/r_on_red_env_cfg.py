@@ -1,7 +1,7 @@
 """Config for the "R on Red" task.
 
 Matches the scene/physics of the old TAMP ``BlocksSceneCfg`` used to collect
-the ``mar16_red_high`` dataset (``/weka/jasonl/TAMP/datasets/unmerged/``).
+the ``mar16_red_high`` dataset.
 The goal is to place a red R-shaped block on a red target cube in the
 presence of three blue distractor cubes.
 
