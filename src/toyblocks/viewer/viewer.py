@@ -74,6 +74,12 @@ class ViewerCfg:
     """Whether to ignore trajectories that have no frames saved for viewing other than the reset frame."""
     share_url: bool = False
     """Use this setting to allow viser to share a public url (handy if using beaker)"""
+    minimal_gui: bool = False
+    """Strip the viser front-end down toward the scene itself: dark mode, no logo or share button,
+    the control panel docked to the right edge and minimized to a rail strip, so the browser opens
+    on the scene alone (viser >= 1.1; older viser docks it but starts it expanded), and no debug
+    markers (goal and block frame arrows, cube-corner spheres). For a screen-facing view where the
+    panel is not the subject and nothing in the viewer can be interacted with."""
 
 class Viewer:
     def __init__(self, cfg: ViewerCfg = ViewerCfg()):
@@ -82,6 +88,29 @@ class Viewer:
         # initialize server
         self._server = viser.ViserServer()
         self._server.gui.set_panel_label("ToyBlocks Viewer")
+        if self.cfg.minimal_gui:
+            main_panel = getattr(self._server.gui, "main_panel", None)
+            if main_panel is None:
+                # viser < 1.1: the layout flag is the only way to dock the panel, and it starts expanded.
+                self._server.gui.configure_theme(
+                    dark_mode=True,
+                    show_logo=False,
+                    show_share_button=False,
+                    control_layout="collapsible",
+                    control_width="small",
+                )
+            else:
+                # viser 1.1 deprecated control_layout in favour of main_panel placement. Panel
+                # commands are replayed to clients that connect later, so every browser opens with
+                # the panel minimized; the widgets stay one click away on the rail.
+                self._server.gui.configure_theme(
+                    dark_mode=True,
+                    show_logo=False,
+                    show_share_button=False,
+                    control_width="small",
+                )
+                main_panel.dock_right()
+                main_panel.minimize()
         self._server.scene.set_up_direction("+z")
         self._server.scene.add_light_ambient(name="/World/ambient_light", color=(255, 255, 255), intensity=1.0)
 
@@ -324,7 +353,12 @@ class Viewer:
                     self.select_entity(self._rigid_objects[k])
             create_rigid(k, rigid_object)
 
-        for name, marker in base_env.visualization_markers.items():
+        # The markers are Isaac's debug visuals (goal and block frame arrows, cube-corner spheres).
+        # They are meaningless where nothing in the viewer can be acted on, and they are most of the
+        # handles updated per frame -- eight spheres per marked block -- so minimal_gui drops them:
+        # with no marker objects registered, frames carry no marker poses and no handles are made.
+        markers = dict() if self.cfg.minimal_gui else base_env.visualization_markers
+        for name, marker in markers.items():
             # wrap visualize() to cache the last world-space translations and orientations
             marker._viewer_last_translations = None
             marker._viewer_last_orientations = None
@@ -338,7 +372,7 @@ class Viewer:
                     return orig(translations=translations, orientations=orientations, **kwargs)
                 return cached_visualize
             marker.visualize = _make_cached_visualize(marker, original_visualize)
-        self._marker_objects = base_env.visualization_markers
+        self._marker_objects = markers
         self._cube_corner_colors = [(255,0,0),(255,128,0),(255,255,0),(0,255,255),(0,255,0),(0,0,255),(255,0,255),(0,255,128)]
 
         self._env_id_map = {id: i for i, id in enumerate(self.cfg.env_ids)}
