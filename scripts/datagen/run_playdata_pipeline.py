@@ -5,12 +5,12 @@ Pipeline:
   task-gen   Generate PDDL scenes                     (task_gen/play_scene.py)
   env        Build env packages + reset states         (generate_task_from_pddl.py)
   play       Generate play data                        (vecgen/run.py --play)
-  render   Render each play problem (opt-in: --render)
+  render     Render each play problem                   (opt-in: --render-pass)
   merge      Merge goal-reached episodes into one LeRobot dataset (scripts/datagen/merge_datasets.py)
   annotate   Annotate the merged dataset               (annotate_target_xy.py)
 
 Play data records exactly like the datagen pipeline's execution stage (same
-LeRobot recorder, Parquet only; images come from --render). Episodes whose goal was
+LeRobot recorder, Parquet only; images come from --render-pass). Episodes whose goal was
 reached go to ``blocks_success`` and missed ones to ``blocks_failure``, so the merge keeps
 only goal-reached episodes. The merge hardlinks every rendered video instead of copying it.
 
@@ -26,17 +26,18 @@ high-level actions.
 The play stage runs on the vecgen engine (``scripts/vecgen/run.py --play``): no TAMP and
 no planner workers. Each goal is one FF call from the symbolic state read off the sim
 (with the derived geometric facts), and the plan runs as batched vecgen skills.
---render (or --render-local) renders each problem inside its play job, right after play,
-with the datagen pipeline's render defaults (the RI training set's flags and sidecars).
+--render-pass FLAGS.yaml[:N] renders each problem inside its play job, right after play, with
+the datagen pipeline's render defaults. Repeat the flag for more looks.
 
-Every stage runs on this machine, one problem per GPU (--local-gpus, default every visible GPU).
+Every stage runs locally, one problem per GPU (--local-gpus, default every visible GPU).
 Datasets land under --output-root (default data/).
 
 Usage:
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play \\
       --num-pddls 8 --env-per-pddl 16 --play-num-envs 8 \\
       --max-plans-per-env 20 --min-successful-plans-per-env 10 --local-gpus 0 1 2 3
-  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --render \\
+  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play \\
+      --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml \\
       --num-pddls 2 --usd-library train_blocks_large
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --resume
 
@@ -107,8 +108,7 @@ PARAM_GROUPS: list[tuple[str, str | None, list[tuple[str, str, str]]]] = [
         ("abandon_plan_percent", "abandon-plan-percent", "float"),
     ]),
     ("Render", "render", [
-        ("render_flags", "render-flags", "str"),
-        ("render_n", "render-n", "int"),
+        ("render_pass", "render-pass", "[str]"),
         ("render_skip_cameras", "render-skip-cameras", "[str]"),
         ("render_skip_failure_episodes", "render-skip-failure-episodes", "bool"),
         ("render_extra", "render-extra", "[str]"),
@@ -213,7 +213,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--play-record-videos", action="store_true",
                         help="Record the front / gripper camera videos while playing (run.py "
                              "--record-videos); without it play records Parquet only and images "
-                             "come from --render")
+                             "come from --render-pass")
     parser.add_argument("--dfa-spec", default=None,
                         help="DFA strategy choosing the goals (e.g. "
                              "src/toyblocks/playdata/dfa/library/flip_search.yaml) instead of "
@@ -350,7 +350,7 @@ def main() -> int:
         "task_gen": not args.skip_task_gen,
         "env": not args.skip_env,
         "play": not args.skip_play,
-        "render": args.render or args.render_local,
+        "render": bool(dg.resolve_render_passes(args)),
         "merge": not args.skip_merge,
         "annotate": not args.skip_annotate,
     }
@@ -568,7 +568,8 @@ def main() -> int:
     # The annotator projects goals into the front camera: needs recorded (--play-record-videos)
     # or rendered episodes.
     if enabled["annotate"] and not render_ran and not args.play_record_videos:
-        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need --render)")
+        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need "
+                    "--render-pass or --play-record-videos)")
         enabled["annotate"] = False
     if enabled["annotate"]:
         log.info("=" * 60)

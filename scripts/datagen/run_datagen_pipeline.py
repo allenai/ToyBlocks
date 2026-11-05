@@ -5,8 +5,8 @@ Pipeline:
   task-gen            Generate PDDL tasks              (task_gen/rotate.py)
   env                 Build the env packages + reset states (generate_task_from_pddl.py)
   execution           Run vecgen per problem (scripts/vecgen/run.py)
-  render            Render finished execution (opt-in): --render pipelined into the
-                      GPU-slot pool, or --render-local coupled inside each execution job
+  render              Render finished execution (opt-in): one --render-pass per look,
+                      scheduled by --render-schedule
   merge               Merge successful datasets        (scripts/datagen/merge_datasets.py)
   annotate            Annotate the merged dataset      (annotate_target_xy.py)
 
@@ -16,13 +16,14 @@ and records the LeRobot dataset (Parquet only unless --vecgen-record-videos) int
 execution/<slug>/. --exec-num-envs and --seed apply; episodes
 per problem default to --env-per-problem (the reset states). The flow needs no TAMP checkout.
 
-With --render / --render-local each finished problem is rendered
+With --render-pass FLAGS.yaml[:N] each finished problem is rendered
 (scripts/render/render.py) and the merge consumes the rendered episodes instead of the
-execution data. The render defaults are the RI training set's: the
-glyphs_trainsplit_symmetric flags, one copy per episode, the 224 RGB and rg8_55_224 depth
-sidecars, left_camera skipped and failure episodes skipped.
+execution data. Repeat the flag for more looks: each pass renders every episode into its own
+job_<name> directory and the merge takes them all. The defaults around a pass are one copy per
+episode, the 224 RGB and rg8_55_224 depth sidecars, left_camera skipped and failure episodes
+skipped.
 
-Every stage runs on this machine, one problem per GPU slot (--local-gpus, default every visible
+Every stage runs locally, one problem per GPU slot (--local-gpus, default every visible
 GPU, x --local-gpu-workers); each step sees a single GPU. Datasets land under --output-root
 (default data/): <root>/datasets/unmerged/<exp>/ and <root>/datasets/merged/train/<exp>/.
 
@@ -32,12 +33,14 @@ Usage:
   python run_datagen_pipeline.py --experiment-id jun23_rotate --interactive
   python run_datagen_pipeline.py --experiment-id jun23_rotate --local-gpus 0 1
   python run_datagen_pipeline.py --experiment-id jun23_rotate --resume
-  python run_datagen_pipeline.py --experiment-id jun23_rotate --render-local
-  python run_datagen_pipeline.py --experiment-id jun23_rotate --render-local \
+  python run_datagen_pipeline.py --experiment-id jun23_rotate \
+      --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+  python run_datagen_pipeline.py --experiment-id jun23_rotate \
+      --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml \
       --render-extra="--extra_depth g12_224"
 
-The video sidecars have no dedicated --render-* flag; RI's (--extra_rgb 224 --extra_depth
-rg8_55_224) are on by default and --render-extra overrides them. --extra_rgb 224 writes videos/observation.images.<cam>_224/ (the HVLA training
+The video sidecars have no dedicated --render-* flag. --extra_rgb 224 and --extra_depth
+rg8_55_224 are on by default and --render-extra overrides them. --extra_rgb 224 writes videos/observation.images.<cam>_224/ (the HVLA training
 sidecar, Pillow BILINEAR, byte-compatible with reencode_to_224_batch.py). --extra_depth
 g12_224 writes the depth equivalent as lossless gray12le HEVC with a short per-camera GOP
 -- ~0.16x the bytes of the older rg8_224 and far cheaper to read cold; both decode to
@@ -199,14 +202,7 @@ RENDER_ITEM_PREFIX = "render:"
 #: render.py prints "all jobs done" and then hangs in Isaac teardown, so every local render
 #: goes through this wrapper, which keys completion on the marker and SIGKILLs the group.
 RUN_LOCAL_RENDER = Path(__file__).resolve().parents[2] / "scripts" / "render" / "run_local_render.py"
-#: The RI training set's domain-randomization flags (glyph + colour train split, symmetric).
-PLAIN_RENDER_FLAGS = "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
-
-RENDER_FLAGS_DEFAULT = (
-    "src/toyblocks/domain_randomization/flags/"
-    "render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"
-)
-#: RI's video sidecars and GOPs; --render-extra (appended after) overrides any of them.
+#: The video sidecars and GOPs every pass gets; --render-extra (appended after) overrides them.
 RENDER_RI_SIDECARS = ("--extra_rgb", "224", "--extra_depth", "rg8_55_224",
                         "--extra_rgb_GOP", "2", "--rgb_GOP", "2")
 
@@ -271,7 +267,7 @@ def local_env_argv(args, pddl, envs_dir: str) -> list[str]:
 
 
 def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
-                        flags_path: Path | None = None, renders_per_episode: int | None = None,
+                        flags_path: Path, renders_per_episode: int,
                         enable_gi: bool = False) -> list[str]:
     """The render.py command for one problem, with the settings the RI training set used.
 
@@ -289,7 +285,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
                               in the env package, and the generated table has
                               MAX_NON_SIM_STATE_RANDOMIZATIONS (8) of them.
 
-    The RI video sidecars (RENDER_RI_SIDECARS) come before ``--render-extra``, which can
+    The video sidecars (RENDER_RI_SIDECARS) come before ``--render-extra``, which can
     override them (render.py is last-wins).
 
     render.py is run BY ABSOLUTE PATH with -u, never ``-m`` and never imported: it sibling-imports
@@ -301,7 +297,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         str(src_dir),
         "--output", str(out_dir),
         "--envs_dir", envs_dir,
-        "-N", str(args.render_n if renders_per_episode is None else renders_per_episode),
+        "-N", str(renders_per_episode),
         "--num_envs", str(args.render_local_num_envs),
         "--skip_initial_step",
         "--resume",
@@ -315,11 +311,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
     # ONE flag with every camera after it. render.py declares --skip_cameras as a plain
     # nargs="*" store, so a repeated flag OVERWRITES: passing it twice keeps only the last camera
     # and silently renders the rest.
-    # Without a YAML render.py uses its own defaults, which sample nothing: that is how
-    # --render-non-randomized renders with no visual DR.
-    _flags = flags_path or (Path(args.render_flags) if args.render_flags else None)
-    if _flags is not None:
-        argv += ["--flags", str(_flags.resolve())]
+    argv += ["--flags", str(flags_path.resolve())]
     if args.render_skip_cameras:
         argv += ["--skip_cameras", *args.render_skip_cameras]
     # ALWAYS after --skip_cameras, and never the last thing before --render-extra: nargs="*"
@@ -339,13 +331,10 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
     argv += list(RENDER_RI_SIDECARS)
     argv += render_extra_tokens(args)
     # A pass's IDENTITY goes after the extra. render.py is last-wins, so a shared
-    # --render-extra carrying -N or --flags would otherwise rewrite the non-randomized pass
-    # into N randomized copies sitting in a directory named non_randomized -- and every count
-    # would still read (N+1)x. The normal pass passes neither, so an extra still wins there.
-    if flags_path is not None:
-        argv += ["--flags", str(flags_path.resolve())]
-    if renders_per_episode is not None:
-        argv += ["-N", str(renders_per_episode)]
+    # --render-extra carrying -N or --flags would otherwise rewrite one pass into another:
+    # its copies would land in a directory named after a YAML it was not rendered with, and
+    # every count would still look right.
+    argv += ["--flags", str(flags_path.resolve()), "-N", str(renders_per_episode)]
     return argv
 
 
@@ -432,14 +421,9 @@ def parse_render_pass(spec: str) -> tuple[str, int]:
 def resolve_render_passes(args) -> list[tuple[str, int]]:
     """Every pass this run should produce, as (flags YAML, copies per source episode).
 
-    ``--render-pass`` names them. ``--render-randomized`` and ``--render-non-randomized`` are
-    shorthand for the two most common ones.
+    ``--render-pass`` is the only source: one entry per flag, in the order given.
     """
     passes = [parse_render_pass(s) for s in (getattr(args, "render_pass", None) or [])]
-    if getattr(args, "render_randomized", False) and args.render_flags:
-        passes.append((args.render_flags, args.render_n))
-    if getattr(args, "render_non_randomized", False):
-        passes.append((args.render_non_randomized_flags or PLAIN_RENDER_FLAGS, 1))
     seen, unique = {}, []
     for flags, copies in passes:
         name = render_job_name(flags)
@@ -593,9 +577,9 @@ def merge_shipped_problems(base_dir: Path) -> list[str]:
 class LocalRenderScheduler:
     """Queues each problem's local render the moment its execution finalizes.
 
-    The coupled mode (``--render-local``) appends the render to the execution job's own
+    The coupled schedule appends the render to the execution job's own
     shell chain, so the render holds the slot its execution just used. This pipelined mode
-    (``--render``) makes the render an independent item in the SAME slot pool,
+    (``--render-schedule pipelined``) makes the render an independent item in the SAME slot pool,
     eligible as soon as execution N finalizes, so it can start while execution N+1 is still
     running whenever a slot is free.
 
@@ -735,10 +719,10 @@ class LocalRenderScheduler:
     def _state_of(self, problem: str) -> str:
         """Worst state across every pass this run owes for *problem*.
 
-        With --render-non-randomized a problem is only SHIPPED when BOTH the randomized and
-        the original dataset are on disk: merge globs render/out/job_*, so a half-finished
-        problem would otherwise contribute N copies where (N+1) were promised and nothing would
-        report it. ABSENT beats UNRENDERABLE beats SHIPPED.
+        With more than one --render-pass a problem is only SHIPPED when EVERY pass is on disk:
+        merge globs render/out/job_*, so a half-finished problem would otherwise contribute
+        fewer copies than were promised and nothing would report it.
+        ABSENT beats UNRENDERABLE beats SHIPPED.
         """
         states = [local_render_state(d, problem) for d in self._out_dirs]
         for worst in (RENDER_ABSENT, RENDER_UNRENDERABLE):
@@ -1192,8 +1176,7 @@ PARAM_GROUPS: list[tuple[str, str | None, list[tuple[str, str, str]]]] = [
         "Render",
         "render",
         [
-            ("render_flags", "render-flags", "str"),
-            ("render_n", "render-n", "int"),
+            ("render_pass", "render-pass", "[str]"),
             ("render_skip_cameras", "render-skip-cameras", "[str]"),
             ("render_skip_failure_episodes", "render-skip-failure-episodes", "bool"),
             ("render_extra", "render-extra", "[str]"),
@@ -1332,25 +1315,28 @@ def prompt_params(
 
 
 def add_render_args(parser: argparse.ArgumentParser) -> None:
-    """The ``--render*`` flags (shared with run_playdata_pipeline.py)."""
+    """The ``--render*`` flags (shared with run_playdata_pipeline.py).
+
+    ``--render-pass`` is the only flag that turns the stage on. Every other flag here applies to
+    EVERY pass the run produces, so a run cannot give two passes different cameras or schedules.
+    """
     parser.add_argument(
-        "--render-randomized",
-        "--rerender",
-        action="store_true",
-        dest="render_randomized",
-        help="Render each problem's recorded episodes with visual domain randomization and "
-        "merge those instead of the execution data. Requires --render-flags, the "
-        "randomization YAML. Execution records no cameras, so this is the pass that produces "
-        "the images. --render is the old spelling. Use --render-schedule to choose how the "
-        "renders are scheduled against the executions",
+        "--render-pass",
+        action="append",
+        metavar="FLAGS.yaml[:N]",
+        help="Render one pass with this flags YAML, optionally N copies of every source "
+        "episode. Repeat the flag for more looks: each pass renders the same episodes and "
+        "lands in its own job_<name> directory, and the merge takes them all. This is the only "
+        "flag that turns the render stage on. src/toyblocks/domain_randomization/flags/ ships "
+        "render_flags_plain.yaml for a plain render and the allrand files for visual domain "
+        "randomization",
     )
     parser.add_argument(
         "--render-schedule",
-        "--rerender-schedule",
         choices=["pipelined", "coupled"],
         default=None,
-        help="How each render is scheduled against the executions. Both run on this machine "
-        "and produce identical pixels, so this is a throughput and observability choice. "
+        help="How each render is scheduled against the executions. Applies to every pass. Both "
+        "produce identical pixels, so this is a throughput and observability choice. "
         "'coupled' (default) appends the render to that problem's execution job, holding one "
         "slot across both phases: faster with more than one worker. 'pipelined' queues the "
         "render as its own item in the shared GPU-slot pool as soon as that problem's execution "
@@ -1358,112 +1344,28 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "status, at some throughput cost",
     )
     parser.add_argument(
-        "--render-local-stall-timeout",
-        "--rerender-local-stall-timeout",
-        type=int,
-        default=3600,
-        help="Render (local): SIGKILL the render if it prints nothing for this long. Success is "
-        "decided by the 'all jobs done' marker and the on-disk result, never by exit status, "
-        "because render.py hangs in Isaac teardown after finishing its work",
-    )
-    parser.add_argument(
-        "--render-local-num-envs",
-        "--rerender-local-num-envs",
-        type=int,
-        default=8,
-        help="Render (local): envs per render wave. This is a FLOOR, not a preference: "
-        "plan_block_sizes skips the problem unless this covers every block-size slot in the env "
-        "package (8 by default). 8 keeps the encoder's RSS survivable beside Isaac",
-    )
-    parser.add_argument(
-        "--render-non-randomized",
-        action="store_true",
-        help="Render: ALSO render each source episode once with the randomized sections of the "
-             "flags YAML removed -- the same scene and cameras, nothing sampled. Multiplexes the "
-             "dataset: with -N the merged result is (N+1)x the source instead of Nx. Off by "
-             "default. Writes a sibling job dir that merge picks up automatically",
-    )
-    parser.add_argument(
-        "--render-non-randomized-flags",
-        default=None,
-        help="Render: flags YAML for the --render-non-randomized pass. Default: derived "
-             "from --render-flags by dropping every randomized section and keeping the scene "
-             "(cameras, hide_objects, env_spacing, render_mode, carb_settings, texture_cache). "
-             "Pass one explicitly to control exactly what 'the original' looks like",
-    )
-    parser.add_argument(
-        "--render-local-fail-on-video-defects",
-        "--rerender-local-fail-on-video-defects",
-        action="store_true",
-        help="Render (local): fail a problem whose encoder could not publish every video "
-             "(default: off). Without it the problem finalizes as completed with "
-             "status=incomplete_videos and merges with parquet rows whose mp4 is absent, which a "
-             "path-resolving dataloader reads as zeros. Off by default because a failed problem "
-             "renders whole (scripts/render/fast_patch.py fills video holes afterwards)",
-    )
-    # Exact option so a bare --render reports the choice instead of argparse answering
-    # "ambiguous option: --render could match --render-randomized, --render-schedule, ...".
-    parser.add_argument("--render", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--render-local",
-        "--rerender-local",
-        action="store_true",
-        dest="render_local",
-        help="Deprecated spelling of --render-randomized --render-schedule coupled. Every "
-        "render "
-        "is local, so the name described the wrong thing: what it selects is the schedule. "
-        "Still accepted, and still turns the stage on",
-    )
-    parser.add_argument(
-        "--render-pass",
-        action="append",
-        metavar="FLAGS.yaml[:N]",
-        help="Render one pass with this flags YAML, optionally N copies of every source "
-        "episode. Repeat the flag for more looks: each pass renders the same episodes and "
-        "lands in its own job_<name> directory, and the merge takes them all.",
-    )
-    parser.add_argument(
-        "--render-flags",
-        "--rerender-flags",
-        dest="render_flags",
-        default=None,
-        help="The render flags YAML, as a path readable on this machine. Required whenever a "
-             "render runs: it describes how the scene is set up and drawn, and it is recorded "
-             "in every problem's render_params.json. The deterministic keys alone give a plain "
-             "render (render_flags_plain.yaml); adding the sampled sections makes it a visual "
-             f"domain-randomization YAML ({RENDER_FLAGS_DEFAULT} is the RI training set's)",
-    )
-    parser.add_argument(
-        "--render-n",
-        "--rerender-n",
-        type=int,
-        default=1,
-        help="Render: rendered copies per source episode (default: 1)",
-    )
-    parser.add_argument(
         "--render-skip-cameras",
-        "--rerender-skip-cameras",
         nargs="*",
         default=["left_camera"],
-        help="Render: camera names not to render (default: left_camera, as in RI; pass the flag "
+        help="Camera names not to render, in every pass (default: left_camera; pass the flag "
              "with no names to render every camera)",
     )
     parser.add_argument(
         "--render-skip-failure-episodes",
-        "--rerender-skip-failure-episodes",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Render: render only blocks_success, as the merge keeps only that split anyway "
-             "(default: on, as in RI)",
+        help="Render only blocks_success, in every pass, as the merge keeps only that split "
+             "anyway (default: on)",
     )
     parser.add_argument(
         "--render-extra",
-        "--rerender-extra",
         nargs="*",
         default=[],
         metavar="ARG",
-        help="Render: extra arguments appended to the render.py command line; they override "
-        "the RI defaults (--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 --rgb_GOP 2). "
+        help="Extra arguments appended to every pass's render.py command line; they override "
+        "the pipeline's defaults (--extra_rgb 224 --extra_depth rg8_55_224 --extra_rgb_GOP 2 "
+        "--rgb_GOP 2). Each pass re-applies its own --flags and -N afterwards, so an extra "
+        "cannot rewrite one pass into another. "
         "Use the = FORM, "
         "quoted as one string: --render-extra=\"--extra_rgb 224 --extra_depth g12_224 "
         "--depth_gop 1000\". The '=' is not optional for a BARE flag -- argparse reads a "
@@ -1471,12 +1373,36 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "--render-extra \"--skip_failure_episodes\" is REJECTED while "
         "--render-extra=\"--skip_failure_episodes\" works. "
         "This is how the video sidecars are requested: --extra_rgb 224 writes a 224x224 RGB "
-        "copy per camera (the HVLA training sidecar), --extra_depth g12_224 the depth one "
+        "copy per camera (the training sidecar), --extra_depth g12_224 the depth one "
         "(lossless gray12le HEVC, short per-camera GOP; rg8_224 is the older, ~6x larger "
         "variant -- both decode to identical depth). "
         "Neither has a dedicated --render-* flag.",
     )
-
+    parser.add_argument(
+        "--render-local-num-envs",
+        type=int,
+        default=8,
+        help="Envs per render wave, in every pass. This is a FLOOR, not a preference: "
+        "plan_block_sizes skips the problem unless this covers every block-size slot in the env "
+        "package (8 by default). 8 keeps the encoder's RSS survivable beside Isaac",
+    )
+    parser.add_argument(
+        "--render-local-stall-timeout",
+        type=int,
+        default=3600,
+        help="SIGKILL a render that prints nothing for this long. Success is "
+        "decided by the 'all jobs done' marker and the on-disk result, never by exit status, "
+        "because render.py hangs in Isaac teardown after finishing its work",
+    )
+    parser.add_argument(
+        "--render-local-fail-on-video-defects",
+        action="store_true",
+        help="Fail a problem whose encoder could not publish every video "
+             "(default: off). Without it the problem finalizes as completed with "
+             "status=incomplete_videos and merges with parquet rows whose mp4 is absent, which a "
+             "path-resolving dataloader reads as zeros. Off by default because a failed problem "
+             "renders whole (scripts/render/fast_patch.py fills video holes afterwards)",
+    )
 
 def add_merge_args(parser: argparse.ArgumentParser) -> None:
     """The ``--merge-*`` / ``--annotate-*`` flags (shared with run_playdata_pipeline.py)."""
@@ -1813,6 +1739,16 @@ def main() -> int:
         enabled = prompt_steps(enabled)
         prompt_params(args, enabled)
         exp = args.experiment_id
+        # Unticking the stage here must also drop the passes. The coupled schedule appends the
+        # render to each execution job from resolve_render_passes, NOT from enabled["render"],
+        # so leaving the passes in place would burn the GPU rendering and then merge the
+        # un-rendered execution tree at exit 0.
+        if not enabled["render"]:
+            args.render_pass = []
+        elif not resolve_render_passes(args):
+            log.error("Render: the stage is ticked but no --render-pass was given, so there is "
+                      "nothing to render. Pass --render-pass FLAGS.yaml[:N]")
+            return 1
 
     # ── Validate parameters ──────────────────────────────────────────
     if args.local:
@@ -1822,10 +1758,6 @@ def main() -> int:
             "choose which GPUs to use and how many problems to run on each.)"
         )
         return 1
-    if args.render:
-        log.error("--render is ambiguous: pass --render-non-randomized for a plain render, or "
-                  "--render-randomized for one with visual domain randomization")
-        return 1
     if args.num_reset_states is not None:
         log.error(
             "--num-reset-states has never had an effect and has been removed: the env stage "
@@ -1833,50 +1765,10 @@ def main() -> int:
             "--env-per-problem (default %d) instead.", parser.get_default("env_per_problem"),
         )
         return 1
-    # --render-local is the old spelling of --render-schedule coupled. Resolve both into
-    # one derived boolean so nothing downstream has to know two spellings.
-    if args.render_local:
-        if args.render_schedule == "pipelined":
-            log.error("--render-local is the coupled schedule, so it contradicts "
-                      "--render-schedule pipelined. Pass --render --render-schedule <mode>")
-            return 1
-        log.warning("--render-local is deprecated; prefer "
-                    "--render-randomized --render-schedule coupled")
-        args.render_schedule = "coupled"
-        args.render_randomized = True
-        # The coupled render is a STAGE, not merely a step inside the execution job, even though
-        # that is where it runs. Three things follow, and all three are load-bearing:
-        #   * LocalRenderScheduler is constructed below on `enabled["render"]`,
-        #     so the post-stage sweep -- the only place either local mode decides what was
-        #     rendered -- covers this mode too;
-        #   * apply_resume can select 'render' as the resume point, so a run interrupted after
-        #     its executions finalized can be finished instead of silently merging raw parquet;
-        #   * render_ran is true from argv, so the base/execution merge fallback is unreachable.
-        # It must stay HERE, after prompt_steps: flipped any earlier, an interactive run could
-        # untick the stage while the execution chains still carry the render -- burning the GPU
-        # and then merging the un-rendered tree. The guard above keys on enabled["render"],
-        # which is still args.render_randomized at this point.
-        enabled["render"] = True
-
     if args.render_schedule is None:
         args.render_schedule = "coupled"
     # The one thing the rest of the run branches on.
     args.render_coupled = args.render_schedule == "coupled"
-
-    # Both modes render on this machine: --render-local inside each execution job,
-    # --render as its own item in the shared GPU-slot pool. The preconditions are
-    # the same, so they are checked once for both rather than only for the coupled mode.
-    # The YAML decides what the rendered data looks like and is recorded in every problem's
-    # render_params.json, so it is named explicitly rather than defaulted.
-    # Asking for a render that resolves to no pass would otherwise skip the stage in silence.
-    if (args.render_pass or args.render_randomized) and not resolve_render_passes(args):
-        log.error("--render-randomized needs --render-flags <YAML>: it describes how the scene "
-                  "is set up and drawn, and is recorded in every problem's render_params.json. "
-                  "The shipped set is in src/toyblocks/domain_randomization/flags/ -- "
-                  "%s for a plain render, %s for the RI training set's randomization. "
-                  "--render-pass FLAGS.yaml[:N] names one directly",
-                  PLAIN_RENDER_FLAGS, RENDER_FLAGS_DEFAULT)
-        return 1
 
     if enabled["render"]:
         # Recording in-physics video and then overwriting it with a render pays the slow
@@ -1887,8 +1779,8 @@ def main() -> int:
                 "(vecgen stays parquet-only and the render renders the cameras)"
             )
             return 1
-        # Every pass, not just the one --render-flags names: a --render-pass YAML that is not
-        # on this machine would otherwise fail inside the render, after the Kit startup.
+        # A --render-pass YAML that is not readable here would otherwise fail inside the
+        # render, after the Kit startup.
         # is_file() RAISES PermissionError (not False) for a path under an unreadable dir.
         for flags, _copies in resolve_render_passes(args):
             try:
@@ -2328,7 +2220,7 @@ def main() -> int:
                     "Merge reads only render/out once this stage is marked complete, so "
                     "there is no dataset to ship. Re-run to render them; to merge the raw "
                     "un-rendered execution tree on purpose, re-run without "
-                    "--render-local/--render.", len(expected),
+                    "--render-pass.", len(expected),
                 )
             return 1
         if lost:
@@ -2372,9 +2264,9 @@ def main() -> int:
                 return 1
             # Name them. The glob is deliberately wide (every job_* dir), but
             # that means a job dir an earlier run wrote is merged again whether or not this
-            # run asked for it -- most easily by dropping --render-non-randomized from an
-            # otherwise identical command, which silently keeps shipping the baseline copies and
-            # leaves the dataset at (N+1)x while the command says Nx.
+            # run asked for it -- most easily by dropping a --render-pass from an otherwise
+            # identical command, which silently keeps shipping that pass's copies and leaves
+            # the dataset larger than the command says.
             log.info("Merge: input job dirs: %s",
                      " ".join(Path(d).name for d in merge_input_dirs))
             owed = {render_job_name(f) for f, _ in resolve_render_passes(args)}
@@ -2417,7 +2309,7 @@ def main() -> int:
     # rendered.
     if enabled["annotate"] and not render_ran and not args.vecgen_record_videos:
         log.warning("Annotate: skipped, the dataset records no camera (pixel goals need "
-                    "--vecgen-record-videos or --render)")
+                    "--vecgen-record-videos or --render-pass)")
         enabled["annotate"] = False
     if enabled["annotate"]:
         log.info("=" * 60)

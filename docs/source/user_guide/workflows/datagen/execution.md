@@ -76,7 +76,7 @@ When `run_datagen_pipeline.py` runs this stage, it sets `run.py`'s flags from it
 | `--seed` | `42` | `--seed` | |
 | `--vecgen-exclude-actions` | `push_to_right,push_next_to` | `--exclude-actions` | Domain actions FF may never plan, also when re-planning. |
 | `--vecgen-pool-slots` | `32` | `--pool-slots` | cuRobo planner pool slots per process. |
-| `--vecgen-record-videos` | off | `--record-videos --enable_cameras` | Normally videos come from [rendering](render.md); this cannot be combined with `--render-randomized`. |
+| `--vecgen-record-videos` | off | `--record-videos --enable_cameras` | Normally videos come from [rendering](render.md); this cannot be combined with a `--render-pass`. |
 | `--vecgen-problems-per-env` | `8` | — | The number of problems sharing one multi-problem env package and process. Above 1 the env stage is skipped: each execution job builds its group's package with `scripts/vecgen/make_superset_env.py` (unless it already exists) and then streams every episode of the group through one `run.py` process, which reads the problems from `problems.json` instead of `--pddl`. |
 
 The pipeline always passes `--record <base>/execution/<slug> --mark-complete --headless`, where

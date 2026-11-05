@@ -134,7 +134,7 @@ def test_profiles_above_the_render_floor_are_refused():
     i % len(table), so fewer envs than profiles leaves the high slots unspawned and
     plan_block_sizes skips EVERY problem. Refuse up front rather than render nothing."""
     rc, out = _run_pipeline(
-        "--render-local", "--render-flags", CAMTEST,
+        "--render-pass", CAMTEST,
         "--num-scene-profiles", "16", "--num-envs", "16", "--exec-num-envs", "16",
     )
     assert rc != 0
@@ -143,5 +143,5 @@ def test_profiles_above_the_render_floor_are_refused():
 
 def test_the_default_pairing_is_not_refused():
     """8 profiles against the default 8 render envs is the common case; it must not trip."""
-    rc, out = _run_pipeline("--render-local", "--render-flags", CAMTEST)
+    rc, out = _run_pipeline("--render-pass", CAMTEST)
     assert "must be at least --num-scene-profiles" not in out

@@ -39,8 +39,7 @@ def mod():
 
 def _args(mod, *extra: str):
     return mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-randomized",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
         *extra,
     ])
 
@@ -521,13 +520,15 @@ def test_the_coupled_report_block_is_gone(mod):
     assert src.count('mark_stage_complete(base, "render")') == 1,         "the local marker must be set in exactly one place (the sweep)"
 
 
-def test_the_local_render_is_a_real_stage_enabled_after_prompt_steps(mod):
-    """Flipped before prompt_steps, an interactive run could untick the stage while the exec
-    chains still carry the render: full GPU cost, then the un-rendered tree merged at exit 0."""
+def test_unticking_the_stage_interactively_also_drops_the_passes(mod):
+    """The coupled schedule appends the render to each execution job from
+    resolve_render_passes, not from enabled["render"]. If unticking the stage left the passes
+    in place, the run would burn the GPU rendering and then merge the un-rendered tree at
+    exit 0."""
     src = PIPELINE.read_text()
-    flip = src.index('        enabled["render"] = True')
-    assert src.index("enabled = prompt_steps(enabled)") < flip, "flip must follow prompt_steps"
-    assert src.index('args.render_schedule == "pipelined"') < flip,         "the schedule guard must stay ahead of the flip, which keys on enabled['render']"
+    clear = src.index("            args.render_pass = []")
+    assert src.index("enabled = prompt_steps(enabled)") < clear, "must follow prompt_steps"
+    assert 'if not enabled["render"]:' in src[clear - 200:clear]
 
 
 def test_a_coupled_run_can_resume_into_the_render(mod, tmp_path):
@@ -570,39 +571,11 @@ def test_worker_count_multiplies_the_slots_per_gpu(mod):
     assert mod.build_parser().get_default("local_gpu_workers") == 1, "default must be a no-op"
 
 
-def test_the_old_spelling_contradicting_the_new_schedule_is_refused():
-    """--render-local IS the coupled schedule, so asking for pipelined too is a contradiction."""
+def test_an_unreadable_pass_yaml_is_caught_before_kit_starts():
+    """Every pass is checked up front; otherwise it dies ~245s into Kit startup per problem."""
     r = subprocess.run(
         [sys.executable, str(PIPELINE), "--experiment-id", "_g",
-         "--render-local", "--render-schedule", "pipelined"],
-        capture_output=True, text=True, cwd=ROOT, timeout=600,
-    )
-    assert r.returncode != 0 and "contradicts" in (r.stdout + r.stderr)
-
-
-def test_the_old_spelling_composes_with_the_stage_flag():
-    """It used to be an alternative to --render; now it only selects the schedule.
-
-    The YAML path is deliberately missing so the run stops at validation: the deprecation
-    warning is emitted before that check, and nothing here should start a render.
-    """
-    r = subprocess.run(
-        [sys.executable, str(PIPELINE), "--experiment-id", "_g",
-         "--render-randomized", "--render-local", "--render-flags", "/nonexistent/none.yaml"],
-        capture_output=True, text=True, cwd=ROOT, timeout=120,
-    )
-    out = r.stdout + r.stderr
-    assert r.returncode != 0 and "readable on THIS machine" in out
-    assert "alternatives" not in out
-    assert "deprecated" in out
-
-
-def test_pipelined_mode_checks_the_flags_yaml_too():
-    """This guard used to sit inside `if args.render_local`, so --render skipped it
-    and burned ~245s of Kit startup per problem before dying."""
-    r = subprocess.run(
-        [sys.executable, str(PIPELINE), "--experiment-id", "_g", "--render-randomized",
-         "--render-flags", "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml"],
+         "--render-pass", "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml"],
         capture_output=True, text=True, cwd=ROOT, timeout=600,
     )
     assert r.returncode != 0 and "readable on THIS machine" in (r.stdout + r.stderr)

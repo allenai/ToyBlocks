@@ -230,8 +230,7 @@ Turn it on with `--render-pass`:
 There is no default YAML, so every pass names the look it renders, and the pipeline records that
 file in the problem's `render_params.json`. [`src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml)
 is the plain baseline and [`src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml)
-adds lighting, material, camera, glyph and colour randomization. `--render-randomized` with
-`--render-flags`, and `--render-non-randomized`, are shorthand for those two passes.
+adds lighting, material, camera, glyph and colour randomization.
 
 A pipeline render defaults to one copy per episode, the 224 RGB and depth sidecars,
 `left_camera` skipped and failure episodes skipped. The `allrand` flags draw HDRI backdrops from

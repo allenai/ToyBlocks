@@ -31,9 +31,6 @@ Render a pass with it:
 --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
 ```
 
-`--render-non-randomized` is shorthand for exactly that pass. It uses this file, so the
-two commands are equivalent.
-
 Add sampled sections to that file and the same renderer produces a different look per episode:
 see [Domain randomization](#domain-randomization). Ask for more than one look in a run with
 [render passes](#render-passes).
@@ -73,9 +70,8 @@ for exactly what is bit-reproducible and what is not.
   they were recorded with, and a flags YAML describing the look.
 - **Output:** a rendered copy of each dataset, with camera videos, read by [merge](merge.md).
 
-The stage is optional in the pipeline. It runs whenever the run resolves to at least one render
-pass, which `--render-pass` always does and the two shorthands below do as well. It is the only
-way to get camera videos without recording them during execution.
+The stage is optional in the pipeline, and `--render-pass` is the only flag that turns it on.
+It is the only way to get camera videos without recording them during execution.
 
 ## Running it
 
@@ -151,12 +147,7 @@ The pipeline flags for this stage are:
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--render-pass FLAGS.yaml[:N]` | none | Add one render pass, optionally `N` copies of every source episode. Repeatable. Turns the stage on. |
-| `--render-flags` | none | The YAML `--render-randomized` uses, as a path readable on the machine you launch the run from. On its own it adds no pass, and `--render-randomized` without it is an error. |
-| `--render-randomized` | off | Shorthand. With `--render-flags F.yaml` and `--render-n N` it is the same as `--render-pass F.yaml:N`. |
-| `--render-n` | 1 | Copies per source episode for `--render-randomized`. |
-| `--render-non-randomized` | off | Shorthand for `--render-pass` [`src/toyblocks/domain_randomization/flags/render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml), which needs no YAML of your own. |
-| `--render-non-randomized-flags` | [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | Makes that shorthand `--render-pass OTHER.yaml` instead. |
+| `--render-pass FLAGS.yaml[:N]` | none | Add one render pass with this flags YAML, optionally `N` copies of every source episode. Repeatable. **The only flag that turns the stage on.** The path must be readable on the machine you launch the run from, and every pass is checked before any work starts. |
 | `--render-schedule` | `coupled` | `coupled` runs each render inside the problem's execution job, `pipelined` queues it in the shared GPU-slot pool. Identical pixels either way. |
 | `--render-skip-cameras` | `left_camera` | Cameras not to render. Pass the flag with no names to render every camera. |
 | `--render-skip-failure-episodes` | on | Render only successful episodes. The merge keeps only those anyway. `--no-render-skip-failure-episodes` renders both splits. |
@@ -165,13 +156,12 @@ The pipeline flags for this stage are:
 | `--render-local-stall-timeout` | 3600 | Kill a render that prints nothing for this many seconds. |
 | `--render-local-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video, instead of finalizing it as `incomplete_videos`. |
 
-`--render-n` belongs to `--render-randomized` only. It does nothing to a
-`--render-non-randomized` pass, which always renders once, and nothing to a `--render-pass`,
-which carries its own `:N`.
+Every flag above except `--render-pass` applies to **every** pass, so one run cannot give two
+passes different cameras, sidecars or schedules. Only the YAML and the copy count vary per pass,
+and both live in the `--render-pass` value itself.
 
 A render cannot be combined with `--vecgen-record-videos`. Despite their names, the
-`--render-local-*` flags apply to both schedules. `--render`, `--render-local` and the
-`--rerender*` spellings are superseded, and the pipeline says so when it sees them.
+`--render-local-*` flags apply to both schedules.
 
 ## Output
 
@@ -246,7 +236,7 @@ Five flags YAMLs ship in `src/toyblocks/domain_randomization/flags/`:
 
 | File | Use |
 |---|---|
-| [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | One fixed look, nothing sampled. The baseline, and what `--render-non-randomized` uses. |
+| [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | One fixed look, nothing sampled. The plain baseline. |
 | [`render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml) | All-random lighting, materials and cameras, plus the train glyph split (symmetry-preserving) and per-env block colours. |
 | [`render_flags_allrand_texcache.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml) | All-random lighting, materials and cameras, without glyph or colour swaps. |
 | [`render_flags_camtest.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml) | A small camera preset for quick tests. It randomizes nothing. See [Common pitfalls](#common-pitfalls). |
@@ -280,11 +270,6 @@ both rendered. The run keeps the first and warns. The merge also reads every `jo
 under `render/out/`, not only the passes this command asked for, so a directory left by an
 earlier run of the same experiment is merged again. Delete it, or use a fresh `--experiment-id`.
 
-`--render-randomized` and `--render-non-randomized` are shorthand for the two most common
-passes and resolve to exactly these entries, so a run can be written either way. Prefer
-`--render-pass`: it names the YAML and the copy count in one place, and it is the only form that
-scales past two looks. [Through the pipeline](#through-the-pipeline) has the translation.
-
 Each pass is a separate renderer invocation rather than extra `-N` iterations within one,
 because a process applies one flags dict before the sim is built, and the per-wave levers (dome,
 skybox, exposure) are scene-global, so a differently-flagged episode sharing a wave would still
@@ -296,8 +281,8 @@ would contribute 3 copies where 4 were promised and nothing would report it.
 randomized passes is that they are comparable: same backdrop, same renderer, only the sampling
 gone. That is why it takes a YAML rather than rendering with no flags at all. Dropping the YAML
 would bring the backdrop geometry back and change the render mode, giving a different scene
-rather than the same one unrandomized. [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) is that baseline, and
-`--render-non-randomized-flags` replaces it when you want a different one.
+rather than the same one unrandomized. [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) is that baseline, and any YAML of your own can
+take its place.
 
 ### N copies within one pass
 
@@ -310,27 +295,15 @@ episodes and frames. Each output episode records the `src_episode_index` it came
 
 Running `render.py` by hand, the same multiplier is `-N` / `--renders_per_episode`.
 
-A plain pass beside a randomized one makes the merged dataset **(N+1) times** the source. Written
-with the shorthands and as passes, these are the same run:
-
-```bash
---render-randomized \
---render-flags src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml \
---render-n 3 \
---render-non-randomized
-```
+A plain pass beside a randomized one makes the merged dataset **(N+1) times** the source:
 
 ```bash
 --render-pass src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml:3 \
 --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
 ```
 
-Both give `job_allrand_texcache_glyphs_trainsplit_symmetric` with 3 copies per episode and
+That gives `job_allrand_texcache_glyphs_trainsplit_symmetric` with 3 copies per episode and
 `job_plain` with 1, so the merge ships 4x the source episodes.
-
-`--render-n 3 --render-non-randomized` on its own is **not** that run. With no
-`--render-randomized` and no `--render-flags` there is no randomized pass for `--render-n` to
-multiply, so it resolves to the plain pass alone, at 1x.
 
 ## Reproducing a recorded look
 

@@ -87,12 +87,11 @@ no longer read. A problem that was executed but never rendered therefore vanishe
 merged dataset. The local flow has [a three-state gate](local.md#what-counts-as-rendered) to
 stop that from happening silently.
 
-The glob is deliberately wide, so that both `job_local` and the `job_local_nonrand` directory of
-[`--render-non-randomized`](render.md#render-passes) are picked up.
-That means a `job_local*` directory left by an **earlier** run is merged again, whether or not
-this run produced it: dropping `--render-non-randomized` from an otherwise identical command keeps
-shipping the old baseline copies. The pipeline only warns about it, so clean up old job directories
-before re-running.
+The glob is deliberately wide, so that every [render pass](render.md#render-passes) is picked up.
+That means a `job_*` directory left by an **earlier** run is merged again, whether or not this run
+produced it: dropping a `--render-pass` from an otherwise identical command keeps shipping that
+pass's copies. The pipeline only warns about it, so clean up old job directories before
+re-running.
 
 ## What `--union_schema` actually does
 
