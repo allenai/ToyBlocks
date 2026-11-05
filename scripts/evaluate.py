@@ -1,10 +1,10 @@
-"""Unified evaluation script for blocksuite Isaac Lab environments.
+"""Unified evaluation script for ToyBlocks Isaac Lab environments.
 
 Supports several action sources, selected by CLI flags:
 
 1. **Policy server** (``--policy_host`` / ``--policy_port``):
-   Connect to a WebSocket + msgpack policy server (``blocksuite.serving``), e.g.
-   ``python -m blocksuite.serving.serve_maniflow_policy`` serving ManiFlow (``--hl oracle``)
+   Connect to a WebSocket + msgpack policy server (``toyblocks.serving``), e.g.
+   ``python -m toyblocks.serving.serve_maniflow_policy`` serving ManiFlow (``--hl oracle``)
    or Molmo2 HL + ManiFlow LL (``--hl model``, with ``--hl_from_model`` here). Supports
    action chunking and the registered obs transforms (``maniflow``,
    ``maniflow_blocks_table``).
@@ -43,10 +43,10 @@ Example usage::
     # python scripts/evaluate.py --task <slug>-v0 --env-cfg.track-collisions ...
 
     # Random-action rollout (no policy)
-    python scripts/evaluate.py --task Blocksuite-Lift-v0 --random_actions --num_envs 4 --num_eval_steps 200
+    python scripts/evaluate.py --task ToyBlocks-Lift-v0 --random_actions --num_envs 4 --num_eval_steps 200
 
     # Zero-action sanity check
-    python scripts/evaluate.py --task Blocksuite-Lift-v0 --num_episodes 3
+    python scripts/evaluate.py --task ToyBlocks-Lift-v0 --num_episodes 3
 
     # Dataset replay via the launcher (starts the queue, no policy server)
     python scripts/launch_eval.py --replay --dataset-path /path/to/lerobot_root \\
@@ -112,7 +112,7 @@ def _merge_render_replay_kit_args() -> None:
     _, dataset_path = _argv_option("--dataset_path", "--dataset-path")
     if not dataset_path:
         return
-    from blocksuite.eval.render_replay import RecordedRenderReplay, merge_kit_args
+    from toyblocks.eval.render_replay import RecordedRenderReplay, merge_kit_args
 
     replay = RecordedRenderReplay.from_dataset(dataset_path)
     extra = replay.kit_args() if replay is not None else ""
@@ -138,18 +138,18 @@ try:
 except ImportError:
     pass
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 simulation_app = launch_app()
 
 # Now safe to import everything that touches isaaclab / omni.
 import tyro
 
 import isaaclab_tasks  # noqa: F401
-import blocksuite.tasks  # noqa: F401
+import toyblocks.tasks  # noqa: F401
 import isaaclab.sim as sim_utils  # noqa: F401
 
-from blocksuite.eval.args import Args
-from blocksuite.eval import evaluate
+from toyblocks.eval.args import Args
+from toyblocks.eval import evaluate
 
 
 def main() -> None:
@@ -161,7 +161,7 @@ def main() -> None:
     # sizes each slot's env count to its queued workload (env_cfg.env_slots),
     # otherwise env i spawns at slot i % N and num_envs has to be a multiple of N.
     # Must run before video_env_ids is derived from num_envs below.
-    from blocksuite.utils.eval_helpers import reconcile_num_envs_with_task
+    from toyblocks.utils.eval_helpers import reconcile_num_envs_with_task
     reconcile_num_envs_with_task(args)
 
     if args.save_video_all_envs:
@@ -173,7 +173,7 @@ def main() -> None:
     # no --env-cfg.robot-id/scene-preset-id override was given). Requires
     # --dataset_path; for queue evals pass the same dataset the queue serves.
     if args.dataset_path:
-        from blocksuite.utils.dataset_provenance import reconcile_env_cfg_with_dataset
+        from toyblocks.utils.dataset_provenance import reconcile_env_cfg_with_dataset
         reconcile_env_cfg_with_dataset(args.env_cfg, args.dataset_path)
 
     evaluate(args)

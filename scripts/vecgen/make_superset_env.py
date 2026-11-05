@@ -1,7 +1,7 @@
 """Build one autogen env package that serves many PDDL problems (problem streaming).
 
 The package spawns the union of the problems' blocks. For each problem, reset states are
-sampled with the stage-1 predicate samplers (``blocksuite.vecgen.sampling``, no TAMP)
+sampled with the stage-1 predicate samplers (``toyblocks.vecgen.sampling``, no TAMP)
 for that problem's blocks while the other blocks are parked on the ground plane behind
 the robot (z = -1.05 m). The package is an
 ordinary gym-registered env (same codegen as ``generate_task_from_pddl.py``) plus
@@ -26,7 +26,7 @@ import sys
 import zlib
 from pathlib import Path
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()
 
@@ -34,8 +34,8 @@ import gymnasium as gym  # noqa: E402
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
 
-from blocksuite.tamp.blocks.camera_view import blocks_in_front_view  # noqa: E402
-from blocksuite.tamp.blocks.template.codegen import (  # noqa: E402
+from toyblocks.tamp.blocks.camera_view import blocks_in_front_view  # noqa: E402
+from toyblocks.tamp.blocks.template.codegen import (  # noqa: E402
     SKIP_PREDICATES,
     extract_clear_blocks,
     extract_goal_block,
@@ -45,16 +45,16 @@ from blocksuite.tamp.blocks.template.codegen import (  # noqa: E402
     reorder_predicates_by_dependencies,
     write_env_package,
 )
-from blocksuite.utils import common_utils, tree_utils  # noqa: E402
-from blocksuite.utils.reset_states_io import pack_reset_states  # noqa: E402
-from blocksuite.utils.robot_init_sampling import (  # noqa: E402
+from toyblocks.utils import common_utils, tree_utils  # noqa: E402
+from toyblocks.utils.reset_states_io import pack_reset_states  # noqa: E402
+from toyblocks.utils.robot_init_sampling import (  # noqa: E402
     CollisionFreeRobotInitSampler,
     RobotInitSamplingConfig,
 )
-from blocksuite.vecgen.sampling import SceneSim, make_sampler  # noqa: E402
-from blocksuite.vecgen.sampling import predicates as spawn_window  # noqa: E402
-from blocksuite.vecgen.sim import VecSim  # noqa: E402
-from blocksuite.vecgen.symbolic.pddl import parse_problem  # noqa: E402
+from toyblocks.vecgen.sampling import SceneSim, make_sampler  # noqa: E402
+from toyblocks.vecgen.sampling import predicates as spawn_window  # noqa: E402
+from toyblocks.vecgen.sim import VecSim  # noqa: E402
+from toyblocks.vecgen.symbolic.pddl import parse_problem  # noqa: E402
 
 GROUND_Z = -1.05
 PARK_ROWS_X = (-0.7, -0.85, -1.0, -1.15, -1.3, -1.45)
@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--pddls", nargs="+", required=True)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--name", required=True, help="package / task slug")
-    ap.add_argument("--domain-path", default="src/blocksuite/tamp/blocks")
+    ap.add_argument("--domain-path", default="src/toyblocks/tamp/blocks")
     ap.add_argument(
         "--num-reset-states", type=int, default=32, help="per problem (multiple of --num-envs)"
     )

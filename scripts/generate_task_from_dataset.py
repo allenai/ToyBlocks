@@ -8,13 +8,13 @@ already writes into every LeRobot recording. Datasets with multiple distinct
 goals are supported: the generated env evaluates all goals and selects per
 sub-env based on the queue setup's ``pddl_goal`` field at runtime (see
 :meth:`BaseEnv.set_episode_goal`). Block-spawn shape and color are derived from
-each block name by :meth:`blocksuite.tamp.blocks.template.codegen.Block.from_names`
+each block name by :meth:`toyblocks.tamp.blocks.template.codegen.Block.from_names`
 (USD assets via ``USD_OVERRIDES``; every other name is a cuboid colored from a
 color word in the name, or a rotating palette when it has none).
 
 The dataset's recorded ``scene_id`` / ``robot_id`` provenance is baked into the
 generated ``env_cfg.py`` (see
-:func:`~blocksuite.utils.dataset_provenance.read_dataset_provenance`), so the
+:func:`~toyblocks.utils.dataset_provenance.read_dataset_provenance`), so the
 package targets the scene the data was collected in rather than the template's
 default; a dataset with no recorded provenance is rejected.
 
@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import tyro
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()
 import compileall
@@ -39,26 +39,26 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List, Tuple
 
-from blocksuite.cli.base_args import BaseArgs
-from blocksuite.domain_randomization.block_variables import (
+from toyblocks.cli.base_args import BaseArgs
+from toyblocks.domain_randomization.block_variables import (
     identity_assignment,
     parse_block_variable_map,
     source_goal,
 )
-from blocksuite.tamp.blocks.pddl_goal_tensor_conversions import (
+from toyblocks.tamp.blocks.pddl_goal_tensor_conversions import (
     assert_goal_atoms_supported,
     filter_goal_atoms,
 )
-from blocksuite.tamp.blocks.template.codegen import (
+from toyblocks.tamp.blocks.template.codegen import (
     assert_goal_text_supported,
     generate_environment_code,
     parse_pddl_goal_from_text,
     task_slug_from_dataset_path,
     write_env_package,
 )
-from blocksuite.utils import episode_dataset
-from blocksuite.utils.dataset_provenance import read_dataset_provenance
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils import episode_dataset
+from toyblocks.utils.dataset_provenance import read_dataset_provenance
+from toyblocks.utils.episode_dataset import (
     SCENE_FURNITURE_PREFIXES,
     distinct_cube_scales,
     normalize_cube_scale,
@@ -80,8 +80,8 @@ class Args(BaseArgs):
 
     python scripts/generate_task_from_dataset.py \
         --dataset-path data/datasets/merged/train/apr15_pnp \
-        --domain-path src/blocksuite/tamp/blocks \
-        --output-dir src/blocksuite/tasks/autogen --headless
+        --domain-path src/toyblocks/tamp/blocks \
+        --output-dir src/toyblocks/tasks/autogen --headless
 
     The output package folder, gym id, and class names use the dataset directory
     basename with hyphens replaced by underscores (override with ``--task-name``).
@@ -89,9 +89,9 @@ class Args(BaseArgs):
 
     dataset_path: str = ""
     """LeRobot dataset directory (root with data.parquet, data/chunk-*/, or blocks/data/chunk-*/)."""
-    domain_path: str = "src/blocksuite/tamp/blocks"
+    domain_path: str = "src/toyblocks/tamp/blocks"
     """Path to the folder containing the env template + predicate definitions."""
-    output_dir: str = "src/blocksuite/tasks/autogen"
+    output_dir: str = "src/toyblocks/tasks/autogen"
     """Directory that will contain the generated task folder (slug)."""
     task_name: str = ""
     """Override the slug derived from the dataset basename (must be a valid Python identifier)."""

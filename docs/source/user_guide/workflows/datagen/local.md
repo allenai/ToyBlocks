@@ -37,7 +37,7 @@ get-toyblocks-assets --asset-manifest asset_manifest.json
 
 Re-rendering with the default flags draws HDRI backdrops from polyhaven (installed with the base
 assets) and the separately licensed Laval indoor set; see
-[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops).
 
 Re-rendering needs real disk. A run of a few problems at `--rerender-n 2` writes several GB of
 video; check free space before a long run rather than discovering it mid-encode.
@@ -150,7 +150,7 @@ Execution records state and actions only — vecgen spawns no cameras by default
 from the re-render stage, which replays the recorded states with no physics and renders them
 under the domain randomization in a flags YAML. See [Re-rendering](rerender.md) for what that
 stage does and every flag it takes, and the
-[YAML reference](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md)
+[YAML reference](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md)
 for how to write the randomization.
 
 Two flags turn the stage on, and they pick how it is scheduled against the executions. Both
@@ -172,7 +172,7 @@ They are alternatives; passing both is refused. Neither can be combined with
 physics-render cost for frames nothing reads.
 
 The render defaults are the RI training set's: the flags YAML
-`src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`
+`src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`
 (`--rerender-flags`), one copy per episode (`--rerender-n 1`), the 224 RGB and `rg8_55_224` depth
 sidecars, `left_camera` skipped and failure episodes skipped. The flags YAML must be readable on
 this machine; the pipeline checks it before starting.
@@ -180,7 +180,7 @@ this machine; the pipeline checks it before starting.
 ### Which mode to use
 
 Measured over 4 problems, 2 reps, execution + re-render window only
-([BENCHMARK_local.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/BENCHMARK_local.md)):
+([BENCHMARK_local.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/BENCHMARK_local.md)):
 
 | | 1 slot | 2 slots (`--local-gpu-workers 2`) |
 |---|---|---|
@@ -376,6 +376,6 @@ the pipeline's accounting rather than the render.
 
 - [Automatic Data Generation](../data_generation.md) — the pipeline overview and every pipeline flag
 - [Re-rendering](rerender.md) — the rerender stage and its flags
-- [YAML reference](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md) — writing a randomization YAML
-- [docs/rerender/README_local.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md) — implementation notes, HDRI backdrops and invariants for the pipeline re-render
-- [docs/rerender/BENCHMARK_local.md](https://github.com/allenai/blocksuite/blob/release/docs/rerender/BENCHMARK_local.md) — the coupled-vs-pipelined measurements
+- [YAML reference](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md) — writing a randomization YAML
+- [docs/rerender/README_local.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md) — implementation notes, HDRI backdrops and invariants for the pipeline re-render
+- [docs/rerender/BENCHMARK_local.md](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/BENCHMARK_local.md) — the coupled-vs-pipelined measurements

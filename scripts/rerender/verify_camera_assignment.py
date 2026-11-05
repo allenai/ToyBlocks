@@ -17,7 +17,7 @@ from pathlib import Path
 import av, numpy as np, pyarrow.parquet as pq
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-from blocksuite.data_annotation.annotation_utils import extrinsics_from_camera_pose  # noqa: E402
+from toyblocks.data_annotation.annotation_utils import extrinsics_from_camera_pose  # noqa: E402
 
 DEPK = "observation.depth.camera:front_camera"
 MM = 1000.0

@@ -3,7 +3,7 @@
 # EJBL depth augmentation (evaluate.py --depth_aug ejbl) needs cv2.ximgproc,
 # which is not in the stock opencv-python wheel. Training uses the same pin via
 # HVLA requirements and the maniflow-opencv-contrib Beaker image; eval jobs on
-# blocksuite-main-maniflow install it at runtime when DEPTH_AUG is set.
+# toyblocks-main-maniflow install it at runtime when DEPTH_AUG is set.
 
 install_hvla_opencv_contrib() {
   local req_file="${H_VLA_PATH}/requirements.txt"

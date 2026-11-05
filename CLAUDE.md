@@ -1,4 +1,4 @@
-# CLAUDE Instructions for Blocksuite
+# CLAUDE Instructions for ToyBlocks
 
 ## Critical Rules for AI Code Changes
 
@@ -40,15 +40,15 @@ tmux ls
 ---
 
 ## Project Overview
-- **Blocksuite** is a research codebase for robotic manipulation task generation, data collection, policy training, and evaluation. It integrates Isaac Lab simulation, symbolic task planning (FF) with CuRobo motion planning (the vecgen datagen engine), and policy serving infrastructure.
+- **ToyBlocks** is a research codebase for robotic manipulation task generation, data collection, policy training, and evaluation. It integrates Isaac Lab simulation, symbolic task planning (FF) with CuRobo motion planning (the vecgen datagen engine), and policy serving infrastructure.
 - The architecture is modular: simulation environments, datagen (vecgen), policy serving, and evaluation are separated into distinct packages.
 - Key directories:
-  - `src/blocksuite/`: Core Python package — tasks, blocks domain, datagen (vecgen), serving, evaluation, utilities.
-  - `src/blocksuite/tamp/blocks/`: Blocks domain — PDDL domain + problems, action config, goal checks, env-package templates.
-  - `src/blocksuite/vecgen/`: Datagen engine — FF planning, batched skills, cuRobo v2 planner pool, recording.
-  - `src/blocksuite/tasks/`: Isaac Lab gymnasium environments (lift, flip, rotate, push, pile, etc.).
-  - `src/blocksuite/serving/`: Policy server/client infrastructure (WebSocket + msgpack).
-  - `src/blocksuite/eval/`: Evaluation utilities (replay, metrics, resets).
+  - `src/toyblocks/`: Core Python package — tasks, blocks domain, datagen (vecgen), serving, evaluation, utilities.
+  - `src/toyblocks/tamp/blocks/`: Blocks domain — PDDL domain + problems, action config, goal checks, env-package templates.
+  - `src/toyblocks/vecgen/`: Datagen engine — FF planning, batched skills, cuRobo v2 planner pool, recording.
+  - `src/toyblocks/tasks/`: Isaac Lab gymnasium environments (lift, flip, rotate, push, pile, etc.).
+  - `src/toyblocks/serving/`: Policy server/client infrastructure (WebSocket + msgpack).
+  - `src/toyblocks/eval/`: Evaluation utilities (replay, metrics, resets).
   - `scripts/`: Entry points for datagen, evaluation, task generation, and policy serving.
   - `curobo/`: NVIDIA CuRobo motion planning (editable dependency).
   - `maniflow-tb/`: ManiFlow low-level policy (installs as the `hvla` package; submodule of allenai/maniflow-tb).
@@ -61,28 +61,28 @@ tmux ls
 Orchestrated by `scripts/datagen/run_datagen_pipeline.py` on this machine (one problem per GPU slot: `--local-gpus` x `--local-gpu-workers`; output under `--output-root`, default `data`; `--resume` skips stages marked done in `<base>/.pipeline_state/`):
 1. **Task Generation** (`scripts/task_gen/*.py`): PDDL problems.
 2. **Env** (`scripts/generate_task_from_pddl.py`): PDDL problem → autogen Isaac Lab env package + sampled reset states (`--randomize_robot_init`: collision-free cuRobo IK starts). With `--vecgen-problems-per-env G > 1` the vecgen jobs build multi-problem packages instead (`scripts/vecgen/make_superset_env.py`).
-3. **Execution** (`scripts/vecgen/run.py`, `src/blocksuite/vecgen/`): FF plans per env (`symbolic/`), batched skills on a cuRobo v2 planner pool (`skills/`, `planner/`), verified effects and goals (`symbolic/predicates.py`), LeRobot recording → `execution/<slug>/`.
-4. **Merge / annotate / plot** (`scripts/datagen/merge_datasets.py`, `src/blocksuite/data_annotation/annotate_target_xy.py`, `scripts/datagen/plot_episode.py`).
+3. **Execution** (`scripts/vecgen/run.py`, `src/toyblocks/vecgen/`): FF plans per env (`symbolic/`), batched skills on a cuRobo v2 planner pool (`skills/`, `planner/`), verified effects and goals (`symbolic/predicates.py`), LeRobot recording → `execution/<slug>/`.
+4. **Merge / annotate / plot** (`scripts/datagen/merge_datasets.py`, `src/toyblocks/data_annotation/annotate_target_xy.py`, `scripts/datagen/plot_episode.py`).
 
-Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rerendering (`scripts/rerender/`) runs on `blocksuite.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--rerender-local`; datagen also has `--rerender`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/rerender/README_local.md`.
+Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rerendering (`scripts/rerender/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--rerender-local`; datagen also has `--rerender`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/rerender/README_local.md`.
 
 ### Evaluation
 - `scripts/evaluate.py`: Eval worker: remote policy server, LL oracle, dataset replay, or random actions.
-- `src/blocksuite/serving/serve_maniflow_policy.py`: ManiFlow LL policy server (`--hl oracle`), or Molmo2 HL + ManiFlow LL (`--hl model`).
+- `src/toyblocks/serving/serve_maniflow_policy.py`: ManiFlow LL policy server (`--hl oracle`), or Molmo2 HL + ManiFlow LL (`--hl model`).
 - `scripts/launch_eval.py`: Queue-driven eval launcher: policy server, episode queue and eval workers on this machine.
 
 ### TAMP Domain (Blocks)
-- `src/blocksuite/tamp/blocks/domain.pddl`: Symbolic domain definition.
-- `src/blocksuite/tamp/blocks/action_config.yaml`: Per-action argument layouts (`HL_ARGS`).
-- `src/blocksuite/tamp/blocks/pddl_goal_tensor_conversions.py`: Batched goal-predicate checks on the live sim (eval success gate, oracle step checks).
-- `src/blocksuite/tamp/blocks/template/`: Codegen for autogen env packages from PDDL.
-- `src/blocksuite/tamp/blocks/problems/`: Checked-in PDDL problem files.
+- `src/toyblocks/tamp/blocks/domain.pddl`: Symbolic domain definition.
+- `src/toyblocks/tamp/blocks/action_config.yaml`: Per-action argument layouts (`HL_ARGS`).
+- `src/toyblocks/tamp/blocks/pddl_goal_tensor_conversions.py`: Batched goal-predicate checks on the live sim (eval success gate, oracle step checks).
+- `src/toyblocks/tamp/blocks/template/`: Codegen for autogen env packages from PDDL.
+- `src/toyblocks/tamp/blocks/problems/`: Checked-in PDDL problem files.
 
 ### Serving
-- `src/blocksuite/serving/base_policy.py`: `BasePolicy` interface all policy servers must implement.
-- `src/blocksuite/serving/policy_server.py`: WebSocket+msgpack server.
-- `src/blocksuite/serving/policy_client.py`: Client used by `evaluate.py`.
-- `src/blocksuite/serving/obs_transforms/`: Observation transforms (maniflow, maniflow_blocks_table).
+- `src/toyblocks/serving/base_policy.py`: `BasePolicy` interface all policy servers must implement.
+- `src/toyblocks/serving/policy_server.py`: WebSocket+msgpack server.
+- `src/toyblocks/serving/policy_client.py`: Client used by `evaluate.py`.
+- `src/toyblocks/serving/obs_transforms/`: Observation transforms (maniflow, maniflow_blocks_table).
 
 ## Developer Workflows
 
@@ -104,12 +104,12 @@ python scripts/datagen/run_datagen_pipeline.py --experiment-id oct31_stack3 \
     --env-per-problem 16 --num-envs 16 --exec-num-envs 16
 
 # Or stage by stage for one problem
-problem=src/blocksuite/tamp/blocks/problems/flip.pddl
+problem=src/toyblocks/tamp/blocks/problems/flip.pddl
 task=$(basename "${problem}" .pddl | tr '-' '_')
-python scripts/generate_task_from_pddl.py --domain_path src/blocksuite/tamp/blocks \
+python scripts/generate_task_from_pddl.py --domain_path src/toyblocks/tamp/blocks \
     --pddl ${problem} --num_reset_states 32 --num_envs 16 --seed 0 --output_dir outputs --headless
 python scripts/vecgen/run.py --env-path outputs/${task} --pddl ${problem} \
-    --domain src/blocksuite/tamp/blocks/domain.pddl --num-envs 16 --episodes 32 \
+    --domain src/toyblocks/tamp/blocks/domain.pddl --num-envs 16 --episodes 32 \
     --record datasets/flip/${task} --mark-complete --headless
 ```
 
@@ -140,24 +140,24 @@ python scripts/task_gen/stack_three.py --train --count 50 --out-dir outputs/stac
 
 # Play-data scenes (used by scripts/datagen/run_playdata_pipeline.py)
 python scripts/task_gen/play_scene.py --count 50 --out-dir outputs/play/tasks --seed 42
-# ...and the search scenes the DFA goal policies run on (src/blocksuite/playdata/dfa/AUTHORING.md)
+# ...and the search scenes the DFA goal policies run on (src/toyblocks/playdata/dfa/AUTHORING.md)
 python scripts/task_gen/find_as.py --count 5 --out-dir outputs/find_as/tasks --seed 42
 python scripts/task_gen/search.py --count 5 --out-dir outputs/search/tasks --seed 42
 ```
 
 ## Project-Specific Conventions
-- **Isaac App Launch**: Always call `launch_app()` from `blocksuite.cli.isaac_app` before importing any Isaac Lab modules. This is a hard requirement.
-- **Autogen Tasks**: Generated env packages go under `src/blocksuite/tasks/autogen/*/` (gitignored). They register as `<slug>-v0` gymnasium environments.
+- **Isaac App Launch**: Always call `launch_app()` from `toyblocks.cli.isaac_app` before importing any Isaac Lab modules. This is a hard requirement.
+- **Autogen Tasks**: Generated env packages go under `src/toyblocks/tasks/autogen/*/` (gitignored). They register as `<slug>-v0` gymnasium environments.
 - **PDDL Naming**: PDDL problem basenames become task slugs via `task_slug_from_pddl_path` (hyphens → underscores).
 - **Predicates / skills**: vecgen checks PDDL facts on the sim in `vecgen/symbolic/predicates.py` and executes each domain action with a batched skill in `vecgen/skills/`.
-- **LeRobot Format**: All dataset recording (datagen and eval) uses the one `IsaacDataRecorderLeRobot` in `blocksuite.vecgen.recording` (LeRobot v3, parallel writers stitched at finalize); see `docs/lerobot_recording.md`.
-- **Observation Transforms**: Policy servers and `evaluate.py` use pluggable obs transforms registered in `src/blocksuite/serving/obs_transforms/`.
+- **LeRobot Format**: All dataset recording (datagen and eval) uses the one `IsaacDataRecorderLeRobot` in `toyblocks.vecgen.recording` (LeRobot v3, parallel writers stitched at finalize); see `docs/lerobot_recording.md`.
+- **Observation Transforms**: Policy servers and `evaluate.py` use pluggable obs transforms registered in `src/toyblocks/serving/obs_transforms/`.
 - **`tyro`**: Most CLI scripts use `tyro` for argument parsing (dataclass-based configs).
 - **`uv`**: Use `uv run` to execute scripts within the managed virtualenv.
 
 ## Integration Points
 - **Isaac Lab**: All simulation via Isaac Lab's Python API (requires `--extra isaac`).
-- **FF**: Symbolic planner, vendored (with its binary) in `src/blocksuite/vecgen/symbolic/ff_planner/`.
+- **FF**: Symbolic planner, vendored (with its binary) in `src/toyblocks/vecgen/symbolic/ff_planner/`.
 - **CuRobo**: Motion planning in `./curobo/` (editable install as `nvidia-curobo`).
 - **ManiFlow**: Molmo2 HL in `./molmo2/`, ManiFlow LL in `./maniflow-tb/` (`hvla` package).
 
@@ -168,7 +168,7 @@ python scripts/task_gen/search.py --count 5 --out-dir outputs/search/tasks --see
 | `scripts/generate_task_from_pddl.py` | PDDL → autogen env package + reset states |
 | `scripts/vecgen/run.py` | Datagen execution: FF + batched skills → LeRobot dataset |
 | `scripts/evaluate.py` | Eval worker (policy server, LL oracle, replay, random) |
-| `src/blocksuite/serving/serve_maniflow_policy.py` | ManiFlow / Molmo2 WebSocket policy server |
+| `src/toyblocks/serving/serve_maniflow_policy.py` | ManiFlow / Molmo2 WebSocket policy server |
 | `scripts/launch_eval.py` | Queue-driven eval launcher (local, single or multi GPU) |
 | `scripts/task_gen/*.py` | PDDL problem generators (flip, rotate, push, etc.) |
 | `scripts/datagen/run_datagen_pipeline.py` | End-to-end pipeline orchestrator |

@@ -5,18 +5,18 @@ This is the legacy entry point: pass a checked-in or planner-emitted PDDL via
 __init__.py}`` registering ``<slug>-v0`` with gymnasium. With ``--num_reset_states 0``
 no Isaac stepping happens (only codegen); with ``--num_reset_states > 0`` the
 script also samples reset states by stepping the env through the TAMP-free predicate
-samplers in :mod:`blocksuite.vecgen.sampling` (the same ones ``make_superset_env.py`` uses).
+samplers in :mod:`toyblocks.vecgen.sampling` (the same ones ``make_superset_env.py`` uses).
 
 For the queue-driven eval flow, the dataset-only sibling
 ``scripts/generate_task_from_dataset.py`` skips the GCS PDDL bundle by reading
 ``pddl_goal`` and ``observation.state.object_pose.*`` directly from the LeRobot
 dataset. Both scripts share the codegen helpers in
-:mod:`blocksuite.tamp.blocks.template.codegen`.
+:mod:`toyblocks.tamp.blocks.template.codegen`.
 """
 
 import tyro
 
-from blocksuite.cli.isaac_app import launch_app
+from toyblocks.cli.isaac_app import launch_app
 
 simulation_app = launch_app()
 import compileall
@@ -34,9 +34,9 @@ import numpy as np
 import torch
 import tqdm
 
-from blocksuite.cli.base_args import BaseArgs
-from blocksuite.tamp.blocks.camera_view import blocks_in_front_view
-from blocksuite.tamp.blocks.template.codegen import (
+from toyblocks.cli.base_args import BaseArgs
+from toyblocks.tamp.blocks.camera_view import blocks_in_front_view
+from toyblocks.tamp.blocks.template.codegen import (
     SKIP_PREDICATES,
     assert_goal_text_supported,
     extract_clear_blocks,
@@ -48,17 +48,17 @@ from blocksuite.tamp.blocks.template.codegen import (
     task_slug_from_pddl_path,
     write_env_package,
 )
-from blocksuite.tasks.base_env import BaseEnv
-from blocksuite.tasks.base_env_cfg import BaseEnvCfg
-from blocksuite.utils import common_utils, import_utils, tree_utils
-from blocksuite.utils.reset_states_io import pack_reset_states
-from blocksuite.utils.robot_init_sampling import (
+from toyblocks.tasks.base_env import BaseEnv
+from toyblocks.tasks.base_env_cfg import BaseEnvCfg
+from toyblocks.utils import common_utils, import_utils, tree_utils
+from toyblocks.utils.reset_states_io import pack_reset_states
+from toyblocks.utils.robot_init_sampling import (
     CollisionFreeRobotInitSampler,
     RobotInitSamplingConfig,
 )
-from blocksuite.vecgen.sampling import SceneSim, make_sampler
-from blocksuite.vecgen.sampling.predicates import set_spawn_ranges
-from blocksuite.vecgen.sim import VecSim
+from toyblocks.vecgen.sampling import SceneSim, make_sampler
+from toyblocks.vecgen.sampling.predicates import set_spawn_ranges
+from toyblocks.vecgen.sim import VecSim
 
 #: Rounds of re-sampling an env whose blocks are not all inside the front camera view.
 MAX_OUT_OF_VIEW_RESAMPLES = 20
@@ -71,24 +71,24 @@ class Args(BaseArgs):
 
     Example command:
 
-    python scripts/generate_task_from_pddl.py --pddl src/blocksuite/tamp/blocks/problems/pnp_on_table.pddl \
-        --domain_path src/blocksuite/tamp/blocks --output_dir outputs --headless --my_verbose
+    python scripts/generate_task_from_pddl.py --pddl src/toyblocks/tamp/blocks/problems/pnp_on_table.pddl \
+        --domain_path src/toyblocks/tamp/blocks --output_dir outputs --headless --my_verbose
 
-    For local tasks that load without editing ``blocksuite.tasks`` (see ``tasks/autogen/__init__.py``),
-    write under ``src/blocksuite/tasks/autogen`` (ignored by git for ``problem_*`` packages).
+    For local tasks that load without editing ``toyblocks.tasks`` (see ``tasks/autogen/__init__.py``),
+    write under ``src/toyblocks/tasks/autogen`` (ignored by git for ``problem_*`` packages).
 
     The output package folder name, Gym registration id prefix, and generated Python class names use the
     PDDL file stem with hyphens (``-``) replaced by underscores (``_``).
     """
 
-    pddl: str = "blocksuite/tamp/blocks/problems/pnp_on_table.pddl"
+    pddl: str = "toyblocks/tamp/blocks/problems/pnp_on_table.pddl"
     """The PDDL file to generate task from."""
     seed: Annotated[int, tyro.conf.arg(aliases=["-s"])] = 0
     """Seed for the random number generator."""
-    domain_path: str = "src/blocksuite/tamp/blocks"
+    domain_path: str = "src/toyblocks/tamp/blocks"
     """Path to the folder containing all domain specific files, including predicate definitions, environment template, and problem definitions"""
     output_dir: str = "."
-    """Directory that will contain the generated task folder (slug). Use ``src/blocksuite/tasks/autogen`` for runtime autoload."""
+    """Directory that will contain the generated task folder (slug). Use ``src/toyblocks/tasks/autogen`` for runtime autoload."""
     num_reset_states: int = 1
     """How many initial physics snapshots to sample and save as reset_states.pkl. If 0, only env code is generated (no sim, no pickle)."""
     my_verbose: bool = False
@@ -190,8 +190,8 @@ def generate_env_from_pddl(args: Args, pddl_path: str, output_dir: str):
 
     if os.path.abspath(output_dir) not in sys.path:
         sys.path.insert(0, os.path.abspath(output_dir))
-    # ``import blocksuite.tasks`` (top of this file) already imported
-    # ``blocksuite.tasks.autogen``, so a FileFinder for this very directory is
+    # ``import toyblocks.tasks`` (top of this file) already imported
+    # ``toyblocks.tasks.autogen``, so a FileFinder for this very directory is
     # sitting in sys.path_importer_cache with a directory listing taken before
     # write_env_package created env_folder. That finder only refills its cache
     # when the directory mtime changes, so on a filesystem with coarse mtime

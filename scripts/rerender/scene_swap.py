@@ -19,7 +19,7 @@ the env source and reconcile() returns False without touching the timeline or th
 run with one problem per worker therefore pays exactly zero.
 
 isaaclab / pxr imports are function-local so this module can be imported before the Isaac app is
-launched (same convention as blocksuite.domain_randomization.build).
+launched (same convention as toyblocks.domain_randomization.build).
 """
 from __future__ import annotations
 
@@ -98,7 +98,7 @@ def env_size_table(env_file: Optional[str]) -> Optional[List[float]]:
     The generated ``_setup_scene_objects`` declares ``randomizations`` as a literal whose
     ``block_sizes`` maps each block to one ``[x, y, z]`` per slot. Every block of a slot shares one
     size, and the recorder writes the first block's edge as ``observation.state.cube_scale`` (see
-    ``blocksuite.vecgen.recorder``), so the first non-empty list is the table episodes match.
+    ``toyblocks.vecgen.recorder``), so the first non-empty list is the table episodes match.
     """
     if not env_file or not os.path.exists(env_file):
         return None
@@ -170,12 +170,12 @@ class _ShimEnv:
 def _capture_cfgs():
     """Temporarily make rigid_objects.create_* return a cfg instead of spawning.
 
-    The generated function does `from blocksuite.utils import rigid_objects` INSIDE its body, so
+    The generated function does `from toyblocks.utils import rigid_objects` INSIDE its body, so
     patching the module's attributes is the interception point. Passing return_cfg=True reuses the
     real builders -- per-env size tiling, friction tiling and the cuboid/usd dispatch all stay
     exactly as the template computes them, so this cannot drift from generated envs.
     """
-    from blocksuite.utils import rigid_objects as ro
+    from toyblocks.utils import rigid_objects as ro
 
     originals = {n: getattr(ro, n) for n in ("create_cuboid", "create_toy_block")}
 
@@ -377,7 +377,7 @@ def _rederive_sim_caches(sim, log=print) -> None:
     except Exception as e:                                     # noqa: BLE001 - report, never mask
         log(f"[scene_swap] WARNING could not re-derive env_base_poses ({type(e).__name__}: {e})")
     try:
-        from blocksuite.domain_randomization.render_sim import fix_object_name_mappings
+        from toyblocks.domain_randomization.render_sim import fix_object_name_mappings
         sim.prim_scene_obj_mapping = fix_object_name_mappings(sim.scene, sim.scene.rigid_objects)
         sim.obj_prim_scene_mapping = {v: k for k, v in sim.prim_scene_obj_mapping.items()}
     except Exception as e:                                     # noqa: BLE001

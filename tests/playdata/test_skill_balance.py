@@ -1,18 +1,18 @@
-"""blocksuite.playdata.skill_balance: skill counting and the balanced goal policy."""
+"""toyblocks.playdata.skill_balance: skill counting and the balanced goal policy."""
 import random
 
 import pytest
 
-from blocksuite.playdata.goal_policy import Decision
-from blocksuite.playdata.skill_balance import (
+from toyblocks.playdata.goal_policy import Decision
+from toyblocks.playdata.skill_balance import (
     BalancedSkillCfg,
     BalancedSkillGoalPolicy,
     drop_done_after_non_pnp,
     plan_skills,
     target_shares,
 )
-from blocksuite.playdata.symbolic_state import SymbolicState
-from blocksuite.task_gen.orientations import flip, yaw
+from toyblocks.playdata.symbolic_state import SymbolicState
+from toyblocks.task_gen.orientations import flip, yaw
 
 BLOCKS = ["block_a", "block_i", "block_2", "block_e"]
 

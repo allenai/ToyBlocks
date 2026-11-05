@@ -4,10 +4,10 @@
 #   - the maniflow extra: molmo2 (Molmo2 HL) and maniflow-tb (ManiFlow LL), editable;
 #   - an ffmpeg CLI (expert clip extraction).
 #
-# Build with docker/build_eval_image.sh: the context is a fresh blobless clone of blocksuite at
+# Build with docker/build_eval_image.sh: the context is a fresh blobless clone of ToyBlocks at
 # the requested ref with the curobo, maniflow-tb and molmo2 submodules. One
 # `uv pip install` of every extra resolves the same torch / CUDA / Isaac versions as the vecgen
-# image. The repo is at /root/blocksuite and the venv at /root/.venv.
+# image. The repo is at /root/toyblocks and the venv at /root/.venv.
 
 FROM ubuntu:24.04 AS build
 
@@ -27,8 +27,8 @@ RUN uv venv /root/.venv --python 3.11
 ENV VIRTUAL_ENV=/root/.venv \
     PATH="/root/.venv/bin:$PATH"
 
-COPY . /root/blocksuite
-WORKDIR /root/blocksuite
+COPY . /root/toyblocks
+WORKDIR /root/toyblocks
 
 RUN uv pip install -e ".[dev,isaac,torch-cu128,vecgen,maniflow]" --config-settings editable_mode=strict \
     && get-toyblocks-assets --asset-manifest asset_manifest.json \
@@ -52,7 +52,7 @@ RUN apt-get update -q \
 COPY --from=build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 COPY --from=build /opt/uv-python /opt/uv-python
 COPY --from=build /root/.venv /root/.venv
-COPY --from=build /root/blocksuite /root/blocksuite
+COPY --from=build /root/toyblocks /root/toyblocks
 
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python \
     UV_LINK_MODE=copy \
@@ -61,4 +61,4 @@ ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python \
     OMNI_KIT_ACCEPT_EULA=YES \
     NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=all
-WORKDIR /root/blocksuite
+WORKDIR /root/toyblocks

@@ -17,7 +17,7 @@ Three things here back specific downstream guarantees:
   gitignored, so a stale package is indistinguishable from a fresh one.
 
 Runs without Isaac Lab: codegen needs only stdlib, numpy and gymnasium (pulled in
-by ``blocksuite/tamp/blocks/template/__init__.py``, which registers the template
+by ``toyblocks/tamp/blocks/template/__init__.py``, which registers the template
 env), and the templates themselves are read as text rather than imported.
 """
 
@@ -30,7 +30,7 @@ from pathlib import Path
 
 import pytest
 
-from blocksuite.tamp.blocks.template.codegen import (
+from toyblocks.tamp.blocks.template.codegen import (
     AUTOGEN_PACKAGE_VERSION,
     PREDICATE_ORDER,
     _override_env_cfg_fields,
@@ -50,7 +50,7 @@ from blocksuite.tamp.blocks.template.codegen import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DOMAIN_PATH = REPO_ROOT / "src" / "blocksuite" / "tamp" / "blocks"
+DOMAIN_PATH = REPO_ROOT / "src" / "toyblocks" / "tamp" / "blocks"
 PROBLEMS_DIR = DOMAIN_PATH / "problems"
 
 RANDOMIZATION_KEYS = {"block_size_range", "table_height_range", "friction_range"}
@@ -564,7 +564,7 @@ def test_stale_codegen_version_raises(tmp_path, monkeypatch):
     """
     import gymnasium as gym
 
-    from blocksuite.utils.eval_helpers import _load_task_profiles
+    from toyblocks.utils.eval_helpers import _load_task_profiles
 
     package = tmp_path / "stale_autogen_pkg"
     package.mkdir()

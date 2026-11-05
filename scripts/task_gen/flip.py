@@ -38,7 +38,7 @@ Usage:
 import argparse
 import random
 
-from blocksuite.task_gen import (
+from toyblocks.task_gen import (
     And,
     Block,
     Clear,
@@ -48,7 +48,7 @@ from blocksuite.task_gen import (
     OriOf,
     ProblemSpec,
 )
-from blocksuite.task_gen.orientations import FLIP_TABLES, ORIENTATIONS, flip
+from toyblocks.task_gen.orientations import FLIP_TABLES, ORIENTATIONS, flip
 
 
 def _inverse_flip(goal_ori: str, directions: list[str]) -> list[str]:

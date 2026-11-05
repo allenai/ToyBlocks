@@ -27,11 +27,11 @@ if not OUT.is_absolute():
     OUT = REPO / OUT
 
 DS = {"A": np.load(OUT / "dsA.npz"), "B": np.load(OUT / "dsB.npz")}
-DSNAME = {"A": "blocksuite", "B": "classic"}
+DSNAME = {"A": "toyblocks", "B": "classic"}
 CELLS = [  # (dataset, sim, file, diagonal?)
-    ("A", "blocksuite", "replay_A_in_blocksuite.npz", True),
+    ("A", "toyblocks", "replay_A_in_toyblocks.npz", True),
     ("A", "classic", "replay_A_in_classic.npz", False),
-    ("B", "blocksuite", "replay_B_in_blocksuite.npz", False),
+    ("B", "toyblocks", "replay_B_in_toyblocks.npz", False),
     ("B", "classic", "replay_B_in_classic.npz", True),
 ]
 JOINTS = [f"panda_joint{i+1}" for i in range(7)]

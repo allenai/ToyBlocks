@@ -1,4 +1,4 @@
-"""blocksuite.vecgen.recording.merge on small synthetic LeRobot v3 datasets (no Isaac, no lerobot).
+"""toyblocks.vecgen.recording.merge on small synthetic LeRobot v3 datasets (no Isaac, no lerobot).
 
 Each source is a problem_*/blocks_success dataset with its own episode/frame/task numbering, a
 ragged object_pose column set, optional videos and meta/extra files. The merge must renumber
@@ -18,7 +18,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from blocksuite.vecgen.recording import merge as M
+from toyblocks.vecgen.recording import merge as M
 
 
 def _features(blocks: list[str]) -> dict[str, Any]:

@@ -9,7 +9,7 @@ because its goldens are computed over the fixture rather than over sim.
 
 This test closes that by comparing the fixture against the observation contract
 the Isaac lane records
-(``blocksuite.eval.policy_input_verification.observed_obs_contract``, captured by
+(``toyblocks.eval.policy_input_verification.observed_obs_contract``, captured by
 ``scripts/eval/verify_dataset_loading.py`` and committed under
 ``tests/eval/goldens/``). Both sides are described by the *same* descriptor
 functions, so what is compared is exactly what those functions consider
@@ -42,14 +42,14 @@ from pathlib import Path
 
 import pytest
 
-from blocksuite.eval.policy_input_verification import (
+from tests.serving.policy_input_fixture import FIXTURE_CAMERAS, build_obs
+from toyblocks.eval.policy_input_verification import (
     OBS_CONTRACT_GOLDEN_PREFIX,
     POLICY_INPUT_DEPTH_KEYS,
     POLICY_INPUT_STATE_DIM,
     build_policy_input_transform,
     observed_obs_contract,
 )
-from tests.serving.policy_input_fixture import FIXTURE_CAMERAS, build_obs
 
 GOLDEN_DIR = Path(__file__).resolve().parents[1] / "eval" / "goldens"
 

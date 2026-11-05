@@ -59,7 +59,7 @@ from a LeRobot dataset. To build them by hand:
 ```bash
 DS=/path/to/lerobot_dataset            # any datagen output (vecgen or merged)
 
-# eval env package from the dataset -> src/blocksuite/tasks/autogen/tamper_src (gym id tamper_src-v0)
+# eval env package from the dataset -> src/toyblocks/tasks/autogen/tamper_src (gym id tamper_src-v0)
 python scripts/generate_task_from_dataset.py --dataset-path $DS --task-name tamper_src --headless
 
 # episode queue (one setup per dataset episode)
@@ -200,7 +200,7 @@ the recovery demonstration.
 ```bash
 python scripts/vecgen/run.py \
     --env-path outputs/tamper/round1/unknown_problem \
-    --domain src/blocksuite/tamp/blocks/domain.pddl \
+    --domain src/toyblocks/tamp/blocks/domain.pddl \
     --init-from-scene --reset-state-ids 0 1 2 3 --episodes 4 \
     --num-envs 4 --seed 0 \
     --record outputs/tamper/round1/datasets/problem_unknown_problem --mark-complete \
@@ -220,7 +220,7 @@ Pixel goals project into the front camera, so the annotator needs recorded
 cameras: `--record-videos`, or re-rendered episodes.
 
 ```bash
-python src/blocksuite/data_annotation/annotate_target_xy.py \
+python src/toyblocks/data_annotation/annotate_target_xy.py \
     outputs/tamper/round1/datasets/problem_unknown_problem -j 8
 ```
 

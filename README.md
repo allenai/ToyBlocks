@@ -2,11 +2,11 @@
   <img src="ToyBlocksLogo_letest.svg" alt="ToyBlocks" width="720">
 </p>
 
-# blocksuite
+# ToyBlocks
 
 This repo contains all code for creating toy block domain tasks and (maybe?) RL training
 
-All docs / example commands / workflows can be found at https://allenai.github.io/blocksuite
+All docs / example commands / workflows can be found at https://allenai.github.io/ToyBlocks
 
 If you need to add details about your work (e.g. new rl script, new datagen script, new details on evals etc.) please edit the markdown files in docs/source
 
@@ -44,7 +44,7 @@ export OMNI_KIT_ACCEPT_EULA=YES
 Datagen (vecgen) needs cuRobo v2 (the `curobo` submodule): install the `vecgen` optional group (or
 `tamp`, which adds the rerun / flask debug viewers). The submodule must be initialized first
 (`git submodule update --init curobo`; the `--recursive` command above already does it).
-There is no TAMP submodule any more; the FF planner is vendored in `src/blocksuite/vecgen/symbolic/ff_planner/`.
+There is no TAMP submodule any more; the FF planner is vendored in `src/toyblocks/vecgen/symbolic/ff_planner/`.
 
 ```bash
 uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
@@ -80,17 +80,17 @@ Laval. See
 
 ## Code Organization
 
-All source code in `src/blocksuite/`
+All source code in `src/toyblocks/`
 
-- `src/blocksuite/tasks`: all hand created tasks as well as templates for PDDL based task generation
-- `src/blocksuite/vecgen`: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)
-- `src/blocksuite/robots`: all robot assets and configurations, including controllers
-- `src/blocksuite/serving`: policy serving infrastructure (`BasePolicy`, `PolicyServer`, WebSocket client, obs transforms)
-- `src/blocksuite/wrappers`: gym `Wrapper` subclasses (recording, stats, obs flattening)
-- `src/blocksuite/cli`: command line utilities
-- `src/blocksuite/data_annotation`: dataset annotation utilities
-- `src/blocksuite/utils`: utilities for blocksuite
-- `src/blocksuite/utils/rigid_objects`: utilities for working with rigid objects (e.g. creating them more easily)
+- `src/toyblocks/tasks`: all hand created tasks as well as templates for PDDL based task generation
+- `src/toyblocks/vecgen`: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)
+- `src/toyblocks/robots`: all robot assets and configurations, including controllers
+- `src/toyblocks/serving`: policy serving infrastructure (`BasePolicy`, `PolicyServer`, WebSocket client, obs transforms)
+- `src/toyblocks/wrappers`: gym `Wrapper` subclasses (recording, stats, obs flattening)
+- `src/toyblocks/cli`: command line utilities
+- `src/toyblocks/data_annotation`: dataset annotation utilities
+- `src/toyblocks/utils`: utilities for ToyBlocks
+- `src/toyblocks/utils/rigid_objects`: utilities for working with rigid objects (e.g. creating them more easily)
 
 The ManiFlow and Molmo2 policy code is in the `maniflow-tb/` and `molmo2/` submodules
 
@@ -100,8 +100,8 @@ Both images build from a fresh SSH clone of a ref (push your branch first) and a
 
 ```bash
 # eval image: Isaac + cuRobo + maniflow-tb + molmo2 (policy servers and evaluate.py)
-docker/build_eval_image.sh release /tmp/eval_img        # -> blocksuite-eval:<sha>
+docker/build_eval_image.sh main /tmp/eval_img        # -> toyblocks-eval:<sha>
 
 # slim datagen image: vecgen + cuRobo v2, no policies, no CUDA toolkit
-docker/build_vecgen_image.sh release /tmp/vecgen_img    # -> blocksuite-vecgen:<sha>
+docker/build_vecgen_image.sh main /tmp/vecgen_img    # -> toyblocks-vecgen:<sha>
 ```

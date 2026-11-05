@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 
 def _apply_use_calibrated_cameras_policy(args: SimpleNamespace) -> None:
-    """Mirror blocksuite.eval.run_eval.evaluate() calibrated-camera handling."""
+    """Mirror toyblocks.eval.run_eval.evaluate() calibrated-camera handling."""
     if args.use_calibrated_cameras:
         args.ingest_camera_intrinsics = False
         args.env_cfg.use_calibrated_cameras = True

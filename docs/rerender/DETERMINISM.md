@@ -1,4 +1,4 @@
-# Determinism in rerender and `blocksuite.domain_randomization`
+# Determinism in rerender and `toyblocks.domain_randomization`
 
 What is reproducible, what is not, and which changes moved the line. Every number here was
 measured on this repo (aug24_bigblocks_flip_a, one problem, RTX 5090), not asserted.
@@ -66,7 +66,7 @@ Both callers must therefore sample the FULL episode list in one call:
 * **rerender** does this already via `--fragment_invariant` (default ON): a fragment keeps the
   whole per-problem episode list so its DR matches a single-machine run.
 * **a gym wrapper** must pass `episode_keys=` up front (see
-  `blocksuite_dagger/.../dr_wrapper.py`), after which each reset only *applies* values already
+  `toyblocks_dagger/.../dr_wrapper.py`), after which each reset only *applies* values already
   drawn. Without it the wrapper warns.
 
 This is pinned as a strict `xfail` in

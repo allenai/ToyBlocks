@@ -69,11 +69,11 @@ fi
 generate_task() {
   local episode_indices="$1"
   if [ -n "$PDDL_PROBLEM_FILE" ]; then
-    local pddl_env_path="${ENV_PATH:-src/blocksuite/tasks/autogen}"
+    local pddl_env_path="${ENV_PATH:-src/toyblocks/tasks/autogen}"
     echo "===> generating task from PDDL: ${PDDL_PROBLEM_FILE}"
     python scripts/generate_task_from_pddl.py \
       --pddl "$PDDL_PROBLEM_FILE" \
-      --domain_path src/blocksuite/tamp/blocks \
+      --domain_path src/toyblocks/tamp/blocks \
       --output_dir "$pddl_env_path" \
       --num_reset_states 8 \
       --headless || exit 1
@@ -91,8 +91,8 @@ generate_task() {
     if [ -n "$USD_LIBRARY" ]; then usd_library_arg=(--usd-library "$USD_LIBRARY"); fi
     python scripts/generate_task_from_dataset.py \
       --dataset-path "$DATASET_PATH" \
-      --domain-path src/blocksuite/tamp/blocks \
-      --output-dir src/blocksuite/tasks/autogen \
+      --domain-path src/toyblocks/tamp/blocks \
+      --output-dir src/toyblocks/tasks/autogen \
       --task-name "$TASK_SLUG" \
       "${episode_arg[@]}" \
       "${usd_library_arg[@]}" \

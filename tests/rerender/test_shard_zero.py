@@ -61,7 +61,7 @@ def _stub_sim() -> None:
 
 
 _stub_sim()
-from blocksuite.vecgen.recording.lerobot_recorder import (  # noqa: E402
+from toyblocks.vecgen.recording.lerobot_recorder import (  # noqa: E402
     next_free_shard, shard_dir_for,
 )
 
@@ -106,7 +106,7 @@ def main():
         _check("  after the clear -> shard 0", (i, Path(d).name), (0, "problem_x__s001"))
 
     print("D: sharding is OPT-OUT, and rerender opts out")
-    rec_src = (HERE.parents[1] / "src" / "blocksuite" / "vecgen" / "recording"
+    rec_src = (HERE.parents[1] / "src" / "toyblocks" / "vecgen" / "recording"
                / "lerobot_recorder.py").read_text()
     _check("recorder takes enable_sharding", "enable_sharding: bool = True" in rec_src, True)
     _check("  default is ON, so datagen is unchanged",
@@ -117,7 +117,7 @@ def main():
     _check("rerender passes enable_sharding=False", "enable_sharding=False," in rr, True)
 
     # the real guard, called on a minimal self: it is the first statement in roll_shard
-    from blocksuite.vecgen.recording.lerobot_recorder import IsaacDataRecorderLeRobot as _R
+    from toyblocks.vecgen.recording.lerobot_recorder import IsaacDataRecorderLeRobot as _R
 
     class _Fake:
         _enable_sharding = False

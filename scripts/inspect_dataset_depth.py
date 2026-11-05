@@ -17,7 +17,7 @@ from typing import Any
 import numpy as np
 import tyro
 
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils.episode_dataset import (
     _COL_DEPTH_PREFIX,
     _load_episode_video_metadata,
     _load_lerobot_info,

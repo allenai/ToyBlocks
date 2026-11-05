@@ -47,7 +47,7 @@ the search budget: every "retry" becomes "run K variants in K envs from the same
 3. **Rerender** (unchanged): videos from recorded states.
 4. **Merge / annotate** (unchanged).
 
-## Package layout (`src/blocksuite/vecgen/`)
+## Package layout (`src/toyblocks/vecgen/`)
 
 - `program.py`     skill programs and per-env program state (pure data, torch-free)
 - `segments.py`    batched joint-target segment tables, gather per tick
@@ -65,23 +65,23 @@ the search budget: every "retry" becomes "run K variants in K envs from the same
 ## What is reused from the old system
 
 vecgen runs without the TAMP submodule (`tmp3` not installed: `uv pip install -e
-.[dev,isaac,torch-cu128,vecgen]`). What it reuses from TAMP was copied into blocksuite, verbatim except imports, and
+.[dev,isaac,torch-cu128,vecgen]`). What it reuses from TAMP was copied into ToyBlocks, verbatim except imports, and
 checked against the original (same IK/plan results, same dataset files, same task-gen output):
 
 | reused | from | now in |
 |---|---|---|
 | `CuroboPlannerPool` (cuRobo v2 batched IK/trajopt, per-env tensor worlds, attachments) + robot config / URDF / spheres | `tmp3.Backends.Curobo.coordinator`, `motion_gen`, `types`, `robot_config` | `vecgen/planner/` |
 | `IsaacDataRecorderLeRobot` (schema, shards, success/failure split, writer process) | `tmp3.DataRecorder` | `vecgen/recording/` (goal annotation not ported) |
-| stiffness profiles | `tmp3.Backends._shared.stiffness_profiles` | `blocksuite/utils/stiffness_profiles.py` |
-| scripted flip (`ReOrientTrajectory` constants + helpers: waypoints, tip offset, anchor cost, press depth) | `blocksuite.tamp.blocks.executors` | `skills/reorient_trajectory.py` |
-| scripted rotate (`RotateTrajectory` constants + helpers: sub-targets, anchors, timing) | `blocksuite.tamp.blocks.executors` | `skills/rotate_trajectory.py` |
-| RL checkpoint loading + pseudo env (`BaseRLTrajectory`) | `blocksuite.tamp.blocks.executors` | `skills/rl_trajectory.py` |
-| stage-1 predicate samplers (superset package) | `blocksuite.tamp.blocks.predicates` | `vecgen/sampling/` |
+| stiffness profiles | `tmp3.Backends._shared.stiffness_profiles` | `toyblocks/utils/stiffness_profiles.py` |
+| scripted flip (`ReOrientTrajectory` constants + helpers: waypoints, tip offset, anchor cost, press depth) | `toyblocks.tamp.blocks.executors` | `skills/reorient_trajectory.py` |
+| scripted rotate (`RotateTrajectory` constants + helpers: sub-targets, anchors, timing) | `toyblocks.tamp.blocks.executors` | `skills/rotate_trajectory.py` |
+| RL checkpoint loading + pseudo env (`BaseRLTrajectory`) | `toyblocks.tamp.blocks.executors` | `skills/rl_trajectory.py` |
+| stage-1 predicate samplers (superset package) | `toyblocks.tamp.blocks.predicates` | `vecgen/sampling/` |
 | FF-v2.3modified binary + sources | `TAMP/planners` | `symbolic/ff_planner/` |
-| PDDL task generators' library | `tmp3.data_gen.task_gen` | `blocksuite/task_gen/` |
+| PDDL task generators' library | `tmp3.data_gen.task_gen` | `toyblocks/task_gen/` |
 
 Used in place: autogen env packages, reset states, scene profiles, `_reset_idx`,
-`get/set_state_dict`, stage-1 codegen (`blocksuite.tamp.blocks.template`), `camera_view`,
+`get/set_state_dict`, stage-1 codegen (`toyblocks.tamp.blocks.template`), `camera_view`,
 `domain.pddl`, RL checkpoints. Not reused: per-env executors (pick/place), scalar predicates
 (now batched tensors), PRRefinement, orchestrator, `robot.py` / simulator backends, policy
 pickles. The legacy 3-stage pipeline has since been removed; play data (`run.py --play`) and the

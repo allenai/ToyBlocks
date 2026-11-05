@@ -17,4 +17,4 @@ stao: I can't get isaac lab automatically discovered by python language servers 
 
 ## Notes
 
-`src/blocksuite/cli/base_args.py` contains a base arguments dataclass for use with tyro to replace any instance of argparse usage in Isaac. This means we have nicer and typed CLIs. See `scripts/random_actions.py` for example usage of tyro and typed CLI args.
+`src/toyblocks/cli/base_args.py` contains a base arguments dataclass for use with tyro to replace any instance of argparse usage in Isaac. This means we have nicer and typed CLIs. See `scripts/random_actions.py` for example usage of tyro and typed CLI args.

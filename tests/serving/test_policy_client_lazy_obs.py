@@ -7,8 +7,8 @@ from typing import Any
 import numpy as np
 import torch
 
-from blocksuite.serving.action_chunk_broker import ActionChunkBroker, PerEnvActionChunkBroker
-from blocksuite.serving.policy_client import PolicyClientAdapter
+from toyblocks.serving.action_chunk_broker import ActionChunkBroker, PerEnvActionChunkBroker
+from toyblocks.serving.policy_client import PolicyClientAdapter
 
 
 class _RecordingPolicy:

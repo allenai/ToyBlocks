@@ -1,16 +1,16 @@
-"""blocksuite.playdata.domain_filter: restricting a domain to allowed actions."""
+"""toyblocks.playdata.domain_filter: restricting a domain to allowed actions."""
 from pathlib import Path
 
 import pytest
 
-from blocksuite.playdata.domain_filter import (
+from toyblocks.playdata.domain_filter import (
     filter_domain_text,
     list_actions,
     resolve_allowed_actions,
     write_filtered_domain,
 )
 
-DOMAIN = Path(__file__).resolve().parents[2] / "src/blocksuite/tamp/blocks/domain.pddl"
+DOMAIN = Path(__file__).resolve().parents[2] / "src/toyblocks/tamp/blocks/domain.pddl"
 
 
 def _balanced(text: str) -> bool:

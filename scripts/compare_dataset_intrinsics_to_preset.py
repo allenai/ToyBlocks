@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Compare LeRobot recorded camera K vs blocksuite sim2real + fr3_softer presets.
+"""Compare LeRobot recorded camera K vs ToyBlocks sim2real + fr3_softer presets.
 
 Reads ``observation.camera_intrinsics.*`` from the first frame of up to N episodes
 per dataset and compares to analytic preset intrinsics at each camera's render
 resolution. Front-camera recorded K uses a centered principal point (see
-``blocksuite.tamp.blocks.camera_view``), not naive scaling of ``K_front``.
+``toyblocks.tamp.blocks.camera_view``), not naive scaling of ``K_front``.
 """
 
 from __future__ import annotations
@@ -15,9 +15,9 @@ from pathlib import Path
 import numpy as np
 import pyarrow.parquet as pq
 
-from blocksuite.utils.calibrated_camera_intrinsics import preset_k_for_camera
-from blocksuite.utils.dataset_provenance import read_dataset_provenance
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils.calibrated_camera_intrinsics import preset_k_for_camera
+from toyblocks.utils.dataset_provenance import read_dataset_provenance
+from toyblocks.utils.episode_dataset import (
     _COL_EPISODE_INDEX,
     _COL_IS_FIRST,
     _resolve_parquet_files,

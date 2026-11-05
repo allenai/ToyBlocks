@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import torch
 
-from blocksuite.utils.episode_queue import apply_setup
+from toyblocks.utils.episode_queue import apply_setup
 
 
 def test_apply_setup_uses_calibrated_not_setup_k() -> None:
@@ -26,15 +26,15 @@ def test_apply_setup_uses_calibrated_not_setup_k() -> None:
 
     with (
         patch(
-            "blocksuite.utils.calibrated_camera_intrinsics.apply_calibrated_camera_intrinsics_for_env"
+            "toyblocks.utils.calibrated_camera_intrinsics.apply_calibrated_camera_intrinsics_for_env"
         ) as mock_cal,
         patch(
-            "blocksuite.utils.dataset_provenance.apply_camera_intrinsics_for_env"
+            "toyblocks.utils.dataset_provenance.apply_camera_intrinsics_for_env"
         ) as mock_rec,
-        patch("blocksuite.utils.episode_queue._park_unused_blocks"),
-        patch("blocksuite.utils.episode_queue._apply_table_height"),
-        patch("blocksuite.utils.episode_queue._apply_eval_table_z_offset", return_value=0.0),
-        patch("blocksuite.utils.episode_queue._apply_recorded_friction"),
+        patch("toyblocks.utils.episode_queue._park_unused_blocks"),
+        patch("toyblocks.utils.episode_queue._apply_table_height"),
+        patch("toyblocks.utils.episode_queue._apply_eval_table_z_offset", return_value=0.0),
+        patch("toyblocks.utils.episode_queue._apply_recorded_friction"),
     ):
         apply_setup(base_env, 0, setup)
         mock_cal.assert_called_once_with(base_env, 0)

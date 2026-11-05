@@ -11,7 +11,7 @@ a hard failure.
 The read path is the part with no coverage and the most ways to be quietly
 wrong: datagen writes provenance as top-level *parquet columns*, older and
 hand-built datasets put it in ``meta/info.json`` (top-level or under a nested
-``blocksuite`` block), and ``scene_id`` is datagen's name for what eval calls
+``toyblocks`` block), and ``scene_id`` is datagen's name for what eval calls
 ``scene_preset_id``. Each is exercised below against a tmp_path LeRobot
 skeleton, including the case where nothing is recorded anywhere.
 
@@ -28,7 +28,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from blocksuite.utils.dataset_provenance import (
+from toyblocks.utils.dataset_provenance import (
     read_dataset_provenance,
     reconcile_env_cfg_with_dataset,
 )
@@ -81,11 +81,11 @@ def test_reads_top_level_info_json_keys(tmp_path):
     assert provenance["source"] == str(root)
 
 
-def test_reads_the_nested_blocksuite_block(tmp_path):
+def test_reads_the_nested_toyblocks_block(tmp_path):
     """Datagen may nest provenance rather than pollute LeRobot's own schema."""
     root = make_dataset(
         tmp_path / "ds",
-        info={"robot_type": "franka", "blocksuite": {"robot_id": ROBOT, "scene_preset_id": SCENE}},
+        info={"robot_type": "franka", "toyblocks": {"robot_id": ROBOT, "scene_preset_id": SCENE}},
     )
     provenance = read_dataset_provenance(root)
     assert (provenance["robot_id"], provenance["scene_preset_id"]) == (ROBOT, SCENE)
@@ -170,7 +170,7 @@ def test_an_explicit_override_is_kept_and_warned_about(tmp_path, caplog):
         tmp_path / "ds", info={"robot_id": ROBOT, "scene_preset_id": SCENE}
     )
     env_cfg = FakeEnvCfg(robot_id=ROBOT, scene_preset_id="sim2real")
-    with caplog.at_level(logging.WARNING, logger="blocksuite.utils.dataset_provenance"):
+    with caplog.at_level(logging.WARNING, logger="toyblocks.utils.dataset_provenance"):
         reconcile_env_cfg_with_dataset(
             env_cfg, root, argv=["evaluate.py", "--env-cfg.scene-preset-id", "sim2real"]
         )
@@ -201,7 +201,7 @@ def test_no_provenance_and_no_override_exits(tmp_path):
 def test_no_provenance_but_an_explicit_override_is_honored(tmp_path, caplog):
     root = make_dataset(tmp_path / "ds", info={"robot_type": "franka"})
     env_cfg = FakeEnvCfg(robot_id=ROBOT, scene_preset_id=SCENE)
-    with caplog.at_level(logging.WARNING, logger="blocksuite.utils.dataset_provenance"):
+    with caplog.at_level(logging.WARNING, logger="toyblocks.utils.dataset_provenance"):
         reconcile_env_cfg_with_dataset(
             env_cfg,
             root,

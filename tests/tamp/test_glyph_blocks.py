@@ -1,4 +1,4 @@
-from blocksuite.tamp.blocks.glyph_blocks import (
+from toyblocks.tamp.blocks.glyph_blocks import (
     DIGIT_TYPE,
     LETTER_TYPE,
     block_name,
@@ -29,7 +29,7 @@ def test_single_character_glyphs_are_unchanged() -> None:
 def test_every_glyph_and_legacy_alias_spawns_from_the_large_library_by_default() -> None:
     """block_r / block_t / block_b and the block_o1 / block_o2 aliases used to be pinned
     to train_blocks, mixing asset sets in a scene even with --usd-library train_blocks_large."""
-    from blocksuite.tamp.blocks.template.codegen import Block
+    from toyblocks.tamp.blocks.template.codegen import Block
 
     names = [f"block_{c}" for c in "abcdefghijklmnopqrstuvwxyz123456789"] + ["block_10", "block_o1", "block_o2"]
     for library in (None, "train_blocks_large"):

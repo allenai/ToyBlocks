@@ -1,6 +1,6 @@
 {
   "case": "soft_config",
-  "task": "blocksuite.tasks.lift.LiftEnv",
+  "task": "toyblocks.tasks.lift.LiftEnv",
   "seed": 0,
   "robot_id": "fr3_robotiq_gripper_soft",
   "control_mode": "arm_relative_joint_gripper_binary",

@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.vecgen.math import quat_apply, quat_mul
+from toyblocks.vecgen.math import quat_apply, quat_mul
 
 RERENDER = Path(__file__).resolve().parents[2] / "scripts" / "rerender" / "rerender.py"
 

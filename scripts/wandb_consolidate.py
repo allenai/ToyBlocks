@@ -132,7 +132,7 @@ _OFFLINE_DIAGNOSTICS_SUBDIR = "control_diagnostics_offline"
 
 # One rollout only, still rendered online and flat under the worker's
 # output_dir root -- unaffected by the offline-diagnostics move (96ddd7641).
-# hl_conditioning_staleness.png comes from blocksuite.eval.hl_staleness under
+# hl_conditioning_staleness.png comes from toyblocks.eval.hl_staleness under
 # --save_diagnostic_plots.
 _DIAGNOSTIC_PLOT_NAMES = [
     "hl_conditioning_staleness.png",
@@ -425,7 +425,7 @@ def _build_episodes_table(
     """Build a ``wandb.Table`` from merged ``eval_episodes.json`` rows."""
     import wandb
 
-    from blocksuite.utils.wandb_logging import (
+    from toyblocks.utils.wandb_logging import (
         _EXPERT_FIRST_FRAME_CAMERAS,
         _RESULT_TABLE_METRIC_KEYS,
         _extract_expert_first_frame,
@@ -652,7 +652,7 @@ def main() -> None:
 
     import wandb
 
-    from blocksuite.utils.wandb_logging import (
+    from toyblocks.utils.wandb_logging import (
         log_aggregates_table,
         log_hl_policy_input_table,
         log_ll_policy_input_table,

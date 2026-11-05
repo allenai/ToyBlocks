@@ -20,7 +20,7 @@ source "${SCRIPT_DIR}/_common.sh"
 # Free any process squatting the policy port / GPU from a previous run. Scoped to
 # this user's processes: `pkill -f` matches on the whole command line, so on a
 # shared node an unscoped pattern kills other people's servers too.
-pkill -9 -u "$(id -u)" -f "blocksuite.serving.serve_maniflow_policy" || true
+pkill -9 -u "$(id -u)" -f "toyblocks.serving.serve_maniflow_policy" || true
 
 # =============================================================================
 # POLICY SERVER LAUNCH (foreground)
@@ -55,7 +55,7 @@ if [ "$POLICY_NAME" = "maniflow" ] || [ "$POLICY_NAME" = "molmo2_maniflow" ]; th
     HL_CHECKPOINT_ARG=(--hl_checkpoint "$HL_MODEL_PATH")
   fi
 
-  CUDA_VISIBLE_DEVICES=0 python -m blocksuite.serving.serve_maniflow_policy \
+  CUDA_VISIBLE_DEVICES=0 python -m toyblocks.serving.serve_maniflow_policy \
       --port "$POLICY_PORT" \
       --hl "$HL" \
       --checkpoint "$MODEL_PATH" \

@@ -27,7 +27,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 import av  # noqa: E402
-from blocksuite.vecgen.recording._video_encoder import _VideoEncoderProcess as VP  # noqa: E402
+from toyblocks.vecgen.recording._video_encoder import _VideoEncoderProcess as VP  # noqa: E402
 
 _failures = []
 
@@ -136,7 +136,7 @@ def main():
             _check(f"{short}: g12 is smaller than rg8", rb < ra, True)
 
     print("\nD: the resize is shared with rg8_224, which is what makes C possible")
-    src = (Path(__file__).resolve().parents[2] / "src" / "blocksuite" / "vecgen" / "recording"
+    src = (Path(__file__).resolve().parents[2] / "src" / "toyblocks" / "vecgen" / "recording"
            / "_video_encoder.py").read_text()
     seg = src[src.index("if is_depth and self._extra_suffix:"):]
     seg = seg[:seg.index("if not is_depth")] if "if not is_depth" in seg else seg[:2000]

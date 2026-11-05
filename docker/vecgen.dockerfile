@@ -1,10 +1,10 @@
 # Slim image for the vecgen datagen flow: task gen -> env packages (stage 1) -> vecgen
 # (scripts/vecgen/run.py, optional camera videos) -> merge -> annotate, plus the pipeline driver.
 #
-# Build with docker/build_vecgen_image.sh: the context is a fresh blobless clone of blocksuite at
+# Build with docker/build_vecgen_image.sh: the context is a fresh blobless clone of ToyBlocks at
 # the requested ref with only the curobo (v2) submodule. No TAMP (the vecgen flow is TAMP-free), no openpi / hvla /
 # molmo2, no CUDA toolkit: cuRobo v2 JIT-compiles its kernels with NVRTC from the pip wheels,
-# so it needs no rebuild at run time. Repo at /root/blocksuite, venv at /root/.venv.
+# so it needs no rebuild at run time. Repo at /root/toyblocks, venv at /root/.venv.
 
 FROM ubuntu:24.04 AS build
 
@@ -24,10 +24,10 @@ RUN uv venv /root/.venv --python 3.11
 ENV VIRTUAL_ENV=/root/.venv \
     PATH="/root/.venv/bin:$PATH"
 
-COPY . /root/blocksuite
-WORKDIR /root/blocksuite
+COPY . /root/toyblocks
+WORKDIR /root/toyblocks
 # Pin every package to the tested vecgen venv (docker/vecgen.constraints.txt).
-ENV UV_CONSTRAINT=/root/blocksuite/docker/vecgen.constraints.txt
+ENV UV_CONSTRAINT=/root/toyblocks/docker/vecgen.constraints.txt
 
 # cuRobo v2 builds against the installed torch (no build isolation), once at build time.
 RUN uv pip install -e ".[isaac,torch-cu128]" --config-settings editable_mode=strict \
@@ -56,7 +56,7 @@ RUN apt-get update -q \
 COPY --from=build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 COPY --from=build /opt/uv-python /opt/uv-python
 COPY --from=build /root/.venv /root/.venv
-COPY --from=build /root/blocksuite /root/blocksuite
+COPY --from=build /root/toyblocks /root/toyblocks
 
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python \
     UV_LINK_MODE=copy \
@@ -65,4 +65,4 @@ ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python \
     OMNI_KIT_ACCEPT_EULA=YES \
     NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=all
-WORKDIR /root/blocksuite
+WORKDIR /root/toyblocks

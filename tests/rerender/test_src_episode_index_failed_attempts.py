@@ -11,7 +11,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from blocksuite.domain_randomization.episodes import FAILED_ATTEMPT_COL
+from toyblocks.domain_randomization.episodes import FAILED_ATTEMPT_COL
 
 RERENDER = Path(__file__).resolve().parents[2] / "scripts" / "rerender" / "rerender.py"
 

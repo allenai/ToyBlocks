@@ -8,15 +8,15 @@ import pandas as pd
 import pytest
 import torch
 
-from blocksuite.eval.pd_mode_controller import DATASET_SWITCH_SETTLE_TICKS, PDModeController
-from blocksuite.eval.replay import ReplayPolicy, _detect_unrecorded_ticks, _phase_slices
-from blocksuite.utils.episode_queue import apply_setup, park_placed_blocks, restore_placed_blocks
 from scripts.plot_diagnostics_from_eval_run import (
     _has_row_layout_marker,
     _is_replay_run,
     _load_episode_specs,
     _rollout_from_frames,
 )
+from toyblocks.eval.pd_mode_controller import DATASET_SWITCH_SETTLE_TICKS, PDModeController
+from toyblocks.eval.replay import ReplayPolicy, _detect_unrecorded_ticks, _phase_slices
+from toyblocks.utils.episode_queue import apply_setup, park_placed_blocks, restore_placed_blocks
 
 
 class _StubBaseEnv:
@@ -429,7 +429,7 @@ def queue_env(monkeypatch: pytest.MonkeyPatch) -> _FakeQueueEnv:
     # apply_setup imports the Isaac-backed friction helper even for setups that record no friction.
     monkeypatch.setitem(
         sys.modules,
-        "blocksuite.utils.randomization_utils",
+        "toyblocks.utils.randomization_utils",
         SimpleNamespace(set_rigid_body_friction=None),
     )
     return _FakeQueueEnv()
@@ -572,7 +572,7 @@ def test_row_layout_marker_is_detected(tmp_path) -> None:
     (tmp_path / "meta" / "info.json").write_text('{"fps": 15}')
     assert not _has_row_layout_marker(tmp_path)
     (tmp_path / "meta" / "info.json").write_text(
-        '{"fps": 15, "blocksuite_row_layout": {"layout": "state_then_action", "version": 2}}'
+        '{"fps": 15, "toyblocks_row_layout": {"layout": "state_then_action", "version": 2}}'
     )
     assert _has_row_layout_marker(tmp_path)
 
@@ -580,7 +580,7 @@ def test_row_layout_marker_is_detected(tmp_path) -> None:
 def test_row_layout_marker_file_from_older_recordings_is_detected(tmp_path) -> None:
     (tmp_path / "meta").mkdir()
     (tmp_path / "meta" / "info.json").write_text('{"fps": 15}')
-    (tmp_path / "meta" / "blocksuite_row_layout.json").write_text("{}")
+    (tmp_path / "meta" / "toyblocks_row_layout.json").write_text("{}")
     assert _has_row_layout_marker(tmp_path)
 
 

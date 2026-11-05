@@ -8,8 +8,8 @@ Run:
 import pytest
 import torch
 
-from blocksuite.tasks._template._template_env_cfg import TemplateEnvCfg
-from blocksuite.tasks._template._template_env import TemplateEnv
+from toyblocks.tasks._template._template_env_cfg import TemplateEnvCfg
+from toyblocks.tasks._template._template_env import TemplateEnv
 from tests.helpers import SCENE_ROBOT_MAP, teardown_sim
 
 

@@ -8,8 +8,8 @@ Run:
 import pytest
 import torch
 
-from blocksuite.tasks.push_stacked.push_stacked_env_cfg import PushStackedEnvCfg
-from blocksuite.tasks.push_stacked.push_stacked_env import PushStackedEnv
+from toyblocks.tasks.push_stacked.push_stacked_env_cfg import PushStackedEnvCfg
+from toyblocks.tasks.push_stacked.push_stacked_env import PushStackedEnv
 from tests.helpers import SCENE_ROBOT_MAP, teardown_sim
 
 

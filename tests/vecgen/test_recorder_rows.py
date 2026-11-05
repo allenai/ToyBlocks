@@ -55,7 +55,7 @@ def _install_sim_stubs() -> None:
 
 _install_sim_stubs()
 
-from blocksuite.vecgen.recording import lerobot_recorder as lr  # noqa: E402
+from toyblocks.vecgen.recording import lerobot_recorder as lr  # noqa: E402
 
 Rec = lr.IsaacDataRecorderLeRobot
 
@@ -288,8 +288,8 @@ def test_over_budget_items_spill_to_disk_instead_of_blocking(
     import pickle
     import queue
 
-    monkeypatch.setenv("BLOCKSUITE_RECORDER_SPILL_DIR", str(tmp_path / "spill"))
-    monkeypatch.setenv("BLOCKSUITE_RECORDER_SPILL_MIN_FREE_GB", "0")
+    monkeypatch.setenv("TOYBLOCKS_RECORDER_SPILL_DIR", str(tmp_path / "spill"))
+    monkeypatch.setenv("TOYBLOCKS_RECORDER_SPILL_MIN_FREE_GB", "0")
     rec, _ = make_recorder()
     writer = types.SimpleNamespace(
         index=0,
@@ -342,7 +342,7 @@ def test_batched_depth_and_rgb_conversion_match_the_per_frame_path() -> None:
 
 
 def test_shared_memory_slots_round_trip_and_free() -> None:
-    from blocksuite.vecgen.recording._shm_slots import SlotArena, SlotReader, frame_image_bytes
+    from toyblocks.vecgen.recording._shm_slots import SlotArena, SlotReader, frame_image_bytes
 
     rgb = np.random.default_rng(0).integers(0, 255, (36, 64, 3), dtype=np.uint8)
     depth = np.arange(36 * 64, dtype=np.uint16).reshape(36, 64)
@@ -417,7 +417,7 @@ import gymnasium as gym  # noqa: E402
 import torch  # noqa: E402
 
 _RECORD_EPISODE_PATH = (
-    Path(__file__).resolve().parents[2] / "src" / "blocksuite" / "wrappers" / "record_episode.py"
+    Path(__file__).resolve().parents[2] / "src" / "toyblocks" / "wrappers" / "record_episode.py"
 )
 HOLD = -1.0
 
@@ -426,12 +426,12 @@ HOLD = -1.0
 def record_episode_module(monkeypatch: pytest.MonkeyPatch) -> types.ModuleType:
     """``record_episode`` loaded privately, with its Isaac-only imports stubbed for this test."""
     stubs = {
-        "blocksuite.tasks.base_env": {"BaseEnv": type("BaseEnv", (), {})},
-        "blocksuite.utils.dataset_recording_utils": {
+        "toyblocks.tasks.base_env": {"BaseEnv": type("BaseEnv", (), {})},
+        "toyblocks.utils.dataset_recording_utils": {
             "IsaacDataRecorderBase": type("IsaacDataRecorderBase", (), {}),
             "_extract_frame": None,
         },
-        "blocksuite.utils.visualization_utils": {"images_to_video": None, "tile_images": None},
+        "toyblocks.utils.visualization_utils": {"images_to_video": None, "tile_images": None},
     }
     for name, attrs in stubs.items():
         module = types.ModuleType(name)
@@ -564,7 +564,7 @@ def test_an_env_with_no_episode_to_run_is_not_recorded(
 def test_dropped_frames_ride_with_end_episode_and_are_left_out(make_recorder: Any) -> None:
     """A failed attempt undone by a snapshot restore: its rows are named in ``end_episode`` and
     the writer saves the episode without them (LeRobot renumbers the rest)."""
-    from blocksuite.vecgen.recording._video_encoder import keep_frames
+    from toyblocks.vecgen.recording._video_encoder import keep_frames
 
     rec, sent = make_recorder()
     _record(rec, 0, [0])
@@ -595,7 +595,7 @@ def test_trimmed_videos_leave_out_the_dropped_frames(tmp_path: Any) -> None:
     av = pytest.importorskip("av")
     if not hasattr(av, "open"):
         pytest.skip("PyAV not installed")
-    from blocksuite.vecgen.recording._video_encoder import _VideoEncoderProcess
+    from toyblocks.vecgen.recording._video_encoder import _VideoEncoderProcess
 
     enc = _VideoEncoderProcess(None, str(tmp_path), "t", 25, {}, {}, depth_codec="hevc")
     n, dropped = 40, [(2, 5), (9, 10), (20, 31)]

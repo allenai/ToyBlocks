@@ -29,14 +29,14 @@ from typing import Any
 import numpy as np
 import torch
 
-from blocksuite.eval.pd_mode_controller import (
+from toyblocks.eval.pd_mode_controller import (
     DeferredSettle,
     PDModeController,
     settle_hold_action,
 )
-from blocksuite.serving.action_chunk_broker import ActionChunkBroker
-from blocksuite.serving.obs_transforms import ObsTransformPolicy
-from blocksuite.serving.obs_transforms.maniflow import ManiflowObsTransform
+from toyblocks.serving.action_chunk_broker import ActionChunkBroker
+from toyblocks.serving.obs_transforms import ObsTransformPolicy
+from toyblocks.serving.obs_transforms.maniflow import ManiflowObsTransform
 
 # ``PDModeController`` takes its gains as explicit dicts rather than baking any in,
 # so these mirror the two arm configs it can be asked to switch to/from. Built here

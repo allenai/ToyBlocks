@@ -18,13 +18,13 @@ Usage:
 
 import argparse
 
-from blocksuite.tamp.blocks.glyph_blocks import (
+from toyblocks.tamp.blocks.glyph_blocks import (
     LETTERS,
     READABLE_ORI,
     all_glyph_blocks,
     blocks_for_text,
 )
-from blocksuite.task_gen import (
+from toyblocks.task_gen import (
     And,
     Block,
     Clear,
@@ -34,7 +34,7 @@ from blocksuite.task_gen import (
     OriOf,
     ProblemSpec,
 )
-from blocksuite.task_gen.orientations import ORIENTATIONS
+from toyblocks.task_gen.orientations import ORIENTATIONS
 
 # Color cuboids mixed into the distractor pool alongside unused letters.
 COLOR_DISTRACTORS = [

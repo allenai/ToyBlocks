@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 
-from blocksuite.serving.action_chunk_broker import ActionChunkBroker
+from toyblocks.serving.action_chunk_broker import ActionChunkBroker
 
 
 class _CountingPolicy:

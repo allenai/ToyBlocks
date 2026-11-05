@@ -86,7 +86,7 @@ EPISODE_LENGTH_S="${EPISODE_LENGTH_S:-30}"
 
 # -- PDDL-direct mode (set to bypass the dataset queue; uses generate_task_from_pddl.py) --
 PDDL_PROBLEM_FILE="${PDDL_PROBLEM_FILE:-}"
-ENV_PATH="${ENV_PATH:-}"   # Output dir for generate_task_from_pddl.py (default: src/blocksuite/tasks/autogen)
+ENV_PATH="${ENV_PATH:-}"   # Output dir for generate_task_from_pddl.py (default: src/toyblocks/tasks/autogen)
 
 # -- Server / queue ports --
 POLICY_PORT="${POLICY_PORT:-8000}"

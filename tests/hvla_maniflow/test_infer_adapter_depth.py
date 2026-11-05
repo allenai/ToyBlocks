@@ -8,15 +8,15 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import (
+from toyblocks.serving.maniflow_serving_utils import (
     inject_target_front_crop_from_native,
     select_and_validate_obs,
 )
-from blocksuite.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
+from toyblocks.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
     ManiflowBlocksTableObsTransform,
 )
-from blocksuite.serving.serve_maniflow_policy import HLLLInferAdapter
+from toyblocks.serving.serve_maniflow_policy import HLLLInferAdapter
 from tests.serving.infer_adapter_fixtures import (
     _StubPolicy,
     _adapter,

@@ -8,7 +8,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from blocksuite.utils.episode_dataset import load_setups
+from toyblocks.utils.episode_dataset import load_setups
 
 # Episode 1 straddles the cut between the two data files (rows 5..11, cut at 8).
 _LENGTHS = {0: 5, 1: 7, 2: 4}

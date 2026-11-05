@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare recorded camera frames A (blocksuite) vs B (classic), per instance.
+"""Compare recorded camera frames A (ToyBlocks) vs B (classic), per instance.
 
 Only meaningful once both datasets share a matched scene + cameras. Reads
 front_camera / gripper_camera frames from each LeRobot dataset's mp4s, aligns by
@@ -95,12 +95,12 @@ def main():
             a, b = a[:h, :w], b[:h, :w]
             diff = np.abs(a.astype(int) - b.astype(int)).astype(np.uint8)
             stats[cam].append(float(diff.mean()))
-            for cidx, (img, lab) in enumerate([(a, "A blocksuite"), (b, "B classic"), (diff, "|diff|")]):
+            for cidx, (img, lab) in enumerate([(a, "A toyblocks"), (b, "B classic"), (diff, "|diff|")]):
                 axes[r, cidx].imshow(img)
                 axes[r, cidx].set_title(f"inst {inst} {lab}" if r == 0 or cidx else f"inst {inst} {lab}",
                                         fontsize=7)
                 axes[r, cidx].axis("off")
-        fig.suptitle(f"{cam}: A (blocksuite) vs B (classic), mid-episode frame  "
+        fig.suptitle(f"{cam}: A (ToyBlocks) vs B (classic), mid-episode frame  "
                      f"[mean |diff| = {np.mean(stats[cam]):.1f}/255]", fontsize=12)
         fig.tight_layout(rect=(0, 0, 1, 0.98))
         op = OUT / f"image_diff_{cam}.png"

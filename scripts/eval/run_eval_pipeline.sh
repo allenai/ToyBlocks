@@ -52,12 +52,12 @@ H_VLA_PATH="${H_VLA_PATH:-$REPO_ROOT/maniflow-tb}"
 TRAIN_CONFIG_PATH="${TRAIN_CONFIG_PATH:-$H_VLA_PATH/examples/Franka/train_maniflow_multimodal.yaml}"
 # The policy server imports hvla from H_VLA_PATH as checked out (in the image, or by
 # `git submodule update` locally); a job's `git checkout` does not move submodules. Serving a
-# maniflow-tb other than the one this blocksuite commit pins would be silent, so refuse it.
+# maniflow-tb other than the one this ToyBlocks commit pins would be silent, so refuse it.
 if [ "$POLICY_NAME" != "replay" ]; then
   _MTB_PIN="$(git -C "$REPO_ROOT" rev-parse "HEAD:maniflow-tb" 2>/dev/null || true)"
   _MTB_HEAD="$(git -C "$H_VLA_PATH" rev-parse HEAD 2>/dev/null || true)"
   if [ -n "$_MTB_PIN" ] && [ "$_MTB_HEAD" != "$_MTB_PIN" ]; then
-    echo "maniflow-tb at ${H_VLA_PATH} is ${_MTB_HEAD:-missing}, but this blocksuite commit pins ${_MTB_PIN}." >&2
+    echo "maniflow-tb at ${H_VLA_PATH} is ${_MTB_HEAD:-missing}, but this ToyBlocks commit pins ${_MTB_PIN}." >&2
     echo "Run: git submodule update --init maniflow-tb (in a docker image: rebuild it, docker/build_eval_image.sh)." >&2
     exit 1
   fi
@@ -99,7 +99,7 @@ HL_MAX_NEW_TOKENS="${HL_MAX_NEW_TOKENS:-}"     # molmo2_maniflow: Molmo2 decode 
 ORACLE_COMPARISON="${ORACLE_COMPARISON:-}"     # 1 -> also tick a client-side comparison oracle for a model | oracle overlay panel
 # HL latency (update interval K + estimated HL inference time M, milliseconds)
 # + viz. Defaults reproduce today's fresh-every-step behavior. See
-# blocksuite.serving.hl_latency.
+# toyblocks.serving.hl_latency.
 HL_UPDATE_INTERVAL_MS="${HL_UPDATE_INTERVAL_MS:-0.0}"
 HL_UPDATE_INTERVAL_JITTER_MS="${HL_UPDATE_INTERVAL_JITTER_MS:-0.0}"
 ESTIMATED_HL_INFERENCE_TIME_MS="${ESTIMATED_HL_INFERENCE_TIME_MS:-0.0}"
@@ -147,7 +147,7 @@ LEROBOT_NUM_SHARDS="${LEROBOT_NUM_SHARDS:-8}"
 LEROBOT_VIDEO_CODEC="${LEROBOT_VIDEO_CODEC:-libx264}"
 
 # -- Wandb --
-WANDB_PROJECT="${WANDB_PROJECT:-blocksuite-eval}"
+WANDB_PROJECT="${WANDB_PROJECT:-toyblocks-eval}"
 # Extract source-dataset expert MP4s for the coordinator's episodes table.
 SAVE_EXPERT_VIDEO="${SAVE_EXPERT_VIDEO:-${ENABLE_WANDB:-}}"
 EVAL_PARAMS="${EVAL_PARAMS:-}"
@@ -193,7 +193,7 @@ if [ "$POLICY_NAME" = "replay" ]; then
 elif [ "$POLICY_NAME" = "maniflow" ]; then
   export H_VLA_PATH
   export PYTHONPATH="${PYTHONPATH:-}:${H_VLA_PATH}"
-  CUDA_VISIBLE_DEVICES=0 python -m blocksuite.serving.serve_maniflow_policy \
+  CUDA_VISIBLE_DEVICES=0 python -m toyblocks.serving.serve_maniflow_policy \
     --port "$POLICY_PORT" \
     --hl oracle \
     --checkpoint "$MODEL_PATH" \
@@ -208,7 +208,7 @@ elif [ "$POLICY_NAME" = "maniflow" ]; then
 elif [ "$POLICY_NAME" = "molmo2_maniflow" ]; then
   export H_VLA_PATH
   export PYTHONPATH="${PYTHONPATH:-}:${H_VLA_PATH}"
-  CUDA_VISIBLE_DEVICES=0 python -m blocksuite.serving.serve_maniflow_policy \
+  CUDA_VISIBLE_DEVICES=0 python -m toyblocks.serving.serve_maniflow_policy \
     --port "$POLICY_PORT" \
     --hl model \
     --checkpoint "$MODEL_PATH" \
@@ -250,8 +250,8 @@ if [ -n "$USD_LIBRARY" ]; then
 fi
 python scripts/generate_task_from_dataset.py \
   --dataset-path "$DATASET_PATH" \
-  --domain-path src/blocksuite/tamp/blocks \
-  --output-dir src/blocksuite/tasks/autogen \
+  --domain-path src/toyblocks/tamp/blocks \
+  --output-dir src/toyblocks/tasks/autogen \
   --task-name "$TASK_SLUG" \
   $CODEGEN_EPISODE_INDICES_ARG \
   $CODEGEN_USD_LIBRARY_ARG \

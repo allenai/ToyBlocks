@@ -1,4 +1,4 @@
-"""Shared test helpers for blocksuite simulation tests."""
+"""Shared test helpers for ToyBlocks simulation tests."""
 
 SCENE_ROBOT_MAP = {
     "droid_with_box_table": "fr3_robotiq_gripper_soft",

@@ -1,5 +1,5 @@
 """Reset states are matched to envs by profile *value* (reset_states_io, ported with the env
-packages of naman/datagen-revamp fdf4933f; the vecgen half of its tests needs blocksuite.vecgen).
+packages of naman/datagen-revamp fdf4933f; the vecgen half of its tests needs toyblocks.vecgen).
 
 A scene profile (per-block sizes, friction) is fixed per env at spawn, so a
 reset state or recorded episode is only valid in an env spawned with the same
@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.utils.reset_states_io import (
+from toyblocks.utils.reset_states_io import (
     load_reset_states,
     load_reset_states_with_profiles,
     pack_reset_states,

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from blocksuite.utils.eval_helpers import allocate_env_slots
+from toyblocks.utils.eval_helpers import allocate_env_slots
 
 _REPO = Path(__file__).resolve().parents[2]
 
@@ -76,7 +76,7 @@ def test_queue_reports_slot_workload_and_serves_longest_first() -> None:
 
 
 def test_queue_client_asks_for_each_env_s_spawn_slot(monkeypatch) -> None:
-    from blocksuite.utils import episode_queue
+    from toyblocks.utils import episode_queue
 
     asked: list[int] = []
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from blocksuite.utils.calibrated_camera_intrinsics import (
+from toyblocks.utils.calibrated_camera_intrinsics import (
     calibrated_camera_k3x3,
     calibrated_camera_k9_by_name,
     preset_k_for_camera,
@@ -36,7 +36,7 @@ def test_aug26_front_gripper_values() -> None:
 def test_dropped_camera_is_skipped_without_a_warning(caplog) -> None:
     from types import SimpleNamespace
 
-    from blocksuite.utils.dataset_provenance import apply_camera_intrinsics_for_env
+    from toyblocks.utils.dataset_provenance import apply_camera_intrinsics_for_env
 
     env = SimpleNamespace(cameras={}, cfg=SimpleNamespace(drop_cameras=("left_camera",)))
     with caplog.at_level("WARNING"):

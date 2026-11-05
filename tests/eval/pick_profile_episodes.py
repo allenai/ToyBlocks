@@ -27,7 +27,7 @@ from dataclasses import dataclass
 
 import tyro
 
-from blocksuite.utils.episode_dataset import CUBE_SCALE_DECIMALS, load_setups
+from toyblocks.utils.episode_dataset import CUBE_SCALE_DECIMALS, load_setups
 
 # Table deltas are sampled in metres over a ~4 cm range, so a 0.1 mm grouping key
 # separates every distinct sampled value without splitting one on float noise.

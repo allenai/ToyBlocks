@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from blocksuite.utils.wandb_logging import EpisodeResultsTable
+from toyblocks.utils.wandb_logging import EpisodeResultsTable
 
 _KEY = "observation.images.front_camera_hl_overlay"
 

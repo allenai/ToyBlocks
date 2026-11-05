@@ -2,7 +2,7 @@ import math
 
 import torch
 
-from blocksuite.vecgen.math import (
+from toyblocks.vecgen.math import (
     pose_compose,
     pose_inverse,
     quat_angle,

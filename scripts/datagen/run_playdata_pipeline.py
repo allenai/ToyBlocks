@@ -154,7 +154,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", default="data",
                         help="Root for every dataset the pipeline writes (default: data)")
     parser.add_argument("--dataset-folder", default="unmerged")
-    parser.add_argument("--domain-path", default="src/blocksuite/tamp/blocks")
+    parser.add_argument("--domain-path", default="src/toyblocks/tamp/blocks")
     parser.add_argument("--seed", type=int, default=42, help="Play-data seed")
 
     # Stage 1: task generation
@@ -216,7 +216,7 @@ def parse_args() -> argparse.Namespace:
                              "come from --rerender")
     parser.add_argument("--dfa-spec", default=None,
                         help="DFA strategy choosing the goals (e.g. "
-                             "src/blocksuite/playdata/dfa/library/flip_search.yaml) instead of "
+                             "src/toyblocks/playdata/dfa/library/flip_search.yaml) instead of "
                              "balanced / random goals; on ACCEPT / REJECT the env moves on")
     parser.add_argument("--dfa-param", nargs="+", default=None, metavar="KEY=VALUE",
                         help="Override the DFA spec's params (e.g. letter=Q flips_per_block=3)")
@@ -380,9 +380,9 @@ def main() -> int:
     env_vars = play_env(args)
 
     # -- pin commits ------------------------------------------------------------
-    blocksuite_sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+    toyblocks_sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                                     text=True, check=True).stdout.strip()
-    log.info("Pinned commit: blocksuite=%s", blocksuite_sha)
+    log.info("Pinned commit: ToyBlocks=%s", toyblocks_sha)
 
     # -- paths ----------------------------------------------------------------------
     # Absolute: the rerender staging symlinks and the per-stage subprocesses must not depend
@@ -427,7 +427,7 @@ def main() -> int:
     config = {
         **{k: v for k, v in vars(args).items() if isinstance(v, (str, int, float, bool, list, type(None)))},
         "experiment_id": exp,
-        "blocksuite_commit_sha": blocksuite_sha,
+        "toyblocks_commit_sha": toyblocks_sha,
         "play_env": env_vars,
         "enabled_steps": enabled,
     }
@@ -577,7 +577,7 @@ def main() -> int:
             return 1
         # The annotator exits non-zero when it wrote no goal columns; treat that as a failure.
         result = dg.run([
-            sys.executable, "src/blocksuite/data_annotation/annotate_target_xy.py",
+            sys.executable, "src/toyblocks/data_annotation/annotate_target_xy.py",
             merge_output_dir, "-j", str(args.annotate_num_workers),
         ], check=False)
         if result.returncode != 0:

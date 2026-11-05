@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from blocksuite.serving.maniflow_serving_utils import (
+from toyblocks.serving.maniflow_serving_utils import (
     _parse_hl_action,
     _parse_target_xy,
     _strip_coords,

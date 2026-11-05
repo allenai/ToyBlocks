@@ -129,7 +129,7 @@ run_dataset() {
     if ! python scripts/generate_task_from_dataset.py \
         --dataset-path "${DATA_DIR}" \
         --task-name "${EVAL_TASK_NAME}" \
-        --output-dir src/blocksuite/tasks/autogen \
+        --output-dir src/toyblocks/tasks/autogen \
         --headless; then
         echo "[ERROR]: generate_task_from_dataset failed for ${name}"
         FAILURES+=("${name} (task generation)")

@@ -7,11 +7,6 @@ from typing import Any
 import numpy as np
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import derive_model_input_spec
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
-from blocksuite.serving.serve_maniflow_policy import HLLLInferAdapter, ManiFlowInferAdapter
 from tests.serving.policy_input_fixture import (
     build_obs,
     load_depth_fixture,
@@ -19,6 +14,11 @@ from tests.serving.policy_input_fixture import (
     load_stats,
     stats_action_mode,
 )
+from toyblocks.serving.maniflow_serving_utils import derive_model_input_spec
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
+)
+from toyblocks.serving.serve_maniflow_policy import HLLLInferAdapter, ManiFlowInferAdapter
 
 ACTION_HORIZON = 4
 

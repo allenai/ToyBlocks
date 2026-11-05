@@ -11,7 +11,7 @@ import types
 
 import torch
 
-from blocksuite.vecgen.recorder import LeRobotRecorder
+from toyblocks.vecgen.recorder import LeRobotRecorder
 
 
 class _Scene(dict):

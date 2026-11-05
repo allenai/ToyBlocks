@@ -1,7 +1,7 @@
 """Golden for the sim's dynamics: seeded free-space rollouts' joint trajectories.
 
 This is the one thing the eval-side scene checks cannot see. ``scene_load.sh``
-and ``blocksuite.eval.scene_verification`` diff a *static* scene against a
+and ``toyblocks.eval.scene_verification`` diff a *static* scene against a
 dataset's recorded ground truth, so a drift in how the arm actually moves under
 known actions -- a controller gain, an actuator profile, a solver setting, an
 Isaac upgrade -- passes every one of them.
@@ -57,18 +57,18 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.eval.pd_mode_controller import PDModeController
-from blocksuite.eval.scene_verification import (
+from tests.helpers import teardown_sim
+from toyblocks.eval.pd_mode_controller import PDModeController
+from toyblocks.eval.scene_verification import (
     FieldDiff,
     SceneMismatchReport,
     compare_array,
     compare_key_set,
     malformed_golden,
 )
-from blocksuite.tasks.lift.lift_env import LiftEnv
-from blocksuite.tasks.lift.lift_env_cfg import LiftEnvCfg
-from blocksuite.utils.episode_dataset import SCENE_FURNITURE_PREFIXES
-from tests.helpers import teardown_sim
+from toyblocks.tasks.lift.lift_env import LiftEnv
+from toyblocks.tasks.lift.lift_env_cfg import LiftEnvCfg
+from toyblocks.utils.episode_dataset import SCENE_FURNITURE_PREFIXES
 
 GOLDEN_DIR = Path(__file__).parent
 
@@ -120,7 +120,7 @@ ROLLOUT_CASES = {
 # and only exist after a datagen run, which would make the golden depend on the
 # very pipeline it is meant to be independent of. Lift is the smallest task with
 # a block in it.
-TASK = "blocksuite.tasks.lift.LiftEnv"
+TASK = "toyblocks.tasks.lift.LiftEnv"
 SEED = 0
 
 # All pinned in the fixture rather than inherited from cfg defaults, and all

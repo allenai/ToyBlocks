@@ -13,7 +13,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from blocksuite.domain_randomization.episodes import load_episodes
+from toyblocks.domain_randomization.episodes import load_episodes
 
 
 def _write_dataset(root: Path, lengths: list[int]) -> None:

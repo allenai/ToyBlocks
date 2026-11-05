@@ -1,7 +1,7 @@
 # Replaying Actions from a Dataset
 
 Replay plays a LeRobot dataset's recorded actions back through the **same
-queue-driven eval loop a policy uses** (`blocksuite.eval.run_eval._run_eval`).
+queue-driven eval loop a policy uses** (`toyblocks.eval.run_eval._run_eval`).
 There is no separate replay runner any more: `--replay` is just another action
 source next to a policy server, random or zero actions.
 
@@ -26,7 +26,7 @@ alongside it, because its one-GPU check for the default `molmo2_maniflow` policy
 under `--replay` too.
 
 `--replay` selects `POLICY_NAME=replay` in
-[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/blocksuite/blob/main/scripts/eval/run_eval_pipeline.sh):
+[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/run_eval_pipeline.sh):
 the policy server is skipped, the autogen task is generated from the dataset,
 the episode queue is started, and each eval worker runs
 
@@ -40,7 +40,7 @@ Output lands under `runs/<task>-v0/replay/<out_subdir>/...` like any other eval 
 [`launch_eval.py` outputs](launch_eval.md#outputs))
 (`eval_episodes.json`, `eval_results.json`, videos, the optional LeRobot
 recording), so the offline diagnostics
-([`scripts/plot_diagnostics_from_eval_run.py`](https://github.com/allenai/blocksuite/blob/main/scripts/plot_diagnostics_from_eval_run.py))
+([`scripts/plot_diagnostics_from_eval_run.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/plot_diagnostics_from_eval_run.py))
 work unchanged.
 
 Add `--dry-run` to print the pipeline invocation instead of running it.
@@ -112,7 +112,7 @@ only applies to `--replay` and raises otherwise.
   `load_pd_gains_from_dataset` (first parquet chunk, one representative vector
   per mode), not the exact per-frame recorded ones; joint velocity limits are
   not written. Identical for datasets recorded under two fixed profiles. When
-  the dataset has no frames of one mode, that mode falls back to the blocksuite
+  the dataset has no frames of one mode, that mode falls back to the ToyBlocks
   defaults.
 - The 5/10-tick settle is a fixed convention (settle steps are not recorded in
   the source dataset). It applies to policy evals with a `--dataset_path` as
@@ -126,6 +126,6 @@ only applies to `--replay` and raises otherwise.
 The former standalone path (`--replay_lerobot_dataset`, `--replay_dataset_path`,
 `--max_replay_episodes`, `replay_results.json`, `replay_plots/`, comparison
 videos) has been removed.
-[`scripts/extract_lerobot_episode.py`](https://github.com/allenai/blocksuite/blob/main/scripts/extract_lerobot_episode.py)
+[`scripts/extract_lerobot_episode.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/extract_lerobot_episode.py)
 and the side-by-side video helpers in `utils/tamp_dataset.py` remain for offline
 inspection but are no longer used by eval.

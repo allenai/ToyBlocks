@@ -18,7 +18,7 @@ from pathlib import Path
 
 import tyro
 
-from blocksuite.vecgen.recording.merge import merge_datasets
+from toyblocks.vecgen.recording.merge import merge_datasets
 
 
 @dataclasses.dataclass

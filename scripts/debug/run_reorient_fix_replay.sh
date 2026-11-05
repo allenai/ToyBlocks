@@ -4,7 +4,7 @@
 # scale/initial state). Two repeats per dataset because fixed-seed replay
 # swings ~+-8% from PhysX nondeterminism; baseline datasets for comparison.
 set -uo pipefail
-cd /home/naman/blocksuite
+cd /home/naman/toyblocks
 status=.logs/reorient_fix_replay.status
 log=.logs/reorient_fix_replay.log
 note() { echo "[$(date '+%F %T')] $*" | tee -a "$status"; }

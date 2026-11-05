@@ -4,7 +4,7 @@ Reads a consolidated LeRobot v3 dataset (e.g.
 ``data/datasets/merged/train/apr15_pnp_10k``), filters one
 episode by ``episode_index``, and writes it back out as a per-episode
 ``blocks/``-style directory in the format expected by
-:func:`blocksuite.utils.tamp_dataset.load_tamp_episode`:
+:func:`toyblocks.utils.tamp_dataset.load_tamp_episode`:
 
     <dst>/data/chunk-000/file-000.parquet
     <dst>/meta/info.json

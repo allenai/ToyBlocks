@@ -43,7 +43,7 @@ def test_no_reference_to_a_moved_script_still_points_into_tamp():
                 if ref in STAYED_IN_TAMP or "*" in ref:
                     continue
                 if (ROOT / "scripts/rerender" / ref).exists() or (
-                    ROOT / "src/blocksuite/domain_randomization/flags" / ref
+                    ROOT / "src/toyblocks/domain_randomization/flags" / ref
                 ).exists():
                     offenders.append(f"{p.relative_to(ROOT)}:{n} -> {ref} (it moved here)")
     assert not offenders, "stale TAMP paths for scripts that moved:\n  " + "\n  ".join(offenders)

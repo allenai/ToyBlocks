@@ -27,7 +27,7 @@ rather than of differences between the training and eval setups.
 - Plug in a new model by implementing a small policy-server interface.
 - Capture the episodes on which a policy failed and send them back to data generation, which
   plans new expert demonstrations and recovery behaviors from those states
-  ([TAMPER](https://github.com/allenai/blocksuite/blob/main/docs/tamper.md)).
+  ([TAMPER](https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md)).
 
 ## Design goals for our evaluation system
 
@@ -117,8 +117,8 @@ a scenario, a task for it has to exist and be registered, and it has to define t
 Evaluation scores episodes on that `success` signal and those stats, not on an RL reward.
 
 **Blocks tasks are generated, not written by hand.** Both generators below render the domain
-template in `src/blocksuite/tamp/blocks/template/` into a package
-`src/blocksuite/tasks/autogen/<slug>/` (gitignored) that registers the gym id `<slug>-v0`.
+template in `src/toyblocks/tamp/blocks/template/` into a package
+`src/toyblocks/tasks/autogen/<slug>/` (gitignored) that registers the gym id `<slug>-v0`.
 Code generation also writes the success criterion and the metrics into the task's
 `evaluate()`:
 
@@ -130,7 +130,7 @@ So there is no reward or metric code to write: "Partial progress from the PDDL g
 explains how these stats become a partial progress score.
 
 **From a dataset:**
-[`scripts/generate_task_from_dataset.py`](https://github.com/allenai/blocksuite/blob/main/scripts/generate_task_from_dataset.py).
+[`scripts/generate_task_from_dataset.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/generate_task_from_dataset.py).
 This is the task `launch_eval.py` evaluates, and the pipeline generates it for you from
 `--dataset-path` before starting the workers. The slug is the dataset directory name with
 `-` replaced by `_`, unless you pass `--task-name`. From the LeRobot dataset it reads:
@@ -148,18 +148,18 @@ run it by hand, for example to debug code generation:
 
 ```bash
 python scripts/generate_task_from_dataset.py --dataset-path data/datasets/my_dataset \
-    --domain-path src/blocksuite/tamp/blocks --output-dir src/blocksuite/tasks/autogen --headless
+    --domain-path src/toyblocks/tamp/blocks --output-dir src/toyblocks/tasks/autogen --headless
 ```
 
 **From a PDDL problem:**
-[`scripts/generate_task_from_pddl.py`](https://github.com/allenai/blocksuite/blob/main/scripts/generate_task_from_pddl.py),
+[`scripts/generate_task_from_pddl.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/generate_task_from_pddl.py),
 the [environment generation](datagen/env_generation.md) stage of data generation. Besides the
 package it samples starting scenes from the problem's `:init` into `reset_states.pkl`, which
 the task starts from when no queue is attached. Use it to evaluate on a problem that has no
 dataset, by running `evaluate.py --task <slug>-v0` directly. `launch_eval.py` does not use it (this will 
 be fixed by December 2026).
 
-**Hand-written tasks** in `src/blocksuite/tasks/` (for example `Blocksuite-Lift-v0`) define
+**Hand-written tasks** in `src/toyblocks/tasks/` (for example `ToyBlocks-Lift-v0`) define
 their own `evaluate()`; [Metrics](evals/metrics.md) shows how to add task-specific metrics.
 
 **Regenerate packages after updating the code.** Each package records the codegen version
@@ -178,7 +178,7 @@ There are two entry points:
   hand.
 
 The evaluation pipeline itself lives in
-[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/blocksuite/blob/main/scripts/eval/run_eval_pipeline.sh)
+[`scripts/eval/run_eval_pipeline.sh`](https://github.com/allenai/ToyBlocks/blob/main/scripts/eval/run_eval_pipeline.sh)
 and `launch_eval.py --dry-run` prints the exact invocation of it. Here's what processes
 are launched when running `scripts/launch_eval.py`:
 
@@ -303,10 +303,10 @@ task-specific code, and measures it the same way for all tasks.
 ```
 
 When the gym task is generated,
-[`codegen.py`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/tamp/blocks/template/codegen.py)
+[`codegen.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/tamp/blocks/template/codegen.py)
 compiles each conjunct of each goal into a batched check on the live simulation state
 (`_goal_conj_<k>`, which calls `batched_goal_conjunct` in
-[`pddl_goal_tensor_conversions.py`](https://github.com/allenai/blocksuite/blob/main/src/blocksuite/tamp/blocks/pddl_goal_tensor_conversions.py)).
+[`pddl_goal_tensor_conversions.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/tamp/blocks/pddl_goal_tensor_conversions.py)).
 At reset, `set_episode_goal` selects each environment's own goal, and fails rather than
 grade an episode against a goal the task was not compiled for. The supported predicates
 are `on`, `on_table`, `on_left`, `on_right`, `on_front`, `on_back`, `next_to`, `ori_of`,

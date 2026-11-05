@@ -46,8 +46,8 @@ parallel:
 ```bash
 python scripts/vecgen/run.py \
     --env-path outputs/flip \
-    --pddl src/blocksuite/tamp/blocks/problems/flip.pddl \
-    --domain src/blocksuite/tamp/blocks/domain.pddl \
+    --pddl src/toyblocks/tamp/blocks/problems/flip.pddl \
+    --domain src/toyblocks/tamp/blocks/domain.pddl \
     --num-envs 16 --episodes 32 \
     --record datasets/flip --mark-complete --headless
 ```
@@ -155,7 +155,7 @@ These are the flags you are most likely to need:
 |---|---|---|
 | `--env-path` | (required) | The autogen env package directory. |
 | `--pddl` | `None` | The problem file. Omit it only when `<env-path>/problems.json` exists, which is the case for multi-problem streaming. |
-| `--domain` | `src/blocksuite/tamp/blocks/domain.pddl` | The domain that FF plans over. |
+| `--domain` | `src/toyblocks/tamp/blocks/domain.pddl` | The domain that FF plans over. |
 | `--num-envs` | `16` | The number of environments stepped in lockstep. |
 | `--episodes` | `16` | The total number of episodes to finish. |
 | `--seed` | `0` | Seeds the engine RNG and the geometry sampler. |

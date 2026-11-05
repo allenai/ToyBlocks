@@ -21,7 +21,7 @@ def _env(tmp_path, body: str) -> str:
 TWO_BLOCK = """
     class Foo:
         def _setup_scene_objects(self):
-            from blocksuite.utils import rigid_objects
+            from toyblocks.utils import rigid_objects
             block_names = ['block_a', 'block_blue']
             block_specs = {'block_a': {'type': 'usd', 'usd_path': 'train_blocks_large/usd/A.usda'},
                            'block_blue': {'type': 'cuboid', 'usd_path': None}}
@@ -68,7 +68,7 @@ def test_names_not_in_specs_are_dropped(tmp_path):
 SIZED = """
     class Foo:
         def _setup_scene_objects(self):
-            from blocksuite.utils import rigid_objects
+            from toyblocks.utils import rigid_objects
             block_names = ['block_1', 'block_blue']
             block_specs = {'block_1': {'type': 'usd', 'usd_path': 'train_blocks_large/usd/1.usda'},
                            'block_blue': {'type': 'cuboid', 'usd_path': None}}

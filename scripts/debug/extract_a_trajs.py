@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Extract A's (blocksuite) CuRobo final interpolated joint trajectories into a pickle.
+"""Extract A's (ToyBlocks) CuRobo final interpolated joint trajectories into a pickle.
 
-For each blocksuite plan `parallel_policy_instance_{i}.pkl` (i=0..7), lift the two
+For each ToyBlocks plan `parallel_policy_instance_{i}.pkl` (i=0..7), lift the two
 ManipTrajectory segments' interpolated CuRobo waypoints as plain (T,7) float32
 arrays, keyed by (a_instance, reference_frame). The classic ManipTrajectory
 executor (env-gated by RG_ATRAJ_PKL) loads this and replays these waypoints

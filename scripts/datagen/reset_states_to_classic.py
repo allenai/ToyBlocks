@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Translate blocksuite ``reset_states.pkl`` into TAMP blocks-classic instance JSONs.
+"""Translate ToyBlocks ``reset_states.pkl`` into TAMP blocks-classic instance JSONs.
 
 Lets both datagen pipelines start from *bit-identical* initial states so a
 dataset diff isolates pipeline differences rather than scene sampling.
 
 The two representations:
 
-  blocksuite   one ``reset_states.pkl`` holding a batched Isaac state dict
+  ToyBlocks   one ``reset_states.pkl`` holding a batched Isaac state dict
                (``rigid_object[name]["root_pose"]`` = env-local xyz+wxyz), plus
                ``profiles.json`` with per-profile block sizes / table height /
                friction, plus ``profile_ids`` mapping state -> profile.
@@ -20,18 +20,18 @@ Three conventions have to line up, and they are the reason this is a script and
 not a copy:
 
 1. **Indexing.** classic instance files are **1-based** (``1.json`` first) while
-   blocksuite reset-state indices are 0-based, so instance *i* of blocksuite
+   ToyBlocks reset-state indices are 0-based, so instance *i* of ToyBlocks
    becomes ``{i+1}.json``.
 2. **Table height.** classic applies ``z + table_height_delta`` at reset unless
    ``positions_include_table_height`` is set (see the sim2real template's
-   ``thd`` handling). blocksuite poses are already the settled world-local z, so
+   ``thd`` handling). ToyBlocks poses are already the settled world-local z, so
    this writer sets the flag True and hands classic the z verbatim — no implicit
    shift. Both pipelines put the table at ``x=0.4888``, so the frames agree.
-3. **Block size.** blocksuite carries per-block absolute sizes; classic derives
+3. **Block size.** ToyBlocks carries per-block absolute sizes; classic derives
    one isotropic edge as ``base_cube_edge * cube_scale``. This script reports the
-   ``--base_cube_edge`` / ``--cube_scale`` pair that reproduces the blocksuite
+   ``--base_cube_edge`` / ``--cube_scale`` pair that reproduces the ToyBlocks
    size so env generation can be invoked to match, and refuses to guess when
-   blocksuite's blocks are not all the same size.
+   toyblocks's blocks are not all the same size.
 
 Usage::
 
@@ -51,7 +51,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from blocksuite.utils.reset_states_io import load_reset_states  # noqa: E402
+from toyblocks.utils.reset_states_io import load_reset_states  # noqa: E402
 
 # classic's default unscaled cuboid edge; only used to report a matching pair.
 CLASSIC_DEFAULT_BASE_EDGE = 0.02985
@@ -105,12 +105,12 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--env-path", required=True, type=Path,
-                        help="blocksuite env package (holds reset_states.pkl + profiles.json)")
+                        help="toyblocks env package (holds reset_states.pkl + profiles.json)")
     parser.add_argument("--out-dir", required=True, type=Path,
                         help="classic task directory to write {i}.json into")
     parser.add_argument("--base-cube-edge", type=float, default=None,
                         help="Override the reported base edge (default: use the "
-                             "blocksuite block size so cube_scale is exactly 1.0)")
+                             "toyblocks block size so cube_scale is exactly 1.0)")
     parser.add_argument("--z-offset", type=float, default=None,
                         help="Add this to every block z. The two scenes' table "
                              "surfaces sit at different heights, so a verbatim copy "
@@ -132,7 +132,7 @@ def main() -> int:
 
     names = _block_names(states)
     n_states = states["rigid_object"][names[0]]["root_pose"].shape[0]
-    print(f"blocksuite: {n_states} reset state(s), {len(names)} block(s), "
+    print(f"toyblocks: {n_states} reset state(s), {len(names)} block(s), "
           f"num_profiles={num_profiles}")
     print(f"  blocks: {names}")
 
@@ -204,7 +204,7 @@ def main() -> int:
         z_offset = float(np.median(settled) - np.median(src_z))
         print(f"\nz offset from settled reference ({settled.size} pose(s)): {z_offset:+.5f} m")
         print(f"  target settled median z {np.median(settled):.5f} "
-              f"(std {settled.std():.5f}) vs blocksuite {np.median(src_z):.5f}")
+              f"(std {settled.std():.5f}) vs ToyBlocks {np.median(src_z):.5f}")
     else:
         z_offset = 0.0
         print("\nWARNING: no --z-offset or --settled-reference; copying z unchanged. "
@@ -230,11 +230,11 @@ def main() -> int:
             "table_height_delta": meta["table_height"],
             "table_friction": meta["friction"],
             "profile_id": pid,
-            # blocksuite poses are already the settled z in the table's frame, so
+            # ToyBlocks poses are already the settled z in the table's frame, so
             # classic must not add table_height_delta on top of them.
             "positions_include_table_height": True,
             "_source": {
-                "pipeline": "blocksuite",
+                "pipeline": "toyblocks",
                 "env_path": str(args.env_path),
                 "reset_state_index": i,
                 "z_offset_applied": z_offset,

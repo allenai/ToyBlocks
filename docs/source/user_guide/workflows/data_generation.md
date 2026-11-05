@@ -84,7 +84,7 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
 - **Relabel a policy's failures**: turn the states where a policy failed during
   evaluation into new expert demonstrations, with
   `scripts/datagen/run_tamper_pipeline.py`
-  ([TAMPER](https://github.com/allenai/blocksuite/blob/main/docs/tamper.md)).
+  ([TAMPER](https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md)).
 - **Produce training-ready output**: one merged, annotated LeRobot dataset, ready for
   imitation learning and for [evaluation](evaluations.md).
 
@@ -105,13 +105,13 @@ run_datagen_pipeline.py
   └─ annotate    annotate_target_xy.py           target annotations
 ```
 
-If you simply want to generate some example datasets with already tested scripts, start from these entry points in the [scripts/datagen folder](https://github.com/allenai/blocksuite/tree/main/scripts/datagen):
+If you simply want to generate some example datasets with already tested scripts, start from these entry points in the [scripts/datagen folder](https://github.com/allenai/ToyBlocks/tree/main/scripts/datagen):
 
-- [run_datagen_pipeline.py](https://github.com/allenai/blocksuite/blob/main/scripts/datagen/run_datagen_pipeline.py): the end-to-end pipeline described on this page; its docstring lists ready-to-run example commands.
-- [run_playdata_pipeline.py](https://github.com/allenai/blocksuite/blob/main/scripts/datagen/run_playdata_pipeline.py): the same pipeline for play data, where each scene plays a chain of goals without resetting.
-- [run_tamper_pipeline.py](https://github.com/allenai/blocksuite/blob/main/scripts/datagen/run_tamper_pipeline.py): turns states where a policy failed during evaluation into new expert demonstrations.
-- [merge_datasets.py](https://github.com/allenai/blocksuite/blob/main/scripts/datagen/merge_datasets.py): merges per-problem LeRobot datasets into one.
-- [plot_episode.py](https://github.com/allenai/blocksuite/blob/main/scripts/datagen/plot_episode.py): plots every signal of one episode, a quick way to check a generated dataset.
+- [run_datagen_pipeline.py](https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_datagen_pipeline.py): the end-to-end pipeline described on this page; its docstring lists ready-to-run example commands.
+- [run_playdata_pipeline.py](https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_playdata_pipeline.py): the same pipeline for play data, where each scene plays a chain of goals without resetting.
+- [run_tamper_pipeline.py](https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_tamper_pipeline.py): turns states where a policy failed during evaluation into new expert demonstrations.
+- [merge_datasets.py](https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/merge_datasets.py): merges per-problem LeRobot datasets into one.
+- [plot_episode.py](https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/plot_episode.py): plots every signal of one episode, a quick way to check a generated dataset.
 
 
 
@@ -172,7 +172,7 @@ python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3 --re
 | `--randomize-scene` / `--no-randomize-scene` | on | Block size, table height, and friction randomization. |
 | `--randomize-robot-init` | off | Give each reset state a random collision-free arm configuration and gripper state. |
 | `--num-distractors` | 0 | Distractor objects per problem (passed to the generator as `--num_distractors`; see [Task generation](datagen/task_generation.md#common-pitfalls)). |
-| `--domain-path` | `src/blocksuite/tamp/blocks` | Path to the PDDL domain directory. |
+| `--domain-path` | `src/toyblocks/tamp/blocks` | Path to the PDDL domain directory. |
 | `--usd-library` | `train_blocks_large` | Glyph asset library that block names resolve against at code generation. |
 | `--skip-task-gen`, `--skip-env`, `--skip-execution`, `--skip-merge`, `--skip-annotate` | off | Skip individual steps for re-runs or debugging. |
 
@@ -231,7 +231,7 @@ the flags YAML `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 episode, the 224 RGB and depth sidecars, `left_camera` skipped and failure episodes skipped. The
 default flags draw HDRI backdrops from polyhaven (part of the base asset download) and the
 separately licensed Laval indoor set; see
-[HDRI backdrops](https://github.com/allenai/blocksuite/blob/release/docs/rerender/README_local.md#hdri-backdrops).
+[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops).
 Every rerender flag is described in [Re-rendering](datagen/rerender.md).
 
 ### Per-Stage Parameters

@@ -33,26 +33,6 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving.maniflow_serving_utils import (
-    client_advertised_obs_keys,
-    derive_model_input_spec,
-    postprocess_actions,
-    select_and_validate_obs,
-)
-from blocksuite.serving.molmo2_hl import HLContract, hl_contract_from_config, stack_label
-from blocksuite.serving.obs_transforms.maniflow import (
-    STATE_DIM_LAYOUTS,
-    transform_kwargs_from_server_metadata,
-)
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
-from blocksuite.serving.serve_maniflow_policy import (
-    HLLLInferAdapter,
-    ManiFlowInferAdapter,
-    _maybe_render_input_trace,
-    hl_question_with_prev_action,
-)
 from tests.serving.policy_input_fixture import (
     FIXTURE_BATCH,
     build_obs,
@@ -60,6 +40,26 @@ from tests.serving.policy_input_fixture import (
     load_fixture,
     load_stats,
     stats_action_mode,
+)
+from toyblocks.serving.maniflow_serving_utils import (
+    client_advertised_obs_keys,
+    derive_model_input_spec,
+    postprocess_actions,
+    select_and_validate_obs,
+)
+from toyblocks.serving.molmo2_hl import HLContract, hl_contract_from_config, stack_label
+from toyblocks.serving.obs_transforms.maniflow import (
+    STATE_DIM_LAYOUTS,
+    transform_kwargs_from_server_metadata,
+)
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
+)
+from toyblocks.serving.serve_maniflow_policy import (
+    HLLLInferAdapter,
+    ManiFlowInferAdapter,
+    _maybe_render_input_trace,
+    hl_question_with_prev_action,
 )
 
 ACTION_HORIZON = 4
@@ -230,7 +230,7 @@ def test_metadata_works_without_stats():
 
 def test_transform_kwargs_carry_target_front_crop_bottom_pct():
     adapter, _, _, _ = _adapter(9)
-    from blocksuite.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
+    from toyblocks.serving.obs_transforms.maniflow import transform_kwargs_from_server_metadata
 
     meta = dict(adapter.metadata)
     meta["use_target_front_crop"] = 40
@@ -563,7 +563,7 @@ def test_no_trace_request_renders_nothing(monkeypatch):
     the ``None`` branch was taken first, and the stub proves nothing was drawn --
     which a check on an empty temp dir the renderer was never given cannot.
     """
-    import blocksuite.serving.policy_input_trace as trace_module
+    import toyblocks.serving.policy_input_trace as trace_module
 
     calls: list[dict[str, Any]] = []
     monkeypatch.setattr(

@@ -28,23 +28,23 @@ import numpy as np
 import pytest
 import torch
 
-from blocksuite.serving import msgpack_numpy
-from blocksuite.serving.action_chunk_broker import (
-    ActionChunkBroker,
-    PerEnvActionChunkBroker,
-    _split_envs,
-)
-from blocksuite.serving.base_policy import BasePolicy
-from blocksuite.serving.obs_transforms import ObsTransformPolicy
-from blocksuite.serving.obs_transforms.maniflow_blocks_table import (
-    ManiflowBlocksTableObsTransform,
-)
-from blocksuite.serving.policy_client import PolicyClientAdapter
 from tests.serving.policy_input_fixture import (
     FIXTURE_BATCH,
     build_obs,
     build_target_heatmap,
 )
+from toyblocks.serving import msgpack_numpy
+from toyblocks.serving.action_chunk_broker import (
+    ActionChunkBroker,
+    PerEnvActionChunkBroker,
+    _split_envs,
+)
+from toyblocks.serving.base_policy import BasePolicy
+from toyblocks.serving.obs_transforms import ObsTransformPolicy
+from toyblocks.serving.obs_transforms.maniflow_blocks_table import (
+    ManiflowBlocksTableObsTransform,
+)
+from toyblocks.serving.policy_client import PolicyClientAdapter
 
 TRACE_KEY = "__ll_input_trace__"
 ACTION_HORIZON = 3

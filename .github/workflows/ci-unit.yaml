@@ -44,7 +44,7 @@ jobs:
           # isaac) also pull hvla / Isaac Lab, which a CPU box cannot install.
           # These are exactly what the CPU tests import: torch + pillow for the
           # obs transforms, omegaconf to read checkpoint configs, websockets +
-          # msgpack because blocksuite.serving.__init__ imports the websocket
+          # msgpack because toyblocks.serving.__init__ imports the websocket
           # transport, pyarrow to build the LeRobot skeletons the provenance
           # tests read, and matplotlib because the policy-input trace/debug panels
           # render with it (tests/serving/test_policy_input_trace.py). A missing
@@ -65,10 +65,10 @@ jobs:
           # The LeRobot recorder and merge tests are named explicitly: tests/vecgen is not
           # collected here, and they stub the sim (and, when absent, PyAV/LeRobot)
           # imports themselves; the stitch test skips without LeRobot.
-          # src/blocksuite/domain_randomization holds the camera/DR tests next to the code
+          # src/toyblocks/domain_randomization holds the camera/DR tests next to the code
           # they cover, so the directories above do not collect them. Named here so
           # the wave-intrinsics contract (recorded camera == rendered camera) is enforced.
           pytest tests/serving tests/tamp tests/eval tests/rerender \
             tests/vecgen/test_recorder_rows.py tests/vecgen/test_recorder_stitch.py \
             tests/vecgen/test_merge.py \
-            src/blocksuite/domain_randomization -v
+            src/toyblocks/domain_randomization -v

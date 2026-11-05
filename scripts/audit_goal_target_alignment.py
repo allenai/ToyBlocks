@@ -33,8 +33,8 @@ import pyarrow.compute as pc
 import pyarrow.parquet as pq
 import tyro
 
-from blocksuite.utils.dataset_provenance import camera_short_name
-from blocksuite.utils.episode_dataset import (
+from toyblocks.utils.dataset_provenance import camera_short_name
+from toyblocks.utils.episode_dataset import (
     _COL_DATA_CHUNK_INDEX,
     _COL_DATA_FILE_INDEX,
     _COL_EPISODE_INDEX,

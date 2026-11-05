@@ -1,4 +1,4 @@
-"""Guard: blocksuite does not depend on the removed TAMP submodule.
+"""Guard: ToyBlocks does not depend on the removed TAMP submodule.
 
 Datagen (vecgen), play data, TAMPER and the eval oracles all run without TAMP; this keeps
 it that way. Every Python file under ``src/``, ``scripts/`` and ``tests/`` is

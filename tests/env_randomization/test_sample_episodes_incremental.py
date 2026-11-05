@@ -10,13 +10,13 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from blocksuite.domain_randomization import interpreter as I
-from blocksuite.domain_randomization.assets import AssetPaths
-from blocksuite.domain_randomization.resolve import resolve_skybox_textures
+from toyblocks.domain_randomization import interpreter as I
+from toyblocks.domain_randomization.assets import AssetPaths
+from toyblocks.domain_randomization.resolve import resolve_skybox_textures
 
 KEYS = [0, 1, 2, 3, 4, 5, 6, 7]
 FIELDS = ("ep_offsets", "ep_mats", "ep_spheres", "ep_local")
-FLAGS_YAML = "src/blocksuite/domain_randomization/flags/rerender_flags_open_hybrid_camera_rand_only.yaml"
+FLAGS_YAML = "src/toyblocks/domain_randomization/flags/rerender_flags_open_hybrid_camera_rand_only.yaml"
 ENV_SPHERE_SPEC: dict = {"sets": [{"set": "polyhaven/all"}], "seed": 7}
 
 

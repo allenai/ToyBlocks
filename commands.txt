@@ -1,8 +1,8 @@
 ================================================================================
-  Blocksuite + TAMP — Flip + Pick-and-Place End-to-End Commands
+  ToyBlocks + TAMP — Flip + Pick-and-Place End-to-End Commands
 ================================================================================
 
-Runs a pick-and-place TAMP task entirely through blocksuite's scripts, backed by
+Runs a pick-and-place TAMP task entirely through toyblocks's scripts, backed by
 the TAMP planner (tmp3). Validated on the FR3 (franka_droid) robot.
 
 
@@ -10,7 +10,7 @@ the TAMP planner (tmp3). Validated on the FR3 (franka_droid) robot.
 --------------------------------------------------------------------------------
 Step 1: Generate the PDDL problem (flip RL + PnP)
 --------------------------------------------------------------------------------
-# blocksuite has NO PDDL-problem generator (its scripts only CONSUME PDDLs).
+# ToyBlocks has NO PDDL-problem generator (its scripts only CONSUME PDDLs).
 # Start block_r at o17; goal o2 + on block_red1 -> REORIENT then PNP_TABLE_BLOCK.
 
 cat > /tmp/flip_pnp_r_on_red.pddl <<'EOF'
@@ -58,7 +58,7 @@ Step 2: Codegen the env package + sample reset states
 
 python scripts/generate_task_from_pddl.py \
     --pddl /tmp/flip_pnp_r_on_red.pddl \
-    --domain_path src/blocksuite/tamp/blocks \
+    --domain_path src/toyblocks/tamp/blocks \
     --output_dir datasets/basics/test/ \
     --num_reset_states 16 \
     --num_envs 8 \
@@ -74,7 +74,7 @@ Step 3: Generate plans (TAMP planner, CuRobo-only — no Isaac sim)
 python scripts/generate_plans.py \
     --num-workers 4 \
     --domain-name Blocks \
-    --domain-path src/blocksuite/tamp/blocks \
+    --domain-path src/toyblocks/tamp/blocks \
     --pddl-problem-file /tmp/flip_pnp_r_on_red.pddl \
     --env-path datasets/basics/test/flip_pnp_r_on_red \
     --device cuda:0 \
@@ -90,10 +90,10 @@ Step 4: Execute the plans in Isaac Sim (records LeRobot data + videos)
 # --data_dir       : output (success/ + failure/ with per-camera mp4s)
 
 python scripts/execute_plans.py \
-    --policy_dir src/blocksuite/tasks/plans/flip_pnp_r_on_red/ \
+    --policy_dir src/toyblocks/tasks/plans/flip_pnp_r_on_red/ \
     --num_envs 8 \
     --domain_name Blocks \
-    --domain_path src/blocksuite/tamp/blocks \
+    --domain_path src/toyblocks/tamp/blocks \
     --pddl_problem_file /tmp/flip_pnp_r_on_red.pddl \
     --env_path datasets/basics/test/flip_pnp_r_on_red \
     --robotiq \

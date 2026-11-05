@@ -2,7 +2,7 @@
 
 set -e
 
-DOCKER_IMAGE=blocksuite-dev-maniflow-tamp:latest
+DOCKER_IMAGE=toyblocks-dev-maniflow-tamp:latest
 SRC_FOLDER=""
 
 command -v fzf >/dev/null 2>&1 && HAS_FZF=true || HAS_FZF=false
@@ -18,10 +18,10 @@ done
 
 # TODO(wilbert): get the ones that are built locally using the docker cli
 image_choices=(
-    "blocksuite-main-base:latest"
-    "blocksuite-main-maniflow:latest"
-    "blocksuite-dev-base:latest"
-    "blocksuite-dev-maniflow:latest"
+    "toyblocks-main-base:latest"
+    "toyblocks-main-maniflow:latest"
+    "toyblocks-dev-base:latest"
+    "toyblocks-dev-maniflow:latest"
 )
 
 if [ "${HAS_FZF}" == "true" ]; then
@@ -33,7 +33,7 @@ cd "${REPO_ROOT}"
 
 SRC_FOLDER_CMD=""
 if [ -n "${SRC_FOLDER}" ]; then
-    SRC_FOLDER_CMD="-v ${SRC_FOLDER}:/root/blocksuite:rw"
+    SRC_FOLDER_CMD="-v ${SRC_FOLDER}:/root/toyblocks:rw"
     echo "[INFO]: mounting source folder @ ${SRC_FOLDER_CMD}"
 fi
 
@@ -41,6 +41,6 @@ docker run -it --rm \
     --gpus all --runtime=nvidia \
     -v ~/.gitconfig:/root/.gitconfig:ro \
     -v ~/.ssh/id_ed25519:/root/.ssh/id_ed25519 \
-    -v $(pwd)/datasets:/root/blocksuite/datasets:rw \
+    -v $(pwd)/datasets:/root/toyblocks/datasets:rw \
     ${SRC_FOLDER_CMD} \
     ${DOCKER_IMAGE}
