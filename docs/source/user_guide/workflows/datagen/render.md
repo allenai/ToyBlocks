@@ -275,6 +275,11 @@ That renders the plain look once into `job_plain` and the randomized look three 
 `job_allrand_texcache`, so the merged dataset is 4x the source episodes. The `:N` suffix is per
 pass, and without it a pass renders once.
 
+Passes are keyed by that `job_<name>`, so two YAMLs whose names reduce to the same one are not
+both rendered. The run keeps the first and warns. The merge also reads every `job_*` directory
+under `render/out/`, not only the passes this command asked for, so a directory left by an
+earlier run of the same experiment is merged again. Delete it, or use a fresh `--experiment-id`.
+
 `--render-randomized` and `--render-non-randomized` are shorthand for the two most common
 passes and resolve to exactly these entries, so a run can be written either way. Prefer
 `--render-pass`: it names the YAML and the copy count in one place, and it is the only form that
@@ -456,17 +461,19 @@ before using a rendered dataset.
 
 ### `render_flags_camtest.yaml` produces identical copies
 
-`render_flags_camtest.yaml` has **no random section at all**. A `:4` pass with it produces
-four pixel-identical copies, while every size-based check still reports 4x. Use it only to test
-the camera rig, never to check that randomization works.
+`render_flags_camtest.yaml` has **no random section at all**. A `:4` pass with it produces four
+copies of the same look, identical in depth and differing in RGB only by renderer noise, while
+every size-based check still reports 4x. Use it only to test the camera rig, never to check that
+randomization works.
 
 ### `--antialiasing` has no effect under the shipped path-tracing files
 
 `render_flags_plain.yaml` and both `allrand` files select RTX Real-Time 2.0 path tracing through
-their `carb_settings`, where antialiasing is not optional. `--antialiasing` and `--disable_dlss`
-are applied before that, so the log prints the mode you asked for and the pixels do not change.
-Verify any antialiasing change with a pixel difference, never with the log line. To get a
-genuinely different mode, change the render mode in the YAML.
+their `carb_settings`, and that renderer does not let antialiasing be turned off.
+`--antialiasing` and `--disable_dlss` set the simulation's antialiasing mode, which the YAML's
+render mode then overrides, so the log prints the mode you asked for and the pixels do not
+change. Verify any antialiasing change with a pixel difference, never with the log line. To get
+a genuinely different mode, change the render mode in the YAML.
 
 ### Mixing seeding modes in one dataset
 
