@@ -473,15 +473,10 @@ docker/build_eval_image.sh<span class="w"> </span>main<span class="w"> </span>/t
 docker/build_vecgen_image.sh<span class="w"> </span>main<span class="w"> </span>/tmp/vecgen_img<span class="w">    </span><span class="c1"># -&gt; toyblocks-vecgen:&lt;sha&gt;</span>
 </pre></div>
 </div>
-<section id="hardware-specification">
-<h3>Hardware specification<a class="headerlink" href="#hardware-specification" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p>x86_64 Linux host. The images do not build on arm64 (e.g. Apple Silicon): the pinned CUDA torch has no arm64 wheels.</p></li>
-<li><p>An NVIDIA GPU with a driver that supports CUDA 12.8 (driver 570 or newer).</p></li>
-<li><p>The <a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">NVIDIA Container Toolkit</a> to run the images, which take the driver libraries from the host.</p></li>
-<li><p>Tested on an NVIDIA RTX 5090 (32 GB).</p></li>
-</ul>
-</section>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Hardware:</strong> the images need an x86_64 Linux host with an NVIDIA GPU (see <a class="reference internal" href="#prerequisites">Prerequisites</a>); they do not build on arm64 such as Apple Silicon, since the pinned CUDA torch has no arm64 wheels. Running them needs the <a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">NVIDIA Container Toolkit</a>. Tested on an NVIDIA RTX 5090 (32 GB).</p>
+</div>
 </section>
 <section id="code-organization">
 <h2>Code Organization<a class="headerlink" href="#code-organization" title="Link to this heading">#</a></h2>
@@ -565,10 +560,7 @@ docker/build_vecgen_image.sh<span class="w"> </span>main<span class="w"> </span>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-assets">Download the assets</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-installation">Verify the installation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-docs">Build the docs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docker-images">Docker images</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-specification">Hardware specification</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docker-images">Docker images</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-organization">Code Organization</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 </ul>
