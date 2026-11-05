@@ -278,15 +278,16 @@ class VecSim:
         """Scale the arm's static / dynamic / viscous joint friction in sim (A/B: 0 = off)."""
         data = self.art.data
         arm = self.arm_ids
-        for name, writer in (
-            ("joint_friction_coeff", "write_joint_friction_coefficient_to_sim"),
-            ("joint_dynamic_friction_coeff", "write_joint_dynamic_friction_coefficient_to_sim"),
-            ("joint_viscous_friction_coeff", "write_joint_viscous_friction_coefficient_to_sim"),
-        ):
-            values = getattr(data, name, None)
-            if values is not None and hasattr(self.art, writer):
-                getattr(self.art, writer)(values[:, arm] * scale, joint_ids=arm)
-
+        # One write for all three coefficients: PhysX rejects static < dynamic, so scaling
+        # static first (scale < 1) and dynamic after errors on the intermediate state.
+        dynamic = getattr(data, "joint_dynamic_friction_coeff", None)
+        viscous = getattr(data, "joint_viscous_friction_coeff", None)
+        self.art.write_joint_friction_coefficient_to_sim(
+            data.joint_friction_coeff[:, arm] * scale,
+            joint_dynamic_friction_coeff=None if dynamic is None else dynamic[:, arm] * scale,
+            joint_viscous_friction_coeff=None if viscous is None else viscous[:, arm] * scale,
+            joint_ids=arm,
+        )
     def set_arm_armature(self, scale: float) -> None:
         """Scale the arm's joint armature in sim (0 = none, as the pre-sysid robot of the Sep data)."""
         armature = getattr(self.art.data, "joint_armature", None)
