@@ -133,3 +133,9 @@ docker/build_eval_image.sh main /tmp/eval_img        # -> toyblocks-eval:<sha>
 # slim datagen image: vecgen + cuRobo v2, no policies, no CUDA toolkit
 docker/build_vecgen_image.sh main /tmp/vecgen_img    # -> toyblocks-vecgen:<sha>
 ```
+
+## License
+
+ToyBlocks is licensed under the [Apache License 2.0](LICENSE).
+The `curobo`, `maniflow-tb` and `molmo2` submodules and the downloaded assets (e.g. the HDRI pools) are
+distributed under their own licenses.
