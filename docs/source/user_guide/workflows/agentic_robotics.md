@@ -23,7 +23,12 @@ Install ToyBlocks as in [Installation](installation_and_setup_instructions.md), 
 git submodule update --init curobo agentic_robotics
 uv pip install -e ".[dev,isaac,torch-cu128,vecgen,agentic]"
 export OMNI_KIT_ACCEPT_EULA=YES
+get-toyblocks-assets --asset-manifest asset_manifest.json   # the robot, block and scene assets
 ```
+
+The assets are downloaded once per machine into `~/.toyblocks` and symlinked into `assets/`; without
+them the first task build fails with a missing robot USD. `pytest tests/install` checks the install,
+the submodule pins and the assets (see [Verify the installation](installation_and_setup_instructions.md#verify-the-installation)).
 
 The `agentic` extra installs the `agentic-robotics` package (editable, from the submodule) and
 its `agentic-robotics` command. Its MCP SDK needs newer `starlette`, `fastapi`, `uvicorn` and
@@ -58,7 +63,7 @@ defined and what is built on this machine, then build a task:
 
 ```bash
 agentic-robotics tasks
-agentic-robotics generate-env --task ai2_stacked     # one package per PDDL variant
+agentic-robotics generate-env --task r_on_red        # one package per PDDL variant (r_on_red has one)
 ```
 
 Passing `--generate-env` to `episode`, `page` or `human` builds a missing package on the spot.
@@ -67,7 +72,7 @@ Passing `--generate-env` to `episode`, `page` or `human` builds a missing packag
 
 ```bash
 # One headless, model-driven episode with the scripted skills
-agentic-robotics episode --task ai2_stacked --backend oracle
+agentic-robotics episode --task r_on_red --backend oracle
 ```
 
 The run directory holds the video (`video.mp4`), the model's transcript, the resolved
@@ -81,8 +86,8 @@ The commands below start local web pages; open the printed URL in a browser.
 | Command | Page | What it does |
 |---|---|---|
 | `agentic-robotics menu --backend oracle` | <http://127.0.0.1:8083> | Isaac starts with no scene; pick tasks one after another from the page, watch the model act, and interject |
-| `agentic-robotics page --task ai2_stacked --backend oracle` | <http://127.0.0.1:8083> | one model-driven episode with the interjection page around it |
-| `agentic-robotics human --task ai2_stacked --backend oracle` | <http://127.0.0.1:8083> | the same episode with you in the model's chair: call the skills yourself |
+| `agentic-robotics page --task r_on_red --backend oracle` | <http://127.0.0.1:8083> | one model-driven episode with the interjection page around it |
+| `agentic-robotics human --task r_on_red --backend oracle` | <http://127.0.0.1:8083> | the same episode with you in the model's chair: call the skills yourself |
 | `agentic-robotics portal` | <http://127.0.0.1:8082> | browse finished runs (videos, transcripts, scores); no Isaac, no model |
 | `agentic-robotics portal --static` | files | write the portal as static pages under `<runs dir>/portal/` |
 | `agentic-robotics mock` | <http://127.0.0.1:8083> | the page alone, without Isaac or a GPU, for working on the UI |
@@ -110,7 +115,7 @@ prompt and tool-call budget.
    underscores. ToyBlocks's task generators write suitable problems, for example:
 
    ```bash
-   python scripts/task_gen/stack_three.py --train --count 5 --seed 0 \
+   python scripts/task_gen/stack_three.py --train --count 3 --seed 0 \
        --out-dir agentic_robotics/data/problems/my_stack
    ```
 
@@ -122,41 +127,59 @@ prompt and tool-call budget.
 
    ```python
    "my_stack": TaskConfig(
-       name="My Stack",
+       name="Custom New Task",
        task_slug="my_stack",          # data/problems/my_stack(.pddl | /)
        prompt=PROMPT_PREFIX
-       + "Stack the three letter blocks so the letters read top to bottom. "
+       + "Stack any three letter blocks so their letters read top to bottom. "
        + PROMPT_SUFFIX,
-       max_tool_calls=30,             # the model's budget of skill calls
+       max_tool_calls=30,             # the model's budget of MCP tool calls
    ),
    ```
 
    `PROMPT_PREFIX` and `PROMPT_SUFFIX` frame every task (the robot's role, how pixel coordinates
-   work, how to end the episode); the middle is what the model is asked to do. `glyph_library`
-   picks the block asset library for letter and digit blocks (default `train_blocks_large`).
+   work, how to end the episode); the middle is what the model is asked to do. An optional
+   `glyph_library` field names the asset library the letter and digit blocks are drawn from,
+   `train_blocks` or `train_blocks_large` (ToyBlocks's `GLYPH_LIBRARIES`); leave it out for the
+   default, `train_blocks_large`.
 
 3. **Build and run it.**
 
    ```bash
    agentic-robotics generate-env --task my_stack
    agentic-robotics human --task my_stack --backend oracle     # try it yourself first
-   agentic-robotics episode --task my_stack --backend oracle   # then let the model try
+   agentic-robotics page --task my_stack --backend oracle      # then watch the model try, and interject
    ```
+
+   `generate-env` builds one package per variant, so a task with many variants takes a while;
+   `page` serves the episode with the chat page around it (`episode` runs it headless).
 
    `generate-env` reports reset states with unreachable or overlapping blocks; adjust the
    problem's ranges if many are flagged.
 
 ## ManiFlow skills
 
-The `maniflow` backend runs a trained ManiFlow policy instead of the scripted skills. Install the
-`maniflow` extra, point `MANIFLOW_CHECKPOINT_ROOT` at your checkpoints (the experiment file's
-`maniflow` key names one, relative to that root), and start the policy server in its own shell
-before the episode:
+The `maniflow` backend runs a trained ManiFlow policy instead of the scripted skills. It needs the
+`maniflow` extra (`uv pip install -e ".[dev,isaac,torch-cu128,vecgen,maniflow,agentic]"`) and a
+checkpoint directory in the layout a training run writes (`checkpoints/steps_N_model.safetensors`,
+`config.yaml`, `stats.json`; see [Imitation learning](imitation_learning.md)). The released
+checkpoint, [allenai/maniflow-tb](https://huggingface.co/allenai/maniflow-tb), has that layout:
 
 ```bash
-agentic-robotics serve                       # serves the experiment's checkpoint
-agentic-robotics episode --task ai2_stacked  # in another shell; backend from the experiment file
+hf download allenai/maniflow-tb --local-dir checkpoints/maniflow-tb
 ```
+
+The adapter's checkpoint table (`maniflow_config.py`, `MANIFLOW_CONFIGS`) names each checkpoint
+directory relative to `$MANIFLOW_CHECKPOINT_ROOT` (default: `checkpoints/` under the working
+directory); `maniflow-tb` is the entry for the released checkpoint. Start the policy server in its
+own shell, then run the episode against it:
+
+```bash
+agentic-robotics serve --maniflow maniflow-tb                                     # policy server, port 8000
+agentic-robotics episode --task ai2_stacked --backend maniflow --maniflow maniflow-tb   # in another shell
+```
+
+Without `--maniflow`, both use the experiment file's `maniflow` key; without `--backend`, the
+episode uses its `skill_backend`. A missing checkpoint file is reported by name before Isaac starts.
 
 ## Experiments and further reading
 
