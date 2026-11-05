@@ -129,12 +129,9 @@ docker/build_eval_image.sh main /tmp/eval_img        # -> toyblocks-eval:<sha>
 docker/build_vecgen_image.sh main /tmp/vecgen_img    # -> toyblocks-vecgen:<sha>
 ```
 
-### Hardware specification
-
-- x86_64 Linux host. The images do not build on arm64 (e.g. Apple Silicon): the pinned CUDA torch has no arm64 wheels.
-- An NVIDIA GPU with a driver that supports CUDA 12.8 (driver 570 or newer).
-- The [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) to run the images, which take the driver libraries from the host.
-- Tested on an NVIDIA RTX 5090 (32 GB).
+:::{note}
+**Hardware:** the images need an x86_64 Linux host with an NVIDIA GPU (see [Prerequisites](#prerequisites)); they do not build on arm64 such as Apple Silicon, since the pinned CUDA torch has no arm64 wheels. Running them needs the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Tested on an NVIDIA RTX 5090 (32 GB).
+:::
 
 ## Code Organization
 
