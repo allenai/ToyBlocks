@@ -39,7 +39,7 @@ export OMNI_KIT_ACCEPT_EULA=YES
 
 ## Datagen (cuRobo) setup
 
-Data generation (vecgen) needs cuRobo v2, which comes from the `curobo` submodule. Install the `vecgen` optional group, or `tamp`, which adds the rerun and flask debug viewers on top. The submodule must be initialized first (`git submodule update --init curobo`); the `--recursive` command above already does this. There is no TAMP submodule any more: the FF symbolic planner is vendored in `src/blocksuite/vecgen/symbolic/ff_planner/`.
+Data generation (vecgen) needs cuRobo v2, which comes from the `curobo` submodule. Install the `vecgen` optional group, or `tamp`, which adds the rerun and flask debug viewers on top. The submodule must be initialized first (`git submodule update --init curobo`); the `--recursive` command above already does this. There is no TAMP submodule any more: the FF symbolic planner is vendored in `src/toyblocks/vecgen/symbolic/ff_planner/`.
 
 ```bash
 uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
@@ -72,11 +72,11 @@ With the `vecgen` group installed, generate one environment package from a check
 
 ```bash
 export OMNI_KIT_ACCEPT_EULA=YES
-problem=src/blocksuite/tamp/blocks/problems/flip.pddl
-python scripts/generate_task_from_pddl.py --domain_path src/blocksuite/tamp/blocks \
+problem=src/toyblocks/tamp/blocks/problems/flip.pddl
+python scripts/generate_task_from_pddl.py --domain_path src/toyblocks/tamp/blocks \
     --pddl ${problem} --num_reset_states 8 --num_envs 4 --seed 0 --output_dir outputs --headless
 python scripts/vecgen/run.py --env-path outputs/flip --pddl ${problem} \
-    --domain src/blocksuite/tamp/blocks/domain.pddl --num-envs 4 --episodes 4 \
+    --domain src/toyblocks/tamp/blocks/domain.pddl --num-envs 4 --episodes 4 \
     --record datasets/flip/flip --mark-complete --headless
 ```
 
@@ -99,25 +99,25 @@ Both images build from a fresh SSH clone of a git ref (so push your branch first
 
 ```bash
 # eval image: Isaac + cuRobo + maniflow-tb + molmo2 (policy servers and evaluate.py)
-docker/build_eval_image.sh release /tmp/eval_img        # -> blocksuite-eval:<sha>
+docker/build_eval_image.sh main /tmp/eval_img        # -> toyblocks-eval:<sha>
 
 # slim datagen image: vecgen + cuRobo v2, no policies, no CUDA toolkit
-docker/build_vecgen_image.sh release /tmp/vecgen_img    # -> blocksuite-vecgen:<sha>
+docker/build_vecgen_image.sh main /tmp/vecgen_img    # -> toyblocks-vecgen:<sha>
 ```
 
 ## Code Organization
 
-All source code is in `src/blocksuite/`:
+All source code is in `src/toyblocks/`:
 
-- `src/blocksuite/tasks`: all hand-created tasks, as well as templates for PDDL-based task generation
-- `src/blocksuite/vecgen`: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)
-- `src/blocksuite/robots`: all robot assets and configurations, including controllers
-- `src/blocksuite/serving`: policy serving infrastructure (`BasePolicy`, `PolicyServer`, WebSocket client, obs transforms)
-- `src/blocksuite/wrappers`: gym `Wrapper` subclasses (recording, stats, obs flattening)
-- `src/blocksuite/cli`: command line utilities
-- `src/blocksuite/data_annotation`: dataset annotation utilities
-- `src/blocksuite/utils`: utilities for ToyBlocks
-- `src/blocksuite/utils/rigid_objects`: utilities for working with rigid objects (e.g. creating them more easily)
+- `src/toyblocks/tasks`: all hand-created tasks, as well as templates for PDDL-based task generation
+- `src/toyblocks/vecgen`: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)
+- `src/toyblocks/robots`: all robot assets and configurations, including controllers
+- `src/toyblocks/serving`: policy serving infrastructure (`BasePolicy`, `PolicyServer`, WebSocket client, obs transforms)
+- `src/toyblocks/wrappers`: gym `Wrapper` subclasses (recording, stats, obs flattening)
+- `src/toyblocks/cli`: command line utilities
+- `src/toyblocks/data_annotation`: dataset annotation utilities
+- `src/toyblocks/utils`: utilities for ToyBlocks
+- `src/toyblocks/utils/rigid_objects`: utilities for working with rigid objects (e.g. creating them more easily)
 
 The ManiFlow and Molmo2 policy code is in the `maniflow-tb/` (package `hvla`) and `molmo2/` (package `olmo`) submodules.
 

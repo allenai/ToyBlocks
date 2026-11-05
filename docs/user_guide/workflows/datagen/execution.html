@@ -406,8 +406,8 @@ so you can study them later.</p>
 parallel:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/vecgen/run.py<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--env-path<span class="w"> </span>outputs/flip<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--pddl<span class="w"> </span>src/blocksuite/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--domain<span class="w"> </span>src/blocksuite/tamp/blocks/domain.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pddl<span class="w"> </span>src/toyblocks/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span>src/toyblocks/tamp/blocks/domain.pddl<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--record<span class="w"> </span>datasets/flip<span class="w"> </span>--mark-complete<span class="w"> </span>--headless
 </pre></div>
@@ -585,7 +585,7 @@ to be told to render, so pass <code class="docutils literal notranslate"><span c
 <td><p>The problem file. Omit it only when <code class="docutils literal notranslate"><span class="pre">&lt;env-path&gt;/problems.json</span></code> exists, which is the case for multi-problem streaming.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--domain</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks/domain.pddl</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/domain.pddl</span></code></p></td>
 <td><p>The domain that FF plans over.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num-envs</span></code></p></td>

@@ -366,7 +366,7 @@
 <p>ToyBlocks records evaluation metrics at three granularities: <strong>per-step</strong>, <strong>per-episode</strong>, and <strong>across-episode</strong>. All metrics flow through a common pipeline and are saved automatically at the end of every eval run.</p>
 <section id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MetricsTracker          per-step tensors   RecordMetrics         blocksuite.eval.run_eval
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MetricsTracker          per-step tensors   RecordMetrics         toyblocks.eval.run_eval
 (utils/metrics.py)  ──────────────────►  (wrappers/             (run by scripts/evaluate.py)
                        dict[str,            record_metrics.py)    │
                        Tensor[num_envs]]        │                 ├─► eval_results.json (per episode + aggregates)
@@ -376,13 +376,13 @@
 </div>
 <section id="metricstracker">
 <h3>MetricsTracker<a class="headerlink" href="#metricstracker" title="Link to this heading">#</a></h3>
-<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/utils/metrics.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/metrics.py</span></code></a></p>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/utils/metrics.py"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/utils/metrics.py</span></code></a></p>
 <p>Core per-step metric computation. Instantiated once in <code class="docutils literal notranslate"><span class="pre">BaseEnv.__init__</span></code> when any <code class="docutils literal notranslate"><span class="pre">track_*</span></code> config flag is enabled. Each call to <code class="docutils literal notranslate"><span class="pre">step()</span></code> reads the current simulation state (joint data, EE frame, contact sensor) and returns a flat <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">Tensor[num_envs]]</span></code>. All values are scalar-per-environment tensors.</p>
 <p><code class="docutils literal notranslate"><span class="pre">BaseEnv</span></code> merges these tensors into <code class="docutils literal notranslate"><span class="pre">info[&quot;stats&quot;]</span></code> via its <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> method, making them available to downstream wrappers.</p>
 </section>
 <section id="recordmetrics">
 <h3>RecordMetrics<a class="headerlink" href="#recordmetrics" title="Link to this heading">#</a></h3>
-<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/wrappers/record_metrics.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/wrappers/record_metrics.py</span></code></a></p>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/wrappers/record_metrics.py"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/wrappers/record_metrics.py</span></code></a></p>
 <p>A <code class="docutils literal notranslate"><span class="pre">gym.Wrapper</span></code> that sits between the environment and <code class="docutils literal notranslate"><span class="pre">RecordEpisode</span></code>. It does three things:</p>
 <ol class="arabic simple">
 <li><p><strong>Episode summaries</strong> – accumulates per-step stats and, when an episode ends, injects <code class="docutils literal notranslate"><span class="pre">{key}/mean</span></code>, <code class="docutils literal notranslate"><span class="pre">{key}/min</span></code>, <code class="docutils literal notranslate"><span class="pre">{key}/max</span></code>, and <code class="docutils literal notranslate"><span class="pre">{key}/final</span></code> into <code class="docutils literal notranslate"><span class="pre">info[&quot;final_info&quot;][&quot;episode&quot;]</span></code>.</p></li>
@@ -392,7 +392,7 @@
 </section>
 <section id="the-eval-loop">
 <h3>The eval loop<a class="headerlink" href="#the-eval-loop" title="Link to this heading">#</a></h3>
-<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py"><code class="docutils literal notranslate"><span class="pre">scripts/evaluate.py</span></code></a> parses the arguments (<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code></a>) and runs the eval loop in <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/run_eval.py"><code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval</span></code></a>. When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, …) to the summaries from <code class="docutils literal notranslate"><span class="pre">RecordMetrics</span></code>. At the end of the run it writes:</p>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py"><code class="docutils literal notranslate"><span class="pre">scripts/evaluate.py</span></code></a> parses the arguments (<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/eval/args.py</span></code></a>) and runs the eval loop in <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/run_eval.py"><code class="docutils literal notranslate"><span class="pre">toyblocks.eval.run_eval</span></code></a>. When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, …) to the summaries from <code class="docutils literal notranslate"><span class="pre">RecordMetrics</span></code>. At the end of the run it writes:</p>
 <ul class="simple">
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">eval_results.json</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">_save_results</span></code> in <code class="docutils literal notranslate"><span class="pre">utils/dataset_recording_utils.py</span></code>) – the raw value of each episode metric as a JSON list, plus mean, std, min, max, and count for every metric across episodes.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">eval_episodes.json</span></code></strong> (the episode table in <code class="docutils literal notranslate"><span class="pre">utils/wandb_logging.py</span></code>) – one record per episode with its prompt, source-episode provenance, metrics, goal progress and video paths (fields listed under “eval_episodes.json” in <a class="reference internal" href="#output-format">Output format</a>). The same records make up the W&amp;B episodes table.</p></li>
@@ -442,7 +442,7 @@
 </section>
 <section id="eval-loop-metrics">
 <h3>Eval-loop metrics<a class="headerlink" href="#eval-loop-metrics" title="Link to this heading">#</a></h3>
-<p>Added per episode by <code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval</span></code>, only in the runs where they apply:</p>
+<p>Added per episode by <code class="docutils literal notranslate"><span class="pre">toyblocks.eval.run_eval</span></code>, only in the runs where they apply:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Key</p></th>
@@ -671,9 +671,9 @@
 <section id="eval-results-json">
 <h3>eval_results.json<a class="headerlink" href="#eval-results-json" title="Link to this heading">#</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
-  "blocksuite_commit": "...",
-  "blocksuite_branch": "...",
-  "blocksuite_dirty": false,
+  "toyblocks_commit": "...",
+  "toyblocks_branch": "...",
+  "toyblocks_dirty": false,
   "submodule_commits": { ... },
   "args": { ... },
   "num_episodes": 10,
@@ -694,7 +694,7 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">blocksuite_commit</span></code>, <code class="docutils literal notranslate"><span class="pre">blocksuite_branch</span></code>, <code class="docutils literal notranslate"><span class="pre">blocksuite_dirty</span></code> and <code class="docutils literal notranslate"><span class="pre">submodule_commits</span></code> record the checkout the run used (the dirty check ignores submodules).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">toyblocks_commit</span></code>, <code class="docutils literal notranslate"><span class="pre">toyblocks_branch</span></code>, <code class="docutils literal notranslate"><span class="pre">toyblocks_dirty</span></code> and <code class="docutils literal notranslate"><span class="pre">submodule_commits</span></code> record the checkout the run used (the dirty check ignores submodules).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">per_episode</span></code> – one list per metric key, where element <em>i</em> is the value for episode <em>i</em>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">per_episode_goal_conjuncts</span></code> – for autogen PDDL tasks, the PDDL text of each <code class="docutils literal notranslate"><span class="pre">goal_conj_&lt;c&gt;</span></code> of episode <em>i</em> (<code class="docutils literal notranslate"><span class="pre">null</span></code> for episodes without goal labels).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">metrics</span></code> – across-episode aggregates (mean, std, min, max, count) for every metric key. The aggregation is NaN-safe, so NaN values (e.g. <code class="docutils literal notranslate"><span class="pre">first_success_step</span></code> of a failed episode) are left out.</p></li>
@@ -852,7 +852,7 @@
 </tbody>
 </table>
 </div>
-<p>The contact-force metrics are configured through env-config fields (<code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/base_env_cfg.py</span></code>), set with <code class="docutils literal notranslate"><span class="pre">--env-cfg.&lt;field&gt;</span></code>:</p>
+<p>The contact-force metrics are configured through env-config fields (<code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tasks/base_env_cfg.py</span></code>), set with <code class="docutils literal notranslate"><span class="pre">--env-cfg.&lt;field&gt;</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Env-config option</p></th>
@@ -879,7 +879,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">--track_metrics</span></code> is OR-ed with the two finer flags, so to turn joint and EE tracking off pass all three negations: <code class="docutils literal notranslate"><span class="pre">--no-track_metrics</span> <span class="pre">--no-track_joint_metrics</span> <span class="pre">--no-track_ee_metrics</span></code>.</p>
 <p>Example with zero actions (no policy server needed, useful for sanity-checking metrics collection):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--task<span class="w"> </span>Blocksuite-Lift-v0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--task<span class="w"> </span>ToyBlocks-Lift-v0<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--env-cfg.track-collisions<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--env-cfg.collision-filter-prim-paths<span class="w"> </span><span class="s1">'{ENV_REGEX_NS}/Block'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--env-cfg.collision-filter-body-names<span class="w"> </span>panda_link7<span class="w"> </span>panda_link8<span class="w"> </span><span class="se">\</span>
@@ -909,13 +909,13 @@
 <section id="add-a-new-metricstracker-category">
 <h3>Add a new MetricsTracker category<a class="headerlink" href="#add-a-new-metricstracker-category" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
-<li><p>Add a boolean flag to <code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> (in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/base_env_cfg.py</span></code>):</p></li>
+<li><p>Add a boolean flag to <code class="docutils literal notranslate"><span class="pre">BaseEnvCfg</span></code> (in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tasks/base_env_cfg.py</span></code>):</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">track_my_sensor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>Add a corresponding <code class="docutils literal notranslate"><span class="pre">--track_my_sensor</span></code> field to the <code class="docutils literal notranslate"><span class="pre">Args</span></code> dataclass in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code> and wire it into the env config in <code class="docutils literal notranslate"><span class="pre">_make_env</span></code> (<code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/dataset_recording_utils.py</span></code>), next to <code class="docutils literal notranslate"><span class="pre">track_joint_metrics</span></code>.</p></li>
+<li><p>Add a corresponding <code class="docutils literal notranslate"><span class="pre">--track_my_sensor</span></code> field to the <code class="docutils literal notranslate"><span class="pre">Args</span></code> dataclass in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/eval/args.py</span></code> and wire it into the env config in <code class="docutils literal notranslate"><span class="pre">_make_env</span></code> (<code class="docutils literal notranslate"><span class="pre">src/toyblocks/utils/dataset_recording_utils.py</span></code>), next to <code class="docutils literal notranslate"><span class="pre">track_joint_metrics</span></code>.</p></li>
 <li><p>In <code class="docutils literal notranslate"><span class="pre">MetricsTracker.__init__</span></code>, initialize any buffers gated on the new flag.</p></li>
 <li><p>Add a <code class="docutils literal notranslate"><span class="pre">_compute_my_sensor_metrics()</span></code> method that returns <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">Tensor[num_envs]]</span></code>.</p></li>
 <li><p>Call it from <code class="docutils literal notranslate"><span class="pre">MetricsTracker.step()</span></code>:</p></li>

@@ -104,7 +104,7 @@ Row *t* holds the observation of state *t* together with the action that drives 
 | `action.gripper_position` | (1,) | float32 | `[gripper]` | Binarized gripper command: 1.0 = open, 0.0 = closed (threshold at 0.3 by default). |
 | `action.gripper_raw` | (1,) | float32 | `[gripper_raw]` | Raw continuous gripper target value before binarization. |
 | `action.ee_position` | (6,) | float32 | `[x, y, z, roll, pitch, yaw]` | Delta end-effector pose: position change (m) + Euler angle change (rad), computed from consecutive EE poses in robot base frame. |
-| `action.pd_mode` | (1,) | float32 | — | PD controller mode, from the stiffness profile closest to the current joint-0 stiffness: 0.0 for `soft` / `softer`, 1.0 for `stiff` / `medium` / `flip` (see `src/blocksuite/utils/stiffness_profiles.py`). |
+| `action.pd_mode` | (1,) | float32 | — | PD controller mode, from the stiffness profile closest to the current joint-0 stiffness: 0.0 for `soft` / `softer`, 1.0 for `stiff` / `medium` / `flip` (see `src/toyblocks/utils/stiffness_profiles.py`). |
 | `action.high_level_action` | (1,) | string | — | Name of the current high-level (PDDL) action (e.g. `pick`, `place`, `reorient`). |
 | `action.high_level_args` | (1,) | string | — | JSON list of the current high-level action's arguments, e.g. `["robot", "block_w", "right_flip", "o7", "o19", "workspace_table"]`. |
 | `action.low_level_action` | (1,) | string | — | Name of the current low-level skill executor. |
@@ -126,7 +126,7 @@ Row *t* holds the observation of state *t* together with the action that drives 
 
 ## Other Recording Paths
 
-Datasets recorded outside vecgen, by evaluation or the `RecordEpisode` wrapper (`src/blocksuite/wrappers/record_episode.py`), can carry extra columns:
+Datasets recorded outside vecgen, by evaluation or the `RecordEpisode` wrapper (`src/toyblocks/wrappers/record_episode.py`), can carry extra columns:
 
 - `action.policy`: the raw policy action, sized to the env's action space.
 - `action.hl_input_prompt`, `action.hl_model_output`, `action.hl_prev_action` (strings) and `action.hl_done` (bool), when a high-level model chooses the actions.

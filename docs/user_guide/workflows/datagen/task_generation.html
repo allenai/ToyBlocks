@@ -383,7 +383,7 @@ problems a generator produces, or to build a problem set once and reuse it.</p>
 <li><p><strong>Output:</strong> a directory of <code class="docutils literal notranslate"><span class="pre">.pddl</span></code> problem files, read by <a class="reference internal" href="env_generation.html"><span class="std std-doc">stage 2, env generation</span></a>.</p></li>
 </ul>
 <p>The stage is optional. You can skip it and feed stage 2 the checked-in problems in
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks/problems/</span></code>, or PDDL you wrote by hand.</p>
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/problems/</span></code>, or PDDL you wrote by hand.</p>
 </section>
 <section id="running-it">
 <h2>Running it<a class="headerlink" href="#running-it" title="Link to this heading">#</a></h2>
@@ -422,7 +422,7 @@ python<span class="w"> </span>scripts/task_gen/stack_three.py<span class="w"> </
 python<span class="w"> </span>scripts/task_gen/play_scene.py<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--count<span class="w"> </span><span class="m">50</span><span class="w"> </span>--out-dir<span class="w"> </span>outputs/play/tasks<span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
 
-<span class="c1"># Search scenes for the DFA goal policies (src/blocksuite/playdata/dfa/AUTHORING.md)</span>
+<span class="c1"># Search scenes for the DFA goal policies (src/toyblocks/playdata/dfa/AUTHORING.md)</span>
 python<span class="w"> </span>scripts/task_gen/find_as.py<span class="w"> </span>--count<span class="w"> </span><span class="m">5</span><span class="w"> </span>--out-dir<span class="w"> </span>outputs/find_as/tasks<span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
 python<span class="w"> </span>scripts/task_gen/search.py<span class="w"> </span>--letter<span class="w"> </span>R<span class="w"> </span>--distractors<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--count<span class="w"> </span><span class="m">5</span><span class="w"> </span>--out-dir<span class="w"> </span>outputs/search/tasks<span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
@@ -586,10 +586,10 @@ The pipeline always passes all three.</p>
 </section>
 <section id="common-pitfalls">
 <h2>Common pitfalls<a class="headerlink" href="#common-pitfalls" title="Link to this heading">#</a></h2>
-<section id="problems-land-in-src-blocksuite-tasks-when-out-dir-is-omitted">
-<h3>Problems land in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/Tasks/</span></code> when <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> is omitted<a class="headerlink" href="#problems-land-in-src-blocksuite-tasks-when-out-dir-is-omitted" title="Link to this heading">#</a></h3>
+<section id="problems-land-in-src-toyblocks-tasks-when-out-dir-is-omitted">
+<h3>Problems land in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/Tasks/</span></code> when <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> is omitted<a class="headerlink" href="#problems-land-in-src-toyblocks-tasks-when-out-dir-is-omitted" title="Link to this heading">#</a></h3>
 <p>You might expect a missing <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> to mean <code class="docutils literal notranslate"><span class="pre">./outputs</span></code>. The generators instead fall back to
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/Tasks/</span></code>, inside the source tree. The exception is <code class="docutils literal notranslate"><span class="pre">play_scene.py</span></code>, which makes
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/Tasks/</span></code>, inside the source tree. The exception is <code class="docutils literal notranslate"><span class="pre">play_scene.py</span></code>, which makes
 the flag required. Always pass <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> so the files end up where you expect.</p>
 </section>
 <section id="a-hand-edited-randomization-line-is-silently-ignored">
@@ -711,7 +711,7 @@ arguments”. Use <code class="docutils literal notranslate"><span class="pre">-
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-scene-randomization-reaches-the-simulator">How scene randomization reaches the simulator</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags">Flags</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-pitfalls">Common pitfalls</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#problems-land-in-src-blocksuite-tasks-when-out-dir-is-omitted">Problems land in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/Tasks/</span></code> when <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> is omitted</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#problems-land-in-src-toyblocks-tasks-when-out-dir-is-omitted">Problems land in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/Tasks/</span></code> when <code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> is omitted</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-hand-edited-randomization-line-is-silently-ignored">A hand-edited randomization line is silently ignored</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#problem-files-from-elsewhere-are-executed-as-code">Problem files from elsewhere are executed as code</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#num-distractors-needs-an-underscore-and-its-meaning-varies"><code class="docutils literal notranslate"><span class="pre">--num_distractors</span></code> needs an underscore, and its meaning varies</a></li>

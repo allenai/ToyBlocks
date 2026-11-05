@@ -401,14 +401,14 @@ Run it by hand to debug a single problem, or to look at the scenes it samples.</
 <p>A typical run generates 32 reset states for the checked-in flip problem, using 16 environments
 in parallel:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--domain_path<span class="w"> </span>src/blocksuite/tamp/blocks<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--pddl<span class="w"> </span>src/blocksuite/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain_path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pddl<span class="w"> </span>src/toyblocks/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output_dir<span class="w"> </span>outputs<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--num_reset_states<span class="w"> </span><span class="m">32</span><span class="w"> </span>--num_envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--headless
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">--pddl</span></code> can be a checked-in problem from <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks/problems/</span></code> or one written
+<p><code class="docutils literal notranslate"><span class="pre">--pddl</span></code> can be a checked-in problem from <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/problems/</span></code> or one written
 by <a class="reference internal" href="task_generation.html"><span class="std std-doc">stage 1</span></a>, for example
 <code class="docutils literal notranslate"><span class="pre">outputs/rotate/tasks/problem_declarative_8_20260602_171400_1234.pddl</span></code>. Of the checked-in ones,
 <code class="docutils literal notranslate"><span class="pre">flip.pddl</span></code> has cube and table randomizations and <code class="docutils literal notranslate"><span class="pre">rotate.pddl</span></code> has none. The package lands in
@@ -423,8 +423,8 @@ underscores. In a shell script you can compute it like this:</p>
 <p>To also give each reset state a random, collision-free starting arm pose, add
 <code class="docutils literal notranslate"><span class="pre">--randomize_robot_init</span></code>. The three range flags limit where the end effector may start:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--domain_path<span class="w"> </span>src/blocksuite/tamp/blocks<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--pddl<span class="w"> </span>src/blocksuite/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain_path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pddl<span class="w"> </span>src/toyblocks/tamp/blocks/problems/flip.pddl<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output_dir<span class="w"> </span>outputs<span class="w"> </span>--num_reset_states<span class="w"> </span><span class="m">32</span><span class="w"> </span>--num_envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--randomize_robot_init<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--robot_init_ee_x_range<span class="w"> </span><span class="m">0</span>.25<span class="w"> </span><span class="m">0</span>.65<span class="w"> </span>--robot_init_ee_y_range<span class="w"> </span>-0.35<span class="w"> </span><span class="m">0</span>.35<span class="w"> </span><span class="se">\</span>
@@ -549,11 +549,11 @@ checkout, so regenerate packages after updating the code.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--pddl</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blocksuite/tamp/blocks/problems/pnp_on_table.pddl</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">toyblocks/tamp/blocks/problems/pnp_on_table.pddl</span></code></p></td>
 <td><p>The problem file. Its basename becomes the task slug. The default no longer works: that file does not exist any more, and the path is missing the leading <code class="docutils literal notranslate"><span class="pre">src/</span></code>. Omitting <code class="docutils literal notranslate"><span class="pre">--pddl</span></code> therefore raises <code class="docutils literal notranslate"><span class="pre">FileNotFoundError</span></code>, so always pass it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--domain_path</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks</span></code></p></td>
 <td><p>The folder holding <code class="docutils literal notranslate"><span class="pre">template/template_env.py</span></code> and <code class="docutils literal notranslate"><span class="pre">template_env_cfg.py</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--output_dir</span></code></p></td>

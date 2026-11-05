@@ -41,14 +41,14 @@ in parallel:
 
 ```bash
 python scripts/generate_task_from_pddl.py \
-    --domain_path src/blocksuite/tamp/blocks \
-    --pddl src/blocksuite/tamp/blocks/problems/flip.pddl \
+    --domain_path src/toyblocks/tamp/blocks \
+    --pddl src/toyblocks/tamp/blocks/problems/flip.pddl \
     --output_dir outputs \
     --num_reset_states 32 --num_envs 16 \
     --seed 0 --headless
 ```
 
-`--pddl` can be a checked-in problem from `src/blocksuite/tamp/blocks/problems/` or one written
+`--pddl` can be a checked-in problem from `src/toyblocks/tamp/blocks/problems/` or one written
 by [stage 1](task_generation.md), for example
 `outputs/rotate/tasks/problem_declarative_8_20260602_171400_1234.pddl`. Of the checked-in ones,
 `flip.pddl` has cube and table randomizations and `rotate.pddl` has none. The package lands in
@@ -68,8 +68,8 @@ To also give each reset state a random, collision-free starting arm pose, add
 
 ```bash
 python scripts/generate_task_from_pddl.py \
-    --domain_path src/blocksuite/tamp/blocks \
-    --pddl src/blocksuite/tamp/blocks/problems/flip.pddl \
+    --domain_path src/toyblocks/tamp/blocks \
+    --pddl src/toyblocks/tamp/blocks/problems/flip.pddl \
     --output_dir outputs --num_reset_states 32 --num_envs 16 \
     --randomize_robot_init \
     --robot_init_ee_x_range 0.25 0.65 --robot_init_ee_y_range -0.35 0.35 \
@@ -130,8 +130,8 @@ Watch the log for the sampling warnings described under [Common pitfalls](#commo
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--pddl` | `blocksuite/tamp/blocks/problems/pnp_on_table.pddl` | The problem file. Its basename becomes the task slug. The default no longer works: that file does not exist any more, and the path is missing the leading `src/`. Omitting `--pddl` therefore raises `FileNotFoundError`, so always pass it. |
-| `--domain_path` | `src/blocksuite/tamp/blocks` | The folder holding `template/template_env.py` and `template_env_cfg.py`. |
+| `--pddl` | `toyblocks/tamp/blocks/problems/pnp_on_table.pddl` | The problem file. Its basename becomes the task slug. The default no longer works: that file does not exist any more, and the path is missing the leading `src/`. Omitting `--pddl` therefore raises `FileNotFoundError`, so always pass it. |
+| `--domain_path` | `src/toyblocks/tamp/blocks` | The folder holding `template/template_env.py` and `template_env_cfg.py`. |
 | `--output_dir` | `.` | The directory that will **contain** `<slug>/`. An existing `<slug>/` is deleted first; see [Common pitfalls](#common-pitfalls). |
 | `--num_reset_states` | `1` | The number of snapshots to sample. It must be an exact multiple of `--num_envs`. `0` means code generation only. |
 | `--num_envs` | `1` | The number of parallel envs used for sampling. |

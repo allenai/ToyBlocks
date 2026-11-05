@@ -172,7 +172,7 @@ python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3 --re
 | `--randomize-scene` / `--no-randomize-scene` | on | Block size, table height, and friction randomization. |
 | `--randomize-robot-init` | off | Give each reset state a random collision-free arm configuration and gripper state. |
 | `--num-distractors` | 0 | Distractor objects per problem (passed to the generator as `--num_distractors`; see [Task generation](datagen/task_generation.md#common-pitfalls)). |
-| `--domain-path` | `src/blocksuite/tamp/blocks` | Path to the PDDL domain directory. |
+| `--domain-path` | `src/toyblocks/tamp/blocks` | Path to the PDDL domain directory. |
 | `--usd-library` | `train_blocks_large` | Glyph asset library that block names resolve against at code generation. |
 | `--skip-task-gen`, `--skip-env`, `--skip-execution`, `--skip-merge`, `--skip-annotate` | off | Skip individual steps for re-runs or debugging. |
 

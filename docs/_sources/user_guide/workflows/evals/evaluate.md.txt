@@ -8,10 +8,10 @@ against a server, the observation transforms, its flags and its outputs. For the
 pipeline, see [Policy Evaluation](../evaluations.md).
 
 `evaluate.py` parses the `Args` dataclass in
-[`src/blocksuite/eval/args.py`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py)
-with `tyro`, and hands it to `blocksuite.eval.run_eval.evaluate`. `Args` also inherits the
+[`src/toyblocks/eval/args.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/args.py)
+with `tyro`, and hands it to `toyblocks.eval.run_eval.evaluate`. `Args` also inherits the
 Isaac launcher options of
-[`BaseArgs`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/cli/base_args.py)
+[`BaseArgs`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/cli/base_args.py)
 (`--device` (default `cuda:0`), `--headless` (on for eval), `--enable_cameras`,
 `--kit_args`, `--rendering_mode`) and the nested env-config overrides `--env-cfg.<field>`
 (for example `--env-cfg.robot-id droid_franka`). Flags accept `-` or `_` between words,
@@ -45,7 +45,7 @@ combined with either.
 ### Random and zero actions
 
 ```bash
-python scripts/evaluate.py --task Blocksuite-Lift-v0 \
+python scripts/evaluate.py --task ToyBlocks-Lift-v0 \
     --random_actions --num_envs 4 --num_eval_steps 200
 ```
 
@@ -70,7 +70,7 @@ Running the server and the eval worker in two terminals is the easiest way to de
 either side with breakpoints.
 
 **1. Start a policy server** (terminal 1),
-[`serve_maniflow_policy`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/serve_maniflow_policy.py).
+[`serve_maniflow_policy`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/serving/serve_maniflow_policy.py).
 `--hl oracle` serves the ManiFlow LL alone (the client supplies the high-level commands);
 `--hl model` serves Molmo2 + ManiFlow:
 
@@ -78,13 +78,13 @@ either side with breakpoints.
 export H_VLA_PATH=$PWD/maniflow-tb PYTHONPATH=$PYTHONPATH:$PWD/maniflow-tb
 
 # ManiFlow, with the high-level oracle on the client
-python -m blocksuite.serving.serve_maniflow_policy --port 8000 --hl oracle \
+python -m toyblocks.serving.serve_maniflow_policy --port 8000 --hl oracle \
     --checkpoint data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors \
     --config data/checkpoints/my_maniflow_run/config.yaml \
     --train_config maniflow-tb/examples/Franka/train_maniflow_multimodal.yaml
 
 # Molmo2 high level + ManiFlow low level
-python -m blocksuite.serving.serve_maniflow_policy --port 8000 --hl model \
+python -m toyblocks.serving.serve_maniflow_policy --port 8000 --hl model \
     --checkpoint data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors \
     --hl_checkpoint data/checkpoints/my_molmo2_run \
     --config data/checkpoints/my_maniflow_run/config.yaml \
@@ -165,7 +165,7 @@ Any model can be served by implementing the small `BasePolicy` interface; see
 ## Observation transforms
 
 Registered in
-[`src/blocksuite/serving/obs_transforms/__init__.py`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/obs_transforms/__init__.py)
+[`src/toyblocks/serving/obs_transforms/__init__.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/serving/obs_transforms/__init__.py)
 and selected with `--obs_transform` (default `none`, which sends the raw observations):
 
 | Name | Use for |
@@ -199,7 +199,7 @@ The tables below list the user-facing flags with their defaults. Every flag's do
 
 | Flag | Default | Description |
 |---|---|---|
-| `--task` | `Blocksuite-Lift-v0` | Gymnasium task id. Queue evals use the autogen `<slug>-v0` task generated from the dataset. |
+| `--task` | `ToyBlocks-Lift-v0` | Gymnasium task id. Queue evals use the autogen `<slug>-v0` task generated from the dataset. |
 | `--num_envs` | `4` | Parallel environments (snapped to the task's slot count). |
 | `--num_eval_steps` | `200` | Maximum environment steps. Ignored under `--queue_url`, where the run ends when the queue is exhausted. |
 | `--num_episodes` | none | Stop after this many finished episodes; with `--num_eval_steps`, whichever comes first. |
@@ -300,7 +300,7 @@ it. See [TAMPER](https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md).
 ### W&B
 
 `--wandb` mirrors throughput, per-episode metrics and videos to a W&B run (needs
-`WANDB_API_KEY`). `--wandb_project` (default `blocksuite-eval`), `--wandb_entity`,
+`WANDB_API_KEY`). `--wandb_project` (default `toyblocks-eval`), `--wandb_entity`,
 `--wandb_group` (none by default), `--wandb_name`, `--wandb_job_type`, `--wandb_tags` and
 `--wandb_log_interval_seconds` configure it. Pipeline runs leave it off and merge all
 workers into one run instead (see [`launch_eval.py` outputs](launch_eval.md#outputs)).

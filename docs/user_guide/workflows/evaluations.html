@@ -476,8 +476,8 @@ a scenario, a task for it has to exist and be registered, and it has to define t
 </ul>
 <p>Evaluation scores episodes on that <code class="docutils literal notranslate"><span class="pre">success</span></code> signal and those stats, not on an RL reward.</p>
 <p><strong>Blocks tasks are generated, not written by hand.</strong> Both generators below render the domain
-template in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tamp/blocks/template/</span></code> into a package
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/autogen/&lt;slug&gt;/</span></code> (gitignored) that registers the gym id <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;-v0</span></code>.
+template in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/template/</span></code> into a package
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/tasks/autogen/&lt;slug&gt;/</span></code> (gitignored) that registers the gym id <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;-v0</span></code>.
 Code generation also writes the success criterion and the metrics into the task’s
 <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>:</p>
 <ul class="simple">
@@ -504,7 +504,7 @@ rejected.</p></li>
 <a class="reference internal" href="evals/launch_eval.html#the-episode-queue"><span class="std std-ref">episode queue</span></a>, so no reset states are sampled. To
 run it by hand, for example to debug code generation:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/generate_task_from_dataset.py<span class="w"> </span>--dataset-path<span class="w"> </span>data/datasets/my_dataset<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--domain-path<span class="w"> </span>src/blocksuite/tamp/blocks<span class="w"> </span>--output-dir<span class="w"> </span>src/blocksuite/tasks/autogen<span class="w"> </span>--headless
+<span class="w">    </span>--domain-path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span>--output-dir<span class="w"> </span>src/toyblocks/tasks/autogen<span class="w"> </span>--headless
 </pre></div>
 </div>
 <p><strong>From a PDDL problem:</strong>
@@ -514,7 +514,7 @@ package it samples starting scenes from the problem’s <code class="docutils li
 the task starts from when no queue is attached. Use it to evaluate on a problem that has no
 dataset, by running <code class="docutils literal notranslate"><span class="pre">evaluate.py</span> <span class="pre">--task</span> <span class="pre">&lt;slug&gt;-v0</span></code> directly. <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> does not use it (this will
 be fixed by December 2026).</p>
-<p><strong>Hand-written tasks</strong> in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks/</span></code> (for example <code class="docutils literal notranslate"><span class="pre">Blocksuite-Lift-v0</span></code>) define
+<p><strong>Hand-written tasks</strong> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tasks/</span></code> (for example <code class="docutils literal notranslate"><span class="pre">ToyBlocks-Lift-v0</span></code>) define
 their own <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code>; <a class="reference internal" href="evals/metrics.html"><span class="std std-doc">Metrics</span></a> shows how to add task-specific metrics.</p>
 <p><strong>Regenerate packages after updating the code.</strong> Each package records the codegen version
 that built it (<code class="docutils literal notranslate"><span class="pre">codegen_version</span></code> in <code class="docutils literal notranslate"><span class="pre">profiles.json</span></code>), and evaluation refuses a package built
@@ -645,10 +645,10 @@ task-specific code, and measures it the same way for all tasks.</p>
 </pre></div>
 </div>
 <p>When the gym task is generated,
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/tamp/blocks/template/codegen.py"><code class="docutils literal notranslate"><span class="pre">codegen.py</span></code></a>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/tamp/blocks/template/codegen.py"><code class="docutils literal notranslate"><span class="pre">codegen.py</span></code></a>
 compiles each conjunct of each goal into a batched check on the live simulation state
 (<code class="docutils literal notranslate"><span class="pre">_goal_conj_&lt;k&gt;</span></code>, which calls <code class="docutils literal notranslate"><span class="pre">batched_goal_conjunct</span></code> in
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/tamp/blocks/pddl_goal_tensor_conversions.py"><code class="docutils literal notranslate"><span class="pre">pddl_goal_tensor_conversions.py</span></code></a>).
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/tamp/blocks/pddl_goal_tensor_conversions.py"><code class="docutils literal notranslate"><span class="pre">pddl_goal_tensor_conversions.py</span></code></a>).
 At reset, <code class="docutils literal notranslate"><span class="pre">set_episode_goal</span></code> selects each environment’s own goal, and fails rather than
 grade an episode against a goal the task was not compiled for. The supported predicates
 are <code class="docutils literal notranslate"><span class="pre">on</span></code>, <code class="docutils literal notranslate"><span class="pre">on_table</span></code>, <code class="docutils literal notranslate"><span class="pre">on_left</span></code>, <code class="docutils literal notranslate"><span class="pre">on_right</span></code>, <code class="docutils literal notranslate"><span class="pre">on_front</span></code>, <code class="docutils literal notranslate"><span class="pre">on_back</span></code>, <code class="docutils literal notranslate"><span class="pre">next_to</span></code>, <code class="docutils literal notranslate"><span class="pre">ori_of</span></code>,

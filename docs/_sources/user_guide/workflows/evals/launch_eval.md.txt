@@ -314,7 +314,7 @@ To check what was applied, look at each episode's `render_replay_status` and
 The four HL latency flags decouple the high-level conditioning (the oracle for
 `--policy maniflow`, the Molmo2 forward for `--policy molmo2_maniflow`) from per-step
 low-level inference, in milliseconds of sim time
-(`sim_time_ms = step * step_dt * 1000`; see `src/blocksuite/serving/hl_latency.py`). All
+(`sim_time_ms = step * step_dt * 1000`; see `src/toyblocks/serving/hl_latency.py`). All
 default to 0, which runs the HL on every LL inference with no delay:
 
 - **K** (`--hl-update-interval-ms`): invoke the HL at most once per K ms and buffer its
@@ -553,7 +553,7 @@ render and block-identity flags work together.
 | Flag | Default | Description |
 |---|---|---|
 | `--wandb` | off | Log the run to W&B, merging every worker into one run. Also extracts each episode's expert video for the episodes table. |
-| `--wandb-project` | `blocksuite-eval` | W&B project. |
+| `--wandb-project` | `toyblocks-eval` | W&B project. |
 | `--out-subdir` | profile | Output subdirectory under `runs/<task>-v0/<policy>/`. |
 | `--policy-name` | from `--policy` | Policy label used in W&B names and output paths. Currently only the default works: the pipeline also reads this label to choose the policy server, so any other value stops it with `unknown POLICY_NAME`. |
 | `--problem-id` | `problem_000000` | `<problem_id>` segment of the output path. |

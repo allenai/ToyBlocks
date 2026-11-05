@@ -5,7 +5,7 @@ ToyBlocks records evaluation metrics at three granularities: **per-step**, **per
 ## Architecture
 
 ```text
-MetricsTracker          per-step tensors   RecordMetrics         blocksuite.eval.run_eval
+MetricsTracker          per-step tensors   RecordMetrics         toyblocks.eval.run_eval
 (utils/metrics.py)  ──────────────────►  (wrappers/             (run by scripts/evaluate.py)
                        dict[str,            record_metrics.py)    │
                        Tensor[num_envs]]        │                 ├─► eval_results.json (per episode + aggregates)
@@ -15,7 +15,7 @@ MetricsTracker          per-step tensors   RecordMetrics         blocksuite.eval
 
 ### MetricsTracker
 
-[`src/blocksuite/utils/metrics.py`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/utils/metrics.py)
+[`src/toyblocks/utils/metrics.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/utils/metrics.py)
 
 Core per-step metric computation. Instantiated once in `BaseEnv.__init__` when any `track_*` config flag is enabled. Each call to `step()` reads the current simulation state (joint data, EE frame, contact sensor) and returns a flat `dict[str, Tensor[num_envs]]`. All values are scalar-per-environment tensors.
 
@@ -23,7 +23,7 @@ Core per-step metric computation. Instantiated once in `BaseEnv.__init__` when a
 
 ### RecordMetrics
 
-[`src/blocksuite/wrappers/record_metrics.py`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/wrappers/record_metrics.py)
+[`src/toyblocks/wrappers/record_metrics.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/wrappers/record_metrics.py)
 
 A `gym.Wrapper` that sits between the environment and `RecordEpisode`. It does three things:
 
@@ -33,7 +33,7 @@ A `gym.Wrapper` that sits between the environment and `RecordEpisode`. It does t
 
 ### The eval loop
 
-[`scripts/evaluate.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py) parses the arguments ([`src/blocksuite/eval/args.py`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py)) and runs the eval loop in [`blocksuite.eval.run_eval`](https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/run_eval.py). When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, ...) to the summaries from `RecordMetrics`. At the end of the run it writes:
+[`scripts/evaluate.py`](https://github.com/allenai/ToyBlocks/blob/main/scripts/evaluate.py) parses the arguments ([`src/toyblocks/eval/args.py`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/args.py)) and runs the eval loop in [`toyblocks.eval.run_eval`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/run_eval.py). When an episode finishes, the loop adds its own episode metrics (collisions, oracle and high-level counters, replay divergence, ...) to the summaries from `RecordMetrics`. At the end of the run it writes:
 
 - **`eval_results.json`** (`_save_results` in `utils/dataset_recording_utils.py`) -- the raw value of each episode metric as a JSON list, plus mean, std, min, max, and count for every metric across episodes.
 - **`eval_episodes.json`** (the episode table in `utils/wandb_logging.py`) -- one record per episode with its prompt, source-episode provenance, metrics, goal progress and video paths (fields listed under "eval_episodes.json" in [Output format](#output-format)). The same records make up the W&B episodes table.
@@ -59,7 +59,7 @@ Always recorded when `record_metrics=True` (the default in `BaseEnvCfg`). These 
 
 ### Eval-loop metrics
 
-Added per episode by `blocksuite.eval.run_eval`, only in the runs where they apply:
+Added per episode by `toyblocks.eval.run_eval`, only in the runs where they apply:
 
 | Key | When | Description |
 |---|---|---|
@@ -164,9 +164,9 @@ runs/<run_name>/
 
 ```text
 {
-  "blocksuite_commit": "...",
-  "blocksuite_branch": "...",
-  "blocksuite_dirty": false,
+  "toyblocks_commit": "...",
+  "toyblocks_branch": "...",
+  "toyblocks_dirty": false,
   "submodule_commits": { ... },
   "args": { ... },
   "num_episodes": 10,
@@ -186,7 +186,7 @@ runs/<run_name>/
 }
 ```
 
-- `blocksuite_commit`, `blocksuite_branch`, `blocksuite_dirty` and `submodule_commits` record the checkout the run used (the dirty check ignores submodules).
+- `toyblocks_commit`, `toyblocks_branch`, `toyblocks_dirty` and `submodule_commits` record the checkout the run used (the dirty check ignores submodules).
 - `per_episode` -- one list per metric key, where element *i* is the value for episode *i*.
 - `per_episode_goal_conjuncts` -- for autogen PDDL tasks, the PDDL text of each `goal_conj_<c>` of episode *i* (`null` for episodes without goal labels).
 - `metrics` -- across-episode aggregates (mean, std, min, max, count) for every metric key. The aggregation is NaN-safe, so NaN values (e.g. `first_success_step` of a failed episode) are left out.
@@ -268,7 +268,7 @@ When running with `num_envs > 1`, each sub-environment gets its own set of CSVs 
 | `--save_step_metrics` | off | Write the per-step CSVs. Off by default: they cost a host copy of every stat on every step, and the episode summaries do not depend on them |
 | `--collision` | `end` | Block-displacement collision scoring: `end`, `penalize` or `off` (see "Eval-loop metrics" above) |
 
-The contact-force metrics are configured through env-config fields (`BaseEnvCfg` in `src/blocksuite/tasks/base_env_cfg.py`), set with `--env-cfg.<field>`:
+The contact-force metrics are configured through env-config fields (`BaseEnvCfg` in `src/toyblocks/tasks/base_env_cfg.py`), set with `--env-cfg.<field>`:
 
 | Env-config option | Default | Description |
 |---|---|---|
@@ -282,7 +282,7 @@ Example with zero actions (no policy server needed, useful for sanity-checking m
 
 ```bash
 uv run python scripts/evaluate.py \
-    --task Blocksuite-Lift-v0 \
+    --task ToyBlocks-Lift-v0 \
     --env-cfg.track-collisions \
     --env-cfg.collision-filter-prim-paths '{ENV_REGEX_NS}/Block' \
     --env-cfg.collision-filter-body-names panda_link7 panda_link8 \
@@ -313,13 +313,13 @@ The value must be a `[num_envs]` tensor. It will automatically appear in the per
 
 ### Add a new MetricsTracker category
 
-1. Add a boolean flag to `BaseEnvCfg` (in `src/blocksuite/tasks/base_env_cfg.py`):
+1. Add a boolean flag to `BaseEnvCfg` (in `src/toyblocks/tasks/base_env_cfg.py`):
 
 ```python
 track_my_sensor: bool = False
 ```
 
-2. Add a corresponding `--track_my_sensor` field to the `Args` dataclass in `src/blocksuite/eval/args.py` and wire it into the env config in `_make_env` (`src/blocksuite/utils/dataset_recording_utils.py`), next to `track_joint_metrics`.
+2. Add a corresponding `--track_my_sensor` field to the `Args` dataclass in `src/toyblocks/eval/args.py` and wire it into the env config in `_make_env` (`src/toyblocks/utils/dataset_recording_utils.py`), next to `track_joint_metrics`.
 
 3. In `MetricsTracker.__init__`, initialize any buffers gated on the new flag.
 

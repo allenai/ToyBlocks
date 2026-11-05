@@ -413,7 +413,7 @@ own GPU. This is also the best way to preview a flags YAML before committing to 
 <span class="w">    </span>--env_file<span class="w"> </span>&lt;env_package&gt;/env.py<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>&lt;out_dir&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--max_episodes<span class="w"> </span><span class="m">20</span><span class="w"> </span>--num_envs<span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--flags<span class="w"> </span>src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
+<span class="w">    </span>--flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 </pre></div>
 </div>
 <p>For an <em>unmerged</em> dataset, with one directory per problem, drop <code class="docutils literal notranslate"><span class="pre">--env_file</span></code>. The env is then
@@ -423,7 +423,7 @@ that is the experiment’s own <code class="docutils literal notranslate"><span 
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/rerender/rerender.py<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/execution<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--envs_dir<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/envs<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>&lt;out_dir&gt;<span class="w"> </span>--max_episodes<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--flags<span class="w"> </span>src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache.yaml
+<span class="w">    </span>--flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache.yaml
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> often hangs during Isaac teardown after it finishes; see
@@ -618,7 +618,7 @@ silently accepted nor treated as a total failure:</p>
 randomization is configured, and it is recorded in every problem’s <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> as the
 dataset’s visual provenance. <code class="docutils literal notranslate"><span class="pre">rerender.py</span> <span class="pre">--flags</span></code> has no default; the pipeline’s
 <code class="docutils literal notranslate"><span class="pre">--rerender-flags</span></code> defaults to the RI training set’s YAML.</p>
-<p>Four presets live in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/domain_randomization/flags/</span></code>:</p>
+<p>Four presets live in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Preset</p></th>
@@ -644,7 +644,7 @@ dataset’s visual provenance. <code class="docutils literal notranslate"><span 
 <p>The two <code class="docutils literal notranslate"><span class="pre">allrand</span></code> presets sample HDRI backdrops from the <code class="docutils literal notranslate"><span class="pre">polyhaven</span></code> and <code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code> pools; see
 <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops">HDRI backdrops</a>.</p>
 <p>To write your own, see the
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a>.
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>.
 It covers every top-level key, the value forms the resolver accepts, and, importantly, <em>when</em>
 each value is drawn: per wave, per episode or per env.</p>
 </section>
@@ -1035,7 +1035,7 @@ against that.</p>
 <li><p><a class="reference internal" href="local.html"><span class="std std-doc">Running locally</span></a>: the local pipeline, and the gate that decides what gets merged</p></li>
 <li><p><a class="reference internal" href="execution.html"><span class="std std-doc">Execution</span></a>: the stage that produces the trajectories this stage replays</p></li>
 <li><p><a class="reference internal" href="merge.html"><span class="std std-doc">Merge</span></a>: how re-rendered problems become one training dataset</p></li>
-<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a>: every randomization key</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>: every randomization key</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/DETERMINISM.md">DETERMINISM.md</a>: what is reproducible, and what is not</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md">README_local.md</a>: the two pipeline render modes, HDRI backdrops, and the invariants behind the gate</p></li>
 </ul>

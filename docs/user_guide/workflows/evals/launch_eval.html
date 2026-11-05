@@ -794,7 +794,7 @@ table height) runs with nothing applied, and the run carries on.</p></li>
 <p>The four HL latency flags decouple the high-level conditioning (the oracle for
 <code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">maniflow</span></code>, the Molmo2 forward for <code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">molmo2_maniflow</span></code>) from per-step
 low-level inference, in milliseconds of sim time
-(<code class="docutils literal notranslate"><span class="pre">sim_time_ms</span> <span class="pre">=</span> <span class="pre">step</span> <span class="pre">*</span> <span class="pre">step_dt</span> <span class="pre">*</span> <span class="pre">1000</span></code>; see <code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving/hl_latency.py</span></code>). All
+(<code class="docutils literal notranslate"><span class="pre">sim_time_ms</span> <span class="pre">=</span> <span class="pre">step</span> <span class="pre">*</span> <span class="pre">step_dt</span> <span class="pre">*</span> <span class="pre">1000</span></code>; see <code class="docutils literal notranslate"><span class="pre">src/toyblocks/serving/hl_latency.py</span></code>). All
 default to 0, which runs the HL on every LL inference with no delay:</p>
 <ul class="simple">
 <li><p><strong>K</strong> (<code class="docutils literal notranslate"><span class="pre">--hl-update-interval-ms</span></code>): invoke the HL at most once per K ms and buffer its
@@ -1335,7 +1335,7 @@ render and block-identity flags work together.</p>
 <td><p>Log the run to W&amp;B, merging every worker into one run. Also extracts each episode’s expert video for the episodes table.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--wandb-project</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blocksuite-eval</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">toyblocks-eval</span></code></p></td>
 <td><p>W&amp;B project.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--out-subdir</span></code></p></td>

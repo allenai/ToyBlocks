@@ -562,7 +562,7 @@ to the console only; pipe it through <code class="docutils literal notranslate">
 from the re-render stage, which replays the recorded states with no physics and renders them
 under the domain randomization in a flags YAML. See <a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a> for what that
 stage does and every flag it takes, and the
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>
 for how to write the randomization.</p>
 <p>Two flags turn the stage on, and they pick how it is scheduled against the executions. Both
 produce <strong>the same pixels</strong> — the <code class="docutils literal notranslate"><span class="pre">rerender.py</span></code> argv, the staged source layout and the
@@ -604,7 +604,7 @@ observability, not about how the dataset looks.</p>
 <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>: recording in-physics video and then overwriting it pays the slow
 physics-render cost for frames nothing reads.</p>
 <p>The render defaults are the RI training set’s: the flags YAML
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>
 (<code class="docutils literal notranslate"><span class="pre">--rerender-flags</span></code>), one copy per episode (<code class="docutils literal notranslate"><span class="pre">--rerender-n</span> <span class="pre">1</span></code>), the 224 RGB and <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> depth
 sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The flags YAML must be readable on
 this machine; the pipeline checks it before starting.</p>
@@ -877,7 +877,7 @@ the pipeline’s accounting rather than the render.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a> — the pipeline overview and every pipeline flag</p></li>
 <li><p><a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a> — the rerender stage and its flags</p></li>
-<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/domain_randomization/YAML_REFERENCE.md">YAML reference</a> — writing a randomization YAML</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a> — writing a randomization YAML</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md">docs/rerender/README_local.md</a> — implementation notes, HDRI backdrops and invariants for the pipeline re-render</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/BENCHMARK_local.md">docs/rerender/BENCHMARK_local.md</a> — the coupled-vs-pipelined measurements</p></li>
 </ul>

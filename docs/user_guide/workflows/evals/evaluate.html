@@ -369,10 +369,10 @@ policy server you started yourself. This page covers its action sources, how to 
 against a server, the observation transforms, its flags and its outputs. For the full
 pipeline, see <a class="reference internal" href="../evaluations.html"><span class="std std-doc">Policy Evaluation</span></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> parses the <code class="docutils literal notranslate"><span class="pre">Args</span></code> dataclass in
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/eval/args.py</span></code></a>
-with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, and hands it to <code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval.evaluate</span></code>. <code class="docutils literal notranslate"><span class="pre">Args</span></code> also inherits the
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/eval/args.py"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/eval/args.py</span></code></a>
+with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, and hands it to <code class="docutils literal notranslate"><span class="pre">toyblocks.eval.run_eval.evaluate</span></code>. <code class="docutils literal notranslate"><span class="pre">Args</span></code> also inherits the
 Isaac launcher options of
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/cli/base_args.py"><code class="docutils literal notranslate"><span class="pre">BaseArgs</span></code></a>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/cli/base_args.py"><code class="docutils literal notranslate"><span class="pre">BaseArgs</span></code></a>
 (<code class="docutils literal notranslate"><span class="pre">--device</span></code> (default <code class="docutils literal notranslate"><span class="pre">cuda:0</span></code>), <code class="docutils literal notranslate"><span class="pre">--headless</span></code> (on for eval), <code class="docutils literal notranslate"><span class="pre">--enable_cameras</span></code>,
 <code class="docutils literal notranslate"><span class="pre">--kit_args</span></code>, <code class="docutils literal notranslate"><span class="pre">--rendering_mode</span></code>) and the nested env-config overrides <code class="docutils literal notranslate"><span class="pre">--env-cfg.&lt;field&gt;</span></code>
 (for example <code class="docutils literal notranslate"><span class="pre">--env-cfg.robot-id</span> <span class="pre">droid_franka</span></code>). Flags accept <code class="docutils literal notranslate"><span class="pre">-</span></code> or <code class="docutils literal notranslate"><span class="pre">_</span></code> between words,
@@ -422,7 +422,7 @@ provenance is missing and no override was given (see
 combined with either.</p>
 <section id="random-and-zero-actions">
 <h3>Random and zero actions<a class="headerlink" href="#random-and-zero-actions" title="Link to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span>--task<span class="w"> </span>Blocksuite-Lift-v0<span class="w"> </span><span class="se">\</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/evaluate.py<span class="w"> </span>--task<span class="w"> </span>ToyBlocks-Lift-v0<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--random_actions<span class="w"> </span>--num_envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_eval_steps<span class="w"> </span><span class="m">200</span>
 </pre></div>
 </div>
@@ -445,19 +445,19 @@ task spawns correctly and that recording and metrics work before plugging in a p
 <p>Running the server and the eval worker in two terminals is the easiest way to debug
 either side with breakpoints.</p>
 <p><strong>1. Start a policy server</strong> (terminal 1),
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/serve_maniflow_policy.py"><code class="docutils literal notranslate"><span class="pre">serve_maniflow_policy</span></code></a>.
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/serving/serve_maniflow_policy.py"><code class="docutils literal notranslate"><span class="pre">serve_maniflow_policy</span></code></a>.
 <code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">oracle</span></code> serves the ManiFlow LL alone (the client supplies the high-level commands);
 <code class="docutils literal notranslate"><span class="pre">--hl</span> <span class="pre">model</span></code> serves Molmo2 + ManiFlow:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">H_VLA_PATH</span><span class="o">=</span><span class="nv">$PWD</span>/maniflow-tb<span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$PYTHONPATH</span>:<span class="nv">$PWD</span>/maniflow-tb
 
 <span class="c1"># ManiFlow, with the high-level oracle on the client</span>
-python<span class="w"> </span>-m<span class="w"> </span>blocksuite.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>oracle<span class="w"> </span><span class="se">\</span>
+python<span class="w"> </span>-m<span class="w"> </span>toyblocks.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>oracle<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--checkpoint<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config<span class="w"> </span>data/checkpoints/my_maniflow_run/config.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--train_config<span class="w"> </span>maniflow-tb/examples/Franka/train_maniflow_multimodal.yaml
 
 <span class="c1"># Molmo2 high level + ManiFlow low level</span>
-python<span class="w"> </span>-m<span class="w"> </span>blocksuite.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>model<span class="w"> </span><span class="se">\</span>
+python<span class="w"> </span>-m<span class="w"> </span>toyblocks.serving.serve_maniflow_policy<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--hl<span class="w"> </span>model<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--checkpoint<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--hl_checkpoint<span class="w"> </span>data/checkpoints/my_molmo2_run<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config<span class="w"> </span>data/checkpoints/my_maniflow_run/config.yaml<span class="w"> </span><span class="se">\</span>
@@ -531,7 +531,7 @@ them.</p>
 <section id="observation-transforms">
 <h2>Observation transforms<a class="headerlink" href="#observation-transforms" title="Link to this heading">#</a></h2>
 <p>Registered in
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/blocksuite/serving/obs_transforms/__init__.py"><code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving/obs_transforms/__init__.py</span></code></a>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/serving/obs_transforms/__init__.py"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/serving/obs_transforms/__init__.py</span></code></a>
 and selected with <code class="docutils literal notranslate"><span class="pre">--obs_transform</span></code> (default <code class="docutils literal notranslate"><span class="pre">none</span></code>, which sends the raw observations):</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -596,7 +596,7 @@ width raises.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--task</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Blocksuite-Lift-v0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ToyBlocks-Lift-v0</span></code></p></td>
 <td><p>Gymnasium task id. Queue evals use the autogen <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;-v0</span></code> task generated from the dataset.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code></p></td>
@@ -886,7 +886,7 @@ it. See <a class="reference external" href="https://github.com/allenai/ToyBlocks
 <section id="w-b">
 <h3>W&amp;B<a class="headerlink" href="#w-b" title="Link to this heading">#</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">--wandb</span></code> mirrors throughput, per-episode metrics and videos to a W&amp;B run (needs
-<code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code>). <code class="docutils literal notranslate"><span class="pre">--wandb_project</span></code> (default <code class="docutils literal notranslate"><span class="pre">blocksuite-eval</span></code>), <code class="docutils literal notranslate"><span class="pre">--wandb_entity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code>). <code class="docutils literal notranslate"><span class="pre">--wandb_project</span></code> (default <code class="docutils literal notranslate"><span class="pre">toyblocks-eval</span></code>), <code class="docutils literal notranslate"><span class="pre">--wandb_entity</span></code>,
 <code class="docutils literal notranslate"><span class="pre">--wandb_group</span></code> (none by default), <code class="docutils literal notranslate"><span class="pre">--wandb_name</span></code>, <code class="docutils literal notranslate"><span class="pre">--wandb_job_type</span></code>, <code class="docutils literal notranslate"><span class="pre">--wandb_tags</span></code> and
 <code class="docutils literal notranslate"><span class="pre">--wandb_log_interval_seconds</span></code> configure it. Pipeline runs leave it off and merge all
 workers into one run instead (see <a class="reference internal" href="launch_eval.html#outputs"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> outputs</span></a>).</p>

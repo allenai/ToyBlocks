@@ -1,7 +1,7 @@
 # Replaying Actions from a Dataset
 
 Replay plays a LeRobot dataset's recorded actions back through the **same
-queue-driven eval loop a policy uses** (`blocksuite.eval.run_eval._run_eval`).
+queue-driven eval loop a policy uses** (`toyblocks.eval.run_eval._run_eval`).
 There is no separate replay runner any more: `--replay` is just another action
 source next to a policy server, random or zero actions.
 
@@ -112,7 +112,7 @@ only applies to `--replay` and raises otherwise.
   `load_pd_gains_from_dataset` (first parquet chunk, one representative vector
   per mode), not the exact per-frame recorded ones; joint velocity limits are
   not written. Identical for datasets recorded under two fixed profiles. When
-  the dataset has no frames of one mode, that mode falls back to the blocksuite
+  the dataset has no frames of one mode, that mode falls back to the ToyBlocks
   defaults.
 - The 5/10-tick settle is a fixed convention (settle steps are not recorded in
   the source dataset). It applies to policy evals with a `--dataset_path` as

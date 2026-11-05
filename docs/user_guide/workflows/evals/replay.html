@@ -364,7 +364,7 @@
   <section id="replaying-actions-from-a-dataset">
 <h1>Replaying Actions from a Dataset<a class="headerlink" href="#replaying-actions-from-a-dataset" title="Link to this heading">#</a></h1>
 <p>Replay plays a LeRobot dataset’s recorded actions back through the <strong>same
-queue-driven eval loop a policy uses</strong> (<code class="docutils literal notranslate"><span class="pre">blocksuite.eval.run_eval._run_eval</span></code>).
+queue-driven eval loop a policy uses</strong> (<code class="docutils literal notranslate"><span class="pre">toyblocks.eval.run_eval._run_eval</span></code>).
 There is no separate replay runner any more: <code class="docutils literal notranslate"><span class="pre">--replay</span></code> is just another action
 source next to a policy server, random or zero actions.</p>
 <p>What replay measures is the <em>open-loop ceiling</em> of the sim: replaying the
@@ -498,7 +498,7 @@ referencing an object the scene does not spawn, raises instead of warning.</p></
 <code class="docutils literal notranslate"><span class="pre">load_pd_gains_from_dataset</span></code> (first parquet chunk, one representative vector
 per mode), not the exact per-frame recorded ones; joint velocity limits are
 not written. Identical for datasets recorded under two fixed profiles. When
-the dataset has no frames of one mode, that mode falls back to the blocksuite
+the dataset has no frames of one mode, that mode falls back to the ToyBlocks
 defaults.</p></li>
 <li><p>The 5/10-tick settle is a fixed convention (settle steps are not recorded in
 the source dataset). It applies to policy evals with a <code class="docutils literal notranslate"><span class="pre">--dataset_path</span></code> as

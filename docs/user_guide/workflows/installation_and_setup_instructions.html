@@ -398,7 +398,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 <section id="datagen-curobo-setup">
 <h2>Datagen (cuRobo) setup<a class="headerlink" href="#datagen-curobo-setup" title="Link to this heading">#</a></h2>
-<p>Data generation (vecgen) needs cuRobo v2, which comes from the <code class="docutils literal notranslate"><span class="pre">curobo</span></code> submodule. Install the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> optional group, or <code class="docutils literal notranslate"><span class="pre">tamp</span></code>, which adds the rerun and flask debug viewers on top. The submodule must be initialized first (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">curobo</span></code>); the <code class="docutils literal notranslate"><span class="pre">--recursive</span></code> command above already does this. There is no TAMP submodule any more: the FF symbolic planner is vendored in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/vecgen/symbolic/ff_planner/</span></code>.</p>
+<p>Data generation (vecgen) needs cuRobo v2, which comes from the <code class="docutils literal notranslate"><span class="pre">curobo</span></code> submodule. Install the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> optional group, or <code class="docutils literal notranslate"><span class="pre">tamp</span></code>, which adds the rerun and flask debug viewers on top. The submodule must be initialized first (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span> <span class="pre">curobo</span></code>); the <code class="docutils literal notranslate"><span class="pre">--recursive</span></code> command above already does this. There is no TAMP submodule any more: the FF symbolic planner is vendored in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/ff_planner/</span></code>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,isaac,torch-cu128,vecgen]"</span>
 
 <span class="c1"># Or datagen + ManiFlow</span>
@@ -424,11 +424,11 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <h2>Verify the installation<a class="headerlink" href="#verify-the-installation" title="Link to this heading">#</a></h2>
 <p>With the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code> group installed, generate one environment package from a checked-in problem and record a few episodes. This exercises Isaac Sim, cuRobo and LeRobot recording, and should end with a <code class="docutils literal notranslate"><span class="pre">RESULT</span> <span class="pre">episodes=4</span> <span class="pre">success=...</span></code> line:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMNI_KIT_ACCEPT_EULA</span><span class="o">=</span>YES
-<span class="nv">problem</span><span class="o">=</span>src/blocksuite/tamp/blocks/problems/flip.pddl
-python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span>--domain_path<span class="w"> </span>src/blocksuite/tamp/blocks<span class="w"> </span><span class="se">\</span>
+<span class="nv">problem</span><span class="o">=</span>src/toyblocks/tamp/blocks/problems/flip.pddl
+python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span>--domain_path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--pddl<span class="w"> </span><span class="si">${</span><span class="nv">problem</span><span class="si">}</span><span class="w"> </span>--num_reset_states<span class="w"> </span><span class="m">8</span><span class="w"> </span>--num_envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--output_dir<span class="w"> </span>outputs<span class="w"> </span>--headless
 python<span class="w"> </span>scripts/vecgen/run.py<span class="w"> </span>--env-path<span class="w"> </span>outputs/flip<span class="w"> </span>--pddl<span class="w"> </span><span class="si">${</span><span class="nv">problem</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--domain<span class="w"> </span>src/blocksuite/tamp/blocks/domain.pddl<span class="w"> </span>--num-envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span>src/toyblocks/tamp/blocks/domain.pddl<span class="w"> </span>--num-envs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--record<span class="w"> </span>datasets/flip/flip<span class="w"> </span>--mark-complete<span class="w"> </span>--headless
 </pre></div>
 </div>
@@ -447,26 +447,26 @@ sphinx-build<span class="w"> </span>docs/source<span class="w"> </span>docs/buil
 <h2>Docker images<a class="headerlink" href="#docker-images" title="Link to this heading">#</a></h2>
 <p>Both images build from a fresh SSH clone of a git ref (so push your branch first) and are tagged with its short SHA:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># eval image: Isaac + cuRobo + maniflow-tb + molmo2 (policy servers and evaluate.py)</span>
-docker/build_eval_image.sh<span class="w"> </span>release<span class="w"> </span>/tmp/eval_img<span class="w">        </span><span class="c1"># -&gt; blocksuite-eval:&lt;sha&gt;</span>
+docker/build_eval_image.sh<span class="w"> </span>main<span class="w"> </span>/tmp/eval_img<span class="w">        </span><span class="c1"># -&gt; toyblocks-eval:&lt;sha&gt;</span>
 
 <span class="c1"># slim datagen image: vecgen + cuRobo v2, no policies, no CUDA toolkit</span>
-docker/build_vecgen_image.sh<span class="w"> </span>release<span class="w"> </span>/tmp/vecgen_img<span class="w">    </span><span class="c1"># -&gt; blocksuite-vecgen:&lt;sha&gt;</span>
+docker/build_vecgen_image.sh<span class="w"> </span>main<span class="w"> </span>/tmp/vecgen_img<span class="w">    </span><span class="c1"># -&gt; toyblocks-vecgen:&lt;sha&gt;</span>
 </pre></div>
 </div>
 </section>
 <section id="code-organization">
 <h2>Code Organization<a class="headerlink" href="#code-organization" title="Link to this heading">#</a></h2>
-<p>All source code is in <code class="docutils literal notranslate"><span class="pre">src/blocksuite/</span></code>:</p>
+<p>All source code is in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/tasks</span></code>: all hand-created tasks, as well as templates for PDDL-based task generation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/vecgen</span></code>: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/robots</span></code>: all robot assets and configurations, including controllers</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving</span></code>: policy serving infrastructure (<code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">PolicyServer</span></code>, WebSocket client, obs transforms)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/wrappers</span></code>: gym <code class="docutils literal notranslate"><span class="pre">Wrapper</span></code> subclasses (recording, stats, obs flattening)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/cli</span></code>: command line utilities</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/data_annotation</span></code>: dataset annotation utilities</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils</span></code>: utilities for ToyBlocks</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/rigid_objects</span></code>: utilities for working with rigid objects (e.g. creating them more easily)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/tasks</span></code>: all hand-created tasks, as well as templates for PDDL-based task generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen</span></code>: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/robots</span></code>: all robot assets and configurations, including controllers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/serving</span></code>: policy serving infrastructure (<code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">PolicyServer</span></code>, WebSocket client, obs transforms)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/wrappers</span></code>: gym <code class="docutils literal notranslate"><span class="pre">Wrapper</span></code> subclasses (recording, stats, obs flattening)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/cli</span></code>: command line utilities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/data_annotation</span></code>: dataset annotation utilities</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/utils</span></code>: utilities for ToyBlocks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/utils/rigid_objects</span></code>: utilities for working with rigid objects (e.g. creating them more easily)</p></li>
 </ul>
 <p>The ManiFlow and Molmo2 policy code is in the <code class="docutils literal notranslate"><span class="pre">maniflow-tb/</span></code> (package <code class="docutils literal notranslate"><span class="pre">hvla</span></code>) and <code class="docutils literal notranslate"><span class="pre">molmo2/</span></code> (package <code class="docutils literal notranslate"><span class="pre">olmo</span></code>) submodules.</p>
 </section>

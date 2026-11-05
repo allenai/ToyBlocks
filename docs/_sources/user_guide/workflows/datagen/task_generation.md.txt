@@ -22,7 +22,7 @@ problems a generator produces, or to build a problem set once and reuse it.
 - **Output:** a directory of `.pddl` problem files, read by [stage 2, env generation](env_generation.md).
 
 The stage is optional. You can skip it and feed stage 2 the checked-in problems in
-`src/blocksuite/tamp/blocks/problems/`, or PDDL you wrote by hand.
+`src/toyblocks/tamp/blocks/problems/`, or PDDL you wrote by hand.
 
 ## Running it
 
@@ -68,7 +68,7 @@ python scripts/task_gen/stack_three.py --train \
 python scripts/task_gen/play_scene.py \
     --count 50 --out-dir outputs/play/tasks --seed 42
 
-# Search scenes for the DFA goal policies (src/blocksuite/playdata/dfa/AUTHORING.md)
+# Search scenes for the DFA goal policies (src/toyblocks/playdata/dfa/AUTHORING.md)
 python scripts/task_gen/find_as.py --count 5 --out-dir outputs/find_as/tasks --seed 42
 python scripts/task_gen/search.py --letter R --distractors 2 4 \
     --count 5 --out-dir outputs/search/tasks --seed 42
@@ -179,10 +179,10 @@ The pipeline always passes all three.
 
 ## Common pitfalls
 
-### Problems land in `src/blocksuite/Tasks/` when `--out-dir` is omitted
+### Problems land in `src/toyblocks/Tasks/` when `--out-dir` is omitted
 
 You might expect a missing `--out-dir` to mean `./outputs`. The generators instead fall back to
-`src/blocksuite/Tasks/`, inside the source tree. The exception is `play_scene.py`, which makes
+`src/toyblocks/Tasks/`, inside the source tree. The exception is `play_scene.py`, which makes
 the flag required. Always pass `--out-dir` so the files end up where you expect.
 
 ### A hand-edited randomization line is silently ignored

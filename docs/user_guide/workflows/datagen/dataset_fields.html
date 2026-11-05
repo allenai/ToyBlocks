@@ -790,7 +790,7 @@
 <td><p>(1,)</p></td>
 <td><p>float32</p></td>
 <td><p>—</p></td>
-<td><p>PD controller mode, from the stiffness profile closest to the current joint-0 stiffness: 0.0 for <code class="docutils literal notranslate"><span class="pre">soft</span></code> / <code class="docutils literal notranslate"><span class="pre">softer</span></code>, 1.0 for <code class="docutils literal notranslate"><span class="pre">stiff</span></code> / <code class="docutils literal notranslate"><span class="pre">medium</span></code> / <code class="docutils literal notranslate"><span class="pre">flip</span></code> (see <code class="docutils literal notranslate"><span class="pre">src/blocksuite/utils/stiffness_profiles.py</span></code>).</p></td>
+<td><p>PD controller mode, from the stiffness profile closest to the current joint-0 stiffness: 0.0 for <code class="docutils literal notranslate"><span class="pre">soft</span></code> / <code class="docutils literal notranslate"><span class="pre">softer</span></code>, 1.0 for <code class="docutils literal notranslate"><span class="pre">stiff</span></code> / <code class="docutils literal notranslate"><span class="pre">medium</span></code> / <code class="docutils literal notranslate"><span class="pre">flip</span></code> (see <code class="docutils literal notranslate"><span class="pre">src/toyblocks/utils/stiffness_profiles.py</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">action.high_level_action</span></code></p></td>
 <td><p>(1,)</p></td>
@@ -873,7 +873,7 @@
 </section>
 <section id="other-recording-paths">
 <h2>Other Recording Paths<a class="headerlink" href="#other-recording-paths" title="Link to this heading">#</a></h2>
-<p>Datasets recorded outside vecgen, by evaluation or the <code class="docutils literal notranslate"><span class="pre">RecordEpisode</span></code> wrapper (<code class="docutils literal notranslate"><span class="pre">src/blocksuite/wrappers/record_episode.py</span></code>), can carry extra columns:</p>
+<p>Datasets recorded outside vecgen, by evaluation or the <code class="docutils literal notranslate"><span class="pre">RecordEpisode</span></code> wrapper (<code class="docutils literal notranslate"><span class="pre">src/toyblocks/wrappers/record_episode.py</span></code>), can carry extra columns:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">action.policy</span></code>: the raw policy action, sized to the env’s action space.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">action.hl_input_prompt</span></code>, <code class="docutils literal notranslate"><span class="pre">action.hl_model_output</span></code>, <code class="docutils literal notranslate"><span class="pre">action.hl_prev_action</span></code> (strings) and <code class="docutils literal notranslate"><span class="pre">action.hl_done</span></code> (bool), when a high-level model chooses the actions.</p></li>

@@ -367,7 +367,7 @@
 with the same pipeline. The model implementation lives in its own repository;
 ToyBlocks only provides the interface.</p>
 <p><strong>1. Subclass <code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code></strong> in your model’s package:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">blocksuite.serving</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePolicy</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.serving</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePolicy</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MyPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -382,22 +382,22 @@ ToyBlocks only provides the interface.</p>
 least an <code class="docutils literal notranslate"><span class="pre">&quot;actions&quot;</span></code> key. Any extra ndarray keys returned alongside it are made
 available to the eval loop on <code class="docutils literal notranslate"><span class="pre">PolicyClientAdapter.last_aux</span></code> (this is how
 <code class="docutils literal notranslate"><span class="pre">action_pd_mode</span></code> is passed through).</p>
-<p><strong>2. Serve it</strong> using <code class="docutils literal notranslate"><span class="pre">blocksuite.serving.PolicyServer</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">blocksuite.serving</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyServer</span>
+<p><strong>2. Serve it</strong> using <code class="docutils literal notranslate"><span class="pre">toyblocks.serving.PolicyServer</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.serving</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyServer</span>
 <span class="n">server</span> <span class="o">=</span> <span class="n">PolicyServer</span><span class="p">(</span><span class="n">MyPolicy</span><span class="p">(),</span> <span class="n">host</span><span class="o">=</span><span class="s2">"0.0.0.0"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
 <span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>There is no generic launcher script; wrap these lines in your own entry point.
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving/serve_maniflow_policy.py</span></code> (run as
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">blocksuite.serving.serve_maniflow_policy</span></code>) is a complete example: a <code class="docutils literal notranslate"><span class="pre">tyro</span></code> CLI that
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/serving/serve_maniflow_policy.py</span></code> (run as
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">toyblocks.serving.serve_maniflow_policy</span></code>) is a complete example: a <code class="docutils literal notranslate"><span class="pre">tyro</span></code> CLI that
 loads the ManiFlow checkpoint into a <code class="docutils literal notranslate"><span class="pre">BasePolicy</span></code> and serves it with <code class="docutils literal notranslate"><span class="pre">PolicyServer</span></code>.</p>
 <p>Point <a class="reference internal" href="../evals/evaluate.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code></span></a> at the server with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code> and
 <code class="docutils literal notranslate"><span class="pre">--policy_port</span></code>. <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> starts only the ManiFlow server (<code class="docutils literal notranslate"><span class="pre">--policy</span> <span class="pre">maniflow</span></code> or
 <code class="docutils literal notranslate"><span class="pre">molmo2_maniflow</span></code>), so run your own server alongside <code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> instead.</p>
 <p><strong>3. (Optional) Add an observation transform</strong> if your model expects a different
 observation format than the ToyBlocks env produces. Subclass <code class="docutils literal notranslate"><span class="pre">BaseObsTransform</span></code> in
-<code class="docutils literal notranslate"><span class="pre">src/blocksuite/serving/obs_transforms/</span></code> and register it in <code class="docutils literal notranslate"><span class="pre">_lazy_registry</span></code>, then use
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/serving/obs_transforms/</span></code> and register it in <code class="docutils literal notranslate"><span class="pre">_lazy_registry</span></code>, then use
 <code class="docutils literal notranslate"><span class="pre">--obs_transform</span> <span class="pre">&lt;name&gt;</span></code> at eval time. Transforms can also override
 <code class="docutils literal notranslate"><span class="pre">action_postprocess</span></code> to rewrite the policy response before the action chunk broker.</p>
 </section>
