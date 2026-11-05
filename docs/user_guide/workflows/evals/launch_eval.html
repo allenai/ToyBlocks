@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -679,7 +680,7 @@ preset’s table, so <code class="docutils literal notranslate"><span class="pre
 <td><p>off by default: <code class="docutils literal notranslate"><span class="pre">--use-calibrated-cameras</span></code> uses one fixed sim2real set; <code class="docutils literal notranslate"><span class="pre">--no-use-calibrated-cameras</span></code> applies each episode’s recorded intrinsics</p></td>
 </tr>
 <tr class="row-even"><td><p>Camera poses and look</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">camera_pose.&lt;camera&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">meta/render_params.json</span></code> on rerendered datasets</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">camera_pose.&lt;camera&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">meta/render_params.json</span></code> on rendered datasets</p></td>
 <td><p>checked by scene verification; reproduced only with <code class="docutils literal notranslate"><span class="pre">--use-render-params</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Actuator gains</p></td>
@@ -687,7 +688,7 @@ preset’s table, so <code class="docutils literal notranslate"><span class="pre
 <td><p>read by replay and the dataset PD-switch settle (see <a class="reference internal" href="replay.html"><span class="std std-doc">Dataset Replay</span></a>)</p></td>
 </tr>
 <tr class="row-even"><td><p>Block glyphs and colours</p></td>
-<td><p>glyph/colour rerenders: <code class="docutils literal notranslate"><span class="pre">block_variable_map</span></code> / <code class="docutils literal notranslate"><span class="pre">glyph_map</span></code></p></td>
+<td><p>glyph/colour renders: <code class="docutils literal notranslate"><span class="pre">block_variable_map</span></code> / <code class="docutils literal notranslate"><span class="pre">glyph_map</span></code></p></td>
 <td><p>painted with <code class="docutils literal notranslate"><span class="pre">--replay-block-identity</span></code> (on)</p></td>
 </tr>
 </tbody>
@@ -719,14 +720,14 @@ report is written. Use strict whenever the numbers will be reported. These two f
 are not exposed by <code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code>.</p></li>
 </ul>
 </section>
-<section id="evaluating-on-rerendered-datasets">
-<h2>Evaluating on rerendered datasets<a class="headerlink" href="#evaluating-on-rerendered-datasets" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../datagen/rerender.html"><span class="std std-doc">re-rendering stage</span></a> gives every episode its own look:</p>
+<section id="evaluating-on-rendered-datasets">
+<h2>Evaluating on rendered datasets<a class="headerlink" href="#evaluating-on-rendered-datasets" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="../datagen/render.html"><span class="std std-doc">render stage</span></a> gives every episode its own look:</p>
 <ul class="simple">
 <li><p>its own camera offsets, HDRI sky, table material, lights, exposure and backdrop, recorded
 in <code class="docutils literal notranslate"><span class="pre">meta/render_params.json</span></code> (for a merged dataset, one file per source, reached through
 <code class="docutils literal notranslate"><span class="pre">meta/provenance.json</span></code>);</p></li>
-<li><p>on glyph and colour rerenders, its own block letters and colours (<code class="docutils literal notranslate"><span class="pre">block_variable_map</span></code> /
+<li><p>on glyph and colour renders, its own block letters and colours (<code class="docutils literal notranslate"><span class="pre">block_variable_map</span></code> /
 <code class="docutils literal notranslate"><span class="pre">glyph_map</span></code>).</p></li>
 </ul>
 <p>By default, eval reproduces only the block identities. Everything else is the single
@@ -762,7 +763,7 @@ reproduced:</p>
 <p>To evaluate with the full recorded look:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--policy<span class="w"> </span>maniflow<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--model-path<span class="w"> </span>data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_rerendered_dataset<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dataset-path<span class="w"> </span>data/datasets/my_rendered_dataset<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--no-use-calibrated-cameras<span class="w"> </span>--use-render-params<span class="w"> </span>--wave-resets
 </pre></div>
 </div>
@@ -1186,7 +1187,7 @@ python<span class="w"> </span>scripts/launch_eval.py<span class="w"> </span>--dr
 </section>
 <section id="observations-transform-and-scene">
 <h3>Observations, transform and scene<a class="headerlink" href="#observations-transform-and-scene" title="Link to this heading">#</a></h3>
-<p>See <a class="reference internal" href="#evaluating-on-rerendered-datasets">Evaluating on rerendered datasets</a> for how the camera,
+<p>See <a class="reference internal" href="#evaluating-on-rendered-datasets">Evaluating on rendered datasets</a> for how the camera,
 render and block-identity flags work together.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -1230,15 +1231,15 @@ render and block-identity flags work together.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--use-render-params</span></code></p></td>
 <td><p>off</p></td>
-<td><p>On a rerendered dataset, reproduce each episode’s camera pose, HDRI, table material, lights, exposure and backdrop. Needs <code class="docutils literal notranslate"><span class="pre">--no-use-calibrated-cameras</span></code>; with <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> add <code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code>.</p></td>
+<td><p>On a rendered dataset, reproduce each episode’s camera pose, HDRI, table material, lights, exposure and backdrop. Needs <code class="docutils literal notranslate"><span class="pre">--no-use-calibrated-cameras</span></code>; with <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> add <code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--replay-block-identity</span></code></p></td>
 <td><p>on</p></td>
-<td><p>On a glyph/colour-rerendered dataset, paint each episode’s recorded block letters and colours and prompt with the recorded goal. Success is graded on the source block names either way.</p></td>
+<td><p>On a glyph/colour-rendered dataset, paint each episode’s recorded block letters and colours and prompt with the recorded goal. Success is graded on the source block names either way.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--wave-resets</span></code></p></td>
 <td><p>off</p></td>
-<td><p>Start episodes in waves, so each wave shares one episode’s recorded scene lighting. Needs a rerendered dataset and <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>; not with <code class="docutils literal notranslate"><span class="pre">--replay</span></code> or calibrated cameras.</p></td>
+<td><p>Start episodes in waves, so each wave shares one episode’s recorded scene lighting. Needs a rendered dataset and <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>; not with <code class="docutils literal notranslate"><span class="pre">--replay</span></code> or calibrated cameras.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--eval-table-z-offset</span></code></p></td>
 <td><p>none</p></td>
@@ -1426,7 +1427,7 @@ render and block-identity flags work together.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-requirements">Dataset requirements</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-scene-provenance">Dataset scene provenance</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-dataset-loading">Validating dataset loading</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluating-on-rerendered-datasets">Evaluating on rerendered datasets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluating-on-rendered-datasets">Evaluating on rendered datasets</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hl-latency">HL latency</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>

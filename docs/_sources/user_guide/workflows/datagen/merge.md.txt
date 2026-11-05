@@ -1,7 +1,7 @@
 # Stage 5: Merge
 
 By this point the pipeline has produced one small LeRobot dataset per problem, from
-[execution](execution.md) or [re-rendering](rerender.md). Training wants a single dataset
+[execution](execution.md) or [rendering](render.md). Training wants a single dataset
 instead. Merge combines the per-problem datasets into **one training dataset**: it re-indexes
 episodes, frames and tasks so they are contiguous, writes the data into parquet files of about
 100 MB each, links every source video into place, and writes the merged metadata.
@@ -14,7 +14,7 @@ The command-line tool is `scripts/datagen/merge_datasets.py`, a thin wrapper aro
 
 ## Where it fits
 
-- **Input:** a root directory containing per-problem datasets, from re-rendering (the usual
+- **Input:** a root directory containing per-problem datasets, from rendering (the usual
   case) or straight from execution.
 - **Output:** one merged LeRobot dataset, read by [annotation](annotate.md) and then by training.
 
@@ -28,7 +28,7 @@ Point `--input_dirs` at the directory that contains the `problem_*` directories,
 
 ```bash
 python scripts/datagen/merge_datasets.py \
-    --input_dirs data/datasets/unmerged/<experiment-id>/rerender/out/job_local \
+    --input_dirs data/datasets/unmerged/<experiment-id>/render/out/job_local \
     --output_dir data/datasets/merged/train/<experiment-id> \
     --cameras all --num_workers 16
 ```
@@ -42,11 +42,11 @@ stream, and `--num_workers` sets how many processes share the work.
 
 The pipeline exposes this stage through four wrapper flags: `--merge-cameras` (default `all`),
 `--merge-num-workers` (default `16`), `--merge-output-dir` and `--merge-allow-missing-problems`.
-The last one is not evaluated here but in the rerender stage; see
+The last one is not evaluated here but in the render stage; see
 [Common pitfalls](#common-pitfalls).
 
-The pipeline merges `<output-root>/datasets/unmerged/<experiment-id>/rerender/out/job_*` when the
-rerender stage ran, and `.../execution` otherwise. The merged dataset lands in
+The pipeline merges `<output-root>/datasets/unmerged/<experiment-id>/render/out/job_*` when the
+render stage ran, and `.../execution` otherwise. The merged dataset lands in
 `<output-root>/datasets/merged/train/<experiment-id>/` unless `--merge-output-dir` says otherwise
 (`--output-root` defaults to `data`). The pipeline then copies its run config
 (`run_datagen_pipeline_config_<timestamp>.json`) into the merged directory, and writes
@@ -81,14 +81,14 @@ You give merge a root directory, and it finds the datasets inside on its own. Di
 automatic and **keeps successes only**: for the vectorized layout, the merge takes
 `base_dir/problem_*/blocks_success` and never `blocks_failure`.
 
-**Merge reads the re-rendered tree, not the execution tree.** Once the rerender stage is marked
-complete, the pipeline merges **`rerender/out/job_*` and nothing else**, and the execution tree is
-no longer read. A problem that was executed but never re-rendered therefore vanishes from the
+**Merge reads the rendered tree, not the execution tree.** Once the render stage is marked
+complete, the pipeline merges **`render/out/job_*` and nothing else**, and the execution tree is
+no longer read. A problem that was executed but never rendered therefore vanishes from the
 merged dataset. The local flow has [a three-state gate](local.md#what-counts-as-rendered) to
 stop that from happening silently.
 
 The glob is deliberately wide, so that both `job_local` and the `job_local_nonrand` directory of
-[`--render-non-randomized`](rerender.md#multiplexing-n-copies-and-the-original) are picked up.
+[`--render-non-randomized`](render.md#render-passes) are picked up.
 That means a `job_local*` directory left by an **earlier** run is merged again, whether or not
 this run produced it: dropping `--render-non-randomized` from an otherwise identical command keeps
 shipping the old baseline copies. The pipeline only warns about it, so clean up old job directories
@@ -176,7 +176,7 @@ the merge **raises an error rather than overwrite** an existing destination: ove
 write straight through into the source dataset.
 
 This is also why you must never check `-N` multiplication by comparing bytes; see
-[Re-rendering](rerender.md).
+[Rendering](render.md).
 
 ### An unreadable source disappears from the merge
 
@@ -191,9 +191,9 @@ rows, the merge warns ("offsets follow info.json") and continues.
 
 ### `--merge-allow-missing-problems` drops episodes permanently
 
-This flag is evaluated in the rerender stage, not in the merge. Without it, a problem with a
-finished execution but no re-render makes the run return 1 and leaves the rerender marker unset,
-so `--resume` re-renders that problem. **With** it, the stage is marked complete and those
+This flag is evaluated in the render stage, not in the merge. Without it, a problem with a
+finished execution but no render makes the run return 1 and leaves the render marker unset,
+so `--resume` renders that problem. **With** it, the stage is marked complete and those
 episodes are gone from the dataset permanently.
 
 ## Next

@@ -49,7 +49,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Stage 6: Annotation" href="annotate.html" />
-    <link rel="prev" title="Stage 4: Re-rendering" href="rerender.html" />
+    <link rel="prev" title="Stage 4: Rendering" href="render.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -364,7 +365,7 @@
   <section id="stage-5-merge">
 <h1>Stage 5: Merge<a class="headerlink" href="#stage-5-merge" title="Link to this heading">#</a></h1>
 <p>By this point the pipeline has produced one small LeRobot dataset per problem, from
-<a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a> or <a class="reference internal" href="rerender.html"><span class="std std-doc">re-rendering</span></a>. Training wants a single dataset
+<a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a> or <a class="reference internal" href="render.html"><span class="std std-doc">rendering</span></a>. Training wants a single dataset
 instead. Merge combines the per-problem datasets into <strong>one training dataset</strong>: it re-indexes
 episodes, frames and tasks so they are contiguous, writes the data into parquet files of about
 100 MB each, links every source video into place, and writes the merged metadata.</p>
@@ -375,7 +376,7 @@ space. The flip side of that choice is covered under <a class="reference interna
 <section id="where-it-fits">
 <h2>Where it fits<a class="headerlink" href="#where-it-fits" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong>Input:</strong> a root directory containing per-problem datasets, from re-rendering (the usual
+<li><p><strong>Input:</strong> a root directory containing per-problem datasets, from rendering (the usual
 case) or straight from execution.</p></li>
 <li><p><strong>Output:</strong> one merged LeRobot dataset, read by <a class="reference internal" href="annotate.html"><span class="std std-doc">annotation</span></a> and then by training.</p></li>
 </ul>
@@ -387,7 +388,7 @@ datasets from several runs.</p>
 <p>Point <code class="docutils literal notranslate"><span class="pre">--input_dirs</span></code> at the directory that contains the <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> directories, and
 <code class="docutils literal notranslate"><span class="pre">--output_dir</span></code> at where the merged dataset should go:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/merge_datasets.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--input_dirs<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/rerender/out/job_local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input_dirs<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/render/out/job_local<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output_dir<span class="w"> </span>data/datasets/merged/train/&lt;experiment-id&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--cameras<span class="w"> </span>all<span class="w"> </span>--num_workers<span class="w"> </span><span class="m">16</span>
 </pre></div>
@@ -401,10 +402,10 @@ stream, and <code class="docutils literal notranslate"><span class="pre">--num_w
 <h2>Through the pipeline<a class="headerlink" href="#through-the-pipeline" title="Link to this heading">#</a></h2>
 <p>The pipeline exposes this stage through four wrapper flags: <code class="docutils literal notranslate"><span class="pre">--merge-cameras</span></code> (default <code class="docutils literal notranslate"><span class="pre">all</span></code>),
 <code class="docutils literal notranslate"><span class="pre">--merge-num-workers</span></code> (default <code class="docutils literal notranslate"><span class="pre">16</span></code>), <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code> and <code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code>.
-The last one is not evaluated here but in the rerender stage; see
+The last one is not evaluated here but in the render stage; see
 <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p>
-<p>The pipeline merges <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/unmerged/&lt;experiment-id&gt;/rerender/out/job_*</span></code> when the
-rerender stage ran, and <code class="docutils literal notranslate"><span class="pre">.../execution</span></code> otherwise. The merged dataset lands in
+<p>The pipeline merges <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/unmerged/&lt;experiment-id&gt;/render/out/job_*</span></code> when the
+render stage ran, and <code class="docutils literal notranslate"><span class="pre">.../execution</span></code> otherwise. The merged dataset lands in
 <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;/</span></code> unless <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code> says otherwise
 (<code class="docutils literal notranslate"><span class="pre">--output-root</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">data</span></code>). The pipeline then copies its run config
 (<code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline_config_&lt;timestamp&gt;.json</span></code>) into the merged directory, and writes
@@ -433,13 +434,13 @@ check does not fail the merge; see <a class="reference internal" href="#validati
 <p>You give merge a root directory, and it finds the datasets inside on its own. Discovery is
 automatic and <strong>keeps successes only</strong>: for the vectorized layout, the merge takes
 <code class="docutils literal notranslate"><span class="pre">base_dir/problem_*/blocks_success</span></code> and never <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code>.</p>
-<p><strong>Merge reads the re-rendered tree, not the execution tree.</strong> Once the rerender stage is marked
-complete, the pipeline merges <strong><code class="docutils literal notranslate"><span class="pre">rerender/out/job_*</span></code> and nothing else</strong>, and the execution tree is
-no longer read. A problem that was executed but never re-rendered therefore vanishes from the
+<p><strong>Merge reads the rendered tree, not the execution tree.</strong> Once the render stage is marked
+complete, the pipeline merges <strong><code class="docutils literal notranslate"><span class="pre">render/out/job_*</span></code> and nothing else</strong>, and the execution tree is
+no longer read. A problem that was executed but never rendered therefore vanishes from the
 merged dataset. The local flow has <a class="reference internal" href="local.html#what-counts-as-rendered"><span class="std std-ref">a three-state gate</span></a> to
 stop that from happening silently.</p>
 <p>The glob is deliberately wide, so that both <code class="docutils literal notranslate"><span class="pre">job_local</span></code> and the <code class="docutils literal notranslate"><span class="pre">job_local_nonrand</span></code> directory of
-<a class="reference internal" href="rerender.html#multiplexing-n-copies-and-the-original"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></span></a> are picked up.
+<a class="reference internal" href="render.html#render-passes"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></span></a> are picked up.
 That means a <code class="docutils literal notranslate"><span class="pre">job_local*</span></code> directory left by an <strong>earlier</strong> run is merged again, whether or not
 this run produced it: dropping <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> from an otherwise identical command keeps
 shipping the old baseline copies. The pipeline only warns about it, so clean up old job directories
@@ -572,7 +573,7 @@ exists. Only a merge across filesystems copies. Because the links share inodes w
 the merge <strong>raises an error rather than overwrite</strong> an existing destination: overwriting would
 write straight through into the source dataset.</p>
 <p>This is also why you must never check <code class="docutils literal notranslate"><span class="pre">-N</span></code> multiplication by comparing bytes; see
-<a class="reference internal" href="rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+<a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
 </section>
 <section id="an-unreadable-source-disappears-from-the-merge">
 <h3>An unreadable source disappears from the merge<a class="headerlink" href="#an-unreadable-source-disappears-from-the-merge" title="Link to this heading">#</a></h3>
@@ -587,9 +588,9 @@ rows, the merge warns (“offsets follow info.json”) and continues.</p>
 </section>
 <section id="merge-allow-missing-problems-drops-episodes-permanently">
 <h3><code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> drops episodes permanently<a class="headerlink" href="#merge-allow-missing-problems-drops-episodes-permanently" title="Link to this heading">#</a></h3>
-<p>This flag is evaluated in the rerender stage, not in the merge. Without it, a problem with a
-finished execution but no re-render makes the run return 1 and leaves the rerender marker unset,
-so <code class="docutils literal notranslate"><span class="pre">--resume</span></code> re-renders that problem. <strong>With</strong> it, the stage is marked complete and those
+<p>This flag is evaluated in the render stage, not in the merge. Without it, a problem with a
+finished execution but no render makes the run return 1 and leaves the render marker unset,
+so <code class="docutils literal notranslate"><span class="pre">--resume</span></code> renders that problem. <strong>With</strong> it, the stage is marked complete and those
 episodes are gone from the dataset permanently.</p>
 </section>
 </section>
@@ -611,12 +612,12 @@ train on.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="rerender.html"
+       href="render.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Stage 4: Re-rendering</p>
+        <p class="prev-next-title">Stage 4: Rendering</p>
       </div>
     </a>
     <a class="right-next"

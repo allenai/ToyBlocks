@@ -48,6 +48,7 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Agentic Robotics" href="../agentic_robotics.html" />
     <link rel="prev" title="launch_eval.py Reference" href="launch_eval.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -273,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../datagen/task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../datagen/render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -292,6 +293,7 @@
 <li class="toctree-l3 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -418,7 +420,8 @@ provenance is missing and no override was given (see
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">--random_actions</span></code> raises when combined with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>, and <code class="docutils literal notranslate"><span class="pre">--replay</span></code> raises when
+<p><code class="docutils literal notranslate"><span class="pre">--obs_mode</span> <span class="pre">state</span></code> raises when combined with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code> (see the flag table below).
+<code class="docutils literal notranslate"><span class="pre">--random_actions</span></code> raises when combined with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>, and <code class="docutils literal notranslate"><span class="pre">--replay</span></code> raises when
 combined with either.</p>
 <section id="random-and-zero-actions">
 <h3>Random and zero actions<a class="headerlink" href="#random-and-zero-actions" title="Link to this heading">#</a></h3>
@@ -613,7 +616,7 @@ width raises.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--obs_mode</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">state</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">state</span></code>, <code class="docutils literal notranslate"><span class="pre">rgb</span></code> or <code class="docutils literal notranslate"><span class="pre">rgb+state</span></code>. A <code class="docutils literal notranslate"><span class="pre">depth</span></code> component is added automatically when the served checkpoint takes depth.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">state</span></code>, <code class="docutils literal notranslate"><span class="pre">rgb</span></code> or <code class="docutils literal notranslate"><span class="pre">rgb+state</span></code>. A <code class="docutils literal notranslate"><span class="pre">depth</span></code> component is added automatically when the served checkpoint takes depth. <strong>Not combinable with <code class="docutils literal notranslate"><span class="pre">--policy_host</span></code>:</strong> <code class="docutils literal notranslate"><span class="pre">state</span></code> flattens the observation into one tensor, while the server protocol needs a dict of named keys, so the pair is rejected up front. Use <code class="docutils literal notranslate"><span class="pre">rgb+state</span></code> (add <code class="docutils literal notranslate"><span class="pre">--obs_transform</span> <span class="pre">none</span></code> to send the raw keys).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--control_mode</span></code></p></td>
 <td><p>env default</p></td>
@@ -709,11 +712,11 @@ width raises.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--use_render_params</span></code></p></td>
 <td><p>off</p></td>
-<td><p>On a rerendered dataset, reproduce each episode’s recorded camera pose, HDRI, materials and lights (needs <code class="docutils literal notranslate"><span class="pre">--no-use_calibrated_cameras</span></code>). See also <code class="docutils literal notranslate"><span class="pre">--render_replay_assets_paths</span></code> (extra HDRI roots), <code class="docutils literal notranslate"><span class="pre">--render_replay_warmup_frames</span></code> (default <code class="docutils literal notranslate"><span class="pre">16</span></code>) and <code class="docutils literal notranslate"><span class="pre">--wave_resets</span></code>.</p></td>
+<td><p>On a rendered dataset, reproduce each episode’s recorded camera pose, HDRI, materials and lights (needs <code class="docutils literal notranslate"><span class="pre">--no-use_calibrated_cameras</span></code>). See also <code class="docutils literal notranslate"><span class="pre">--render_replay_assets_paths</span></code> (extra HDRI roots), <code class="docutils literal notranslate"><span class="pre">--render_replay_warmup_frames</span></code> (default <code class="docutils literal notranslate"><span class="pre">16</span></code>) and <code class="docutils literal notranslate"><span class="pre">--wave_resets</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--replay_block_identity</span></code></p></td>
 <td><p>on</p></td>
-<td><p>On glyph/colour-rerendered datasets, paint each episode’s recorded block letters and colours and prompt with the rendered goal.</p></td>
+<td><p>On glyph/colour-rendered datasets, paint each episode’s recorded block letters and colours and prompt with the rendered goal.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--verify_scene</span></code> / <code class="docutils literal notranslate"><span class="pre">--verify_scene_strict</span></code></p></td>
 <td><p>off</p></td>
@@ -1015,6 +1018,15 @@ success_once             0.7800    0.4143    0.0000    1.0000       50
         <p class="prev-next-subtitle">previous</p>
         <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="../agentic_robotics.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Agentic Robotics</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

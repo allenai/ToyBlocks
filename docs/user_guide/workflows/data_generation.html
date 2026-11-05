@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datagen/task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -394,8 +395,8 @@ cost is paid once per group.</p></li>
 <li><p><strong>Diverse tasks on simple assets.</strong> Scene randomization covers block size, table height, friction,
 distractor blocks and block placement, and the robot’s starting pose can be randomized
 (always collision-free).</p></li>
-<li><p><strong>Rerendering, with visuals separate from physics.</strong> Execution records the
-trajectory states; the camera videos come from a separate rerendering stage. It replays
+<li><p><strong>Rendering, with visuals separate from physics.</strong> Execution records the
+trajectory states; the camera videos come from a separate rendering stage. It replays
 each recorded episode by placing the robot and objects frame by frame, with no physics
 stepping, and renders it under domain randomization: lighting and sky images, table
 materials, camera poses and field of view, and block letters and colours. This means:</p>
@@ -409,7 +410,7 @@ stored states;</p></li>
 <li><p>the render settings sampled for each episode are recorded, so evaluation can
 reproduce an episode’s look.</p></li>
 </ul>
-<p>Re-rendered pixels match the original rendering closely but not exactly: driver and
+<p>Rendered pixels match the original rendering closely but not exactly: driver and
 scene-version differences remain.</p>
 </li>
 <li><p><strong>Rich, training-ready output.</strong> Episodes are written in LeRobot v3 format. Alongside
@@ -425,12 +426,12 @@ launch it on, spreading problems over the visible GPUs. The same command works o
 single-GPU workstation and on a multi-GPU node (see <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>).</p></li>
 </ul>
 </section>
-<section id="what-you-can-do-with-the-datagen-pipeline">
-<h2>What you can do with the datagen pipeline?<a class="headerlink" href="#what-you-can-do-with-the-datagen-pipeline" title="Link to this heading">#</a></h2>
+<section id="what-can-you-do-with-the-datagen-pipeline">
+<h2>What can you do with the datagen pipeline?<a class="headerlink" href="#what-can-you-do-with-the-datagen-pipeline" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>Generate a demonstration dataset for a task family</strong>, such as 3-block stacking,
 flipping, rotating or pick-and-place: pick a generator in <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/</span></code> and run
-<code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline.py</span></code> (see <a class="reference internal" href="#full-pipeline-data-generation">Full-pipeline data generation</a>).</p></li>
+<code class="docutils literal notranslate"><span class="pre">run_datagen_pipeline.py</span></code> (see <a class="reference internal" href="#full-data-generation-pipeline">Full data generation pipeline</a>).</p></li>
 <li><p><strong>Generate a single task end to end on one GPU</strong> for debugging, with
 <code class="docutils literal notranslate"><span class="pre">generate_task_from_pddl.py</span></code> followed by <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code> (see
 <a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">Env generation</span></a> and
@@ -438,9 +439,9 @@ flipping, rotating or pick-and-place: pick a generator in <code class="docutils 
 <li><p><strong>Randomize the physical scene</strong> (block size, table height, friction, distractors and
 robot start pose); scene randomization is on by default, and <code class="docutils literal notranslate"><span class="pre">--randomize-robot-init</span></code>
 adds the robot start pose.</p></li>
-<li><p><strong>Re-render a dataset</strong> with new lighting, materials, cameras, and block letters or
+<li><p><strong>Render a dataset</strong> with new lighting, materials, cameras, and block letters or
 colours, as many times as you like, without re-planning (see
-<a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>).</p></li>
+<a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a>).</p></li>
 <li><p><strong>Generate play data</strong>, where each scene plays a chain of goals with no reset in
 between, with <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_playdata_pipeline.py</span></code> or
 <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span> <span class="pre">--play</span></code>.</p></li>
@@ -461,8 +462,7 @@ shows.</p>
   ├─ task-gen    scripts/task_gen/*.py           PDDL problems
   ├─ env         generate_task_from_pddl.py      env package + sampled reset states
   ├─ execution   scripts/vecgen/run.py           FF per env -&gt; batched skills -&gt; verify -&gt; record
-  ├─ rerender    (optional, --rerender or        new visuals from the recorded states
-  │               --rerender-local)
+  ├─ render    (optional, --render)           new visuals from the recorded states
   ├─ merge       merge_datasets.py               one training dataset
   └─ annotate    annotate_target_xy.py           target annotations
 </pre></div>
@@ -476,8 +476,8 @@ shows.</p>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/plot_episode.py">plot_episode.py</a>: plots every signal of one episode, a quick way to check a generated dataset.</p></li>
 </ul>
 </section>
-<section id="full-pipeline-data-generation">
-<h2>Full-Pipeline Data Generation<a class="headerlink" href="#full-pipeline-data-generation" title="Link to this heading">#</a></h2>
+<section id="full-data-generation-pipeline">
+<h2>Full Data Generation Pipeline<a class="headerlink" href="#full-data-generation-pipeline" title="Link to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>.</p>
 <section id="datagen-pipeline-steps">
 <h3>Datagen Pipeline Steps<a class="headerlink" href="#datagen-pipeline-steps" title="Link to this heading">#</a></h3>
@@ -485,9 +485,9 @@ shows.</p>
 <li><p><strong><a class="reference internal" href="datagen/task_generation.html"><span class="std std-doc">Task generation</span></a></strong>: runs a task gen script (default <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/stack_three.py</span> <span class="pre">--train</span></code>) to produce randomised PDDL problem files.</p></li>
 <li><p><strong><a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">Env generation</span></a></strong>: builds one env package per problem and samples its reset states (<code class="docutils literal notranslate"><span class="pre">generate_task_from_pddl.py</span></code>). Skipped when <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span></code> &gt; 1 (the default is 8): the execution step then builds one multi-problem package per group itself.</p></li>
 <li><p><strong><a class="reference internal" href="datagen/execution.html"><span class="std std-doc">Execution</span></a></strong>: runs vecgen on each problem or group (<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code>): FF planning per environment, batched skills, verification, and LeRobot recording.</p></li>
-<li><p><strong><a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Rerender</span></a></strong> (optional): re-renders each problem’s episodes as soon as its execution finishes, either as its own job in the GPU-slot pool (<code class="docutils literal notranslate"><span class="pre">--rerender</span></code>) or inside the execution job (<code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code>).</p></li>
-<li><p><strong><a class="reference internal" href="datagen/merge.html"><span class="std std-doc">Merge</span></a></strong>: merges all successful per-problem LeRobot datasets (the re-rendered ones when the rerender stage ran) into a single LeRobot training dataset (<code class="docutils literal notranslate"><span class="pre">merge_datasets.py</span></code>).</p></li>
-<li><p><strong><a class="reference internal" href="datagen/annotate.html"><span class="std std-doc">Annotate</span></a></strong>: adds per-frame goal columns to the merged LeRobot dataset (<code class="docutils literal notranslate"><span class="pre">annotate_target_xy.py</span></code>): <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> (the current action as text, e.g. <code class="docutils literal notranslate"><span class="pre">pick</span></code>, <code class="docutils literal notranslate"><span class="pre">push</span> <span class="pre">left</span></code>) and <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> (the target object’s pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were re-rendered or recorded with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a></strong> (optional): renders each problem’s episodes as soon as its execution finishes — plain (<code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>) or with visual domain randomization (<code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>), both needing <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>. <code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> places each render either in the shared GPU-slot pool or inside the execution job.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/merge.html"><span class="std std-doc">Merge</span></a></strong>: merges all successful per-problem LeRobot datasets (the rendered ones when the render stage ran) into a single LeRobot training dataset (<code class="docutils literal notranslate"><span class="pre">merge_datasets.py</span></code>).</p></li>
+<li><p><strong><a class="reference internal" href="datagen/annotate.html"><span class="std std-doc">Annotate</span></a></strong>: adds per-frame goal columns to the merged LeRobot dataset (<code class="docutils literal notranslate"><span class="pre">annotate_target_xy.py</span></code>): <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> (the current action as text, e.g. <code class="docutils literal notranslate"><span class="pre">pick</span></code>, <code class="docutils literal notranslate"><span class="pre">push</span> <span class="pre">left</span></code>) and <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> (the target object’s pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were rendered or recorded with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>.</p></li>
 </ol>
 </section>
 <section id="basic-usage">
@@ -495,12 +495,14 @@ shows.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Full pipeline with the defaults (the RI stack-3 training-set settings), on every visible GPU</span>
 python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3
 
-<span class="c1"># The same, re-rendered: the camera videos come from the rerender stage</span>
-python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>--rerender-local
+<span class="c1"># The same, rendered: the camera videos come from the render stage</span>
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 
-<span class="c1"># A small run: 2 problems, 16 episodes each, re-rendered, outputs under ./outputs</span>
+<span class="c1"># A small run: 2 problems, 16 episodes each, rendered, outputs under ./outputs</span>
 python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3_small<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--output-root<span class="w"> </span>outputs<span class="w"> </span>--rerender-local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output-root<span class="w"> </span>outputs<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--task-gen-count<span class="w"> </span><span class="m">2</span><span class="w"> </span>--env-per-problem<span class="w"> </span><span class="m">16</span><span class="w"> </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span>
 
@@ -640,7 +642,7 @@ python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class
 </tbody>
 </table>
 </div>
-<p>Block size, table height and friction are not sampled per episode: each env package bakes in <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> (default 8) profiles drawn from the ranges, so <code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> and <code class="docutils literal notranslate"><span class="pre">--exec-num-envs</span></code> must be multiples of it. How the ranges travel through the PDDL file to the simulator is in <a class="reference internal" href="datagen/task_generation.html#how-scene-randomization-reaches-the-simulator"><span class="std std-ref">How scene randomization reaches the simulator</span></a>. Visual randomization (lighting, materials, cameras, block letters and colours) happens at rerender time; see <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+<p>Block size, table height and friction are not sampled per episode: each env package bakes in <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> (default 8) profiles drawn from the ranges, so <code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> and <code class="docutils literal notranslate"><span class="pre">--exec-num-envs</span></code> must be multiples of it. How the ranges travel through the PDDL file to the simulator is in <a class="reference internal" href="datagen/task_generation.html#how-scene-randomization-reaches-the-simulator"><span class="std std-ref">How scene randomization reaches the simulator</span></a>. Visual randomization (lighting, materials, cameras, block letters and colours) happens at render time; see <a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a>.</p>
 <p>Scene randomization is on by default, over the ranges above. With <code class="docutils literal notranslate"><span class="pre">--no-randomize-scene</span></code> (and with <code class="docutils literal notranslate"><span class="pre">--smoke-test</span></code>), block size, table height and friction are fixed: block size = 0.04, table height delta = 0, friction = 0.4. To use other ranges:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--experiment-id<span class="w"> </span>nov05_stack3_rand<span class="w"> </span><span class="se">\</span>
@@ -686,9 +688,9 @@ python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class
 <p>See <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a> for how the GPU slots are filled, where logs go,
 and what <code class="docutils literal notranslate"><span class="pre">--resume</span></code> deletes.</p>
 </section>
-<section id="re-rendering">
-<h3>Re-rendering<a class="headerlink" href="#re-rendering" title="Link to this heading">#</a></h3>
-<p>Execution records state and actions only; the videos come from the optional rerender stage. Turn
+<section id="rendering">
+<h3>Rendering<a class="headerlink" href="#rendering" title="Link to this heading">#</a></h3>
+<p>Execution records state and actions only; the videos come from the optional render stage. Turn
 it on with one of two flags, which produce the same pixels and differ only in scheduling:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -697,28 +699,31 @@ it on with one of two flags, which produce the same pixels and differ only in sc
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender</span></code></p></td>
-<td><p>Pipelined: each problem’s render is queued as its own item in the GPU-slot pool the moment its execution finishes, so it can overlap the next execution.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
+<td><p>Render with visual domain randomization and merge those episodes instead of the execution data. Needs <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rerender-local</span></code></p></td>
-<td><p>Coupled: the render is appended to each execution job and holds the slot its execution just used. With <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> this is the faster choice.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
+<td><p>Render a plain pass with nothing sampled. Alone it is the only pass; with <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> it adds one. Needs <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> (default) appends each render to its execution job, holding one slot across both; with <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> that is the faster choice. <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues each render as its own item in the GPU-slot pool so it can overlap the next execution, at some throughput cost.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>They are alternatives; passing both is refused. The render defaults are the RI training set’s:
-the flags YAML <code class="docutils literal notranslate"><span class="pre">rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>, one copy per
+<p>There is no default YAML: <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> always names the look. The RI training set uses:
+the flags YAML <code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>, one copy per
 episode, the 224 RGB and depth sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The
 default flags draw HDRI backdrops from polyhaven (part of the base asset download) and the
 separately licensed Laval indoor set; see
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops">HDRI backdrops</a>.
-Every rerender flag is described in <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">Re-rendering</span></a>.</p>
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops">HDRI backdrops</a>.
+Every render flag is described in <a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a>.</p>
 </section>
 <section id="per-stage-parameters">
 <h3>Per-Stage Parameters<a class="headerlink" href="#per-stage-parameters" title="Link to this heading">#</a></h3>
 <p>Flags that set one stage’s options are listed on that stage’s page, with the stage flag each
 one becomes: <a class="reference internal" href="datagen/env_generation.html#through-the-pipeline"><span class="std std-ref">env generation</span></a>,
-<a class="reference internal" href="datagen/execution.html#through-the-pipeline"><span class="std std-ref">execution</span></a>, <a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">re-rendering</span></a>,
+<a class="reference internal" href="datagen/execution.html#through-the-pipeline"><span class="std std-ref">execution</span></a>, <a class="reference internal" href="datagen/render.html"><span class="std std-doc">rendering</span></a>,
 <a class="reference internal" href="datagen/merge.html#flags"><span class="std std-ref">merge</span></a> and <a class="reference internal" href="datagen/annotate.html#running-it"><span class="std std-ref">annotation</span></a>.</p>
 </section>
 <section id="execution-settings-without-a-pipeline-flag">
@@ -742,7 +747,7 @@ under <code class="docutils literal notranslate"><span class="pre">&lt;output-ro
 ├── tasks/                    # Generated PDDL problem files
 ├── envs/                     # Env packages + reset states, one per problem or problem group
 ├── execution/                # Per-problem LeRobot datasets (success + failure splits)
-├── rerender/                 # Re-rendered datasets (only with --rerender / --rerender-local)
+├── render/                 # Rendered datasets (only with --render)
 ├── local_logs/               # Per-problem logs, only when more than one GPU slot runs at a time
 ├── .pipeline_state/          # &lt;stage&gt;.done markers read by --resume
 └── run_datagen_pipeline_config_&lt;timestamp&gt;.json  # Full reproducibility config
@@ -803,15 +808,15 @@ under <code class="docutils literal notranslate"><span class="pre">&lt;output-ro
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-goals-for-the-datagen-system">Design goals for the datagen system</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-you-can-do-with-the-datagen-pipeline">What you can do with the datagen pipeline?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-can-you-do-with-the-datagen-pipeline">What can you do with the datagen pipeline?</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-started">How to get started</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-pipeline-data-generation">Full-Pipeline Data Generation</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-data-generation-pipeline">Full Data Generation Pipeline</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datagen-pipeline-steps">Datagen Pipeline Steps</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic Usage</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-options">Key Options</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scene-randomization">Scene Randomization</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-and-gpu-options">Output and GPU Options</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#re-rendering">Re-rendering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering">Rendering</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#per-stage-parameters">Per-Stage Parameters</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-settings-without-a-pipeline-flag">Execution Settings Without a Pipeline Flag</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#datagen-output-structure">Datagen Output Structure</a></li>

@@ -35,8 +35,8 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
 - **Diverse tasks on simple assets.** Scene randomization covers block size, table height, friction,
   distractor blocks and block placement, and the robot's starting pose can be randomized
   (always collision-free).
-- **Rerendering, with visuals separate from physics.** Execution records the
-  trajectory states; the camera videos come from a separate rerendering stage. It replays
+- **Rendering, with visuals separate from physics.** Execution records the
+  trajectory states; the camera videos come from a separate rendering stage. It replays
   each recorded episode by placing the robot and objects frame by frame, with no physics
   stepping, and renders it under domain randomization: lighting and sky images, table
   materials, camera poses and field of view, and block letters and colours. This means:
@@ -49,7 +49,7 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
   - the render settings sampled for each episode are recorded, so evaluation can
     reproduce an episode's look.
 
-  Re-rendered pixels match the original rendering closely but not exactly: driver and
+  Rendered pixels match the original rendering closely but not exactly: driver and
   scene-version differences remain.
 - **Rich, training-ready output.** Episodes are written in LeRobot v3 format. Alongside
   the robot state, camera streams and actions, every frame records the symbolic state,
@@ -63,11 +63,11 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
   launch it on, spreading problems over the visible GPUs. The same command works on a
   single-GPU workstation and on a multi-GPU node (see [Running on this machine](datagen/local.md)).
 
-## What you can do with the datagen pipeline?
+## What can you do with the datagen pipeline?
 
 - **Generate a demonstration dataset for a task family**, such as 3-block stacking,
   flipping, rotating or pick-and-place: pick a generator in `scripts/task_gen/` and run
-  `run_datagen_pipeline.py` (see [Full-pipeline data generation](#full-pipeline-data-generation)).
+  `run_datagen_pipeline.py` (see [Full data generation pipeline](#full-data-generation-pipeline)).
 - **Generate a single task end to end on one GPU** for debugging, with
   `generate_task_from_pddl.py` followed by `scripts/vecgen/run.py` (see
   [Env generation](datagen/env_generation.md) and
@@ -75,9 +75,9 @@ families, and it runs the same way on a single GPU or across every GPU of one ma
 - **Randomize the physical scene** (block size, table height, friction, distractors and
   robot start pose); scene randomization is on by default, and `--randomize-robot-init`
   adds the robot start pose.
-- **Re-render a dataset** with new lighting, materials, cameras, and block letters or
+- **Render a dataset** with new lighting, materials, cameras, and block letters or
   colours, as many times as you like, without re-planning (see
-  [Re-rendering](datagen/rerender.md)).
+  [Rendering](datagen/render.md)).
 - **Generate play data**, where each scene plays a chain of goals with no reset in
   between, with `scripts/datagen/run_playdata_pipeline.py` or
   `scripts/vecgen/run.py --play`.
@@ -99,8 +99,7 @@ run_datagen_pipeline.py
   ├─ task-gen    scripts/task_gen/*.py           PDDL problems
   ├─ env         generate_task_from_pddl.py      env package + sampled reset states
   ├─ execution   scripts/vecgen/run.py           FF per env -> batched skills -> verify -> record
-  ├─ rerender    (optional, --rerender or        new visuals from the recorded states
-  │               --rerender-local)
+  ├─ render    (optional, --render)           new visuals from the recorded states
   ├─ merge       merge_datasets.py               one training dataset
   └─ annotate    annotate_target_xy.py           target annotations
 ```
@@ -115,7 +114,7 @@ If you simply want to generate some example datasets with already tested scripts
 
 
 
-## Full-Pipeline Data Generation
+## Full Data Generation Pipeline
 
 The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in [Running on this machine](datagen/local.md).
 
@@ -124,9 +123,9 @@ The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire dat
 1. **[Task generation](datagen/task_generation.md)**: runs a task gen script (default `scripts/task_gen/stack_three.py --train`) to produce randomised PDDL problem files.
 2. **[Env generation](datagen/env_generation.md)**: builds one env package per problem and samples its reset states (`generate_task_from_pddl.py`). Skipped when `--vecgen-problems-per-env` > 1 (the default is 8): the execution step then builds one multi-problem package per group itself.
 3. **[Execution](datagen/execution.md)**: runs vecgen on each problem or group (`scripts/vecgen/run.py`): FF planning per environment, batched skills, verification, and LeRobot recording.
-4. **[Rerender](datagen/rerender.md)** (optional): re-renders each problem's episodes as soon as its execution finishes, either as its own job in the GPU-slot pool (`--rerender`) or inside the execution job (`--rerender-local`).
-5. **[Merge](datagen/merge.md)**: merges all successful per-problem LeRobot datasets (the re-rendered ones when the rerender stage ran) into a single LeRobot training dataset (`merge_datasets.py`).
-6. **[Annotate](datagen/annotate.md)**: adds per-frame goal columns to the merged LeRobot dataset (`annotate_target_xy.py`): `goal.action` (the current action as text, e.g. `pick`, `push left`) and `goal.position` (the target object's pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were re-rendered or recorded with `--vecgen-record-videos`.
+4. **[Rendering](datagen/render.md)** (optional): renders each problem's episodes as soon as its execution finishes — plain (`--render-non-randomized`) or with visual domain randomization (`--render-randomized`), both needing `--render-flags`. `--render-schedule` places each render either in the shared GPU-slot pool or inside the execution job.
+5. **[Merge](datagen/merge.md)**: merges all successful per-problem LeRobot datasets (the rendered ones when the render stage ran) into a single LeRobot training dataset (`merge_datasets.py`).
+6. **[Annotate](datagen/annotate.md)**: adds per-frame goal columns to the merged LeRobot dataset (`annotate_target_xy.py`): `goal.action` (the current action as text, e.g. `pick`, `push left`) and `goal.position` (the target object's pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were rendered or recorded with `--vecgen-record-videos`.
 
 
 ### Basic Usage
@@ -135,12 +134,14 @@ The `scripts/datagen/run_datagen_pipeline.py` script orchestrates the entire dat
 # Full pipeline with the defaults (the RI stack-3 training-set settings), on every visible GPU
 python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3
 
-# The same, re-rendered: the camera videos come from the rerender stage
-python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3 --rerender-local
+# The same, rendered: the camera videos come from the render stage
+python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3 --render \
+    --render-flags src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 
-# A small run: 2 problems, 16 episodes each, re-rendered, outputs under ./outputs
+# A small run: 2 problems, 16 episodes each, rendered, outputs under ./outputs
 python scripts/datagen/run_datagen_pipeline.py --experiment-id nov05_stack3_small \
-    --output-root outputs --rerender-local \
+    --output-root outputs --render \
+    --render-flags src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml \
     --task-gen-count 2 --env-per-problem 16 --num-envs 16 --exec-num-envs 16 \
     --vecgen-problems-per-env 1
 
@@ -191,7 +192,7 @@ The pipeline can randomize the following parts of the physical scene:
 | Robot start pose ranges | `--robot-init-ee-x-range`, `--robot-init-ee-y-range`, `--robot-init-ee-z-min` | `0.25 0.65`, `-0.35 0.35`, `0.20` | End-effector window in the robot base frame. |
 | Gripper start state | `--robot-init-gripper-closed-prob` | `0.5` | Probability a reset state starts with the gripper closed. |
 
-Block size, table height and friction are not sampled per episode: each env package bakes in `--num-scene-profiles` (default 8) profiles drawn from the ranges, so `--num-envs` and `--exec-num-envs` must be multiples of it. How the ranges travel through the PDDL file to the simulator is in [How scene randomization reaches the simulator](datagen/task_generation.md#how-scene-randomization-reaches-the-simulator). Visual randomization (lighting, materials, cameras, block letters and colours) happens at rerender time; see [Re-rendering](datagen/rerender.md).
+Block size, table height and friction are not sampled per episode: each env package bakes in `--num-scene-profiles` (default 8) profiles drawn from the ranges, so `--num-envs` and `--exec-num-envs` must be multiples of it. How the ranges travel through the PDDL file to the simulator is in [How scene randomization reaches the simulator](datagen/task_generation.md#how-scene-randomization-reaches-the-simulator). Visual randomization (lighting, materials, cameras, block letters and colours) happens at render time; see [Rendering](datagen/render.md).
 
 Scene randomization is on by default, over the ranges above. With `--no-randomize-scene` (and with `--smoke-test`), block size, table height and friction are fixed: block size = 0.04, table height delta = 0, friction = 0.4. To use other ranges:
 
@@ -216,29 +217,30 @@ python scripts/datagen/run_datagen_pipeline.py \
 See [Running on this machine](datagen/local.md) for how the GPU slots are filled, where logs go,
 and what `--resume` deletes.
 
-### Re-rendering
+### Rendering
 
-Execution records state and actions only; the videos come from the optional rerender stage. Turn
+Execution records state and actions only; the videos come from the optional render stage. Turn
 it on with one of two flags, which produce the same pixels and differ only in scheduling:
 
 | Flag | What it does |
 |------|--------------|
-| `--rerender` | Pipelined: each problem's render is queued as its own item in the GPU-slot pool the moment its execution finishes, so it can overlap the next execution. |
-| `--rerender-local` | Coupled: the render is appended to each execution job and holds the slot its execution just used. With `--local-gpu-workers 2` this is the faster choice. |
+| `--render-randomized` | Render with visual domain randomization and merge those episodes instead of the execution data. Needs `--render-flags`. |
+| `--render-non-randomized` | Render a plain pass with nothing sampled. Alone it is the only pass; with `--render-randomized` it adds one. Needs `--render-flags`. |
+| `--render-schedule` | `coupled` (default) appends each render to its execution job, holding one slot across both; with `--local-gpu-workers 2` that is the faster choice. `pipelined` queues each render as its own item in the GPU-slot pool so it can overlap the next execution, at some throughput cost. |
 
-They are alternatives; passing both is refused. The render defaults are the RI training set's:
-the flags YAML `rerender_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`, one copy per
+There is no default YAML: `--render-flags` always names the look. The RI training set uses:
+the flags YAML `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`, one copy per
 episode, the 224 RGB and depth sidecars, `left_camera` skipped and failure episodes skipped. The
 default flags draw HDRI backdrops from polyhaven (part of the base asset download) and the
 separately licensed Laval indoor set; see
-[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/rerender/README_local.md#hdri-backdrops).
-Every rerender flag is described in [Re-rendering](datagen/rerender.md).
+[HDRI backdrops](https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops).
+Every render flag is described in [Rendering](datagen/render.md).
 
 ### Per-Stage Parameters
 
 Flags that set one stage's options are listed on that stage's page, with the stage flag each
 one becomes: [env generation](datagen/env_generation.md#through-the-pipeline),
-[execution](datagen/execution.md#through-the-pipeline), [re-rendering](datagen/rerender.md),
+[execution](datagen/execution.md#through-the-pipeline), [rendering](datagen/render.md),
 [merge](datagen/merge.md#flags) and [annotation](datagen/annotate.md#running-it).
 
 ### Execution Settings Without a Pipeline Flag
@@ -266,7 +268,7 @@ under `<output-root>/datasets/<dataset-folder>/<experiment-id>/` (by default
 ├── tasks/                    # Generated PDDL problem files
 ├── envs/                     # Env packages + reset states, one per problem or problem group
 ├── execution/                # Per-problem LeRobot datasets (success + failure splits)
-├── rerender/                 # Re-rendered datasets (only with --rerender / --rerender-local)
+├── render/                 # Rendered datasets (only with --render)
 ├── local_logs/               # Per-problem logs, only when more than one GPU slot runs at a time
 ├── .pipeline_state/          # <stage>.done markers read by --resume
 └── run_datagen_pipeline_config_<timestamp>.json  # Full reproducibility config
@@ -280,7 +282,7 @@ The final merged dataset is written to `<output-root>/datasets/merged/train/<exp
 datagen/task_generation
 datagen/env_generation
 datagen/execution
-datagen/rerender
+datagen/render
 datagen/merge
 datagen/annotate
 datagen/dataset_fields

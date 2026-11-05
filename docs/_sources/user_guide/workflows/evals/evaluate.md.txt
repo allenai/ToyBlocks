@@ -39,6 +39,7 @@ Before the run starts, `evaluate.py` also:
 | Zero actions | none of the above | Sanity checks of task spawning and metrics. |
 | Dataset replay | `--replay` with `--queue_url`, `--dataset_path` and `--num_envs 1` | Playing back each queued episode's recorded actions and reporting how far the simulation diverges from the recording. |
 
+`--obs_mode state` raises when combined with `--policy_host` (see the flag table below).
 `--random_actions` raises when combined with `--policy_host`, and `--replay` raises when
 combined with either.
 
@@ -203,7 +204,7 @@ The tables below list the user-facing flags with their defaults. Every flag's do
 | `--num_envs` | `4` | Parallel environments (snapped to the task's slot count). |
 | `--num_eval_steps` | `200` | Maximum environment steps. Ignored under `--queue_url`, where the run ends when the queue is exhausted. |
 | `--num_episodes` | none | Stop after this many finished episodes; with `--num_eval_steps`, whichever comes first. |
-| `--obs_mode` | `state` | `state`, `rgb` or `rgb+state`. A `depth` component is added automatically when the served checkpoint takes depth. |
+| `--obs_mode` | `state` | `state`, `rgb` or `rgb+state`. A `depth` component is added automatically when the served checkpoint takes depth. **Not combinable with `--policy_host`:** `state` flattens the observation into one tensor, while the server protocol needs a dict of named keys, so the pair is rejected up front. Use `rgb+state` (add `--obs_transform none` to send the raw keys). |
 | `--control_mode` | env default | Control mode override, e.g. `arm_joint_gripper_binary` (needed for absolute joint targets: replay, `--dataset_path` runs, `--sync_action_chunks`, `--wave_resets`, `--ll_oracle`, play-mode checkpoints). |
 | `--seed` | none | Random seed; no fixed seed when unset. |
 | `--deterministic_cuda` | off | Deterministic cuDNN plus PhysX enhanced determinism and a single solver partition; slower, and still not bit-for-bit across hardware. |
@@ -230,8 +231,8 @@ The tables below list the user-facing flags with their defaults. Every flag's do
 | `--expert_timeout_scale` | `0` | End each episode after this multiple of its expert demonstration's duration (needs `--queue_url` and `--dataset_path`; `0` disables). Such episodes end as truncations, so they keep their full metrics and TAMPER tags them `timeout`. |
 | `--use_calibrated_cameras` | on | Use the fixed sim2real + FR3 gripper camera intrinsics instead of the dataset's. Disables the two options below. |
 | `--ingest_camera_intrinsics` | on | Apply each episode's recorded camera intrinsics (needs `--no-use_calibrated_cameras`). |
-| `--use_render_params` | off | On a rerendered dataset, reproduce each episode's recorded camera pose, HDRI, materials and lights (needs `--no-use_calibrated_cameras`). See also `--render_replay_assets_paths` (extra HDRI roots), `--render_replay_warmup_frames` (default `16`) and `--wave_resets`. |
-| `--replay_block_identity` | on | On glyph/colour-rerendered datasets, paint each episode's recorded block letters and colours and prompt with the rendered goal. |
+| `--use_render_params` | off | On a rendered dataset, reproduce each episode's recorded camera pose, HDRI, materials and lights (needs `--no-use_calibrated_cameras`). See also `--render_replay_assets_paths` (extra HDRI roots), `--render_replay_warmup_frames` (default `16`) and `--wave_resets`. |
+| `--replay_block_identity` | on | On glyph/colour-rendered datasets, paint each episode's recorded block letters and colours and prompt with the rendered goal. |
 | `--verify_scene` / `--verify_scene_strict` | off | After the first queue reset, compare the scene with the recording and write `scene_verification.json`; strict aborts on hard mismatches. |
 
 ### High-level conditioning

@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -667,7 +668,7 @@
 </section>
 <section id="camera-observations">
 <h2>Camera Observations<a class="headerlink" href="#camera-observations" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="execution.html#what-a-recorded-episode-contains"><span class="std std-ref">Execution records no cameras by default</span></a>, so none of these columns exist in an executed dataset unless it was run with <code class="docutils literal notranslate"><span class="pre">--record-videos</span></code>. They normally come from <a class="reference internal" href="rerender.html"><span class="std std-doc">re-rendering</span></a>.</p>
+<p><a class="reference internal" href="execution.html#what-a-recorded-episode-contains"><span class="std std-ref">Execution records no cameras by default</span></a>, so none of these columns exist in an executed dataset unless it was run with <code class="docutils literal notranslate"><span class="pre">--record-videos</span></code>. They normally come from <a class="reference internal" href="render.html"><span class="std std-doc">rendering</span></a>.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Field</p></th>
@@ -700,7 +701,7 @@
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observation.camera_pose.&lt;cam&gt;</span></code></p></td>
 <td><p>(7,)</p></td>
 <td><p>float32</p></td>
-<td><p>Camera extrinsic pose <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">qw,</span> <span class="pre">qx,</span> <span class="pre">qy,</span> <span class="pre">qz]</span></code> in the robot base frame.</p></td>
+<td><p>Camera extrinsic pose <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">qw,</span> <span class="pre">qx,</span> <span class="pre">qy,</span> <span class="pre">qz]</span></code> in the robot base frame. Constant per episode for a scene-mounted camera; per frame for one mounted on a robot link, such as the gripper camera, which moves with the arm.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">observation.camera_intrinsics.&lt;cam&gt;</span></code></p></td>
 <td><p>(9,)</p></td>
@@ -899,15 +900,15 @@
 <td><p>Git commit/remote, the <code class="docutils literal notranslate"><span class="pre">recording_provenance</span></code> dict used at creation, and SHA-256 checksums of every file copied into <code class="docutils literal notranslate"><span class="pre">meta/extra/</span></code>. In a merged dataset it is one aggregate: the git metadata of the merge, <code class="docutils literal notranslate"><span class="pre">merged_from_n_datasets</span></code>, and one <code class="docutils literal notranslate"><span class="pre">sources[]</span></code> entry per source dataset (its path, <code class="docutils literal notranslate"><span class="pre">problem_name</span></code>, <code class="docutils literal notranslate"><span class="pre">extra_dir</span></code> and files).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">meta/extra/</span></code></p></td>
-<td><p>Copies of source files, only for the paths the recorder was given: <code class="docutils literal notranslate"><span class="pre">domain.pddl</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;problem&gt;.pddl</span></code>, and, from the env directory, <code class="docutils literal notranslate"><span class="pre">block_config.json</span></code>, <code class="docutils literal notranslate"><span class="pre">init.py</span></code> and the <code class="docutils literal notranslate"><span class="pre">&lt;id&gt;.json</span></code> instance files. A merged dataset keeps one <code class="docutils literal notranslate"><span class="pre">domain.pddl</span></code> (from the first source that has it) at <code class="docutils literal notranslate"><span class="pre">meta/extra/domain.pddl</span></code>, and each source’s other copies under <code class="docutils literal notranslate"><span class="pre">meta/extra/&lt;problem&gt;/</span></code>.</p></td>
+<td><p>Copies of the files that define the task, each checksummed in <code class="docutils literal notranslate"><span class="pre">provenance.json</span></code>: <code class="docutils literal notranslate"><span class="pre">domain.pddl</span></code>, and from the env package every <code class="docutils literal notranslate"><span class="pre">problems/*.pddl</span></code> (a multi-problem package contributes all of its members) plus <code class="docutils literal notranslate"><span class="pre">problems.json</span></code>, <code class="docutils literal notranslate"><span class="pre">profiles.json</span></code> and <code class="docutils literal notranslate"><span class="pre">non_sim_state_randomizations.json</span></code>. A merged dataset keeps one <code class="docutils literal notranslate"><span class="pre">domain.pddl</span></code> at <code class="docutils literal notranslate"><span class="pre">meta/extra/domain.pddl</span></code> and each source’s other copies under <code class="docutils literal notranslate"><span class="pre">meta/extra/&lt;problem&gt;/</span></code>. The directory is created only when something is copied into it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">meta/render_params.json</span></code></p></td>
-<td><p>Re-rendered datasets only, before merge: how each split was rendered and every per-episode randomization value; see <a class="reference internal" href="rerender.html#output"><span class="std std-ref">Re-rendering</span></a>. Merge does not carry it into the merged <code class="docutils literal notranslate"><span class="pre">meta/</span></code>.</p></td>
+<td><p>Rendered datasets only, before merge: how each split was rendered and every per-episode randomization value; see <a class="reference internal" href="render.html#output"><span class="std std-ref">Rendering</span></a>. Merge does not carry it into the merged <code class="docutils literal notranslate"><span class="pre">meta/</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Vecgen passes only <code class="docutils literal notranslate"><span class="pre">instance_json_ids</span></code> and <code class="docutils literal notranslate"><span class="pre">generator:</span> <span class="pre">vecgen</span></code> as provenance, so for datasets from <a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a> <code class="docutils literal notranslate"><span class="pre">meta/extra/</span></code> is empty and <code class="docutils literal notranslate"><span class="pre">provenance.json</span></code> holds the git metadata alone. To reproduce such a dataset’s simulation environment, you need:</p>
+<p>Vecgen forwards the domain and the env package, so a dataset from <a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a> carries its own PDDL and scene tables. <code class="docutils literal notranslate"><span class="pre">provenance.json</span></code> additionally records the git commit, which pins <code class="docutils literal notranslate"><span class="pre">domain.pddl</span></code> since that file is checked in. What it does <strong>not</strong> pin is anything uncommitted: there is no dirty-checkout flag, and in a merged dataset the git block is the merge’s, not each source’s. To reproduce such a dataset’s simulation environment, you also need:</p>
 <ol class="arabic simple">
 <li><p>The ToyBlocks repository at the recorded git commit (from <code class="docutils literal notranslate"><span class="pre">meta/provenance.json</span></code>).</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">assets/</span></code> directory with the matching USD meshes and robot models.</p></li>

@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datagen/task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="datagen/rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -400,8 +401,7 @@ the script from; the training command itself runs inside <code class="docutils l
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--data_root_dir</span></code>: the merged LeRobot dataset (by default the pipeline writes it to<br />
 <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;</span></code>). Pass several directories to co-train<br />
-on them; <code class="docutils literal notranslate"><span class="pre">--dataset_ratio</span></code> sets their sampling ratio.<br />
-<a class="reference internal" href="datagen/rerender.html"><span class="std std-doc">re-render step</span></a> writes them.</p></li>
+on them; <code class="docutils literal notranslate"><span class="pre">--dataset_ratio</span></code> sets their sampling ratio.</p></li>
 </ul>
 <p>Everything else keeps its default, which gives:</p>
 <ul class="simple">
@@ -435,6 +435,30 @@ them. A short debug run on one GPU:</p>
 launches <code class="docutils literal notranslate"><span class="pre">torchrun</span></code> instead of <code class="docutils literal notranslate"><span class="pre">accelerate</span> <span class="pre">launch</span></code>; every node must use the same <code class="docutils literal notranslate"><span class="pre">--run_id</span></code>
 (or <code class="docutils literal notranslate"><span class="pre">--resume</span></code>) so that all of them write to the same run directory, which therefore has to be
 on a filesystem the nodes share.</p>
+</section>
+<section id="the-last-batch-of-an-epoch">
+<h2>The last batch of an epoch<a class="headerlink" href="#the-last-batch-of-an-epoch" title="Link to this heading">#</a></h2>
+<p>The train dataloader keeps the last, partial batch of every epoch, and ManiFlow splits every batch
+into a flow part (<code class="docutils literal notranslate"><span class="pre">int(0.75</span> <span class="pre">*</span> <span class="pre">B)</span></code> samples) and a consistency part (<code class="docutils literal notranslate"><span class="pre">int(0.25</span> <span class="pre">*</span> <span class="pre">B)</span></code> samples). A last
+batch of 1 to 3 samples leaves the consistency part empty, and training stops at that step with</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>IndexError: list index out of range
+</pre></div>
+</div>
+<p>raised from the T5 tokenizer (<code class="docutils literal notranslate"><span class="pre">encode_text_input_T5</span></code>), because it is handed an empty list of
+instructions. The <code class="docutils literal notranslate"><span class="pre">train:</span> <span class="pre">&lt;episodes&gt;</span> <span class="pre">episodes,</span> <span class="pre">&lt;N&gt;</span> <span class="pre">samples</span></code> line that <code class="docutils literal notranslate"><span class="pre">[FrankaDataset]</span></code> prints
+before training gives <code class="docutils literal notranslate"><span class="pre">N</span></code>; the last batch holds <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">mod</span> <span class="pre">--dbs</span></code> samples (per GPU). Pick a <code class="docutils literal notranslate"><span class="pre">--dbs</span></code> for
+which that is 0 or at least 4. For example, 242 samples crash at <code class="docutils literal notranslate"><span class="pre">--dbs</span> <span class="pre">16</span></code> (last batch: 2) and
+train at <code class="docutils literal notranslate"><span class="pre">--dbs</span> <span class="pre">32</span></code> (last batch: 18). The debug run above, at <code class="docutils literal notranslate"><span class="pre">--dbs</span> <span class="pre">4</span></code>, crashes whenever <code class="docutils literal notranslate"><span class="pre">N</span></code> is
+not a multiple of 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">N</span></code> is a property of the dataset, not of the training flags, and it is not fixed for a given
+datagen command. The pipeline seeds task generation (<code class="docutils literal notranslate"><span class="pre">--task-gen-seed</span></code>, default <code class="docutils literal notranslate"><span class="pre">6303</span></code>), reset
+state sampling (a fixed <code class="docutils literal notranslate"><span class="pre">0</span></code> with <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">--seed</span></code> plus the group offset
+otherwise) and execution (<code class="docutils literal notranslate"><span class="pre">--seed</span></code>, default <code class="docutils literal notranslate"><span class="pre">42</span></code>), so the problems and start states repeat.
+The executed trajectories are not guaranteed to: vecgen steps GPU physics and builds motion plans
+on worker threads, and a skill that is retried from the live state (a flip that misses keeps its
+failed attempt in the episode) changes the episode length. Rerunning the same command can
+therefore change <code class="docutils literal notranslate"><span class="pre">N</span></code>, and a <code class="docutils literal notranslate"><span class="pre">--dbs</span></code> that worked before can stop working. Check the log line after
+each regeneration.</p>
 </section>
 <section id="resuming-and-fine-tuning">
 <h2>Resuming and fine-tuning<a class="headerlink" href="#resuming-and-fine-tuning" title="Link to this heading">#</a></h2>
@@ -557,6 +581,7 @@ policy that is not ManiFlow.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup">Setup</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#training-on-a-generated-dataset">Training on a generated dataset</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#choosing-gpus-and-nodes">Choosing GPUs and nodes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-last-batch-of-an-epoch">The last batch of an epoch</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resuming-and-fine-tuning">Resuming and fine-tuning</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluating-the-checkpoint">Evaluating the checkpoint</a></li>

@@ -274,7 +274,7 @@
 <li class="toctree-l3"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rerender.html">Stage 4: Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
@@ -293,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
 </ul>
 </details></li>
 </ul>
@@ -374,7 +375,7 @@ coordinates come from projecting the recorded object poses through the recorded 
 <h2>Where it fits<a class="headerlink" href="#where-it-fits" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>Input:</strong> a merged dataset from <a class="reference internal" href="merge.html"><span class="std std-doc">stage 5, merge</span></a>, with recorded front-camera poses
-and intrinsics (normally from <a class="reference internal" href="rerender.html"><span class="std std-doc">re-rendering</span></a>).</p></li>
+and intrinsics (normally from <a class="reference internal" href="render.html"><span class="std std-doc">rendering</span></a>).</p></li>
 <li><p><strong>Output:</strong> the same dataset, with the <code class="docutils literal notranslate"><span class="pre">goal.*</span></code> columns added to its parquet files and to
 <code class="docutils literal notranslate"><span class="pre">meta/info.json</span></code>.</p></li>
 </ul>
@@ -396,7 +397,7 @@ for training.</p>
 <code class="docutils literal notranslate"><span class="pre">--annotate-num-workers</span></code> flag (default <code class="docutils literal notranslate"><span class="pre">64</span></code>) becomes <code class="docutils literal notranslate"><span class="pre">-j</span></code>, and it annotates the merged dataset
 in place at <code class="docutils literal notranslate"><span class="pre">&lt;output-root&gt;/datasets/merged/train/&lt;experiment-id&gt;/</span></code> (or <code class="docutils literal notranslate"><span class="pre">--merge-output-dir</span></code>). A
 non-zero exit from the annotator fails the run.</p>
-<p>The pipeline also skips this stage on its own, with a warning, when the rerender stage did not run
+<p>The pipeline also skips this stage on its own, with a warning, when the render stage did not run
 and <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code> was not set. Pixel goals need a camera, and
 <a class="reference internal" href="execution.html#what-a-recorded-episode-contains"><span class="std std-ref">execution records none by default</span></a>.</p>
 </section>
@@ -461,7 +462,7 @@ pipeline treats that non-zero exit as a hard failure of the run.</p>
 reporting <code class="docutils literal notranslate"><span class="pre">recorded</span></code>. Catching that case is exactly what this check is for.</p>
 <p><code class="docutils literal notranslate"><span class="pre">--allow-nominal-camera</span></code> bypasses the check, and is correct <strong>only</strong> for the legacy <code class="docutils literal notranslate"><span class="pre">table</span></code> and
 <code class="docutils literal notranslate"><span class="pre">color_only_blocks_table</span></code> presets. On any other preset it annotates against the wrong camera, so
-re-render the dataset instead.</p>
+render the dataset instead.</p>
 </section>
 <section id="annotation-can-succeed-and-write-nothing-useful">
 <h3>Annotation can succeed and write nothing useful<a class="headerlink" href="#annotation-can-succeed-and-write-nothing-useful" title="Link to this heading">#</a></h3>

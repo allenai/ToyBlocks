@@ -226,9 +226,9 @@ What each part of the scene is rebuilt from:
 | Block and table friction | `block_friction`, `table_friction` | written at reset when recorded |
 | `scene_id`, `robot_id` | per-step columns | default the eval scene (see above) |
 | Camera intrinsics | `camera_intrinsics.<camera>` | off by default: `--use-calibrated-cameras` uses one fixed sim2real set; `--no-use-calibrated-cameras` applies each episode's recorded intrinsics |
-| Camera poses and look | `camera_pose.<camera>`, `meta/render_params.json` on rerendered datasets | checked by scene verification; reproduced only with `--use-render-params` |
+| Camera poses and look | `camera_pose.<camera>`, `meta/render_params.json` on rendered datasets | checked by scene verification; reproduced only with `--use-render-params` |
 | Actuator gains | `current_stiffness` / `current_damping` / `current_effort_limit` | read by replay and the dataset PD-switch settle (see [Dataset Replay](replay.md)) |
-| Block glyphs and colours | glyph/colour rerenders: `block_variable_map` / `glyph_map` | painted with `--replay-block-identity` (on) |
+| Block glyphs and colours | glyph/colour renders: `block_variable_map` / `glyph_map` | painted with `--replay-block-identity` (on) |
 
 ## Validating dataset loading
 
@@ -255,14 +255,14 @@ To confirm that the eval scene matches the dataset it was generated from:
   report is written. Use strict whenever the numbers will be reported. These two flags
   are not exposed by `launch_eval.py`.
 
-## Evaluating on rerendered datasets
+## Evaluating on rendered datasets
 
-The [re-rendering stage](../datagen/rerender.md) gives every episode its own look:
+The [render stage](../datagen/render.md) gives every episode its own look:
 
 - its own camera offsets, HDRI sky, table material, lights, exposure and backdrop, recorded
   in `meta/render_params.json` (for a merged dataset, one file per source, reached through
   `meta/provenance.json`);
-- on glyph and colour rerenders, its own block letters and colours (`block_variable_map` /
+- on glyph and colour renders, its own block letters and colours (`block_variable_map` /
   `glyph_map`).
 
 By default, eval reproduces only the block identities. Everything else is the single
@@ -281,7 +281,7 @@ To evaluate with the full recorded look:
 ```bash
 python scripts/launch_eval.py --policy maniflow \
     --model-path data/checkpoints/my_maniflow_run/checkpoints/steps_400000_model.safetensors \
-    --dataset-path data/datasets/my_rerendered_dataset \
+    --dataset-path data/datasets/my_rendered_dataset \
     --no-use-calibrated-cameras --use-render-params --wave-resets
 ```
 
@@ -509,7 +509,7 @@ See [HL latency](#hl-latency) for how to choose K and M.
 
 ### Observations, transform and scene
 
-See [Evaluating on rerendered datasets](#evaluating-on-rerendered-datasets) for how the camera,
+See [Evaluating on rendered datasets](#evaluating-on-rendered-datasets) for how the camera,
 render and block-identity flags work together.
 
 | Flag | Default | Description |
@@ -522,9 +522,9 @@ render and block-identity flags work together.
 | `--depth-aug` | none | ManiFlow transforms only: live depth augmentation (`ejbl`). The pipeline installs `opencv-contrib` from the HVLA requirements when it is set. |
 | `--enable-crop` | off | ManiFlow transforms only: build `target_front_crop_rgb` on the client. |
 | `--use-calibrated-cameras` | on | Use the fixed sim2real camera intrinsics; `--no-use-calibrated-cameras` uses each episode's recorded intrinsics. |
-| `--use-render-params` | off | On a rerendered dataset, reproduce each episode's camera pose, HDRI, table material, lights, exposure and backdrop. Needs `--no-use-calibrated-cameras`; with `--num-envs > 1` add `--wave-resets`. |
-| `--replay-block-identity` | on | On a glyph/colour-rerendered dataset, paint each episode's recorded block letters and colours and prompt with the recorded goal. Success is graded on the source block names either way. |
-| `--wave-resets` | off | Start episodes in waves, so each wave shares one episode's recorded scene lighting. Needs a rerendered dataset and `--num-envs > 1`; not with `--replay` or calibrated cameras. |
+| `--use-render-params` | off | On a rendered dataset, reproduce each episode's camera pose, HDRI, table material, lights, exposure and backdrop. Needs `--no-use-calibrated-cameras`; with `--num-envs > 1` add `--wave-resets`. |
+| `--replay-block-identity` | on | On a glyph/colour-rendered dataset, paint each episode's recorded block letters and colours and prompt with the recorded goal. Success is graded on the source block names either way. |
+| `--wave-resets` | off | Start episodes in waves, so each wave shares one episode's recorded scene lighting. Needs a rendered dataset and `--num-envs > 1`; not with `--replay` or calibrated cameras. |
 | `--eval-table-z-offset` | none | Extra world-frame Z offset (m) for the table and blocks after the queue setup, e.g. `-0.02`. |
 | `--replay-gripper-close-target` | none | Override the binary gripper close target (radians). |
 

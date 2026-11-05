@@ -73,7 +73,7 @@ All state observations are in the **robot base frame**.
 
 ## Camera Observations
 
-[Execution records no cameras by default](execution.md#what-a-recorded-episode-contains), so none of these columns exist in an executed dataset unless it was run with `--record-videos`. They normally come from [re-rendering](rerender.md).
+[Execution records no cameras by default](execution.md#what-a-recorded-episode-contains), so none of these columns exist in an executed dataset unless it was run with `--record-videos`. They normally come from [rendering](render.md).
 
 | Field | Shape | Dtype | Description |
 |-------|-------|-------|-------------|
@@ -81,7 +81,7 @@ All state observations are in the **robot base frame**.
 | `observation.depth.<cam>` | (H, W, 1) or (H, W, 3) | video (uint16) | Depth map in millimetres (0–4095), divide by 1000 for metres. Stored as 12-bit `gray12le` (1 channel, the default) or as `rg8` (the same value packed into 3-channel 8-bit RGB: R = low byte, G = high byte). Read `video.depth_encoding` (`gray12le_mm` or `rg8_mm`) in the feature's `info` in `meta/info.json` before decoding. Source is Isaac Lab `distance_to_image_plane`. |
 | `observation.images.<cam>_<variant>` | (224, 224, 3) | video (uint8 RGB) | Optional RGB sidecar from `--extra_rgb`, e.g. `_224`. |
 | `observation.depth.<cam>_<variant>` | varies | video | Optional depth sidecar from `--extra_depth`, e.g. `_g12_224`, `_rg8_224` or `_rg8_55_224`. Has its own resolution, channel count and `video.depth_max_mm`; read them from `meta/info.json`. `rg8_55_224`, the pipeline default, packs depth as `(R << 5) \| G` and saturates at 1023 mm, unlike `rg8`'s `R + (G << 8)`, yet both record `video.depth_encoding: rg8_mm`; tell them apart by the key suffix or by `video.depth_max_mm` (1023 vs 4095). |
-| `observation.camera_pose.<cam>` | (7,) | float32 | Camera extrinsic pose `[x, y, z, qw, qx, qy, qz]` in the robot base frame. |
+| `observation.camera_pose.<cam>` | (7,) | float32 | Camera extrinsic pose `[x, y, z, qw, qx, qy, qz]` in the robot base frame. Constant per episode for a scene-mounted camera; per frame for one mounted on a robot link, such as the gripper camera, which moves with the arm. |
 | `observation.camera_intrinsics.<cam>` | (9,) | float32 | Flattened 3×3 camera intrinsic matrix `[fx, s, cx, 0, fy, cy, 0, 0, 1]` (row-major). |
 
 Tactile cameras (if present) follow the same `observation.images.<cam>` convention but may have different resolution.
@@ -143,10 +143,10 @@ However, the dataset does include **provenance metadata** under `meta/` that rec
 |------|-------------|
 | `meta/recording_config.json` | Recording parameters: gripper binarize threshold, gripper type (`robotiq`), open/close commands, joint velocity limits, `record_videos`, and `robot_link_pose_frame`. |
 | `meta/provenance.json` | Git commit/remote, the `recording_provenance` dict used at creation, and SHA-256 checksums of every file copied into `meta/extra/`. In a merged dataset it is one aggregate: the git metadata of the merge, `merged_from_n_datasets`, and one `sources[]` entry per source dataset (its path, `problem_name`, `extra_dir` and files). |
-| `meta/extra/` | Copies of source files, only for the paths the recorder was given: `domain.pddl`, `<problem>.pddl`, and, from the env directory, `block_config.json`, `init.py` and the `<id>.json` instance files. A merged dataset keeps one `domain.pddl` (from the first source that has it) at `meta/extra/domain.pddl`, and each source's other copies under `meta/extra/<problem>/`. |
-| `meta/render_params.json` | Re-rendered datasets only, before merge: how each split was rendered and every per-episode randomization value; see [Re-rendering](rerender.md#output). Merge does not carry it into the merged `meta/`. |
+| `meta/extra/` | Copies of the files that define the task, each checksummed in `provenance.json`: `domain.pddl`, and from the env package every `problems/*.pddl` (a multi-problem package contributes all of its members) plus `problems.json`, `profiles.json` and `non_sim_state_randomizations.json`. A merged dataset keeps one `domain.pddl` at `meta/extra/domain.pddl` and each source's other copies under `meta/extra/<problem>/`. The directory is created only when something is copied into it. |
+| `meta/render_params.json` | Rendered datasets only, before merge: how each split was rendered and every per-episode randomization value; see [Rendering](render.md#output). Merge does not carry it into the merged `meta/`. |
 
-Vecgen passes only `instance_json_ids` and `generator: vecgen` as provenance, so for datasets from [execution](execution.md) `meta/extra/` is empty and `provenance.json` holds the git metadata alone. To reproduce such a dataset's simulation environment, you need:
+Vecgen forwards the domain and the env package, so a dataset from [execution](execution.md) carries its own PDDL and scene tables. `provenance.json` additionally records the git commit, which pins `domain.pddl` since that file is checked in. What it does **not** pin is anything uncommitted: there is no dirty-checkout flag, and in a merged dataset the git block is the merge's, not each source's. To reproduce such a dataset's simulation environment, you also need:
 1. The ToyBlocks repository at the recorded git commit (from `meta/provenance.json`).
 2. The `assets/` directory with the matching USD meshes and robot models.
 3. The PDDL problem and the env package it was generated from. The problem is named by the `source_problem` column; the dataset does not carry copies.
