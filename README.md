@@ -55,6 +55,7 @@ All source code in `src/toyblocks/`
 - `src/toyblocks/vecgen`: the datagen engine (FF planning, batched skills, cuRobo planner pool, LeRobot recording)
 - `src/toyblocks/robots`: all robot assets and configurations, including controllers
 - `src/toyblocks/serving`: policy serving infrastructure (`BasePolicy`, `PolicyServer`, WebSocket client, obs transforms)
+- `src/toyblocks/eval`: evaluation of learned models (with or without oracles) and replay
 - `src/toyblocks/wrappers`: gym `Wrapper` subclasses (recording, stats, obs flattening)
 - `src/toyblocks/cli`: command line utilities
 - `src/toyblocks/data_annotation`: dataset annotation utilities
