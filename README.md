@@ -1,22 +1,49 @@
 <p align="center">
-  <img src="ToyBlocksLogo_letest.svg" alt="ToyBlocks" width="720">
+  <img src="ToyBlocksLogo_latest.svg" alt="ToyBlocks" width="720">
 </p>
 
 # ToyBlocks
 
-This repo contains all code for creating toy block domain tasks and (maybe?) RL training
+<h3 align="center">
+  <a href="https://allenai.org/blog/toyblocks">Blog post</a> &nbsp;|&nbsp;
+  <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/index.html">Docs</a> &nbsp;|&nbsp;
+  Tech report (coming soon)
+</h3>
 
-All docs / example commands / workflows can be found at https://allenai.github.io/ToyBlocks
+This repo contains ToyBlocks: an open simulation framework based on IsaacSim/IsaacLab, built around 
+a robot arm manipulating blocks on a tabletop. The setting is deliberately simple, but the robot 
+must still reason about how the blocks interact and how to arrange them while pushing, flipping, 
+and stacking.
 
-If you need to add details about your work (e.g. new rl script, new datagen script, new details on evals etc.) please edit the markdown files in docs/source
+ToyBlocks automatically and scalably generates demonstration data for policy training, without requiring 
+time-consuming and expensive teleoperation. Researchers can easily vary these training experiences. 
+For example, a team could generate more pushing or flipping demonstrations, then evaluate performance 
+on tasks kept out of training.
+
+The generated datasets are recorded in the LeRobot format and can be used directly to train VLAs 
+or other policies. ToyBlocks ships with training infrastructure for [ManiFlow](https://maniflow-policy.github.io/), a low-level visuomotor 
+policy conditioned on language and on a target heatmap, and serves it either on its own or under a 
+high-level policy (such as [Molmo2](https://allenai.org/blog/molmo2), Astra, Claude) that decides what to do next. 
+
+Policies are evaluated in closed loop in simulation, either on freshly generated unseen scenes 
+and tasks or on the exact initial states of episodes recorded in a dataset. Evaluation is GPU-parallel. 
+Because every task's goal is expressed in PDDL, ToyBlocks automatically measures success and partial progress, 
+with no task-specific metric code. Either level of a hierarchical policy can be replaced by an oracle 
+to isolate where failures come from, and the states where a policy failed can be sent back to data generation 
+to plan new expert demonstrations and recoveries from them.
+
+The overall goal of ToyBlocks is to provide a controlled world for robot learning and evaluation. 
+By providing full control over the data generation process, ToyBlocks provides tools for researchers 
+to trace the outcomes of trained policies back to the training data.
+
 
 ## Setup
 
 This guide uses `uv` to set everything up. The setup instructions here are for setting up the evaluation environments and data generation systems.
 
-Prerequisites: an NVIDIA driver that supports CUDA 12.8 (570+) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
-ToyBlocks and its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently
-internal to Ai2.
+Prerequisites: an NVIDIA driver that supports CUDA 12.8 (570+) and 
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/). ToyBlocks and 
+its `curobo` and `molmo2` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
 
 ```bash
 git clone https://github.com/allenai/ToyBlocks.git
