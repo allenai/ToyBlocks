@@ -67,7 +67,7 @@ class Args(BaseArgs):
     disable_viewer: bool = False
     """whether to disable the viser viewer. Useful for training if you don't want visualizations or want to run on a cluster"""
     share_url: bool = False
-    """whether to allow viser to expose a public url (handy for beaker runs)"""
+    """whether to allow viser to expose a public url (handy on a remote machine)"""
 
     # Environment specific arguments
     task: str = "ToyBlocks-Lift-v0"

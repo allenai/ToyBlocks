@@ -15,7 +15,7 @@ SPLITS = ("blocks_success", "blocks_failure")
 
 
 # --------------------------------------------------------------------------------------------
-# completion oracle (ground truth == weka, never exit codes, never isdir)
+# completion oracle (ground truth == the output files, never exit codes, never isdir)
 # --------------------------------------------------------------------------------------------
 def problem_complete(out_root: str, problem: str) -> bool:
     """True iff this problem finalized in the output: some split's meta/render_params.json says
@@ -335,7 +335,7 @@ def apply_video_patch(out_root: str, patch_root: str) -> dict[str, Any]:
     the real output would write episode 250's pixels to file-000 and destroy a good episode. It
     therefore renders into its own directory, and the intermediate's render_params carries
     src_episode_index for the remap back. Same mapping patch_remote_from_render.py does over S3,
-    done locally because the orchestrator already has weka mounted.
+    done locally because the output directory is already mounted.
 
     Every file is checked for a moov before it is copied and again at the destination, and it lands
     via a temp file + os.replace, so a failure here can only leave the original hole -- never a

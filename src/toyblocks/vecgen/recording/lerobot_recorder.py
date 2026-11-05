@@ -71,7 +71,7 @@ _SPILL_MIN_ITEM_BYTES = 64 << 10
 
 def resolve_spill_dir(staging_root: Optional[str] = None) -> Path:
     """Where over-budget frames are spilled: ``TOYBLOCKS_RECORDER_SPILL_DIR``, else the video
-    staging root, else the system temp dir. Must be node-local disk (not tmpfs, not weka)."""
+    staging root, else the system temp dir. Must be node-local disk (not tmpfs, not network storage)."""
     raw = os.environ.get("TOYBLOCKS_RECORDER_SPILL_DIR", "").strip()
     return Path(raw or staging_root or os.environ.get("RENDER_VIDEO_STAGING") or tempfile.gettempdir())
 
@@ -451,8 +451,8 @@ class IsaacDataRecorderLeRobot:
         self._extra_rgb_gop = extra_rgb_gop
         self._rgb_gop = rgb_gop
         # Where the encoder stages videos before publishing. None -> node-local scratch. It must
-        # NOT be on weka: the mp4 `moov` trailer is written at close(), and a silent short write
-        # over weka produces a moov-less file with no exception raised.
+        # NOT be on a network filesystem: the mp4 `moov` trailer is written at close(), and a
+        # silent short write over the network produces a moov-less file with no exception raised.
         self._video_staging_root = video_staging_root or None
         self._record_videos = bool(record_videos)
         if not self._record_videos and enable_goal_annotation:

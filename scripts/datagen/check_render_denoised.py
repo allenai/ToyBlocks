@@ -3,15 +3,15 @@
 
 RT2 renders at spp=1 and depends entirely on the DLSS ray-reconstruction denoiser (NGX).
 `libnvidia-ngx.so.1` ships with the DRIVER, and libnvidia-container injects it only when the
-`ngx` capability is requested -- `graphics` does NOT imply it. A Beaker job that does not set
+`ngx` capability is requested -- `graphics` does NOT imply it. A container that does not set
 `NVIDIA_DRIVER_CAPABILITIES=all` therefore produces frames covered in single-pixel fireflies.
 
 Nothing else notices. The episodes record, the parquet validates, every metadata check passes --
 an entire fleet can render a unusable dataset and report success. This measures the pixels.
 
 Immerkaer noise sigma on sampled frames; measured on this pipeline:
-    beaker RT2, capability unset      ~26 - 31      (unusable)
-    beaker RT2, CAPABILITIES=all       ~0.65        (correct)
+    container RT2, capability unset   ~26 - 31      (unusable)
+    container RT2, CAPABILITIES=all    ~0.65        (correct)
     local RTX 5090, no container       ~0.35 - 0.56 (correct)
 The two populations are ~50x apart, so the threshold is not delicate.
 
@@ -84,8 +84,8 @@ def main() -> int:
     if med > a.max_sigma:
         print(f"\n  FAIL: median sigma {med:.2f} > {a.max_sigma}. This render is UNDENOISED.")
         if rt2:
-            print("  RT2 is on, so the DLSS denoiser (NGX) did not initialise. On Beaker that means\n"
-                  "  the task did not set NVIDIA_DRIVER_CAPABILITIES=all (graphics does NOT imply ngx).")
+            print("  RT2 is on, so the DLSS denoiser (NGX) did not initialise. In a container that means\n"
+                  "  it did not set NVIDIA_DRIVER_CAPABILITIES=all (graphics does NOT imply ngx).")
         print("  The metadata is probably fine -- only the pixels are ruined, which is why no other\n"
               "  check catches this.")
         return 1

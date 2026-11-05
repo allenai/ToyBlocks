@@ -148,7 +148,7 @@ def build_depth_stats_payload(
 
 
 def log_depth_stats_summary(payload: dict[str, Any]) -> None:
-    """Log depth stats to stdout (Beaker worker logs)."""
+    """Log depth stats to stdout."""
     z_ranges = payload.get("ptmap_z_ranges_m")
     print(
         f"[INFO]: step-0 depth stats (model input @224) "

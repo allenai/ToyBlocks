@@ -364,7 +364,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
         # still-flushing encoder (which truncates tail videos -> missing moov).
         self._heartbeat = heartbeat
         # Videos are staged here before publishing to _data_dir. Defaults to node-local scratch;
-        # see the staging_dir comment in run() for why this must not live on weka.
+        # see the staging_dir comment in run() for why this must not live on a network filesystem.
         self._staging_root = staging_root or os.environ.get("RENDER_VIDEO_STAGING") \
             or tempfile.gettempdir()
         # mp.Value the parent reads after finalize: number of (episode, feature) videos that could
@@ -605,7 +605,7 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
                 self._defects.value += 1
         # Also record WHICH (episode, feature) is missing, not just how many. The count alone
         # cannot drive a targeted patch -- reconstructing the list afterwards meant a full listing
-        # of ~115k objects over the weka gateway. One JSONL line per defect, appended.
+        # of ~115k files over network storage. One JSONL line per defect, appended.
         quarantined = self._quarantine(src, ep_idx, fkey) if src else None
         try:
             with open(os.path.join(self._data_dir, "_video_defects.jsonl"), "a") as fh:
@@ -616,10 +616,10 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
             logger.error(f"could not record defect sidecar: {type(e).__name__}: {e}")
 
     def _publish(self, src: str, dest: str, tries: int = 3) -> bool:
-        """Copy a validated staging file to its final path on weka and CONFIRM it landed intact.
+        """Copy a validated staging file to its final path and CONFIRM it landed intact.
 
         Staging is local, so `src` stays valid and a failed publish is retryable -- the whole point
-        of moving staging off weka. Verify size + moov at the destination: a short write over a
+        of staging locally. Verify size + moov at the destination: a short write over a
         network filesystem does not necessarily raise.
         """
         for attempt in range(1, tries + 1):
@@ -905,13 +905,14 @@ class _VideoEncoderProcess(ENCODER_CTX.Process):
         datasets.disable_progress_bar()
 
         base = Path(self._data_dir).absolute()
-        # Stage on LOCAL disk, never on weka. container.close() is what writes the mp4 `moov`
-        # trailer; doing that over weka lets a silent short write produce a moov-less file with NO
+        # Stage on LOCAL disk, never on a network filesystem. container.close() is what writes the
+        # mp4 `moov` trailer; doing that over the network lets a silent short write produce a
+        # moov-less file with NO
         # exception (observed 2026-08-24: `INVALID video after close (no moov trailer)` while
         # close() itself raised nothing, 35 videos lost across one 12,800-episode run). Because the
         # withheld file was ALSO the only copy, the loss was unrecoverable in-process.
         # Local staging makes the trailer write cheap and reliable, and -- crucially -- leaves a
-        # good source file behind so publishing to weka can be verified and RETRIED.
+        # good source file behind so publishing to the output directory can be verified and RETRIED.
         staging_dir = os.path.join(self._staging_root, f"_video_staging_{os.getpid()}")
         shutil.rmtree(staging_dir, ignore_errors=True)
         os.makedirs(staging_dir, exist_ok=True)
@@ -1266,7 +1267,7 @@ class _DatasetWriter(threading.Thread):
             dest = os.path.join(dest_dir, f"file-{file_num:03d}.mp4")
             if not proc._publish(path, dest):
                 proc._record_defect(env_idx, ep_idx, fkey,
-                                    f"publish to weka failed: {dest}", src=path)
+                                    f"publish failed: {dest}", src=path)
 
         # Every file of this episode has been published or quarantined; drop its staging directory.
         for ep_dir in {os.path.dirname(path) for _, _, path in vids.values() if path}:

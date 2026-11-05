@@ -58,7 +58,7 @@ def _run(cmd, timeout=120):
 def _probe_stream(p: Path):
     """(width, height, frames). Header first, full packet count only as a fallback.
 
-    -count_packets reads the ENTIRE file; over weka that pinned the first live run at 10 clips/s
+    -count_packets reads the ENTIRE file; over network storage that pinned a run at 10 clips/s
     (~50 min for 29k clips). A properly finalized mp4 carries nb_frames in its moov, which costs
     one small read -- and the corruption this hunts (a SHORT clip whose encoder finalized cleanly)
     is reported faithfully there, because the moov is written from what was actually encoded. Only

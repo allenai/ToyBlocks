@@ -73,7 +73,7 @@ class ViewerCfg:
     ignore_empty_trajectories: bool = True
     """Whether to ignore trajectories that have no frames saved for viewing other than the reset frame."""
     share_url: bool = False
-    """Use this setting to allow viser to share a public url (handy if using beaker)"""
+    """Use this setting to allow viser to share a public url (handy on a remote machine)"""
 
 class Viewer:
     def __init__(self, cfg: ViewerCfg = ViewerCfg()):

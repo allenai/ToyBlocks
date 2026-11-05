@@ -54,7 +54,7 @@ def has_moov(path: str, tries: int = 3, retry_delay: float = 0.5) -> bool:
 
     Retries before condemning. This function decides whether a just-encoded video is publishable,
     and a False here USED TO DESTROY THE ONLY COPY: the caller skipped the publish and the staging
-    file was deleted at finalize. A single stale stat or a transient read over weka was therefore
+    file was deleted at finalize. A single stale stat or a transient network read was therefore
     enough to lose a perfectly good render -- 35 went that way on 2026-08-24. Negatives are now
     re-checked with a fresh open (and so a fresh size) before they are believed, and an unreadable
     file is retried rather than reported as invalid.

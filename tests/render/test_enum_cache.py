@@ -61,7 +61,7 @@ def _cache(root):
 
 
 def _legacy_cache(root, rows):
-    """A schema-1 cache with no `scanned` key -- what is already sitting on weka."""
+    """A schema-1 cache with no `scanned` key -- what older runs left on disk."""
     (root / ENUM_CACHE_NAME).write_text(json.dumps(
         {"schema": 1, "src": str(root), "problems": PROBLEMS, "splits": rows}))
 
@@ -91,7 +91,7 @@ def main():
         _check("both splits present", sorted({s for _p, s, _e in got}),
                ["blocks_failure", "blocks_success"])
 
-    print("C: legacy caches already on weka (schema 1, no `scanned`)")
+    print("C: legacy caches already on disk (schema 1, no `scanned`)")
     with tempfile.TemporaryDirectory() as td:
         r = _mksrc(Path(td) / "c")
         _legacy_cache(r, [[p, "blocks_success", N_SUCCESS] for p in PROBLEMS])
@@ -104,7 +104,7 @@ def main():
         with contextlib.redirect_stderr(buf):
             got = enumerate_source_episodes(str(r))
         # Coverage is derived from the rows when `scanned` is absent, so a good legacy cache must
-        # still HIT -- invalidating them all would cost a ~25 min rescan per source on weka.
+        # still HIT -- invalidating them all would cost a ~25 min rescan per source.
         _check("legacy GOOD cache still hits", len(got), FULL)
         _check("  ...and it really was a hit", "cache hit" in buf.getvalue(), True)
 
