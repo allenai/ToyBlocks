@@ -366,14 +366,14 @@
 <ul class="simple">
 <li><p>Linux with an NVIDIA GPU and a driver that supports CUDA 12.8 (driver 570 or newer).</p></li>
 <li><p><a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a> on your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (<code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-LsSf</span> <span class="pre">https://astral.sh/uv/install.sh</span> <span class="pre">|</span> <span class="pre">sh</span></code>).</p></li>
-<li><p>A GitHub SSH key with access to the <code class="docutils literal notranslate"><span class="pre">allenai</span></code> organization: <code class="docutils literal notranslate"><span class="pre">blocksuite</span></code> and the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> and <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> submodules are private and cloned over SSH (<code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-T</span> <span class="pre">git&#64;github.com</span></code> should greet you by name). The <code class="docutils literal notranslate"><span class="pre">curobo</span></code> submodule is public.</p></li>
+<li><p>Git access to GitHub over HTTPS. ToyBlocks and its <code class="docutils literal notranslate"><span class="pre">curobo</span></code> and <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> submodules are public; the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> submodule is currently internal to Ai2.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tmux</span></code> (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">tmux</span></code>): long-running jobs (pipeline runs, merges, renders) are run in detached <code class="docutils literal notranslate"><span class="pre">tmux</span></code> sessions so they survive a dropped connection.</p></li>
 </ul>
 </section>
 <section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">#</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:allenai/blocksuite.git
-<span class="nb">cd</span><span class="w"> </span>blocksuite
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/allenai/ToyBlocks.git
+<span class="nb">cd</span><span class="w"> </span>ToyBlocks
 
 <span class="c1"># Create a virtual environment for Python 3.11 (required for Isaac Sim 5.1) and activate it</span>
 uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.11
