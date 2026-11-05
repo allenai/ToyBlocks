@@ -132,7 +132,6 @@ def build_depth_stats_payload(
     *,
     depth_keys: Sequence[str],
     per_camera_ptmap_bounds: Mapping[str, Mapping[str, list[float]]] | None,
-    augment_depth: str | None,
 ) -> dict[str, Any]:
     """Summarize model-input depth tensors before they are sent to the policy server."""
     bounds = (
@@ -143,7 +142,6 @@ def build_depth_stats_payload(
     return {
         "per_camera_ptmap_bounds": bounds,
         "ptmap_z_ranges_m": _ptmap_z_ranges_for_keys(depth_keys, bounds),
-        "augment_depth": augment_depth,
         "depth_keys": list(depth_keys),
         "cameras": summarize_wire_depth_batch(wire, depth_keys),
     }
@@ -152,10 +150,9 @@ def build_depth_stats_payload(
 def log_depth_stats_summary(payload: dict[str, Any]) -> None:
     """Log depth stats to stdout (Beaker worker logs)."""
     z_ranges = payload.get("ptmap_z_ranges_m")
-    aug = payload.get("augment_depth")
     print(
         f"[INFO]: step-0 depth stats (model input @224) "
-        f"ptmap_z_ranges_m={z_ranges!r} augment_depth={aug!r}",
+        f"ptmap_z_ranges_m={z_ranges!r}",
         flush=True,
     )
     for key, block in payload.get("cameras", {}).items():

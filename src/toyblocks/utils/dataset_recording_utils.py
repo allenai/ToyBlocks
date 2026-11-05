@@ -871,17 +871,6 @@ def _make_policy_client(args: Any, prompt_resolver: Any, policy: Any):
                 kwargs.update(transform_kwargs_from_server_metadata(server_meta))
                 if getattr(args, "center_crop_ratio", None) is not None:
                     kwargs["center_crop_ratio"] = args.center_crop_ratio
-                if getattr(args, "depth_aug", None) is not None:
-                    from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
-
-                    aug_name = str(args.depth_aug).strip().lower()
-                    require_depth_aug_supported(aug_name)
-                    kwargs["augment_depth"] = aug_name
-                    if not kwargs.get("depth_keys"):
-                        raise ValueError(
-                            f"--depth_aug {args.depth_aug!r} requires a depth-conditioned "
-                            "checkpoint (server metadata advertises no *_depth obs keys)."
-                        )
                 if crop_eval_active(args, server_meta):
                     kwargs["enable_target_front_crop"] = True
                 if kwargs.get("enable_target_front_crop"):
@@ -900,7 +889,6 @@ def _make_policy_client(args: Any, prompt_resolver: Any, policy: Any):
                 f"include_ptmap={kwargs.get('include_ptmap', True)!r} "
                 f"include_prev_front_frame={kwargs.get('include_prev_front_frame', False)!r} "
                 f"center_crop_ratio={kwargs.get('center_crop_ratio')!r} "
-                f"augment_depth={kwargs.get('augment_depth')!r} "
                 f"per_camera_ptmap_bounds={kwargs.get('per_camera_ptmap_bounds')!r} "
                 f"enable_target_front_crop={kwargs.get('enable_target_front_crop')!r} "
                 f"pass_native_front_for_server_crop="

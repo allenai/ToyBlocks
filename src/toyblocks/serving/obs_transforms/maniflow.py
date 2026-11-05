@@ -71,12 +71,6 @@ PerEnvPromptSource = Callable[[int], str] | None
 #   8  -- 7 arm + 1 gripper
 #   9  -- 7 arm + 1 gripper + 1 pd_mode
 #   19 -- 7 arm + 7 joint_vel + 3 ee_xyz + 1 gripper + 1 pd_mode
-_SUPPORTED_AUGMENT_DEPTH = frozenset({"ejbl"})
-HVLA_CAMERA_FOR_DEPTH_KEY: dict[str, str] = {
-    "front_depth": "front_camera",
-    "gripper_depth": "gripper_camera",
-}
-
 STATE_DIM_LAYOUTS: dict[int, dict[str, bool]] = {
     8: {"include_joint_vel": False, "include_ee_pos": False, "include_pd_mode": False},
     9: {"include_joint_vel": False, "include_ee_pos": False, "include_pd_mode": True},
@@ -167,18 +161,6 @@ def _hwc_uint8_to_chw_float(img: np.ndarray) -> np.ndarray:
         raise ValueError(f"Expected HWC uint8 image; got shape {img.shape}")
     f = img.astype(np.float32, copy=False) * np.float32(1.0 / 255.0)
     return np.transpose(f, (0, 3, 1, 2)).copy()
-
-
-def _rgb_nhwc_to_gray_uint8(rgb: np.ndarray) -> np.ndarray:
-    """(N, H, W, 3) uint8 RGB → (N, H, W) uint8 luminance (PIL ``L`` per frame)."""
-    from PIL import Image
-
-    if rgb.ndim != 4 or rgb.shape[-1] != 3:
-        raise ValueError(f"Expected NHWC RGB uint8; got shape {rgb.shape}")
-    out = np.empty(rgb.shape[:3], dtype=np.uint8)
-    for i in range(rgb.shape[0]):
-        out[i] = np.array(Image.fromarray(rgb[i]).convert("L"), dtype=np.uint8)
-    return out
 
 
 def _center_crop_box(h: int, w: int, ratio: float) -> tuple[int, int, int]:
@@ -273,11 +255,6 @@ class ManiflowObsTransform(BaseObsTransform):
         depth_max_m: Depth samples beyond this (and negative / non-finite ones)
             are zeroed as invalid, matching the training decode's
             ``MAX_DEPTH_M`` cutoff.
-        augment_depth: Live depth noise profile before the depth is sent to the
-            policy (``ejbl`` only). Matches HVLA training
-            ``datasets.vla_data.augment_depth``; off by default.
-        depth_aug_seed: Optional RNG seed for ``augment_depth`` (tests only).
-            When unset, noise is stochastic each step like training.
         per_camera_ptmap_bounds: Optional override of vendored Franka ptmap bounds
             (``framework.per_camera_ptmap_bounds`` from the served checkpoint).
             When omitted, :data:`DEFAULT_FRANKA_PER_CAMERA_PTMAP_BOUNDS` applies.
@@ -348,8 +325,6 @@ class ManiflowObsTransform(BaseObsTransform):
         include_ptmap: bool = True,
         depth_keys: Sequence[str] = (),
         depth_max_m: float = TRAIN_MAX_DEPTH_M,
-        augment_depth: str | None = None,
-        depth_aug_seed: int | None = None,
         per_camera_ptmap_bounds: dict[str, dict[str, list[float]]] | None = None,
         include_prev_front_frame: bool = False,
         include_hl_frames: bool = False,
@@ -389,24 +364,6 @@ class ManiflowObsTransform(BaseObsTransform):
                 "wrist_cam."
             )
         self.depth_max_m = depth_max_m
-        if augment_depth is not None:
-            name = str(augment_depth).strip().lower()
-            if name not in _SUPPORTED_AUGMENT_DEPTH:
-                raise ValueError(
-                    f"augment_depth={augment_depth!r} not supported; "
-                    f"allowed: {sorted(_SUPPORTED_AUGMENT_DEPTH)}"
-                )
-            self.augment_depth = name
-            from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
-
-            require_depth_aug_supported(name)
-        else:
-            self.augment_depth = None
-        self._depth_aug_rng = (
-            np.random.default_rng(depth_aug_seed)
-            if self.augment_depth is not None
-            else np.random.default_rng(0)
-        )
         if per_camera_ptmap_bounds is not None:
             self._per_camera_ptmap_bounds: dict[str, dict[str, list[float]]] | None = {
                 str(k): {
@@ -554,60 +511,6 @@ class ManiflowObsTransform(BaseObsTransform):
             out[i] = mask_depth_m_by_z_bounds(d[i], z_min, z_max)
         return out
 
-    def _apply_ejbl_depth_nhw(
-        self,
-        depth_nhw: np.ndarray,
-        obs: dict[str, Any],
-        cam: str,
-        depth_key: str,
-    ) -> np.ndarray:
-        """EJBL noise on batched (N, H, W) depth at the policy grid (training parity)."""
-        from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
-        from hvla.training.trainer_utils.depth_aug.disparity_common import baseline_for_camera
-        from hvla.training.trainer_utils.depth_aug.elastic_disparity_depth import (
-            ELASTIC_DEPTH_AUG_PRESET,
-        )
-        from hvla.training.trainer_utils.depth_aug.elastic_jbl_depth import add_ejbl_depth_noise
-        from hvla.training.trainer_utils.depth_bake_profiles import resolve_profile
-
-        require_depth_aug_supported("ejbl")
-        hvla_cam = HVLA_CAMERA_FOR_DEPTH_KEY[depth_key]
-        profile = resolve_profile("ejbl")
-        if profile is None:
-            require_depth_aug_supported("ejbl")
-
-        rgb = self.process_image(
-            self.get_image(obs, cam),
-            self.image_size,
-            interpolate_device=self._image_interpolate_device,
-            antialias=self._resize_antialias,
-        )
-        gray = _rgb_nhwc_to_gray_uint8(rgb)
-
-        native_w = _depth_as_nhw(self.get_depth(obs, cam)).shape[-1]
-        target_w = self.image_size[1]
-        sx = target_w / float(native_w)
-        K = self.get_intrinsics(obs, cam)
-        fx_batch = K[:, 0, 0].astype(np.float64) * sx
-        baseline_m = baseline_for_camera(hvla_cam)
-
-        out = depth_nhw.copy()
-        n = out.shape[0]
-        for i in range(n):
-            out[i] = add_ejbl_depth_noise(
-                out[i],
-                float(fx_batch[i]),
-                baseline_m,
-                gray=gray[i],
-                rng=self._depth_aug_rng,
-                elastic_preset=profile.elastic_preset or ELASTIC_DEPTH_AUG_PRESET,
-                noise_kwargs=profile.noise_kwargs or {},
-                random_ideal_mix=profile.random_ideal_mix,
-                ideal_mix_min=profile.ideal_mix_min,
-                ideal_mix_max=profile.ideal_mix_max,
-            )
-        return self._zero_invalid_depth(out)
-
     def _depth_inputs(self, obs: dict[str, Any]) -> dict[str, np.ndarray]:
         """The declared ``*_depth`` keys + ``camera_intrinsics`` for GPU back-projection.
 
@@ -630,8 +533,6 @@ class ManiflowObsTransform(BaseObsTransform):
                 max_depth_m=self.depth_max_m,
                 interpolate_device=self._image_interpolate_device,
             )
-            if self.augment_depth == "ejbl":
-                resized = self._apply_ejbl_depth_nhw(resized, obs, cam, depth_key)
             resized = self._mask_depth_ptmap_z_nhw(resized, depth_key)
             if self.center_crop_ratio is not None:
                 resized = _center_crop_resize_nearest_nhw(resized, self.center_crop_ratio)

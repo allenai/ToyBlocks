@@ -35,37 +35,6 @@ MANIFLOW_IMAGE_SIZE = 224
 TRAIN_MAX_DEPTH_M = 2.5
 
 
-def depth_aug_supported(profile: str) -> bool:
-    """True when live eval depth aug for ``profile`` (currently ``ejbl``) is importable."""
-    name = str(profile).strip().lower()
-    if name != "ejbl":
-        return False
-    try:
-        from hvla.training.trainer_utils.depth_aug.elastic_jbl_depth import (  # noqa: F401
-            add_ejbl_depth_noise,
-        )
-        from hvla.training.trainer_utils.depth_bake_profiles import resolve_profile
-    except ImportError:
-        return False
-    try:
-        resolved = resolve_profile("ejbl")
-    except Exception:
-        return False
-    return resolved is not None
-
-
-def require_depth_aug_supported(profile: str) -> None:
-    """Fail fast when ``--depth-aug`` was requested but hvla lacks EJBL profiles."""
-    name = str(profile).strip().lower()
-    if depth_aug_supported(name):
-        return
-    raise RuntimeError(
-        f"--depth-aug {name!r} needs hvla.training.trainer_utils.depth_bake_profiles, which the "
-        "installed maniflow-tb checkout does not ship. Omit --depth-aug, or point the maniflow-tb "
-        "submodule at a revision that provides the EJBL depth-augmentation profiles."
-    )
-
-
 # Obs keys the policy server synthesizes from the standard eval client payload
 # (``front_rgb`` + ``target_heatmap``). Omitted from advertised ``obs_keys`` so
 # every compared checkpoint uses the same client-side transform.

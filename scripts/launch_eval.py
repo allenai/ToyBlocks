@@ -637,13 +637,6 @@ def main() -> None:
         "(e.g. -0.02 to lower the table by 2 cm).",
     )
     p.add_argument(
-        "--depth-aug",
-        default=None,
-        metavar="PROFILE",
-        help="Maniflow policies only: live depth augmentation on the client obs "
-        "transform (ejbl). Pipeline installs opencv-contrib from HVLA requirements when set.",
-    )
-    p.add_argument(
         "--enable-crop",
         action="store_true",
         help="Maniflow policies only: client-side target_front_crop_rgb (training parity).",
@@ -819,13 +812,6 @@ def main() -> None:
             raise SystemExit(f"--center-crop-ratio must be in (0, 1], got {args.center_crop_ratio}")
         if args.center_crop_ratio == 1.0:
             args.center_crop_ratio = None
-    if args.depth_aug is not None:
-        _require_maniflow_obs_transform(obs_transform, "--depth-aug")
-        if str(args.depth_aug).strip().lower() not in ("ejbl",):
-            raise SystemExit(f"--depth-aug must be 'ejbl' when set, got {args.depth_aug!r}")
-        from toyblocks.serving.maniflow_serving_utils import require_depth_aug_supported
-
-        require_depth_aug_supported(str(args.depth_aug).strip().lower())
     if args.enable_crop:
         _require_maniflow_obs_transform(obs_transform, "--enable-crop")
     robot_id = args.robot_id or pol["robot_id"]
@@ -993,7 +979,6 @@ def main() -> None:
         "replay_clip_stats": args.replay_clip_stats,
         "center_crop_ratio": args.center_crop_ratio,
         "replay_gripper_close_target": args.replay_gripper_close_target,
-        "depth_aug": args.depth_aug,
         "enable_crop": args.enable_crop,
         "use_calibrated_cameras": args.use_calibrated_cameras,
         "use_render_params": args.use_render_params,
@@ -1084,7 +1069,6 @@ def main() -> None:
             if args.replay_gripper_close_target is not None
             else ""
         ),
-        "DEPTH_AUG": "" if args.depth_aug is None else str(args.depth_aug).strip().lower(),
         "ENABLE_CROP": "1" if args.enable_crop else "",
         "USE_CALIBRATED_CAMERAS": "1" if args.use_calibrated_cameras else "",
         "USE_RENDER_PARAMS": "1" if args.use_render_params else "",
