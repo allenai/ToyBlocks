@@ -1,6 +1,6 @@
 # `train_maniflow.py` Reference
 
-Every flag of maniflow-tb's `scripts/train_maniflow.py` at commit `7b10edf`, the commit the
+Every flag of maniflow-tb's `scripts/train_maniflow.py` at commit `c04eab7`, the commit the
 `maniflow-tb` submodule is pinned to (`python maniflow-tb/scripts/train_maniflow.py --help`
 prints the same list). For the workflow (setup, an example run, outputs, evaluation) see
 [Pre-training Policies on Automatically Generated Data](../imitation_learning.md).
