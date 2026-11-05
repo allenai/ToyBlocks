@@ -151,9 +151,9 @@ directory, so the pipeline keeps the first and warns.
 
 ### How renders are scheduled
 
-`--render-schedule` chooses how renders are scheduled against the executions. Both modes run on
-this machine and produce **the same pixels**, because the renderer argv, the staged source
-layout and the per-problem output directory name (which seeds the randomization) are identical.
+`--render-schedule` chooses how renders are scheduled against the executions. Both modes run
+locally and produce **the same pixels**, because the renderer argv, the staged source layout and
+the per-problem output directory name (which seeds the randomization) are identical.
 The choice is about throughput and observability.
 
 - `coupled` (the default) appends the render to that problem's execution job, holding one slot
@@ -201,8 +201,9 @@ against one you ran by hand:
 | `--camera_base` | `scene` | `data` |
 | `--rtx_warmup_frames` | `16` | `1` |
 
-`--num_envs` comes from `--render-local-num-envs`. Anything you pass through `--render-extra` is
-appended last and therefore wins over all of these.
+`--num_envs` comes from `--render-local-num-envs`. `--render-extra` is appended after these and
+wins over them, apart from the exceptions noted under
+[`--render-extra` needs the `=` form](#troubleshooting).
 
 ## HDRI backdrops
 
@@ -382,8 +383,12 @@ a perfectly healthy-looking marker. Validate the pixels after any run above one 
 pass:
 
 ```bash
-python scripts/render/validate_dataset_videos.py <base>/render/out/job_<name>
+python scripts/render/validate_dataset_videos.py <base>/render/out/job_<name> --frames
 ```
+
+`--frames` is what decodes the videos and compares their frame counts to the episode lengths.
+Without it only the structural check runs, which catches an unopenable file but passes a short
+one.
 
 To confirm that a `:N` suffix genuinely multiplied, count episodes, frames and distinct video
 files, never bytes. Merge hardlinks videos into the merged tree, so `du` of the merged directory
@@ -456,10 +461,12 @@ Argparse reads a space-separated value starting with `-` as an option of its own
 --render-extra "--skip_failure_episodes"                                  # rejected
 ```
 
-It is appended last, so it beats the pipeline's own `--depth_gop`, `--dr_seeding`,
-`--camera_base` and `--env_spacing`, and the default sidecars. `--output`, `--envs_dir`,
-`--episodes_file`, `--episode_offset` and `--max_episodes` are dropped with a warning, because
-they break the pipeline's accounting rather than the render.
+It is appended after the pipeline's own arguments, so it beats `--depth_gop`, `--dr_seeding`,
+`--env_spacing` and the default sidecars. Three things it cannot change. `--output`,
+`--envs_dir`, `--episodes_file`, `--episode_offset` and `--max_episodes` are dropped with a
+warning, because they break the pipeline's accounting rather than the render.
+`--camera_base data` is dropped for the reason above. And each pass re-applies its own `--flags`
+and `-N` afterwards, so an extra carrying either cannot rewrite one pass into another.
 
 ## See also
 
