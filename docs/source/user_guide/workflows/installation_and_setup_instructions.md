@@ -6,7 +6,7 @@ These instructions use `uv` and set up everything needed for evaluation, data ge
 
 - Linux with an NVIDIA GPU and a driver that supports CUDA 12.8 (driver 570 or newer).
 - [`uv`](https://docs.astral.sh/uv/getting-started/installation/) on your `PATH` (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
-- Git access to GitHub over HTTPS. ToyBlocks and its `curobo`, `molmo2` and `agentic_robotics` submodules are public; the `maniflow-tb` submodule is currently internal to Ai2.
+- Git access to GitHub over HTTPS. ToyBlocks and all of its submodules (`curobo`, `maniflow-tb`, `molmo2` and `agentic_robotics`) are public.
 - `tmux` (`sudo apt install tmux`): long-running jobs (pipeline runs, merges, renders) are run in detached `tmux` sessions so they survive a dropped connection.
 
 ## Setup
@@ -131,7 +131,7 @@ Then open `docs/build/html/index.html`.
 
 ## Docker images
 
-Both images build from a fresh SSH clone of a git ref (so push your branch first) and are tagged with its short SHA:
+Both images build from a fresh clone of a git ref (so push your branch first) and are tagged with its short SHA:
 
 ```bash
 # eval image: Isaac + cuRobo + maniflow-tb + molmo2 (policy servers and evaluate.py)

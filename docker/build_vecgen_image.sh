@@ -11,7 +11,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 
 rm -rf "$WORK/toyblocks"
 mkdir -p "$WORK"
-git clone -q --filter=blob:none --no-checkout git@github.com:allenai/ToyBlocks.git "$WORK/toyblocks"
+git clone -q --filter=blob:none --no-checkout https://github.com/allenai/ToyBlocks.git "$WORK/toyblocks"
 cd "$WORK/toyblocks"
 git checkout -q "$REF"
 git submodule update --init --filter=blob:none curobo

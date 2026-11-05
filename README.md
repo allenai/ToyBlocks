@@ -63,9 +63,8 @@ The documentation linked from each step covers the full-scale versions.
 [installation guide](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html)
 for more details.
 
-**Note:** this guide assumes that the `curobo`, `maniflow-tb` and
-`molmo2` submodules are available to you. Step 1 fetches them with `git submodule update`. `curobo` and
-`molmo2` are public, but `maniflow-tb` is currently internal to Ai2. The guide never
+**Note:** this guide uses the `curobo`, `maniflow-tb` and `molmo2` submodules, which are all
+public. Step 1 fetches them with `git submodule update`. The guide never
 runs the Molmo2 model, but the `maniflow` install extra and the evaluation launcher both expect
 the `molmo2` submodule to be present.
 
