@@ -186,14 +186,12 @@ def base_problem_slugs(slugs: Iterable[str]) -> list[str]:
     return out
 
 
-#: Where a local render writes. The basename matters twice: merge globs ``out/job_*``
-#: (so it must start with ``job_``), and the per-problem output directory name is the DR salt
-#: (``seeds._stable_seed_salt``), so it must not change or a rerun of the same problem draws
-#: different randomization.
-#: The ORIGINAL (un-randomized) pass writes here. A sibling of job_local, because
-#: render.py --resume skips a problem whose render_params says completed -- so a second pass
-#: into the SAME dir renders nothing and exits 0. Merge globs render/out/job_*, so a sibling
-#: is picked up with no change to the merge stage.
+#: Where each render pass writes (see render_job_name). The basename matters twice: merge globs
+#: ``out/job_*`` (so it must start with ``job_``), and the per-problem output directory name is
+#: the DR salt (``seeds._stable_seed_salt``), so it must not change or a rerun of the same
+#: problem draws different randomization. Each pass gets its OWN job dir because render.py
+#: --resume skips a problem whose render_params says completed, so a second pass into the same
+#: dir would render nothing and exit 0.
 
 #: Prefix that marks a render item in the shared local slot pool, so the completion
 #: callback can tell "an execution just finished, queue its render" from "a render finished".
@@ -267,8 +265,7 @@ def local_env_argv(args, pddl, envs_dir: str) -> list[str]:
 
 
 def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
-                        flags_path: Path, renders_per_episode: int,
-                        enable_gi: bool = False) -> list[str]:
+                        flags_path: Path, renders_per_episode: int) -> list[str]:
     """The render.py command for one problem, with the settings the RI training set used.
 
     Four of these differ from ``render.py``'s OWN argparse defaults and silently change the
@@ -322,12 +319,6 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         argv.append("--skip_failure_episodes")
     if args.render_fail_on_video_defects:
         argv.append("--fail_on_video_defects")
-    if enable_gi:
-        # The source yaml had a `skybox:` block, whose mere PRESENCE switches GI and reflections
-        # on (dr.build.apply_build_flags). The original pass drops that block, so without this
-        # the un-randomized copy is lit differently from the copies it ships beside -- which
-        # would look like an augmentation rather than the baseline.
-        argv.append("--enable_gi")
     argv += list(RENDER_RI_SIDECARS)
     argv += render_extra_tokens(args)
     # A pass's IDENTITY goes after the extra. render.py is last-wins, so a shared
@@ -339,7 +330,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
 
 
 #: Flags that --render-extra must not set locally: each one silently breaks the pipeline's own
-#: accounting rather than the render. --output steers a problem out of render/out/job_local, so
+#: accounting rather than the render. --output steers a problem out of its render/out/job_* dir, so
 #: merge never ships it and the gate reports it unrendered; the episode selectors make the
 #: rendered episode set disagree with what the sweep and the parity checks expect.
 RENDER_EXTRA_DENIED = ("--output", "--envs_dir", "--episodes_file", "--episode_offset",
@@ -1314,6 +1305,24 @@ def prompt_params(
             print(f"  (invalid value: {exc})")
 
 
+class _RemovedFlag(argparse.Action):
+    """A removed option kept only so it fails LOUDLY with a migration message.
+
+    Without an exact option, argparse abbreviates: ``--render-n 16`` would match the only
+    option starting with that prefix, ``--render-num-envs``, and the run would render one copy
+    per episode with 16 envs per wave instead of 16 copies. That looks like a successful run
+    with a silently wrong dataset size.
+    """
+
+    def __init__(self, option_strings, dest, message="", **kwargs):
+        super().__init__(option_strings, dest, nargs="?", default=None,
+                         help=argparse.SUPPRESS, **kwargs)
+        self._message = message
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.error(f"{option_string} has been removed: {self._message}")
+
+
 def add_render_args(parser: argparse.ArgumentParser) -> None:
     """The ``--render*`` flags (shared with run_playdata_pipeline.py).
 
@@ -1330,6 +1339,12 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
         "flag that turns the render stage on. src/toyblocks/domain_randomization/flags/ ships "
         "render_flags_plain.yaml for a plain render and the allrand files for visual domain "
         "randomization",
+    )
+    parser.add_argument(
+        "--render-n",
+        action=_RemovedFlag,
+        message="copies per source episode are the ':N' suffix on --render-pass, as in "
+                "--render-pass FLAGS.yaml:3",
     )
     parser.add_argument(
         "--render-schedule",
@@ -2128,7 +2143,7 @@ def main() -> int:
         if local_render is not None and not args.render_coupled:
             # Coupled mode is excluded deliberately: its render already runs inside each job's
             # shell chain (local_render_steps), so arming the scheduler as well would queue a
-            # SECOND render.py against the same render/out/job_local/<slug>. --resume
+            # SECOND render.py against the same render/out/job_<name>/<slug>. --resume
             # resolves that by shutil.rmtree-ing whichever has not finalized -- i.e. by deleting
             # a live writer's output, the hazard _seen exists for. Coupled takes the plain-list
             # branch below and meets the scheduler again only in the post-stage sweep.
@@ -2270,9 +2285,11 @@ def main() -> int:
             log.info("Merge: input job dirs: %s",
                      " ".join(Path(d).name for d in merge_input_dirs))
             owed = {render_job_name(f) for f, _ in resolve_render_passes(args)}
+            # `owed` is empty on a merge-only or resumed run, where every job dir is legitimately
+            # from an earlier invocation; warning there would cry wolf on the normal case.
             stale = sorted(
                 Path(d).name for d in merge_input_dirs
-                if Path(d).name.startswith("job_local") and Path(d).name not in owed
+                if owed and Path(d).name not in owed
             )
             if stale:
                 log.warning(

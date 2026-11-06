@@ -70,6 +70,38 @@ def test_render_pass_has_no_default_and_the_shipped_yamls_exist():
         assert f.is_file(), f
 
 
+#: Every spelling the cleanup removed. None may be SILENTLY accepted: argparse abbreviates, so a
+#: removed flag that is a unique prefix of a surviving one is absorbed by it. --render-n 16 was
+#: taken as --render-num-envs 16, rendering one copy per episode with 16 envs per wave -- a run
+#: that looks successful and ships the wrong number of episodes.
+REMOVED_SPELLINGS = [
+    "--render-randomized", "--rerender", "--render-flags", "--rerender-flags",
+    "--render-n", "--rerender-n", "--render-non-randomized",
+    "--render-non-randomized-flags", "--render", "--render-local", "--rerender-local",
+    "--render-local-num-envs", "--render-local-stall-timeout",
+    "--render-local-fail-on-video-defects", "--rerender-schedule", "--rerender-extra",
+    "--rerender-skip-cameras", "--rerender-skip-failure-episodes",
+]
+
+
+@pytest.mark.parametrize("flag", REMOVED_SPELLINGS)
+def test_a_removed_spelling_is_never_silently_accepted(flag):
+    mod = _pipeline_module()
+    with pytest.raises(SystemExit):
+        mod.build_parser().parse_args(
+            ["--experiment-id", "x", "--render-pass", str(CAMTEST), flag, "16"])
+
+
+def test_render_n_says_what_replaced_it(capsys):
+    """It is a unique prefix of --render-num-envs, so without an exact option it is absorbed."""
+    mod = _pipeline_module()
+    with pytest.raises(SystemExit):
+        mod.build_parser().parse_args(
+            ["--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-n", "3"])
+    err = capsys.readouterr().err
+    assert "--render-n has been removed" in err and "--render-pass FLAGS.yaml:3" in err
+
+
 def test_no_render_pass_means_no_render_stage():
     """--render-pass is the only thing that turns the stage on."""
     mod = _pipeline_module()

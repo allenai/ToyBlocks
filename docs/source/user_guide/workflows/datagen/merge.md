@@ -28,7 +28,7 @@ Point `--input_dirs` at the directory that contains the `problem_*` directories,
 
 ```bash
 python scripts/datagen/merge_datasets.py \
-    --input_dirs data/datasets/unmerged/<experiment-id>/render/out/job_local \
+    --input_dirs data/datasets/unmerged/<experiment-id>/render/out/job_plain \
     --output_dir data/datasets/merged/train/<experiment-id> \
     --cameras all --num_workers 16
 ```

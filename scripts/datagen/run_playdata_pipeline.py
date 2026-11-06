@@ -293,24 +293,31 @@ def stage_merge_source(roots: list[Path], staging_dir: Path) -> list[str]:
     dir whose data went to a ``__sNNN`` shard, or one whose episodes all missed) would
     trip that, so the merge reads a staging dir holding only dirs with a
     ``blocks_success``. Hardlinking videos through the symlinks still works.
-    Returns the linked names.
+    Returns (staging dirs to merge, linked problem names).
+    Each root is staged into its OWN subdirectory and handed to merge_datasets.py as its own
+    --input_dirs entry: every render pass holds the same ``problem_*`` names, so one flat
+    staging dir made a second --render-pass abort on a name collision.
     """
     if staging_dir.exists():
-        for link in staging_dir.iterdir():
-            if link.is_symlink():
-                link.unlink()
+        shutil.rmtree(staging_dir)
     staging_dir.mkdir(parents=True, exist_ok=True)
+    staged: list[Path] = []
     linked: list[str] = []
     for root in roots:
+        sub_dir = staging_dir / root.name
+        sub_dir.mkdir(parents=True, exist_ok=True)
+        found = False
         for src in sorted(root.glob("problem_*")):
             if not (src / "blocks_success" / "meta" / "info.json").exists():
                 continue
-            link = staging_dir / src.name
-            if link.is_symlink() or link.exists():
-                raise SystemExit(f"Merge: two sources are both named {src.name} ({src}, {os.readlink(link)})")
-            os.symlink(str(src.resolve()), link)
+            os.symlink(str(src.resolve()), sub_dir / src.name)
             linked.append(src.name)
-    return linked
+            found = True
+        if found:
+            staged.append(sub_dir)
+        else:
+            sub_dir.rmdir()
+    return staged, linked
 
 
 def summarize_play(play_dir: Path, slugs: list[str]) -> dict[str, Any]:
@@ -358,10 +365,31 @@ def main() -> int:
         enabled = dg.prompt_steps(enabled, steps=PLAY_STEPS)
         dg.prompt_params(args, enabled, param_groups=PARAM_GROUPS)
         exp = args.experiment_id
+        # The render runs inside each play job from resolve_render_passes, not from
+        # enabled["render"], so unticking the stage has to drop the passes too. Ticking it with
+        # no --render-pass would otherwise mark the stage complete having rendered nothing.
+        if not enabled["render"]:
+            args.render_pass = []
+        elif not dg.resolve_render_passes(args):
+            log.error("Render: the stage is ticked but no --render-pass was given. Pass "
+                      "--render-pass FLAGS.yaml[:N]")
+            return 1
 
     # -- validate -------------------------------------------------------------
     # As in the datagen pipeline: render.py spawns env i at block-size slot i % profiles, so fewer
     # envs than profiles leaves slots without an env and every problem is skipped.
+    if enabled["render"]:
+        # Checked before the play stage burns its GPU hours: an unreadable YAML would otherwise
+        # fail inside the render, one Isaac startup per problem later.
+        for _flags, _copies in dg.resolve_render_passes(args):
+            try:
+                readable = Path(_flags).is_file()
+            except OSError:
+                readable = False
+            if not readable:
+                log.error("the render needs a flags YAML readable on THIS machine; %s is not",
+                          _flags)
+                return 1
     if enabled["render"] and args.render_num_envs < args.num_scene_profiles:
         log.error("--render-num-envs (%d) must be at least --num-scene-profiles (%d)",
                   args.render_num_envs, args.num_scene_profiles)
@@ -548,14 +576,15 @@ def main() -> int:
         log.info("Merge: merge goal-reached episodes (%s)", "rendered" if render_ran else "play")
         log.info("=" * 60)
         roots = sorted(d for d in (render_dir / "out").glob("job_*") if d.is_dir()) if render_ran else [play_dir]
-        linked = stage_merge_source(roots, merge_source_dir)
+        staged, linked = stage_merge_source(roots, merge_source_dir)
         if not linked:
             log.error("Merge: no blocks_success dataset under %s", " ".join(str(r) for r in roots))
             return 1
-        log.info("Merge: %d problem dir(s) staged in %s", len(linked), merge_source_dir)
+        log.info("Merge: %d problem dir(s) staged in %s: %s", len(linked), merge_source_dir,
+                 " ".join(d.name for d in staged))
         dg.run([
             sys.executable, "scripts/datagen/merge_datasets.py",
-            "--input_dirs", str(merge_source_dir),
+            "--input_dirs", *(str(d) for d in staged),
             "--output_dir", merge_output_dir,
             "--cameras", *args.merge_cameras,
             "--num_workers", str(args.merge_num_workers),
