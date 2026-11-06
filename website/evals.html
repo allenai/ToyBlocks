@@ -173,8 +173,6 @@
   <p>Every eval episode starts from an episode in a dataset. An episode queue reads the robot pose, block poses and sizes, table height and goal from the recording, and the policy has to reach the goal from there. Since the scene comes straight from the dataset, a difference in success rate between two models reflects the models and not a difference in setup.</p>
   <p>The queue hands episodes out to GPU-parallel environments, so the same command works on a single workstation GPU or across a multi-GPU machine.</p>
   <figure><video data-src="media/ev_mosaic.mp4" poster="media/ev_mosaic.jpg" muted loop playsinline></video><figcaption>50 eval environments running at once, shown at 8× speed.</figcaption></figure>
-  <h3>Generalization splits</h3>
-  <p>Held-out tests are just different datasets. For example, train with blocks spawning only on the left side of the table and evaluate on the right, or train on stacks of 2 and 5 blocks and evaluate on 3 and 4. Results for both are on the <a href="experiments.html#ll">Experiments</a> page.</p>
   <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a></p>
 </div></section>
 
