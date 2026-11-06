@@ -19,7 +19,8 @@
   --col: 920px;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; }
+@media (prefers-reduced-motion: no-preference) { :target { scroll-margin-top: 70px; } }
 body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--font); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
 img, video { display: block; max-width: 100%; }
