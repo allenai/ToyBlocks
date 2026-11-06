@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Running the pipeline on this machine &#8212; ToyBlocks  documentation</title>
+    <title>Running Pipeline Locally &#8212; ToyBlocks  documentation</title>
   
   
   
@@ -278,7 +278,7 @@
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
-<li class="toctree-l3 current active"><a class="current reference internal" href="#">Running the pipeline on this machine</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Running Pipeline Locally</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -345,7 +345,7 @@
     
     <li class="breadcrumb-item"><a href="../data_generation.html" class="nav-link">Automatic Data Generation</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Running the pipeline on this machine</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Running Pipeline Locally</span></li>
   </ul>
 </nav>
 </div>
@@ -362,15 +362,15 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="running-the-pipeline-on-this-machine">
-<h1>Running the pipeline on this machine<a class="headerlink" href="#running-the-pipeline-on-this-machine" title="Link to this heading">#</a></h1>
+  <section id="running-pipeline-locally">
+<h1>Running Pipeline Locally<a class="headerlink" href="#running-pipeline-locally" title="Link to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> runs the whole data generation pipeline on the machine
 you launch it on: PDDL problems, env packages, executed episodes, rendered videos and a merged
 LeRobot dataset, all on local disk and local GPUs. The same command works on a single-GPU
-workstation and on a multi-GPU node; the pipeline spreads problems over every GPU it can see.</p>
-<p>This page covers what is specific to running it: choosing GPUs and concurrency, where outputs and
-logs go, rendering, resuming, and checking the result. For the stage-by-stage reference, see
-<a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a>.</p>
+workstation and on a multi-GPU node. The pipeline spreads problems over every GPU it can see.</p>
+<p>This page covers what is specific to running it: asking for renders, choosing GPUs and
+concurrency, where outputs and logs go, resuming, and checking the result. For the
+stage-by-stage reference, see <a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a>.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Stage</p></th>
@@ -388,7 +388,7 @@ logs go, rendering, resuming, and checking the result. For the stage-by-stage re
 <td><p>one process per problem or problem group, across the GPU slots</p></td>
 </tr>
 <tr class="row-odd"><td><p>render</p></td>
-<td><p>one render per problem (<code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>), scheduled into the shared GPU-slot pool or inside each execution job (<code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code>)</p></td>
+<td><p>one render per problem per pass (<code class="docutils literal notranslate"><span class="pre">--render-pass</span></code>), scheduled into the shared GPU-slot pool or inside each execution job</p></td>
 </tr>
 <tr class="row-even"><td><p>merge</p></td>
 <td><p>one subprocess, on the CPU</p></td>
@@ -404,7 +404,7 @@ checkout: the stage scripts are called by relative path (<code class="docutils l
 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">rev-parse</span> <span class="pre">HEAD</span></code> to pin the commit into the run config for reproducibility.</p>
 <section id="before-you-start">
 <h2>Before you start<a class="headerlink" href="#before-you-start" title="Link to this heading">#</a></h2>
-<p>Follow <a class="reference internal" href="../installation_and_setup_instructions.html"><span class="std std-doc">the installation instructions</span></a>: with the
+<p>Follow <a class="reference internal" href="../installation_and_setup_instructions.html"><span class="std std-doc">the installation instructions</span></a>. With the
 virtual environment active, install the datagen (vecgen) extra and fetch the assets:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,isaac,torch-cu128,vecgen]"</span>
 </pre></div>
@@ -412,34 +412,274 @@ virtual environment active, install the datagen (vecgen) extra and fetch the ass
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>get-toyblocks-assets<span class="w"> </span>--asset-manifest<span class="w"> </span>asset_manifest.json
 </pre></div>
 </div>
-<p>Randomized rendering draws HDRI backdrops from polyhaven (installed with the base
-assets) and the separately licensed Laval indoor set; see
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops">HDRI backdrops</a>.</p>
-<p>Rendering needs real disk. A run of a few problems at <code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">2</span></code> writes several GB of
-video; check free space before a long run rather than discovering it mid-encode.</p>
+<p>Randomized rendering draws HDRI backdrops from the polyhaven pool, installed with the base
+assets, and from the separately licensed Laval indoor set. See
+<a class="reference internal" href="#hdri-backdrops">HDRI backdrops</a>.</p>
+<p>Rendering needs real disk. A few problems rendered three times over write several GB of video,
+so check free space before a long run rather than discovering it mid-encode.</p>
 </section>
 <section id="a-complete-run">
 <h2>A complete run<a class="headerlink" href="#a-complete-run" title="Link to this heading">#</a></h2>
-<p>This generates 4 stacking problems, executes 16 episodes each, renders them, and merges the
-result into one LeRobot dataset under <code class="docutils literal notranslate"><span class="pre">./outputs</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
+<p>This generates 4 stacking problems, executes 16 episodes each, renders them with domain
+randomization, and merges the result into one LeRobot dataset under <code class="docutils literal notranslate"><span class="pre">./outputs</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--experiment-id<span class="w"> </span>my_run<span class="w"> </span>--output-root<span class="w"> </span>outputs<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--task-gen-script<span class="w"> </span>scripts/task_gen/stack_three.py<span class="w"> </span>--task-gen-count<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--env-per-problem<span class="w"> </span><span class="m">16</span><span class="w"> </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span>
 </pre></div>
 </div>
-<p>The merged dataset is annotated at the end, since the render supplies the camera data that
-annotation projects goals into. Drop <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> to stop after execution and merge the raw
-parquet (state and actions, no video); the pipeline then logs a warning and skips annotation,
-which needs video (<code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> or <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>).</p>
-<p>Without any flags beyond <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>, the pipeline uses the settings the RI stack-3 training
-set was generated with: 1000 <code class="docutils literal notranslate"><span class="pre">stack_three.py</span> <span class="pre">--train</span></code> problems, randomized scenes, 32 reset states
-per problem, 8 problems per vecgen env package at 128 envs.</p>
-<p>Each stage also runs on its own; see <a class="reference internal" href="task_generation.html"><span class="std std-doc">task generation</span></a>,
+<p>The merged dataset is annotated at the end, because the render supplies the camera data that
+annotation projects goals into. Drop the <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> to stop after execution and merge the
+raw parquet, which holds state and actions but no video. The pipeline then logs a warning and
+skips annotation, which needs video.</p>
+<p>With no flags beyond <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code> the pipeline runs its full default configuration: 1000
+<code class="docutils literal notranslate"><span class="pre">stack_three.py</span> <span class="pre">--train</span></code> problems, randomized scenes, 32 reset states per problem and 8 problems
+per env package at 128 envs. That is a large run, so pass the task-gen and env flags above for
+something smaller.</p>
+<p>Each stage also runs on its own. See <a class="reference internal" href="task_generation.html"><span class="std std-doc">task generation</span></a>,
 <a class="reference internal" href="env_generation.html"><span class="std std-doc">env generation</span></a>, <a class="reference internal" href="execution.html"><span class="std std-doc">execution</span></a>, <a class="reference internal" href="render.html"><span class="std std-doc">rendering</span></a>,
 <a class="reference internal" href="merge.html"><span class="std std-doc">merge</span></a> and <a class="reference internal" href="annotate.html"><span class="std std-doc">annotate</span></a>.</p>
+</section>
+<section id="rendering-locally">
+<h2>Rendering locally<a class="headerlink" href="#rendering-locally" title="Link to this heading">#</a></h2>
+<p>Execution records state and actions only, because vecgen spawns no cameras. The videos come from
+the render stage, which replays the recorded states with no physics and draws them under the
+settings in a flags YAML. See <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a> for what that stage does and every flag it
+takes, and the
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>
+for how to write one.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code> is how you ask for a render.</strong> Repeat the flag for more looks:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml:3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span>my_run<span class="w"> </span>--output-root<span class="w"> </span>outputs
+</pre></div>
+</div>
+<p>Each pass renders <strong>every</strong> source episode under one YAML, into its own
+<code class="docutils literal notranslate"><span class="pre">render/out/job_&lt;name&gt;/</span></code> directory named after that YAML. The optional <code class="docutils literal notranslate"><span class="pre">:N</span></code> renders N copies of
+each episode within the pass, resampling the randomization for each copy. The merge reads every
+<code class="docutils literal notranslate"><span class="pre">job_*</span></code> directory, so the run above ships 1 + 3 = 4 merged episodes per executed episode.</p>
+<p>Each pass is a separate renderer invocation rather than extra copies inside one, because the
+per-wave settings (dome, skybox, exposure) are global to the scene, so two differently-flagged
+looks cannot share a wave. <a class="reference internal" href="render.html#render-passes"><span class="std std-ref">Render passes</span></a> covers this in more detail.</p>
+<section id="which-flag-does-what">
+<h3>Which flag does what<a class="headerlink" href="#which-flag-does-what" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Adds one pass. Repeatable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-flags</span> <span class="pre">FLAGS.yaml</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Names the YAML that the two shorthand flags below use. It adds no pass on its own.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Shorthand for one pass of <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>, repeated <code class="docutils literal notranslate"><span class="pre">--render-n</span></code> times.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Copies per source episode for <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Shorthand for one pass of <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a>, which needs no YAML of your own.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a></p></td>
+<td><p>A different YAML for that pass.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The two shorthands name the common cases, and they compose with each other and with
+<code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> exactly as further <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> entries would. These two commands are
+equivalent:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-randomized<span class="w"> </span>--render-flags<span class="w"> </span>path/to/dr.yaml<span class="w"> </span>--render-n<span class="w"> </span><span class="m">3</span><span class="w"> </span>--render-non-randomized
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>path/to/dr.yaml:3<span class="w"> </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> on its own renders nothing.</strong> It carries a value for the shorthands rather
+than requesting a pass, so a command with <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> and no <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> runs the
+pipeline with the render stage off. Older commands pair the two, because <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>
+was once the only way to render. <code class="docutils literal notranslate"><span class="pre">--render</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-local</span></code> and the <code class="docutils literal notranslate"><span class="pre">--rerender*</span></code> spellings are
+superseded, and the pipeline says so when it sees them.</p>
+<p><strong>With no render flag at all the stage is off.</strong> The merge then takes the execution data
+directly, the dataset holds state and actions with no video, and annotation is skipped with a
+warning, because projecting goals into the front camera needs a camera.</p>
+<p><strong>Asking for a render that resolves to no pass is an error.</strong> <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> without
+<code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> stops the run before any work and names the shipped YAMLs, rather than
+quietly skipping the stage.</p>
+<p>A render cannot be combined with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>. Recording in-physics video and then
+overwriting it pays the slow physics-render cost for frames nothing reads.</p>
+</section>
+<section id="parity-across-passes">
+<h3>Parity across passes<a class="headerlink" href="#parity-across-passes" title="Link to this heading">#</a></h3>
+<p>Passes are symmetric over episodes. Every pass renders the same source episodes, so the merged
+dataset holds (sum of the copies across passes) x (source episodes), and every output episode
+records the <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code> it came from. A problem counts as rendered only when <strong>every</strong>
+pass has landed on disk, checked by the gate in
+<a class="reference internal" href="#what-counts-as-rendered">What counts as “rendered”</a>. Without that check a half-finished
+problem would contribute 3 copies where 4 were promised and nothing would report it.</p>
+<p>Two passes whose YAML file names reduce to the same <code class="docutils literal notranslate"><span class="pre">job_&lt;name&gt;</span></code> would write to the same
+directory, so the pipeline keeps the first and warns.</p>
+</section>
+<section id="how-renders-are-scheduled">
+<h3>How renders are scheduled<a class="headerlink" href="#how-renders-are-scheduled" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> chooses how renders are scheduled against the executions. Both modes run
+locally and produce <strong>the same pixels</strong>, because the renderer argv, the staged source layout and
+the per-problem output directory name (which seeds the randomization) are identical.
+The choice is about throughput and observability.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> (the default) appends the render to that problem’s execution job, holding one slot
+across both phases. Exec and render are one process span, so they share a log and an exit code.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues each render as its own item in the shared GPU-slot pool once that problem’s
+execution finalizes, so it can overlap the next execution and gets its own log, timing and
+exit status.</p></li>
+</ul>
+<p>Measured on one RTX 5090 over 4 problems, timing the execution and render window only:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>1 slot</p></th>
+<th class="head"><p>2 slots (<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>coupled</p></td>
+<td><p>921 s</p></td>
+<td><p><strong>667 s</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>pipelined</p></td>
+<td><p>906 s</p></td>
+<td><p>733 s</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>For throughput, add <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code></strong>, which is 28% faster than a single coupled slot
+and needs none of the scheduler. Pipelining costs nothing at one slot but loses about 10% at
+two, because its render-first ordering pairs render against render, two GPU-saturating
+processes, whereas the coupled chains naturally pair one problem’s execution against another’s
+render.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> when you want separable exec and render timings and logs, failure isolation
+between the two, or a first finished problem early rather than at the end of a chain.</p>
+</section>
+<section id="options-that-matter-on-one-machine">
+<h3>Options that matter on one machine<a class="headerlink" href="#options-that-matter-on-one-machine" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
+<td><p>Envs per render wave, under either schedule. A <strong>floor</strong>, not a preference: the render spawns env <em>i</em> at block-size slot <em>i</em> % <em>profiles</em>, so a value below <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> leaves the high slots without an env and <strong>every problem is skipped</strong>. The pipeline refuses that pairing up front. 8 keeps the encoder’s memory use survivable beside Isaac.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-stall-timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3600</span></code></p></td>
+<td><p>SIGKILL the render if it prints nothing for this many seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-fail-on-video-defects</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and <code class="docutils literal notranslate"><span class="pre">scripts/render/fast_patch.py</span></code> fills video holes afterwards.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Despite their names, the <code class="docutils literal notranslate"><span class="pre">--render-local-*</span></code> flags apply to both schedules.
+<code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> are described in <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
+</section>
+<section id="render-arguments-the-pipeline-pins-for-you">
+<h3>Render arguments the pipeline pins for you<a class="headerlink" href="#render-arguments-the-pipeline-pins-for-you" title="Link to this heading">#</a></h3>
+<p>The pipeline builds its own <code class="docutils literal notranslate"><span class="pre">render.py</span></code> command line, and three of its arguments differ from
+<code class="docutils literal notranslate"><span class="pre">render.py</span></code>’s own defaults. They are worth knowing if you are comparing a pipeline render
+against one you ran by hand:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Pipeline passes</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">60</span></code></p></td>
+<td><p>unset (scene default <code class="docutils literal notranslate"><span class="pre">5.0</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--camera_base</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scene</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rtx_warmup_frames</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> comes from <code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code>. <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> is appended after these and
+wins over them, apart from the exceptions noted under
+<a class="reference internal" href="#troubleshooting"><code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> needs the <code class="docutils literal notranslate"><span class="pre">=</span></code> form</a>.</p>
+</section>
+</section>
+<section id="hdri-backdrops">
+<h2>HDRI backdrops<a class="headerlink" href="#hdri-backdrops" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">allrand</span></code> flags light each episode with an HDRI backdrop sampled from two pools:
+<code class="docutils literal notranslate"><span class="pre">env_sphere.sets:</span> <span class="pre">[polyhaven/all,</span> <span class="pre">indoor-2018/all]</span></code>. The base asset download includes polyhaven,
+and indoor-2018 is installed separately. Each pool is a folder <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;pool&gt;/</span></code> holding the
+<code class="docutils literal notranslate"><span class="pre">.hdr</span></code> files plus a <code class="docutils literal notranslate"><span class="pre">dataset.json</span></code> that lists the files in each named set (<code class="docutils literal notranslate"><span class="pre">all</span></code>, <code class="docutils literal notranslate"><span class="pre">rooms</span></code>, and
+so on). <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">assets/environments/</span></code>, or the directory in <code class="docutils literal notranslate"><span class="pre">RENDER_HDRI_DIR</span></code> when that is
+set.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>pool</p></th>
+<th class="head"><p>what</p></th>
+<th class="head"><p>size</p></th>
+<th class="head"><p>license</p></th>
+<th class="head"><p>how to get it</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polyhaven</span></code></p></td>
+<td><p>299 Poly Haven HDRIs at 2k (<code class="docutils literal notranslate"><span class="pre">all</span></code> = 134 of them)</p></td>
+<td><p>1.8 GB</p></td>
+<td><p>CC0 (credits in its <code class="docutils literal notranslate"><span class="pre">ATTRIBUTION.md</span></code>)</p></td>
+<td><p>included in <code class="docutils literal notranslate"><span class="pre">get-toyblocks-assets</span> <span class="pre">--asset-manifest</span> <span class="pre">asset_manifest.json</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code></p></td>
+<td><p>Laval Indoor HDR Dataset (Gardner et al. 2017), 2,113 panoramas as 4096x2048 <code class="docutils literal notranslate"><span class="pre">.hdr</span></code></p></td>
+<td><p>44 GB</p></td>
+<td><p>research / non-commercial</p></td>
+<td><p>request it from Université Laval (<a class="reference external" href="http://indoor.hdrdb.com">indoor.hdrdb.com</a>), it is not redistributed</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">get-toyblocks-assets</span></code> installs the polyhaven pool under <code class="docutils literal notranslate"><span class="pre">assets/environments/polyhaven</span></code>. For
+indoor-2018, convert the panoramas to 4096x2048 Radiance <code class="docutils literal notranslate"><span class="pre">.hdr</span></code> and put them in
+<code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/indoor-2018/</span></code> together with a <code class="docutils literal notranslate"><span class="pre">dataset.json</span></code> whose <code class="docutils literal notranslate"><span class="pre">sets.all</span></code> lists the file names:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Laval Indoor HDR Dataset 2018"</span><span class="p">,</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hdr"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sets"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"all"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"9C4A0003-e05009bcad.hdr"</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">]}}</span>
+</pre></div>
+</div>
+<p>With only polyhaven installed the render still runs. The indoor-2018 bucket resolves to nothing
+(<code class="docutils literal notranslate"><span class="pre">[dr]</span> <span class="pre">WARNING</span> <span class="pre">skybox</span> <span class="pre">bucket</span> <span class="pre">resolved</span> <span class="pre">0</span> <span class="pre">textures</span></code>), so every backdrop comes from polyhaven and
+the images differ from data rendered with both pools. The log line <code class="docutils literal notranslate"><span class="pre">[render]</span> <span class="pre">asset</span> <span class="pre">map:</span></code> shows
+which pools were found.</p>
 </section>
 <section id="choosing-gpus-and-how-many-problems-run-at-once">
 <h2>Choosing GPUs and how many problems run at once<a class="headerlink" href="#choosing-gpus-and-how-many-problems-run-at-once" title="Link to this heading">#</a></h2>
@@ -463,13 +703,13 @@ per problem, 8 problems per vecgen env package at 128 envs.</p>
 </table>
 </div>
 <p>The pipeline builds one <em>slot</em> per GPU per worker, so <code class="docutils literal notranslate"><span class="pre">len(gpus)</span> <span class="pre">*</span> <span class="pre">workers</span></code> problems run at once.
-Each slot owns one <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> value, so every job sees a single GPU; a stage scales
+Each slot owns one <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> value, so every job sees a single GPU. A stage scales
 out by spreading problems over more slots, never by giving one problem several GPUs. Listing a
 GPU id twice in <code class="docutils literal notranslate"><span class="pre">--local-gpus</span></code> gives it two slots, like <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> does.</p>
-<p>GPU discovery honours an existing <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>; failing that it asks <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>, and
+<p>GPU discovery honours an existing <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>. Failing that it asks <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>, and
 if that is unavailable it runs one problem at a time on the default GPU.</p>
-<p>A failing problem does not abort the stage. The stage keeps going and reports the failure count at
-the end, and the next stage works with the problems that succeeded.</p>
+<p>A failing problem does not abort the stage. The stage keeps going and reports the failure count
+at the end, and the next stage works with the problems that succeeded.</p>
 <section id="how-much-fits">
 <h3>How much fits<a class="headerlink" href="#how-much-fits" title="Link to this heading">#</a></h3>
 <p>Measured on one RTX 5090 (32,607 MiB) at <code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span> <span class="pre">8</span></code>:</p>
@@ -496,15 +736,15 @@ the end, and the next stage works with the problems that succeeded.</p>
 </table>
 </div>
 <p>Two concurrent processes fit comfortably on a 32 GiB card and one does not saturate it, so
-<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> is usually free throughput. Read “Host RAM and disk, not VRAM, are the
-limits” under <a class="reference internal" href="#things-that-will-bite-you">Things that will bite you</a> first.</p>
+<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> is usually free throughput. Host RAM and disk, not VRAM, are what bind
+first, so validate the videos afterwards (see <a class="reference internal" href="#troubleshooting">Troubleshooting</a>).</p>
 </section>
 </section>
 <section id="logs">
 <h2>Logs<a class="headerlink" href="#logs" title="Link to this heading">#</a></h2>
 <p>With a single slot, every job’s output is streamed to your console. With more than one slot, each
-problem’s output goes to its own log file instead, since concurrent Isaac Sim logs are unreadable
-interleaved:</p>
+problem’s output goes to its own log file instead, because concurrent Isaac Sim logs are
+unreadable interleaved:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;base&gt;/local_logs/env/&lt;slug&gt;.log
 &lt;base&gt;/local_logs/execution/&lt;slug&gt;.log
 &lt;base&gt;/local_logs/render/&lt;slug&gt;.log
@@ -513,7 +753,7 @@ interleaved:</p>
 <p>The pipeline logs the directory when it does this, and a <code class="docutils literal notranslate"><span class="pre">FAILED</span> <span class="pre">&lt;stage&gt;:</span> <span class="pre">&lt;slug&gt;</span> <span class="pre">(see</span> <span class="pre">...)</span></code> line
 names the log of each problem that failed. <code class="docutils literal notranslate"><span class="pre">[sched]</span> <span class="pre">&lt;stage&gt;</span> <span class="pre">start|end</span> <span class="pre">&lt;slug&gt;</span> <span class="pre">slot=...</span> <span class="pre">t=...</span></code> lines
 record when each job ran, which is how per-stage timings are measured. The pipeline’s own log goes
-to the console only; pipe it through <code class="docutils literal notranslate"><span class="pre">tee</span></code> if you want to keep it.</p>
+to the console only, so pipe it through <code class="docutils literal notranslate"><span class="pre">tee</span></code> if you want to keep it.</p>
 </section>
 <section id="outputs">
 <h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">#</a></h2>
@@ -546,176 +786,16 @@ to the console only; pipe it through <code class="docutils literal notranslate">
 ├── envs/               # env packages + reset states, one per problem or problem_grp_&lt;slug&gt;
 ├── execution/          # per-problem LeRobot datasets (blocks_success + blocks_failure)
 ├── render/
-│   ├── src/                      # per-problem staging links the renders read from
-│   ├── out/job_local/            # rendered problems
-│   ├── out/job_local_nonrand/    # the --render-non-randomized pass, if enabled
-│   └── non_randomized_flags.yaml # derived flags for that pass
+│   ├── src/            # per-problem staging links the renders read from
+│   └── out/            # one job_&lt;name&gt; directory per render pass, named after its flags YAML
 ├── local_logs/         # per-problem logs, only when &gt;1 slot runs at a time
 ├── .pipeline_state/    # &lt;stage&gt;.done markers that --resume reads
 └── run_datagen_pipeline_config_&lt;timestamp&gt;.json
 </pre></div>
 </div>
-<p>The merged dataset gets a copy of the run config and a plot of its first episode,
-<code class="docutils literal notranslate"><span class="pre">episode_0.png</span></code>.</p>
-</section>
-<section id="hdri-backdrops">
-<h2>HDRI backdrops<a class="headerlink" href="#hdri-backdrops" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">allrand</span></code> flags (including the default) light each episode with an HDRI backdrop sampled from
-two pools: <code class="docutils literal notranslate"><span class="pre">env_sphere.sets:</span> <span class="pre">[polyhaven/all,</span> <span class="pre">indoor-2018/all]</span></code>. The base asset download includes
-polyhaven; indoor-2018 is installed separately.
-Each pool is a folder <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;pool&gt;/</span></code> holding the <code class="docutils literal notranslate"><span class="pre">.hdr</span></code> files plus a <code class="docutils literal notranslate"><span class="pre">dataset.json</span></code> that lists
-the files in each named set (<code class="docutils literal notranslate"><span class="pre">all</span></code>, <code class="docutils literal notranslate"><span class="pre">rooms</span></code>, …). <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">assets/environments/</span></code>, or the
-directory in <code class="docutils literal notranslate"><span class="pre">RENDER_HDRI_DIR</span></code> when that is set.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>pool</p></th>
-<th class="head"><p>what</p></th>
-<th class="head"><p>size</p></th>
-<th class="head"><p>license</p></th>
-<th class="head"><p>how to get it</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polyhaven</span></code></p></td>
-<td><p>299 Poly Haven HDRIs at 2k (<code class="docutils literal notranslate"><span class="pre">all</span></code> = 134 of them)</p></td>
-<td><p>1.8 GB</p></td>
-<td><p>CC0 (credits in its <code class="docutils literal notranslate"><span class="pre">ATTRIBUTION.md</span></code>)</p></td>
-<td><p>included in <code class="docutils literal notranslate"><span class="pre">get-toyblocks-assets</span> <span class="pre">--asset-manifest</span> <span class="pre">asset_manifest.json</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code></p></td>
-<td><p>Laval Indoor HDR Dataset (Gardner et al. 2017), 2,113 panoramas as 4096x2048 <code class="docutils literal notranslate"><span class="pre">.hdr</span></code></p></td>
-<td><p>44 GB</p></td>
-<td><p>research / non-commercial</p></td>
-<td><p>request it from Université Laval (<a class="reference external" href="http://indoor.hdrdb.com">indoor.hdrdb.com</a>); not redistributed</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">get-toyblocks-assets</span></code> installs the polyhaven pool, <code class="docutils literal notranslate"><span class="pre">dataset.json</span></code> and <code class="docutils literal notranslate"><span class="pre">ATTRIBUTION.md</span></code> included,
-under <code class="docutils literal notranslate"><span class="pre">assets/environments/polyhaven</span></code>. For indoor-2018, convert the panoramas to 4096x2048 Radiance
-<code class="docutils literal notranslate"><span class="pre">.hdr</span></code> and put them in <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/indoor-2018/</span></code> together with a <code class="docutils literal notranslate"><span class="pre">dataset.json</span></code> whose <code class="docutils literal notranslate"><span class="pre">sets.all</span></code> lists
-the file names:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Laval Indoor HDR Dataset 2018"</span><span class="p">,</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hdr"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sets"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"all"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"9C4A0003-e05009bcad.hdr"</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">]}}</span>
-</pre></div>
-</div>
-<p>With only polyhaven installed the render still runs. The indoor-2018 bucket resolves to nothing
-(<code class="docutils literal notranslate"><span class="pre">[dr]</span> <span class="pre">WARNING</span> <span class="pre">skybox</span> <span class="pre">bucket</span> <span class="pre">resolved</span> <span class="pre">0</span> <span class="pre">textures</span></code>), so every backdrop comes from polyhaven, and the
-images differ from the RI training data, which drew from both pools. The log line
-<code class="docutils literal notranslate"><span class="pre">[render]</span> <span class="pre">asset</span> <span class="pre">map:</span></code> shows which pools were found.</p>
-</section>
-<section id="rendering-locally">
-<h2>Rendering locally<a class="headerlink" href="#rendering-locally" title="Link to this heading">#</a></h2>
-<p>Execution records state and actions only — vecgen spawns no cameras by default. The videos come
-from the render stage, which replays the recorded states with no physics and renders them
-under the domain randomization in a flags YAML. See <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a> for what that
-stage does and every flag it takes, and the
-<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>
-for how to write the randomization.</p>
-<p>Two flags turn the stage on, and they pick how it is scheduled against the executions. Both
-produce <strong>the same pixels</strong> — the <code class="docutils literal notranslate"><span class="pre">render.py</span></code> argv, the staged source layout and the
-per-problem output directory name (which is the domain-randomization seed salt) are identical, so
-a problem draws the same randomization either way. The choice is about throughput and
-observability, not about how the dataset looks.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p></p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span> <span class="pre">coupled</span></code> (default)</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span> <span class="pre">pipelined</span></code></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>where the render runs</p></td>
-<td><p>its own item in the shared GPU-slot pool</p></td>
-<td><p>inside the execution job’s own shell chain, <code class="docutils literal notranslate"><span class="pre">vecgen</span> <span class="pre">&amp;&amp;</span> <span class="pre">render</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>when it becomes eligible</p></td>
-<td><p>the moment that problem’s execution finalizes</p></td>
-<td><p>immediately, holding the slot its execution just used</p></td>
-</tr>
-<tr class="row-even"><td><p>can overlap the next execution</p></td>
-<td><p>yes, whenever a slot is free</p></td>
-<td><p>no — one job, one slot</p></td>
-</tr>
-<tr class="row-odd"><td><p>exec vs render timing</p></td>
-<td><p>separate items, separate logs, separate <code class="docutils literal notranslate"><span class="pre">[sched]</span></code> lines</p></td>
-<td><p>not separable (one process span)</p></td>
-</tr>
-<tr class="row-even"><td><p>a render failure</p></td>
-<td><p>its own item with its own log</p></td>
-<td><p>indistinguishable from an execution failure in the job’s exit code</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Neither schedule can be combined with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>: recording in-physics video and
-then overwriting it pays the slow physics-render cost for frames nothing reads.</p>
-<p>There is no default YAML: <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> always names the look. The RI training set uses
-<code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>
-(<code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>), one copy per episode (<code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">1</span></code>), the 224 RGB and <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> depth
-sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The flags YAML must be readable on
-this machine; the pipeline checks it before starting.</p>
-<section id="which-schedule-to-use">
-<h3>Which schedule to use<a class="headerlink" href="#which-schedule-to-use" title="Link to this heading">#</a></h3>
-<p>Measured on one RTX 5090 over 4 problems, 2 repetitions, timing the execution + render
-window only, with pipelining and oversubscription varied separately so neither is credited with
-the other’s win:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p></p></th>
-<th class="head"><p>1 slot</p></th>
-<th class="head"><p>2 slots (<code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code>)</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>coupled</p></td>
-<td><p>921 s</p></td>
-<td><p><strong>667 s</strong></p></td>
-</tr>
-<tr class="row-odd"><td><p>pipelined</p></td>
-<td><p>906 s</p></td>
-<td><p>733 s</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><strong>For throughput, add <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code></strong> — 28% faster than a single coupled slot, and
-it needs none of the scheduler. Pipelining costs nothing at one slot but <em>loses</em> about 10% at
-two, because its render-first ordering pairs render against render (two GPU-saturating
-processes), whereas the coupled chains naturally pair one problem’s execution against another’s
-render.</p>
-<p>Use the pipelined mode when you want separable exec/render timings and logs, failure isolation
-between the two, a first finished problem early rather than at the end of a chain, or bounded
-un-rendered disk.</p>
-</section>
-<section id="options-that-matter-on-one-machine">
-<h3>Options that matter on one machine<a class="headerlink" href="#options-that-matter-on-one-machine" title="Link to this heading">#</a></h3>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Flag</p></th>
-<th class="head"><p>Default</p></th>
-<th class="head"><p>Meaning</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
-<td><p>Envs per render wave, under either schedule. A <strong>floor</strong>, not a preference: the render spawns env <em>i</em> at block-size slot <em>i</em> % <em>profiles</em>, so a value below <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> leaves the high slots without an env and <strong>every problem is skipped</strong>. The pipeline refuses that pairing up front. 8 keeps the encoder’s RSS survivable beside Isaac.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-stall-timeout</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">3600</span></code></p></td>
-<td><p>SIGKILL the render if it prints nothing for this many seconds.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-fail-on-video-defects</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole; <code class="docutils literal notranslate"><span class="pre">scripts/render/fast_patch.py</span></code> fills video holes afterwards.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">--render-n</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> are
-described in <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>, along with what <code class="docutils literal notranslate"><span class="pre">--render-n</span></code> and
-<code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> actually multiply and how to check that they did.</p>
-</section>
+<p>A pass run with <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a> lands in <code class="docutils literal notranslate"><span class="pre">render/out/job_plain</span></code>, and one run with
+<a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache.yaml</span></code></a> lands in <code class="docutils literal notranslate"><span class="pre">render/out/job_allrand_texcache</span></code>. The merged
+dataset gets a copy of the run config and a plot of its first episode, <code class="docutils literal notranslate"><span class="pre">episode_0.png</span></code>.</p>
 </section>
 <section id="what-counts-as-rendered">
 <h2>What counts as “rendered”<a class="headerlink" href="#what-counts-as-rendered" title="Link to this heading">#</a></h2>
@@ -732,29 +812,28 @@ being silent, a post-stage sweep classifies every problem on disk into three sta
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_SHIPPED</span></code></p></td>
 <td><p>finalized under <code class="docutils literal notranslate"><span class="pre">blocks_success</span></code> <strong>and</strong> merge can read it (<code class="docutils literal notranslate"><span class="pre">info.json</span></code> present)</p></td>
-<td><p>no — it is done</p></td>
+<td><p>no, it is done</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_UNRENDERABLE</span></code></p></td>
 <td><p>finalized, but it can never ship: it declared itself empty, recorded zero episodes, or finalized with only a <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> split</p></td>
-<td><p>no — permanent, and failing on it would wedge every later run</p></td>
+<td><p>no, it is permanent, and failing on it would wedge every later run</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RENDER_ABSENT</span></code></p></td>
 <td><p>not finalized, or finalized without a readable dataset</p></td>
-<td><p>yes — the run exits non-zero and a later run or <code class="docutils literal notranslate"><span class="pre">--resume</span></code> finishes it</p></td>
+<td><p>yes, the run exits non-zero and a later run or <code class="docutils literal notranslate"><span class="pre">--resume</span></code> finishes it</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>Two of these are worth understanding. <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> in <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> means <em>terminal</em>,
 not <em>has data</em>. And a problem whose episodes all failed finalizes with <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> alone, so
-no <code class="docutils literal notranslate"><span class="pre">blocks_success</span></code> is ever created; re-running cannot change that, because the source has no
+no <code class="docutils literal notranslate"><span class="pre">blocks_success</span></code> is ever created. Re-running cannot change that, because the source has no
 successful episodes.</p>
-<p>Both modes report from this sweep, never from the job list, so it also covers problems the
-execution loop skipped, runs with <code class="docutils literal notranslate"><span class="pre">--skip-execution</span></code>, resumed runs where the execution stage was
-disabled, and preemption shards (<code class="docutils literal notranslate"><span class="pre">problem_x__s001</span></code>). The merge gate asks merge’s own discovery
-what it would ship, rather than globbing <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> — the execution stage creates each problem’s
-output directory <em>before</em> running it, so a crashed execution leaves an empty directory behind for
-good. Pass <code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> to merge what rendered and drop the rest.</p>
+<p>With more than one pass a problem takes the worst state across its passes, so every pass has to
+land before that problem ships.</p>
+<p>Both schedules report from this sweep rather than from the job list, so it also covers problems
+the execution loop skipped and runs with <code class="docutils literal notranslate"><span class="pre">--skip-execution</span></code>. Pass
+<code class="docutils literal notranslate"><span class="pre">--merge-allow-missing-problems</span></code> to merge what rendered and drop the rest.</p>
 </section>
 <section id="flags-that-do-not-do-what-their-name-suggests">
 <h2>Flags that do not do what their name suggests<a class="headerlink" href="#flags-that-do-not-do-what-their-name-suggests" title="Link to this heading">#</a></h2>
@@ -766,13 +845,13 @@ good. Pass <code class="docutils literal notranslate"><span class="pre">--merge-
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num-reset-states</span></code></p></td>
-<td><p><strong>Removed.</strong> It never had an effect — the env stage passes <code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code> through as the generator’s <code class="docutils literal notranslate"><span class="pre">--num_reset_states</span></code> — so passing it is now an error rather than a silent no-op. Use <strong><code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code></strong> (default <code class="docutils literal notranslate"><span class="pre">32</span></code>).</p></td>
+<td><p><strong>Removed.</strong> It never had an effect, because the env stage passes <code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code> through as the generator’s <code class="docutils literal notranslate"><span class="pre">--num_reset_states</span></code>, so passing it is now an error rather than a silent no-op. Use <strong><code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code></strong> (default <code class="docutils literal notranslate"><span class="pre">32</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--env-per-problem</span></code></p></td>
 <td><p>Despite the name, this is the number of <strong>reset states</strong> per problem, not a number of environments. The environment count is <code class="docutils literal notranslate"><span class="pre">--num-envs</span></code> (sampling) or <code class="docutils literal notranslate"><span class="pre">--exec-num-envs</span></code> (execution).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code></p></td>
-<td><p>The count is <strong>baked into the env package at codegen time</strong>, so changing it does nothing for a problem whose package already exists — see below.</p></td>
+<td><p>The count is <strong>baked into the env package at codegen time</strong>, so changing it does nothing for a problem whose package already exists. See below.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--seed</span></code></p></td>
 <td><p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">1</span></code>, it does not reach env generation: the env stage is hard-wired to <code class="docutils literal notranslate"><span class="pre">ENV_GEN_SEED</span> <span class="pre">=</span> <span class="pre">0</span></code>, so re-running with a different <code class="docutils literal notranslate"><span class="pre">--seed</span></code> regenerates <strong>identical reset states</strong> and <code class="docutils literal notranslate"><span class="pre">--seed</span></code> affects execution only. With multi-problem packages (the default), the package for the group starting at problem <em>g</em> is sampled with <code class="docutils literal notranslate"><span class="pre">--seed</span> <span class="pre">+</span> <span class="pre">g</span></code>, so <code class="docutils literal notranslate"><span class="pre">--seed</span></code> changes the reset states too.</p></td>
@@ -783,113 +862,92 @@ good. Pass <code class="docutils literal notranslate"><span class="pre">--merge-
 </tbody>
 </table>
 </div>
-<p>The env-count constraint is “a multiple of the profile count, <strong>or</strong> strictly smaller than it” —
+<p>The env-count constraint is “a multiple of the profile count, <strong>or</strong> strictly smaller than it”.
 <code class="docutils literal notranslate"><span class="pre">--num-envs</span> <span class="pre">4</span></code> against 8 profiles is legal and spawns only the low slots. It is not “must be a
 multiple”.</p>
-<p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> the env stage is <strong>switched off entirely</strong> — the execution
-jobs build the multi-problem packages themselves with <code class="docutils literal notranslate"><span class="pre">scripts/vecgen/make_superset_env.py</span></code>.</p>
-<section id="render-arguments-the-pipeline-pins-for-you">
-<h3>Render arguments the pipeline pins for you<a class="headerlink" href="#render-arguments-the-pipeline-pins-for-you" title="Link to this heading">#</a></h3>
-<p>The pipeline builds its own <code class="docutils literal notranslate"><span class="pre">render.py</span></code> command line, and three of its arguments differ from
-<code class="docutils literal notranslate"><span class="pre">render.py</span></code>’s own defaults. They are worth knowing if you are comparing a pipeline render
-against one you ran by hand:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Pipeline passes</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> default</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">60</span></code></p></td>
-<td><p>unset (scene default <code class="docutils literal notranslate"><span class="pre">5.0</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--camera_base</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">scene</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rtx_warmup_frames</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> comes from <code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code>. Anything you pass through
-<code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> is appended last and therefore wins over all of these.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> the env stage is <strong>switched off entirely</strong>, because the
+execution jobs build the multi-problem packages themselves with
+<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/make_superset_env.py</span></code>.</p>
 <p>Env generation also <strong>skips any problem whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> already exists</strong>, and a
 multi-problem job skips building a package whose <code class="docutils literal notranslate"><span class="pre">problems.json</span></code> exists. That is what makes
-re-running cheap — and what makes a stale env package silently survive a parameter change.
+re-running cheap, and what makes a stale env package silently survive a parameter change.
 Delete the problem’s env directory, or use a fresh <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>, when you change env-stage
 parameters. This applies to <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> in particular: the profile count is a property
 of the package, not of the run, so re-running an existing experiment with a new count keeps the
 old bake.</p>
 </section>
-</section>
 <section id="resuming">
 <h2>Resuming<a class="headerlink" href="#resuming" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">--resume</span></code> continues a previous run of the same <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>: stages already marked complete
+<p><code class="docutils literal notranslate"><span class="pre">--resume</span></code> continues a previous run of the same <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>. Stages already marked complete
 in <code class="docutils literal notranslate"><span class="pre">&lt;base&gt;/.pipeline_state/</span></code> are skipped, and the first unfinished stage is rerun <strong>from scratch,
 deleting its outputs</strong> first. It is a no-op if the experiment directory does not exist.</p>
 <p>What that deletes matters for long runs. If the execution stage was interrupted, <code class="docutils literal notranslate"><span class="pre">--resume</span></code>
 deletes <code class="docutils literal notranslate"><span class="pre">execution/</span></code> and <code class="docutils literal notranslate"><span class="pre">render/</span></code>, including the problems that had already finished. The
 render stage is the exception: it deletes nothing, and <code class="docutils literal notranslate"><span class="pre">render.py</span> <span class="pre">--resume</span></code> renders only the
-problems not yet completed. A run interrupted after its executions finalized therefore resumes
-straight into <code class="docutils literal notranslate"><span class="pre">render</span></code> instead of silently merging raw parquet.</p>
+problems not yet completed, pass by pass. A run interrupted after its executions finalized
+therefore resumes straight into <code class="docutils literal notranslate"><span class="pre">render</span></code> instead of silently merging raw parquet.</p>
 <p>A stage is marked complete when it finishes, even if some of its problems failed, so <code class="docutils literal notranslate"><span class="pre">--resume</span></code>
-does not retry failed problems. To keep finished problems and run only the missing or failed
-ones, rerun the same command <strong>without</strong> <code class="docutils literal notranslate"><span class="pre">--resume</span></code> and with <code class="docutils literal notranslate"><span class="pre">--skip-task-gen</span></code> (otherwise task
-generation writes a fresh batch of problems next to the old ones): env generation skips problems
-whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> exists, and execution skips problems whose <code class="docutils literal notranslate"><span class="pre">.execution_complete</span></code> marker
-exists.</p>
+does not retry failed problems. To keep the finished problems and run only the missing or failed
+ones, rerun the same command <strong>without</strong> <code class="docutils literal notranslate"><span class="pre">--resume</span></code> and with <code class="docutils literal notranslate"><span class="pre">--skip-task-gen</span></code>, otherwise task
+generation writes a fresh batch of problems next to the old ones. Each stage then skips the
+problems it already has.</p>
 </section>
 <section id="verify-the-output">
 <h2>Verify the output<a class="headerlink" href="#verify-the-output" title="Link to this heading">#</a></h2>
 <p><strong>Metadata cannot see a broken render.</strong> A dataset can carry <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> and still contain
-videos no decoder will open — a host-RAM OOM mid-encode produces <code class="docutils literal notranslate"><span class="pre">moov</span> <span class="pre">atom</span> <span class="pre">not</span> <span class="pre">found</span></code> mp4s behind
-a perfectly healthy-looking marker. Validate the pixels after any run above one worker:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/render/validate_dataset_videos.py<span class="w"> </span>&lt;base&gt;/render/out/job_local
+videos no decoder will open. A host-RAM OOM mid-encode produces <code class="docutils literal notranslate"><span class="pre">moov</span> <span class="pre">atom</span> <span class="pre">not</span> <span class="pre">found</span></code> mp4s behind
+a perfectly healthy-looking marker. Validate the pixels after any run above one worker, once per
+pass:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/render/validate_dataset_videos.py<span class="w"> </span>&lt;base&gt;/render/out/job_&lt;name&gt;<span class="w"> </span>--frames
 </pre></div>
 </div>
-<p>To confirm that <code class="docutils literal notranslate"><span class="pre">--render-n</span></code> genuinely multiplied, count episodes, frames and distinct video
-files — never bytes. Merge hardlinks videos into the merged tree, so <code class="docutils literal notranslate"><span class="pre">du</span></code> of the merged directory
-is meaningless, and different random draws compress differently. See
-<a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--frames</span></code> is what decodes the videos and compares their frame counts to the episode lengths.
+Without it only the structural check runs, which catches an unopenable file but passes a short
+one.</p>
+<p>To confirm that a <code class="docutils literal notranslate"><span class="pre">:N</span></code> suffix genuinely multiplied, count episodes, frames and distinct video
+files, never bytes. Merge hardlinks videos into the merged tree, so <code class="docutils literal notranslate"><span class="pre">du</span></code> of the merged directory
+is meaningless, and different random draws compress differently. See <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
 </section>
-<section id="things-that-will-bite-you">
-<h2>Things that will bite you<a class="headerlink" href="#things-that-will-bite-you" title="Link to this heading">#</a></h2>
-<section id="rendering-segfaults-at-startup-on-some-gpu-driver-combinations">
-<h3>Rendering segfaults at startup on some GPU/driver combinations<a class="headerlink" href="#rendering-segfaults-at-startup-on-some-gpu-driver-combinations" title="Link to this heading">#</a></h3>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h2>
+<section id="rendering-segfaults-at-startup-on-some-gpu-and-driver-combinations">
+<h3>Rendering segfaults at startup on some GPU and driver combinations<a class="headerlink" href="#rendering-segfaults-at-startup-on-some-gpu-and-driver-combinations" title="Link to this heading">#</a></h3>
 <p>On an RTX 5090 with driver 595.99.02, every local render died about 7 s into Isaac startup with
 a SIGSEGV in <code class="docutils literal notranslate"><span class="pre">librtx.scenedb.plugin.so</span></code>, while env generation and execution ran fine on the same
-GPU. This is an Isaac Sim 5.1 RTX-renderer problem, not ToyBlocks. Check your machine with:</p>
+GPU. This is an Isaac Sim 5.1 RTX-renderer problem, not a ToyBlocks one. Check your machine with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from isaaclab.app import AppLauncher; AppLauncher(headless=True, enable_cameras=True)"</span>
 </pre></div>
 </div>
-<p>If that crashes, the machine cannot render: run the pipeline without a render flag and
-render the executed episodes on a machine that can (see <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>). The same
-crash affects <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code> and eval video capture. Kit logs are under
+<p>If that crashes, the machine cannot render. Run the pipeline without a render pass and render the
+executed episodes on a machine that can (see <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>). The same crash affects
+<code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code> and eval video capture. Kit logs are under
 <code class="docutils literal notranslate"><span class="pre">.venv/lib/python3.11/site-packages/isaacsim/kit/logs/Kit/Isaac-Sim/5.1/</span></code>.</p>
 </section>
 <section id="harmless-physx-errors">
 <h3>Harmless PhysX errors<a class="headerlink" href="#harmless-physx-errors" title="Link to this heading">#</a></h3>
 <p>Some otherwise clean runs print
 <code class="docutils literal notranslate"><span class="pre">PxDirectGPUAPI::getRigidDynamicData():</span> <span class="pre">not</span> <span class="pre">allowed</span> <span class="pre">while</span> <span class="pre">simulation</span> <span class="pre">is</span> <span class="pre">running</span></code>. The episodes
-still succeed; ignore it.</p>
+still succeed, so ignore it.</p>
 </section>
 <section id="isaac-hangs-after-it-finishes">
 <h3>Isaac hangs after it finishes<a class="headerlink" href="#isaac-hangs-after-it-finishes" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> prints <code class="docutils literal notranslate"><span class="pre">all</span> <span class="pre">jobs</span> <span class="pre">done</span></code> and then hangs in Isaac teardown — observed holding a GPU for
+<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> prints <code class="docutils literal notranslate"><span class="pre">all</span> <span class="pre">jobs</span> <span class="pre">done</span></code> and then hangs in Isaac teardown, observed holding a GPU for
 53 minutes after finalizing all 16 episodes. Every pipeline render therefore runs through
 <code class="docutils literal notranslate"><span class="pre">scripts/render/run_local_render.py</span></code>, which watches for the marker and kills the process group
-after a grace period. <strong>Never key completion on an exit code</strong> here; key it on the log.</p>
+after a grace period. <strong>Never key completion on an exit code</strong> here. Key it on the log.</p>
 </section>
 <section id="host-ram-and-disk-not-vram-are-the-limits">
 <h3>Host RAM and disk, not VRAM, are the limits<a class="headerlink" href="#host-ram-and-disk-not-vram-are-the-limits" title="Link to this heading">#</a></h3>
-<p>VRAM is not the binding constraint when raising <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span></code> — host RAM is, and a
+<p>VRAM is not the binding constraint when raising <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span></code>. Host RAM is, and a
 host-RAM OOM mid-encode corrupts videos behind a <code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> marker. Raise the worker count
 only if you validate the output afterwards.</p>
+</section>
+<section id="a-job-directory-from-an-earlier-run-is-merged-again">
+<h3>A job directory from an earlier run is merged again<a class="headerlink" href="#a-job-directory-from-an-earlier-run-is-merged-again" title="Link to this heading">#</a></h3>
+<p>The merge globs every <code class="docutils literal notranslate"><span class="pre">job_*</span></code> directory under <code class="docutils literal notranslate"><span class="pre">render/out/</span></code>, not only the passes this command
+asked for. Re-running an experiment with fewer passes therefore still ships the older pass, and
+the merged dataset stays larger than the command says. Delete the job directory you no longer
+want, or use a fresh <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>.</p>
 </section>
 <section id="concurrent-slots-share-isaac-s-caches">
 <h3>Concurrent slots share Isaac’s caches<a class="headerlink" href="#concurrent-slots-share-isaac-s-caches" title="Link to this heading">#</a></h3>
@@ -901,9 +959,9 @@ installed Isaac Sim <strong>does not read any of them</strong>. Concurrent slots
 <section id="camera-base-data-does-nothing-here">
 <h3><code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> does nothing here<a class="headerlink" href="#camera-base-data-does-nothing-here" title="Link to this heading">#</a></h3>
 <p>It tells the renderer to base each static camera on the pose the <em>dataset</em> records. The execution
-stage records no camera pose at all — vecgen is parquet-only, so there is never a recorded pose to
-base on. <code class="docutils literal notranslate"><span class="pre">render.py</span></code> detects this, warns loudly, and falls back to <code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">scene</span></code>; the
-pipeline passes <code class="docutils literal notranslate"><span class="pre">scene</span></code> explicitly and drops a <code class="docutils literal notranslate"><span class="pre">data</span></code> arriving through <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code>. Same
+stage records no camera pose at all, because vecgen is parquet-only, so there is never a recorded
+pose to base on. <code class="docutils literal notranslate"><span class="pre">render.py</span></code> detects this, warns loudly, and falls back to <code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">scene</span></code>.
+The pipeline passes <code class="docutils literal notranslate"><span class="pre">scene</span></code> explicitly and drops a <code class="docutils literal notranslate"><span class="pre">data</span></code> arriving through <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code>. Same
 outcome, said at argv-build time instead of minutes into Kit startup.</p>
 </section>
 <section id="render-extra-needs-the-form">
@@ -913,19 +971,21 @@ outcome, said at argv-build time instead of minutes into Kit startup.</p>
 --render-extra<span class="w"> </span><span class="s2">"--skip_failure_episodes"</span><span class="w">                                  </span><span class="c1"># rejected</span>
 </pre></div>
 </div>
-<p>It is appended last, so it beats the pipeline’s own <code class="docutils literal notranslate"><span class="pre">--depth_gop</span></code>, <code class="docutils literal notranslate"><span class="pre">--dr_seeding</span></code>,
-<code class="docutils literal notranslate"><span class="pre">--camera_base</span></code> and <code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code>, and the default sidecars. <code class="docutils literal notranslate"><span class="pre">--output</span></code>, <code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code>,
-<code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code>, <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> are dropped with a warning — they break
-the pipeline’s accounting rather than the render.</p>
+<p>It is appended after the pipeline’s own arguments, so it beats <code class="docutils literal notranslate"><span class="pre">--depth_gop</span></code>, <code class="docutils literal notranslate"><span class="pre">--dr_seeding</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code> and the default sidecars. Three things it cannot change. <code class="docutils literal notranslate"><span class="pre">--output</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code>, <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> are dropped with a
+warning, because they break the pipeline’s accounting rather than the render.
+<code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> is dropped for the reason above. And each pass re-applies its own <code class="docutils literal notranslate"><span class="pre">--flags</span></code>
+and <code class="docutils literal notranslate"><span class="pre">-N</span></code> afterwards, so an extra carrying either cannot rewrite one pass into another.</p>
 </section>
 </section>
 <section id="see-also">
 <h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a> — the pipeline overview and every pipeline flag</p></li>
-<li><p><a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a> — the render stage and its flags</p></li>
-<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a> — writing a randomization YAML</p></li>
-<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md">docs/source/user_guide/workflows/datagen/local.md</a> — implementation notes, HDRI backdrops and invariants for the pipeline render</p></li>
+<li><p><a class="reference internal" href="../data_generation.html"><span class="std std-doc">Automatic Data Generation</span></a> for the pipeline overview and every pipeline flag</p></li>
+<li><p><a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a> for the render stage, render passes and every render flag</p></li>
+<li><p><a class="reference internal" href="merge.html"><span class="std std-doc">Merge</span></a> for how the rendered passes become one dataset</p></li>
+<li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a> for writing a randomization YAML</p></li>
 </ul>
 </section>
 </section>
@@ -979,30 +1039,31 @@ the pipeline’s accounting rather than the render.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">Before you start</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-complete-run">A complete run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering-locally">Rendering locally</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#which-flag-does-what">Which flag does what</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parity-across-passes">Parity across passes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-renders-are-scheduled">How renders are scheduled</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options-that-matter-on-one-machine">Options that matter on one machine</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#render-arguments-the-pipeline-pins-for-you">Render arguments the pipeline pins for you</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hdri-backdrops">HDRI backdrops</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#choosing-gpus-and-how-many-problems-run-at-once">Choosing GPUs and how many problems run at once</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-much-fits">How much fits</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logs">Logs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hdri-backdrops">HDRI backdrops</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering-locally">Rendering locally</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#which-schedule-to-use">Which schedule to use</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options-that-matter-on-one-machine">Options that matter on one machine</a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-counts-as-rendered">What counts as “rendered”</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags-that-do-not-do-what-their-name-suggests">Flags that do not do what their name suggests</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#render-arguments-the-pipeline-pins-for-you">Render arguments the pipeline pins for you</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags-that-do-not-do-what-their-name-suggests">Flags that do not do what their name suggests</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resuming">Resuming</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-output">Verify the output</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#things-that-will-bite-you">Things that will bite you</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering-segfaults-at-startup-on-some-gpu-driver-combinations">Rendering segfaults at startup on some GPU/driver combinations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering-segfaults-at-startup-on-some-gpu-and-driver-combinations">Rendering segfaults at startup on some GPU and driver combinations</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#harmless-physx-errors">Harmless PhysX errors</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#isaac-hangs-after-it-finishes">Isaac hangs after it finishes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#host-ram-and-disk-not-vram-are-the-limits">Host RAM and disk, not VRAM, are the limits</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-job-directory-from-an-earlier-run-is-merged-again">A job directory from an earlier run is merged again</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concurrent-slots-share-isaac-s-caches">Concurrent slots share Isaac’s caches</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#camera-base-data-does-nothing-here"><code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> does nothing here</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#render-extra-needs-the-form"><code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> needs the <code class="docutils literal notranslate"><span class="pre">=</span></code> form</a></li>

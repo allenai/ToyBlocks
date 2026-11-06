@@ -92,7 +92,7 @@ When `run_datagen_pipeline.py` runs this stage, it sets the flags above from its
 | `--seed` | `42` | — | Does not reach this stage. The env-generation seed is always `0`, so a different `--seed` regenerates identical reset states. |
 
 The pipeline runs one env-generation process per problem, spread over the GPU slots (see
-[Running on this machine](local.md)), and skips any problem whose `reset_states.pkl` already
+[Running the pipeline locally](local.md)), and skips any problem whose `reset_states.pkl` already
 exists.
 
 With `--vecgen-problems-per-env > 1` (the default is `8`) this stage is skipped. Each execution

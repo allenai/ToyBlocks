@@ -278,7 +278,7 @@
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
-<li class="toctree-l3"><a class="reference internal" href="local.html">Running the pipeline on this machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="local.html">Running Pipeline Locally</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -489,7 +489,7 @@ underscores. In a shell script you can compute it like this:</p>
 </table>
 </div>
 <p>The pipeline runs one env-generation process per problem, spread over the GPU slots (see
-<a class="reference internal" href="local.html"><span class="std std-doc">Running on this machine</span></a>), and skips any problem whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> already
+<a class="reference internal" href="local.html"><span class="std std-doc">Running the pipeline locally</span></a>), and skips any problem whose <code class="docutils literal notranslate"><span class="pre">reset_states.pkl</span></code> already
 exists.</p>
 <p>With <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> (the default is <code class="docutils literal notranslate"><span class="pre">8</span></code>) this stage is skipped. Each execution
 job first builds one multi-problem package for its group of problems with

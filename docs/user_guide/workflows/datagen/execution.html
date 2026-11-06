@@ -278,7 +278,7 @@
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
-<li class="toctree-l3"><a class="reference internal" href="local.html">Running the pipeline on this machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="local.html">Running Pipeline Locally</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -478,7 +478,7 @@ cleanly; see <a class="reference internal" href="#output">Output</a>.</p>
 <p>The pipeline always passes <code class="docutils literal notranslate"><span class="pre">--record</span> <span class="pre">&lt;base&gt;/execution/&lt;slug&gt;</span> <span class="pre">--mark-complete</span> <span class="pre">--headless</span></code>, where
 <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;</span></code> is the problem’s slug, or <code class="docutils literal notranslate"><span class="pre">problem_grp_&lt;first</span> <span class="pre">slug&gt;</span></code> for a group. It skips any problem
 whose <code class="docutils literal notranslate"><span class="pre">.execution_complete</span></code> marker already exists. Each problem (or group) is one job in the
-pipeline’s GPU-slot pool; see <a class="reference internal" href="local.html"><span class="std std-doc">Running on this machine</span></a>.</p>
+pipeline’s GPU-slot pool; see <a class="reference internal" href="local.html"><span class="std std-doc">Running the pipeline locally</span></a>.</p>
 <p>The pipeline does <strong>not</strong> forward <code class="docutils literal notranslate"><span class="pre">--profile</span></code>, <code class="docutils literal notranslate"><span class="pre">--max-attempts</span></code>, <code class="docutils literal notranslate"><span class="pre">--friction-comp</span></code>,
 <code class="docutils literal notranslate"><span class="pre">--arm-joint-friction-scale</span></code> or <code class="docutils literal notranslate"><span class="pre">--arm-armature-scale</span></code>, so a pipeline run always uses their
 defaults (see <a class="reference internal" href="#flags">Flags</a>). To change them, run <code class="docutils literal notranslate"><span class="pre">run.py</span></code> by hand.</p>

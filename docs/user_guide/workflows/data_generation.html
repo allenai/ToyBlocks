@@ -278,7 +278,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datagen/merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="datagen/dataset_fields.html">Recorded Dataset Fields</a></li>
-<li class="toctree-l3"><a class="reference internal" href="datagen/local.html">Running the pipeline on this machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datagen/local.html">Running Pipeline Locally</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -423,7 +423,7 @@ source files, copies of the PDDL files). An interrupted run can be resumed, skip
 the stages that already finished.</p></li>
 <li><p><strong>One command, one machine.</strong> The orchestrator runs every stage on the machine you
 launch it on, spreading problems over the visible GPUs. The same command works on a
-single-GPU workstation and on a multi-GPU node (see <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>).</p></li>
+single-GPU workstation and on a multi-GPU node (see <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running the pipeline locally</span></a>).</p></li>
 </ul>
 </section>
 <section id="what-can-you-do-with-the-datagen-pipeline">
@@ -462,7 +462,7 @@ shows.</p>
   ├─ task-gen    scripts/task_gen/*.py           PDDL problems
   ├─ env         generate_task_from_pddl.py      env package + sampled reset states
   ├─ execution   scripts/vecgen/run.py           FF per env -&gt; batched skills -&gt; verify -&gt; record
-  ├─ render    (optional, --render)           new visuals from the recorded states
+  ├─ render    (optional, --render-pass)      new visuals from the recorded states
   ├─ merge       merge_datasets.py               one training dataset
   └─ annotate    annotate_target_xy.py           target annotations
 </pre></div>
@@ -478,31 +478,31 @@ shows.</p>
 </section>
 <section id="full-data-generation-pipeline">
 <h2>Full Data Generation Pipeline<a class="headerlink" href="#full-data-generation-pipeline" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> script orchestrates the entire data generation process end-to-end. It runs every stage on this machine, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">scripts/datagen/run_datagen_pipeline.py</span></code> script orchestrates the entire data generation process end-to-end. It runs every stage locally, one problem per GPU slot (all visible GPUs by default), pins the git commit for reproducibility, and saves a full config JSON alongside the output. How the GPU slots, logs and resume work is described in <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running the pipeline locally</span></a>.</p>
 <section id="datagen-pipeline-steps">
 <h3>Datagen Pipeline Steps<a class="headerlink" href="#datagen-pipeline-steps" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p><strong><a class="reference internal" href="datagen/task_generation.html"><span class="std std-doc">Task generation</span></a></strong>: runs a task gen script (default <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/stack_three.py</span> <span class="pre">--train</span></code>) to produce randomised PDDL problem files.</p></li>
 <li><p><strong><a class="reference internal" href="datagen/env_generation.html"><span class="std std-doc">Env generation</span></a></strong>: builds one env package per problem and samples its reset states (<code class="docutils literal notranslate"><span class="pre">generate_task_from_pddl.py</span></code>). Skipped when <code class="docutils literal notranslate"><span class="pre">--vecgen-problems-per-env</span></code> &gt; 1 (the default is 8): the execution step then builds one multi-problem package per group itself.</p></li>
 <li><p><strong><a class="reference internal" href="datagen/execution.html"><span class="std std-doc">Execution</span></a></strong>: runs vecgen on each problem or group (<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code>): FF planning per environment, batched skills, verification, and LeRobot recording.</p></li>
-<li><p><strong><a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a></strong> (optional): renders each problem’s episodes as soon as its execution finishes — plain (<code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>) or with visual domain randomization (<code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>), both needing <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>. <code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> places each render either in the shared GPU-slot pool or inside the execution job.</p></li>
+<li><p><strong><a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a></strong> (optional): renders each problem’s episodes as soon as its execution finishes. Each <code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code> is one look, rendered over every episode into its own output directory, and the flag can be repeated. <code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> places each render either in the shared GPU-slot pool or inside the execution job.</p></li>
 <li><p><strong><a class="reference internal" href="datagen/merge.html"><span class="std std-doc">Merge</span></a></strong>: merges all successful per-problem LeRobot datasets (the rendered ones when the render stage ran) into a single LeRobot training dataset (<code class="docutils literal notranslate"><span class="pre">merge_datasets.py</span></code>).</p></li>
 <li><p><strong><a class="reference internal" href="datagen/annotate.html"><span class="std std-doc">Annotate</span></a></strong>: adds per-frame goal columns to the merged LeRobot dataset (<code class="docutils literal notranslate"><span class="pre">annotate_target_xy.py</span></code>): <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> (the current action as text, e.g. <code class="docutils literal notranslate"><span class="pre">pick</span></code>, <code class="docutils literal notranslate"><span class="pre">push</span> <span class="pre">left</span></code>) and <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> (the target object’s pixel coordinates in the front camera). It needs camera data, so it is skipped with a warning unless the episodes were rendered or recorded with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>.</p></li>
 </ol>
 </section>
 <section id="basic-usage">
 <h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Full pipeline with the defaults (the RI stack-3 training-set settings), on every visible GPU</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Full pipeline with the defaults, on every visible GPU</span>
 python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3
 
 <span class="c1"># The same, rendered: the camera videos come from the render stage</span>
-python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
+python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml
 
 <span class="c1"># A small run: 2 problems, 16 episodes each, rendered, outputs under ./outputs</span>
 python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--experiment-id<span class="w"> </span>nov05_stack3_small<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--output-root<span class="w"> </span>outputs<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output-root<span class="w"> </span>outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--task-gen-count<span class="w"> </span><span class="m">2</span><span class="w"> </span>--env-per-problem<span class="w"> </span><span class="m">16</span><span class="w"> </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span>
 
@@ -685,13 +685,13 @@ python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class
 </tbody>
 </table>
 </div>
-<p>See <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running on this machine</span></a> for how the GPU slots are filled, where logs go,
+<p>See <a class="reference internal" href="datagen/local.html"><span class="std std-doc">Running the pipeline locally</span></a> for how the GPU slots are filled, where logs go,
 and what <code class="docutils literal notranslate"><span class="pre">--resume</span></code> deletes.</p>
 </section>
 <section id="rendering">
 <h3>Rendering<a class="headerlink" href="#rendering" title="Link to this heading">#</a></h3>
-<p>Execution records state and actions only; the videos come from the optional render stage. Turn
-it on with one of two flags, which produce the same pixels and differ only in scheduling:</p>
+<p>Execution records state and actions only, and the videos come from the optional render stage.
+Turn it on with <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Flag</p></th>
@@ -699,23 +699,23 @@ it on with one of two flags, which produce the same pixels and differ only in sc
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
-<td><p>Render with visual domain randomization and merge those episodes instead of the execution data. Needs <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code></p></td>
+<td><p>Render every episode with this flags YAML, optionally <code class="docutils literal notranslate"><span class="pre">N</span></code> copies of each, into its own output directory. Repeat the flag for more looks. The merge takes them all.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
-<td><p>Render a plain pass with nothing sampled. Alone it is the only pass; with <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> it adds one. Needs <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> (default) appends each render to its execution job, holding one slot across both; with <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> that is the faster choice. <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues each render as its own item in the GPU-slot pool so it can overlap the next execution, at some throughput cost.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> (default) appends each render to its execution job, holding one slot across both, and with <code class="docutils literal notranslate"><span class="pre">--local-gpu-workers</span> <span class="pre">2</span></code> that is the faster choice. <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues each render as its own item in the GPU-slot pool so it can overlap the next execution, at some throughput cost.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>There is no default YAML: <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> always names the look. The RI training set uses:
-the flags YAML <code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code>, one copy per
-episode, the 224 RGB and depth sidecars, <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The
-default flags draw HDRI backdrops from polyhaven (part of the base asset download) and the
-separately licensed Laval indoor set; see
+<p>There is no default YAML, so every pass names the look it renders, and the pipeline records that
+file in the problem’s <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code>. <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_plain.yaml</span></code></a>
+is the plain baseline and <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code></a>
+adds lighting, material, camera, glyph and colour randomization. <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> with
+<code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>, and <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>, are shorthand for those two passes.</p>
+<p>A pipeline render defaults to one copy per episode, the 224 RGB and depth sidecars,
+<code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The <code class="docutils literal notranslate"><span class="pre">allrand</span></code> flags draw HDRI backdrops from
+polyhaven (part of the base asset download) and the separately licensed Laval indoor set. See
 <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/source/user_guide/workflows/datagen/local.md#hdri-backdrops">HDRI backdrops</a>.
 Every render flag is described in <a class="reference internal" href="datagen/render.html"><span class="std std-doc">Rendering</span></a>.</p>
 </section>
@@ -747,7 +747,7 @@ under <code class="docutils literal notranslate"><span class="pre">&lt;output-ro
 ├── tasks/                    # Generated PDDL problem files
 ├── envs/                     # Env packages + reset states, one per problem or problem group
 ├── execution/                # Per-problem LeRobot datasets (success + failure splits)
-├── render/                 # Rendered datasets (only with --render)
+├── render/                 # Rendered datasets (only with --render-pass), one job_&lt;name&gt; dir per pass
 ├── local_logs/               # Per-problem logs, only when more than one GPU slot runs at a time
 ├── .pipeline_state/          # &lt;stage&gt;.done markers read by --resume
 └── run_datagen_pipeline_config_&lt;timestamp&gt;.json  # Full reproducibility config

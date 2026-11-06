@@ -278,7 +278,7 @@
 <li class="toctree-l3"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l3"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
-<li class="toctree-l3"><a class="reference internal" href="local.html">Running the pipeline on this machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="local.html">Running Pipeline Locally</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -370,7 +370,7 @@ placed at their recorded poses, with no physics stepping and no replanning, and 
 rendered.</p>
 <p>A render is described by a <strong>flags YAML</strong>: how the scene is set up and how it is drawn. The
 file is recorded in every problem’s <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code>, so a dataset always carries the look
-it was made with. There is no default — the look is always named.</p>
+it was made with. There is no default, so the look is always named.</p>
 <p>The simplest one is
 <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a>,
 which ships with the repo. Every key in it is fixed, so each episode renders identically:</p>
@@ -385,16 +385,19 @@ which ships with the repo. Every key in it is fixed, so each episode renders ide
 <span class="w">  </span><span class="nt">visible_background</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-non-randomized
+<p>Render a pass with it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> is shorthand for exactly that pass. It uses this file, so the
+two commands are equivalent.</p>
 <p>Add sampled sections to that file and the same renderer produces a different look per episode:
 see <a class="reference internal" href="#domain-randomization">Domain randomization</a>. Ask for more than one look in a run with
 <a class="reference internal" href="#render-passes">render passes</a>.</p>
-<p>The renderer is also a plain script you can run on a single GPU of this machine, either on a
-dataset that has no images yet or on one that does, replacing them. To run it as part of a
-pipeline run, see <a class="reference internal" href="#through-the-pipeline">Through the pipeline</a> and
-<a class="reference internal" href="local.html"><span class="std std-doc">Running locally</span></a>.</p>
+<p>The renderer is also a plain script you can run on a single GPU, either on a dataset that has no
+images yet or on one that does, replacing them. To run it as part of a pipeline run, see
+<a class="reference internal" href="#through-the-pipeline">Through the pipeline</a> and
+<a class="reference internal" href="local.html"><span class="std std-doc">Running the pipeline locally</span></a>.</p>
 <section id="why-the-pixels-are-a-separate-stage">
 <h2>Why the pixels are a separate stage<a class="headerlink" href="#why-the-pixels-are-a-separate-stage" title="Link to this heading">#</a></h2>
 <p>Keeping rendering apart from execution has several benefits:</p>
@@ -409,7 +412,7 @@ episode’s look.</p></li>
 dataset with video: it is <strong>where the video comes from</strong>.</p>
 <section id="what-rendering-does-not-change">
 <h3>What rendering does not change<a class="headerlink" href="#what-rendering-does-not-change" title="Link to this heading">#</a></h3>
-<p>The state and action trajectory is identical across renders; only the pixels and the camera
+<p>The state and action trajectory is identical across renders, and only the pixels and the camera
 columns differ. Rendering cannot fix a bad episode, change what the robot did, or alter the
 success labels.</p>
 <p>Rendered pixels match an original in-physics rendering closely but not exactly, because
@@ -422,11 +425,12 @@ for exactly what is bit-reproducible and what is not.</p>
 <h2>Where it fits<a class="headerlink" href="#where-it-fits" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>Input:</strong> the recorded datasets from <a class="reference internal" href="execution.html"><span class="std std-doc">stage 3, execution</span></a>, the env packages
-they were recorded with, and a flags YAML describing the randomization.</p></li>
+they were recorded with, and a flags YAML describing the look.</p></li>
 <li><p><strong>Output:</strong> a rendered copy of each dataset, with camera videos, read by <a class="reference internal" href="merge.html"><span class="std std-doc">merge</span></a>.</p></li>
 </ul>
-<p>The stage is optional in the pipeline, enabled with <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>, but it is
-the only way to get camera videos without recording them during execution.</p>
+<p>The stage is optional in the pipeline. It runs whenever the run resolves to at least one render
+pass, which <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> always does and the two shorthands below do as well. It is the only
+way to get camera videos without recording them during execution.</p>
 </section>
 <section id="running-it">
 <h2>Running it<a class="headerlink" href="#running-it" title="Link to this heading">#</a></h2>
@@ -449,46 +453,43 @@ that is the experiment’s own <code class="docutils literal notranslate"><span 
 <span class="w">    </span>--flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> often hangs during Isaac teardown after it finishes; see
+<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> often hangs during Isaac teardown after it finishes. See
 <a class="reference internal" href="#common-pitfalls">Common pitfalls</a> for how to run it safely.</p>
 </section>
 <section id="through-the-pipeline">
 <h2>Through the pipeline<a class="headerlink" href="#through-the-pipeline" title="Link to this heading">#</a></h2>
-<p>Add <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> to a pipeline run. Each problem is rendered on this machine as soon as its
-execution finishes, and the merge then uses the rendered episodes instead of the execution
-data.</p>
-<p>Pass <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> for a plain render, <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> for a randomized one,
-or both to get both passes (see <a class="reference internal" href="#render-passes">Multiplexing</a>). Either
-way <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> is required.</p>
-<p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> chooses how those renders are scheduled against the executions:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> (the default) runs the render as an extra step in the same job as that problem’s
-execution, holding one slot across both phases. Faster with more than one worker.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues each problem’s render as its own item in the shared GPU-slot pool, so it
-can overlap the next execution when a slot is free, and each render gets its own log, timing
-and exit status — at some throughput cost.</p></li>
-</ul>
-<p>Both schedules run the same renderer with the same arguments and produce identical pixels, so
-this is a throughput and observability choice. <a class="reference internal" href="local.html#rendering-locally"><span class="std std-ref">Running locally</span></a>
-has the measured difference and the three-state gate that decides what the merge ships.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span>--render<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
+<p>Add a <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> to a pipeline run. Each problem is rendered as soon as its execution
+finishes, and the merge then uses the rendered episodes instead of the execution data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/run_datagen_pipeline.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--experiment-id<span class="w"> </span>my_run<span class="w"> </span>--output-root<span class="w"> </span>data<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--task-gen-script<span class="w"> </span>scripts/task_gen/flip.py<span class="w"> </span>--task-gen-count<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vecgen-problems-per-env<span class="w"> </span><span class="m">1</span><span class="w"> </span>--exec-num-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--vecgen-episodes<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--local-gpu-workers<span class="w"> </span><span class="m">2</span>
 </pre></div>
 </div>
-<p>With no other render flags this renders the way the RI training set was rendered: the
-<code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code> flags, one copy per episode,
-<code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped, failure episodes skipped, and the 224-px RGB and <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> depth
-sidecars (<code class="docutils literal notranslate"><span class="pre">--extra_rgb</span> <span class="pre">224</span> <span class="pre">--extra_depth</span> <span class="pre">rg8_55_224</span> <span class="pre">--extra_rgb_GOP</span> <span class="pre">2</span> <span class="pre">--rgb_GOP</span> <span class="pre">2</span></code>). Override any
-<code class="docutils literal notranslate"><span class="pre">render.py</span></code> option with <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code>, in the <code class="docutils literal notranslate"><span class="pre">=</span></code> form:</p>
+<p>Repeat <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> for more looks, and give each one a <code class="docutils literal notranslate"><span class="pre">:N</span></code> for several copies of every
+episode. See <a class="reference internal" href="#render-passes">Render passes</a> for the rules and
+<a class="reference internal" href="local.html#rendering-locally"><span class="std std-ref">Running the pipeline locally</span></a> for how those renders are scheduled.</p>
+<p>Every pass names a YAML, and the pipeline records that file in the problem’s
+<code class="docutils literal notranslate"><span class="pre">render_params.json</span></code>, so a dataset always says which look it was made with. With no other render
+flags the pass above renders <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code></a>
+once per episode, with <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped, failure episodes skipped, and the 224-px RGB and
+<code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> depth sidecars
+(<code class="docutils literal notranslate"><span class="pre">--extra_rgb</span> <span class="pre">224</span> <span class="pre">--extra_depth</span> <span class="pre">rg8_55_224</span> <span class="pre">--extra_rgb_GOP</span> <span class="pre">2</span> <span class="pre">--rgb_GOP</span> <span class="pre">2</span></code>). Override most
+<code class="docutils literal notranslate"><span class="pre">render.py</span></code> options with <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code>, in the <code class="docutils literal notranslate"><span class="pre">=</span></code> form:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-extra<span class="o">=</span><span class="s2">"--extra_depth g12_224"</span>
 </pre></div>
 </div>
-<p>The flags YAML draws HDRI backdrops from the <code class="docutils literal notranslate"><span class="pre">polyhaven</span></code> and <code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code> pools. Where to get
-each, and what happens when one is missing, is in
+<p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code> chooses how renders are scheduled against the executions. <code class="docutils literal notranslate"><span class="pre">coupled</span></code>, the
+default, runs each render inside that problem’s execution job. <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues it in the
+shared GPU-slot pool so it can overlap the next execution. Both run the same renderer with the
+same arguments and produce identical pixels, so this is a throughput and observability choice.
+<a class="reference internal" href="local.html#rendering-locally"><span class="std std-ref">Running the pipeline locally</span></a> has the measured difference, and
+<a class="reference internal" href="local.html#what-counts-as-rendered"><span class="std std-ref">what counts as “rendered”</span></a> is the gate that decides what the
+merge ships.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">allrand</span></code> flags YAMLs draw HDRI backdrops from the <code class="docutils literal notranslate"><span class="pre">polyhaven</span></code> and <code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code> pools.
+Where to get each, and what happens when one is missing, is in
 <a class="reference internal" href="local.html#hdri-backdrops"><span class="std std-ref">HDRI backdrops</span></a>.</p>
 <p>The pipeline flags for this stage are:</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -499,25 +500,33 @@ each, and what happens when one is missing, is in
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Run the render stage and merge the rendered episodes. Cannot be combined with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> runs each render inside the problem’s execution job; <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues it in the shared GPU-slot pool. Identical pixels either way.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Deprecated spelling of <code class="docutils literal notranslate"><span class="pre">--render</span> <span class="pre">--render-schedule</span> <span class="pre">coupled</span></code>.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code></p></td>
+<td><p>none</p></td>
+<td><p>Add one render pass, optionally <code class="docutils literal notranslate"><span class="pre">N</span></code> copies of every source episode. Repeatable. Turns the stage on.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-flags</span></code></p></td>
-<td><p>none — <strong>required</strong></p></td>
-<td><p>The render flags YAML, as a path readable on this machine. It describes how the scene is set up and drawn, and is recorded in <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code>. Shipped in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/</span></code>: <code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code> for a plain render, <code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code> for the RI training set’s randomization.</p></td>
+<td><p>none</p></td>
+<td><p>The YAML <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> uses, as a path readable on the machine you launch the run from. On its own it adds no pass, and <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> without it is an error.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-n</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Shorthand. With <code class="docutils literal notranslate"><span class="pre">--render-flags</span> <span class="pre">F.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">N</span></code> it is the same as <code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">F.yaml:N</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-n</span></code></p></td>
 <td><p>1</p></td>
-<td><p>The number of rendered copies per source episode.</p></td>
+<td><p>Copies per source episode for <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Shorthand for <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_plain.yaml</span></code></a>, which needs no YAML of your own.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a></p></td>
+<td><p>Makes that shorthand <code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">OTHER.yaml</span></code> instead.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code> runs each render inside the problem’s execution job, <code class="docutils literal notranslate"><span class="pre">pipelined</span></code> queues it in the shared GPU-slot pool. Identical pixels either way.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">left_camera</span></code></p></td>
@@ -529,15 +538,7 @@ each, and what happens when one is missing, is in
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-extra</span></code></p></td>
 <td><p>none</p></td>
-<td><p>Extra <code class="docutils literal notranslate"><span class="pre">render.py</span></code> options, appended last so they override the defaults above, written as one quoted <code class="docutils literal notranslate"><span class="pre">=</span></code> string. <code class="docutils literal notranslate"><span class="pre">--output</span></code>, <code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code>, <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> are dropped with a warning, because the pipeline owns them.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Render a plain pass: the YAML’s scene with nothing sampled. On its own it is the only pass; alongside <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> it adds one, making the merged dataset (N+1)x the source. See <a class="reference internal" href="#render-passes">Multiplexing</a>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code></p></td>
-<td><p>derived</p></td>
-<td><p>The flags YAML for that pass, instead of the derived one.</p></td>
+<td><p>Extra <code class="docutils literal notranslate"><span class="pre">render.py</span></code> options, appended after the pipeline’s own defaults so they override them, written as one quoted <code class="docutils literal notranslate"><span class="pre">=</span></code> string. Three exceptions: <code class="docutils literal notranslate"><span class="pre">--output</span></code>, <code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code>, <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">--max_episodes</span></code> are dropped with a warning because the pipeline owns them, <code class="docutils literal notranslate"><span class="pre">--camera_base</span> <span class="pre">data</span></code> is dropped because the execution stage records no camera pose, and the pass’s own <code class="docutils literal notranslate"><span class="pre">--flags</span></code> and <code class="docutils literal notranslate"><span class="pre">-N</span></code> are re-applied afterwards so an extra cannot rewrite one pass into another.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code></p></td>
 <td><p>8</p></td>
@@ -554,7 +555,12 @@ each, and what happens when one is missing, is in
 </tbody>
 </table>
 </div>
-<p>Despite their names, the <code class="docutils literal notranslate"><span class="pre">--render-local-*</span></code> flags apply to both schedules.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--render-n</span></code> belongs to <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> only. It does nothing to a
+<code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> pass, which always renders once, and nothing to a <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code>,
+which carries its own <code class="docutils literal notranslate"><span class="pre">:N</span></code>.</p>
+<p>A render cannot be combined with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>. Despite their names, the
+<code class="docutils literal notranslate"><span class="pre">--render-local-*</span></code> flags apply to both schedules. <code class="docutils literal notranslate"><span class="pre">--render</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-local</span></code> and the
+<code class="docutils literal notranslate"><span class="pre">--rerender*</span></code> spellings are superseded, and the pipeline says so when it sees them.</p>
 </section>
 <section id="output">
 <h2>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h2>
@@ -571,7 +577,7 @@ top-level keys are:</p>
 <td><p>When the render ran, and which script ran it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">completed</span></code></p></td>
-<td><p>Whether the render reached a final state, <strong>not</strong> whether it succeeded; see <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
+<td><p>Whether the render reached a final state, <strong>not</strong> whether it succeeded. See <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">complete</span></code>, <code class="docutils literal notranslate"><span class="pre">incomplete_videos</span></code> or <code class="docutils literal notranslate"><span class="pre">failed</span></code>.</p></td>
@@ -586,7 +592,7 @@ top-level keys are:</p>
 <td><p>The number of episodes in <strong>this split</strong>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">episodes_total</span></code></p></td>
-<td><p>The expected total for the whole problem, across all splits. May be <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p></td>
+<td><p>The problem’s <strong>source</strong> episode count, across all splits. With N copies per episode the splits together hold N times this many.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">fps</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">render-only</span></code> or <code class="docutils literal notranslate"><span class="pre">physics-step</span></code>, and the recording rate.</p></td>
@@ -594,19 +600,22 @@ top-level keys are:</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">env_file</span></code>, <code class="docutils literal notranslate"><span class="pre">source_datasets</span></code></p></td>
 <td><p>What was rendered, and from where.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>, <code class="docutils literal notranslate"><span class="pre">flags_sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">flags_resolved_sha256</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p>The run’s own arguments: the flags file, <code class="docutils literal notranslate"><span class="pre">num_envs</span></code>, <code class="docutils literal notranslate"><span class="pre">renders_per_episode</span></code>, <code class="docutils literal notranslate"><span class="pre">camera_base</span></code>, <code class="docutils literal notranslate"><span class="pre">env_spacing</span></code>, the codecs and the rest. <code class="docutils literal notranslate"><span class="pre">scripts/render/fast_patch.py</span></code> rebuilds the render command from it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>, <code class="docutils literal notranslate"><span class="pre">flags_sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">flags_resolved_sha256</span></code></p></td>
 <td><p>The randomization, the digest of the literal file, and the digest of the resolved dict. Group shards by the <strong>resolved</strong> digest.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dr_seeding</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dr_seeding</span></code></p></td>
 <td><p>Which seeding mode produced these values. A consumer must branch on it.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initial</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initial</span></code></p></td>
 <td><p>The scene as actually built: cameras, materials and lights.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">episodes</span></code></p></td>
-<td><p>Per-episode records, including <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code> and <code class="docutils literal notranslate"><span class="pre">iter</span></code>.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">episodes</span></code></p></td>
+<td><p>Per-episode records, including <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code>, the split, and the batch placement. <code class="docutils literal notranslate"><span class="pre">iter</span></code>, which of the N copies this is, appears only above one copy per episode.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">split_group</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">split_group</span></code></p></td>
 <td><p>Present only for a <code class="docutils literal notranslate"><span class="pre">--split_groups</span></code> member.</p></td>
 </tr>
 </tbody>
@@ -624,15 +633,15 @@ silently accepted nor treated as a total failure:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
-<td><p>Whole and usable.</p></td>
+<td><p>Terminal with no known holes. Check <code class="docutils literal notranslate"><span class="pre">episodes_recorded</span></code> before trusting it, because a problem that can never render finalizes here too, with <code class="docutils literal notranslate"><span class="pre">0</span></code> and an <code class="docutils literal notranslate"><span class="pre">empty_reason</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
 <td><p>non-empty</p></td>
 <td><p>Usable but incomplete. The listed videos are missing and need a patch pass.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
-<td><p>—</p></td>
-<td><p>The problem must be rendered.</p></td>
+<td><p>any</p></td>
+<td><p>The render did not finish. This is also the live state of a render still running, because <code class="docutils literal notranslate"><span class="pre">render.py</span></code> rewrites the file after every wave as a crash checkpoint.</p></td>
 </tr>
 </tbody>
 </table>
@@ -640,9 +649,12 @@ silently accepted nor treated as a total failure:</p>
 <section id="validating-the-output">
 <h3>Validating the output<a class="headerlink" href="#validating-the-output" title="Link to this heading">#</a></h3>
 <p>Metadata alone cannot prove a render is good, so check the videos themselves:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/render/validate_dataset_videos.py<span class="w"> </span>&lt;out_dir&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/render/validate_dataset_videos.py<span class="w"> </span>&lt;out_dir&gt;<span class="w"> </span>--frames
 </pre></div>
 </div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">--frames</span></code> only the structural check runs, which catches an unopenable file but passes a
+short one. Either way it can only inspect videos that exist, so a video that was never written is
+caught by <code class="docutils literal notranslate"><span class="pre">video_defects</span></code> instead.</p>
 </section>
 </section>
 <section id="domain-randomization">
@@ -661,35 +673,38 @@ the renderer samples instead, giving each episode its own look from the same fil
 <span class="nt">randomize_block_colors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nv">...</span><span class="p p-Indicator">}</span><span class="w"> </span><span class="c1"># cuboid colours</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-randomized<span class="w"> </span>--render-flags<span class="w"> </span>&lt;your.yaml&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml
 </pre></div>
 </div>
 <p>Nothing else changes: same renderer, same stage, same output layout. The whole file is recorded
 in every problem’s <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> as the dataset’s visual provenance.</p>
-<p>Four presets live in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/</span></code>:</p>
+<p>Five flags YAMLs ship in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p>Preset</p></th>
+<tr class="row-odd"><th class="head"><p>File</p></th>
 <th class="head"><p>Use</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code></p></td>
-<td><p>The RI training set’s render and the pipeline default: <code class="docutils literal notranslate"><span class="pre">allrand_texcache</span></code> plus the train glyph split (symmetry-preserving) and per-env block colours.</p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a></p></td>
+<td><p>One fixed look, nothing sampled. The baseline, and what <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> uses.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache.yaml</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code></a></p></td>
+<td><p>All-random lighting, materials and cameras, plus the train glyph split (symmetry-preserving) and per-env block colours.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_allrand_texcache.yaml</span></code></a></p></td>
 <td><p>All-random lighting, materials and cameras, without glyph or colour swaps.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code></p></td>
-<td><p>A small camera preset for quick tests. It randomizes nothing; see <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code></a></p></td>
+<td><p>A small camera preset for quick tests. It randomizes nothing. See <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">render_flags_open_hybrid_camera_rand_only.yaml</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_open_hybrid_camera_rand_only.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_open_hybrid_camera_rand_only.yaml</span></code></a></p></td>
 <td><p>Camera randomization only.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The two <code class="docutils literal notranslate"><span class="pre">allrand</span></code> presets sample HDRI backdrops from the <code class="docutils literal notranslate"><span class="pre">polyhaven</span></code> and <code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code> pools; see
+<p>The two <code class="docutils literal notranslate"><span class="pre">allrand</span></code> files sample HDRI backdrops from the <code class="docutils literal notranslate"><span class="pre">polyhaven</span></code> and <code class="docutils literal notranslate"><span class="pre">indoor-2018</span></code> pools. See
 <a class="reference internal" href="local.html#hdri-backdrops"><span class="std std-ref">HDRI backdrops</span></a>.</p>
 <p>To write your own, see the
 <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>.
@@ -699,48 +714,62 @@ each value is drawn: per wave, per episode or per env.</p>
 <section id="render-passes">
 <h2>Render passes<a class="headerlink" href="#render-passes" title="Link to this heading">#</a></h2>
 <p>One run can produce several looks of the same episodes. Each <strong>pass</strong> is one YAML, rendered over
-every source episode into its own <code class="docutils literal notranslate"><span class="pre">job_&lt;name&gt;/</span></code> directory, and the merge takes them all:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>render_flags_plain.yaml
---render-pass<span class="w"> </span>render_flags_allrand_texcache.yaml:3
+every source episode into its own <code class="docutils literal notranslate"><span class="pre">job_&lt;name&gt;/</span></code> directory, where <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the YAML’s file name
+with any <code class="docutils literal notranslate"><span class="pre">render_flags_</span></code> prefix stripped. The merge takes them all:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml:3
 </pre></div>
 </div>
-<p>That renders the plain look once and the randomized look three times, so the merged dataset is
-4x the source episodes. The <code class="docutils literal notranslate"><span class="pre">:N</span></code> suffix is per pass; without it a pass renders once.</p>
-<p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> are shorthand for the two most common
-passes, and compose with each other exactly as two <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> entries would.</p>
+<p>That renders the plain look once into <code class="docutils literal notranslate"><span class="pre">job_plain</span></code> and the randomized look three times into
+<code class="docutils literal notranslate"><span class="pre">job_allrand_texcache</span></code>, so the merged dataset is 4x the source episodes. The <code class="docutils literal notranslate"><span class="pre">:N</span></code> suffix is per
+pass, and without it a pass renders once.</p>
+<p>Passes are keyed by that <code class="docutils literal notranslate"><span class="pre">job_&lt;name&gt;</span></code>, so two YAMLs whose names reduce to the same one are not
+both rendered. The run keeps the first and warns. The merge also reads every <code class="docutils literal notranslate"><span class="pre">job_*</span></code> directory
+under <code class="docutils literal notranslate"><span class="pre">render/out/</span></code>, not only the passes this command asked for, so a directory left by an
+earlier run of the same experiment is merged again. Delete it, or use a fresh <code class="docutils literal notranslate"><span class="pre">--experiment-id</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> are shorthand for the two most common
+passes and resolve to exactly these entries, so a run can be written either way. Prefer
+<code class="docutils literal notranslate"><span class="pre">--render-pass</span></code>: it names the YAML and the copy count in one place, and it is the only form that
+scales past two looks. <a class="reference internal" href="#through-the-pipeline">Through the pipeline</a> has the translation.</p>
 <p>Each pass is a separate renderer invocation rather than extra <code class="docutils literal notranslate"><span class="pre">-N</span></code> iterations within one,
 because a process applies one flags dict before the sim is built, and the per-wave levers (dome,
-skybox, exposure) are scene-global: a differently-flagged episode sharing a wave would still be
-lit by that wave’s draw. Separate job directories also mean each pass resumes independently, and
-a problem counts as rendered only when <strong>every</strong> pass has landed.</p>
-</section>
-<section id="multiplexing-n-copies-within-one-pass">
-<h2>Multiplexing: N copies within one pass<a class="headerlink" href="#multiplexing-n-copies-within-one-pass" title="Link to this heading">#</a></h2>
+skybox, exposure) are scene-global, so a differently-flagged episode sharing a wave would still
+be lit by that wave’s draw. Separate job directories also mean each pass resumes independently,
+and a problem counts as rendered only when <strong>every</strong> pass has landed. Otherwise a failed pass
+would contribute 3 copies where 4 were promised and nothing would report it.</p>
+<p><strong>A plain pass keeps the scene and drops the draws.</strong> The point of rendering one beside
+randomized passes is that they are comparable: same backdrop, same renderer, only the sampling
+gone. That is why it takes a YAML rather than rendering with no flags at all. Dropping the YAML
+would bring the backdrop geometry back and change the render mode, giving a different scene
+rather than the same one unrandomized. <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a> is that baseline, and
+<code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code> replaces it when you want a different one.</p>
+<section id="n-copies-within-one-pass">
+<h3>N copies within one pass<a class="headerlink" href="#n-copies-within-one-pass" title="Link to this heading">#</a></h3>
 <p>Often you want several visual variants of the same trajectory, for example to make a policy
-robust to lighting. <code class="docutils literal notranslate"><span class="pre">-N</span></code> replays each source episode N times, each time with freshly sampled
-randomization. The state and action trajectory is identical across the copies and only the pixels
-and camera columns differ, so the result has <strong>N×</strong> the source’s episodes and frames. Each output
-episode records its <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code> and <code class="docutils literal notranslate"><span class="pre">iter</span></code>.</p>
-<p>In the pipeline, <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> adds one further pass with the randomized sections of
-the YAML removed, making the merged dataset <strong>(N+1)×</strong> the source:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-n<span class="w"> </span><span class="m">3</span><span class="w"> </span>--render-non-randomized
+robust to lighting. A pass written <code class="docutils literal notranslate"><span class="pre">FLAGS.yaml:N</span></code> replays each source episode N times, each time
+with freshly sampled randomization. The state and action trajectory is identical across the
+copies and only the pixels and camera columns differ, so the pass has <strong>N times</strong> the source’s
+episodes and frames. Each output episode records the <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code> it came from, and its
+<code class="docutils literal notranslate"><span class="pre">iter</span></code> when there is more than one copy.</p>
+<p>Running <code class="docutils literal notranslate"><span class="pre">render.py</span></code> by hand, the same multiplier is <code class="docutils literal notranslate"><span class="pre">-N</span></code> / <code class="docutils literal notranslate"><span class="pre">--renders_per_episode</span></code>.</p>
+<p>A plain pass beside a randomized one makes the merged dataset <strong>(N+1) times</strong> the source. Written
+with the shorthands and as passes, these are the same run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-randomized<span class="w"> </span><span class="se">\</span>
+--render-flags<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml<span class="w"> </span><span class="se">\</span>
+--render-n<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+--render-non-randomized
 </pre></div>
 </div>
-<p>That extra pass is a separate invocation into a sibling job directory, not an extra <code class="docutils literal notranslate"><span class="pre">-N</span></code>
-iteration. One process has one flags dict, applied before the sim is built, and the per-wave
-settings (dome, skybox, exposure, sun) are global to the scene. So an “un-randomized” copy sharing
-a wave with randomized ones would still be lit by that wave’s draw.</p>
-<p><strong>“Without randomization” keeps the scene and drops the draws.</strong> The point of a plain pass beside
-randomized ones is that they are comparable: same backdrop, same renderer, only the sampling
-gone. That is why it takes a YAML rather than rendering with no flags at all — dropping the YAML
-would bring the backdrop geometry back and change the render mode, giving a different scene
-rather than the same one unrandomized. The derived YAML therefore keeps
-<code class="docutils literal notranslate"><span class="pre">cameras</span></code>, <code class="docutils literal notranslate"><span class="pre">hide_objects</span></code>, <code class="docutils literal notranslate"><span class="pre">env_spacing</span></code>, <code class="docutils literal notranslate"><span class="pre">render_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">carb_settings</span></code> and <code class="docutils literal notranslate"><span class="pre">texture_cache</span></code>,
-drops everything else, and passes <code class="docutils literal notranslate"><span class="pre">--enable_gi</span></code> when the source had a skybox. It is written to
-<code class="docutils literal notranslate"><span class="pre">&lt;experiment&gt;/render/non_randomized_flags.yaml</span></code>, with a header naming what was dropped. You can
-replace it with <code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code>.</p>
-<p>A problem counts as rendered only when <strong>every</strong> pass has landed. Otherwise a failed original
-pass would contribute N copies where N+1 were promised, and nothing would report it.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml:3<span class="w"> </span><span class="se">\</span>
+--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+</pre></div>
+</div>
+<p>Both give <code class="docutils literal notranslate"><span class="pre">job_allrand_texcache_glyphs_trainsplit_symmetric</span></code> with 3 copies per episode and
+<code class="docutils literal notranslate"><span class="pre">job_plain</span></code> with 1, so the merge ships 4x the source episodes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">3</span> <span class="pre">--render-non-randomized</span></code> on its own is <strong>not</strong> that run. With no
+<code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> and no <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> there is no randomized pass for <code class="docutils literal notranslate"><span class="pre">--render-n</span></code> to
+multiply, so it resolves to the plain pass alone, at 1x.</p>
+</section>
 </section>
 <section id="reproducing-a-recorded-look">
 <h2>Reproducing a recorded look<a class="headerlink" href="#reproducing-a-recorded-look" title="Link to this heading">#</a></h2>
@@ -752,8 +781,10 @@ pass would contribute N copies where N+1 were promised, and nothing would report
 </section>
 <section id="flags">
 <h2>Flags<a class="headerlink" href="#flags" title="Link to this heading">#</a></h2>
-<p>These are the options of <code class="docutils literal notranslate"><span class="pre">render.py</span></code>. <code class="docutils literal notranslate"><span class="pre">datasets_dir</span></code> is positional and <code class="docutils literal notranslate"><span class="pre">--output</span></code> is required;
-everything else has a default.</p>
+<p>These are <code class="docutils literal notranslate"><span class="pre">render.py</span></code>’s own options. <code class="docutils literal notranslate"><span class="pre">datasets_dir</span></code> is positional and <code class="docutils literal notranslate"><span class="pre">--output</span></code> is required,
+and everything else has a default. Isaac Lab’s <code class="docutils literal notranslate"><span class="pre">AppLauncher</span></code> adds its own on top, such as
+<code class="docutils literal notranslate"><span class="pre">--device</span></code>, <code class="docutils literal notranslate"><span class="pre">--kit_args</span></code> and <code class="docutils literal notranslate"><span class="pre">--rendering_mode</span></code>. <code class="docutils literal notranslate"><span class="pre">--headless</span></code> and <code class="docutils literal notranslate"><span class="pre">--enable_cameras</span></code> are forced
+on after parsing, so passing them changes nothing.</p>
 <section id="source-and-output">
 <h3>Source and output<a class="headerlink" href="#source-and-output" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -774,11 +805,11 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env_file</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>The env package’s <code class="docutils literal notranslate"><span class="pre">env.py</span></code>. Ignored for unmerged datasets, which are matched per problem.</p></td>
+<td><p>The env package’s <code class="docutils literal notranslate"><span class="pre">env.py</span></code>. For an unmerged dataset it is only the fallback, used when no per-problem env matches.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--envs_dir</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>A root holding per-problem env packages as <code class="docutils literal notranslate"><span class="pre">&lt;envs_dir&gt;/&lt;problem&gt;/env.py</span></code>. Takes precedence over both of the above.</p></td>
+<td><p>A root holding per-problem env packages as <code class="docutils literal notranslate"><span class="pre">&lt;envs_dir&gt;/&lt;problem&gt;/env.py</span></code>. Tried first, then <code class="docutils literal notranslate"><span class="pre">&lt;datasets_dir&gt;/envs/&lt;problem&gt;/env.py</span></code>, then <code class="docutils literal notranslate"><span class="pre">--env_file</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--assets_paths</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
@@ -812,7 +843,7 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--episodes_file</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Render only the listed episodes, for a targeted patch. Output episodes are renumbered per split, but each records its <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code>.</p></td>
+<td><p>Render only the listed episodes, for a targeted patch. Output episodes are renumbered per split, but each records its <code class="docutils literal notranslate"><span class="pre">src_episode_index</span></code>. Refused when the flags YAML sets <code class="docutils literal notranslate"><span class="pre">randomize_task_letters</span></code>, as the <code class="docutils literal notranslate"><span class="pre">glyphs</span></code> file does. Use <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> there.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
@@ -820,11 +851,11 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--fragment_invariant</span></code></p></td>
 <td><p><strong>on</strong></p></td>
-<td><p>Keep the full per-problem episode list inside a fragment, so render-uids, wave grouping and randomization draws match a single-machine run. Reassembling the fragments then gives a merge that is byte-identical to one big run.</p></td>
+<td><p>Keep the full per-problem episode list inside a fragment, so render-uids, wave grouping and randomization draws match a single-process run. Reassembling the fragments then gives a merge that is byte-identical to one big run.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--split_groups</span></code></p></td>
 <td><p>off</p></td>
-<td><p>Render each member of a vecgen <code class="docutils literal notranslate"><span class="pre">problem_grp_*</span></code> directory as its own unit. Must match how execution was run.</p></td>
+<td><p>Render each member of a vecgen <code class="docutils literal notranslate"><span class="pre">problem_grp_*</span></code> directory as its own unit, and a no-op on a source that has none. Alongside <code class="docutils literal notranslate"><span class="pre">--episode_offset</span></code> it must match the enumeration the offsets were planned with, or every slice misaligns.</p></td>
 </tr>
 </tbody>
 </table>
@@ -850,15 +881,15 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_format</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">12bit</span></code></p></td>
-<td><p>How the main depth is stored. <code class="docutils literal notranslate"><span class="pre">12bit</span></code> is native <code class="docutils literal notranslate"><span class="pre">gray12le</span></code>; <code class="docutils literal notranslate"><span class="pre">rg8</span></code> is the same uint12 packed into lossless 8-bit RGB, about 3x larger but much faster to read at random positions. Neither loses precision.</p></td>
+<td><p>How the main depth is stored. <code class="docutils literal notranslate"><span class="pre">12bit</span></code> is native <code class="docutils literal notranslate"><span class="pre">gray12le</span></code>. <code class="docutils literal notranslate"><span class="pre">rg8</span></code> is the same uint12 packed into lossless 8-bit RGB, about 3x larger but much faster to read at random positions. Neither loses precision.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_codec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">hevc</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">hevc</span></code> encodes about 15x faster; <code class="docutils literal notranslate"><span class="pre">av1</span></code> produces smaller files. Both are lossless 12-bit millimetres.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hevc</span></code> encodes about 15x faster, <code class="docutils literal notranslate"><span class="pre">av1</span></code> produces smaller files. Both are lossless 12-bit millimetres.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--depth_gop</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
-<td><p>The keyframe interval for the main depth. <code class="docutils literal notranslate"><span class="pre">1</span></code> is the friendliest for random access and the largest; higher values are smaller and faster to encode, at the cost of seeking.</p></td>
+<td><p>The keyframe interval for the main depth. <code class="docutils literal notranslate"><span class="pre">1</span></code> is the friendliest for random access and the largest. Higher values are smaller and faster to encode, at the cost of seeking.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rgb_GOP</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
@@ -866,11 +897,11 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--extra_rgb</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Also write a 224-px RGB video per camera, in the HVLA training sidecar layout. It is resized with Pillow BILINEAR; ffmpeg <code class="docutils literal notranslate"><span class="pre">scale</span></code> is <strong>not</strong> equivalent.</p></td>
+<td><p>Also write a 224-px RGB video per camera, in the training sidecar layout. It is resized with Pillow BILINEAR, and ffmpeg <code class="docutils literal notranslate"><span class="pre">scale</span></code> is <strong>not</strong> equivalent.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--extra_depth</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Also write a 224-px depth video per camera: <code class="docutils literal notranslate"><span class="pre">rg8_224</span></code>, <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> or <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code>. <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> and <code class="docutils literal notranslate"><span class="pre">rg8_224</span></code> are lossless and decode to identical depth, <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> at a fraction of the size. <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> packs 10 bits (R = mm &gt;&gt; 5, G = mm &amp; 31) and <strong>clips at 1023 mm</strong>; it is what the RI training set and the pipeline default use.</p></td>
+<td><p>Also write a 224-px depth video per camera: <code class="docutils literal notranslate"><span class="pre">rg8_224</span></code>, <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> or <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code>. <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> and <code class="docutils literal notranslate"><span class="pre">rg8_224</span></code> are lossless and decode to identical depth, <code class="docutils literal notranslate"><span class="pre">g12_224</span></code> at a fraction of the size. <code class="docutils literal notranslate"><span class="pre">rg8_55_224</span></code> packs 10 bits (R = mm &gt;&gt; 5, G = mm &amp; 31) and <strong>clips at 1023 mm</strong>, and it is what the pipeline passes by default.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--extra_rgb_GOP</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
@@ -878,11 +909,11 @@ everything else has a default.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render_scale</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Scale the preset cameras’ resolution while keeping the field of view. Requires <code class="docutils literal notranslate"><span class="pre">--skip_cameras</span> <span class="pre">gripper_camera</span> <span class="pre">left_camera</span></code>, because robot-mounted cameras are not scaled.</p></td>
+<td><p>Scale the preset cameras’ resolution while keeping the field of view. Requires <code class="docutils literal notranslate"><span class="pre">--skip_cameras</span> <span class="pre">gripper_camera</span> <span class="pre">left_camera</span></code>, because robot-mounted cameras are not scaled, and cannot be combined with <code class="docutils literal notranslate"><span class="pre">--match_recorded_cameras</span></code>, whose recorded intrinsics are at the old size.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--camera_base</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Where each camera’s starting pose comes from before randomization. <code class="docutils literal notranslate"><span class="pre">data</span></code> reproduces the calibration the source was captured with; <code class="docutils literal notranslate"><span class="pre">scene</span></code> uses the built SceneConfig. Unusable recorded values fall back to <code class="docutils literal notranslate"><span class="pre">scene</span></code> <strong>with a warning</strong>, never silently.</p></td>
+<td><p>Where each camera’s starting pose comes from before randomization. <code class="docutils literal notranslate"><span class="pre">data</span></code> reproduces the calibration the source was captured with, <code class="docutils literal notranslate"><span class="pre">scene</span></code> uses the built SceneConfig. Unusable recorded values fall back to <code class="docutils literal notranslate"><span class="pre">scene</span></code> <strong>with a warning</strong>, never silently.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--match_recorded_cameras</span></code></p></td>
 <td><p>off</p></td>
@@ -904,11 +935,11 @@ everything else has a default.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--flags</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>The randomization YAML.</p></td>
+<td><p>The flags YAML.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-N</span></code>, <code class="docutils literal notranslate"><span class="pre">--renders_per_episode</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
-<td><p>The number of renders per source episode. See <a class="reference internal" href="#render-passes">Multiplexing</a>.</p></td>
+<td><p>The number of renders per source episode. See <a class="reference internal" href="#render-passes">render passes</a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--dr_seeding</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">hash</span></code></p></td>
@@ -920,7 +951,7 @@ everything else has a default.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--enable_gi</span></code></p></td>
 <td><p>off</p></td>
-<td><p>Turn on RTX global illumination and reflections. Enabled automatically when the YAML has a <code class="docutils literal notranslate"><span class="pre">skybox</span></code> block.</p></td>
+<td><p>Turn on RTX global illumination and reflections. Enabled automatically when the YAML has a <code class="docutils literal notranslate"><span class="pre">skybox</span></code> block, which <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a> and both <code class="docutils literal notranslate"><span class="pre">allrand</span></code> files have.</p></td>
 </tr>
 </tbody>
 </table>
@@ -962,11 +993,11 @@ missing episode.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--rtx_warmup_frames</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
-<td><p>Extra render passes at <code class="docutils literal notranslate"><span class="pre">t==0</span></code> of each batch, so temporal renderers converge and frame 0 has no warm-up artifact. Try 8–16 if artifacts persist.</p></td>
+<td><p>Extra render passes at <code class="docutils literal notranslate"><span class="pre">t==0</span></code> of each batch, so temporal renderers converge and frame 0 has no warm-up artifact. Try 8 to 16 if artifacts persist. The pipeline passes <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--antialiasing</span></code></p></td>
 <td><p>preset (DLSS)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Off</span></code>, <code class="docutils literal notranslate"><span class="pre">FXAA</span></code>, <code class="docutils literal notranslate"><span class="pre">TAA</span></code>, <code class="docutils literal notranslate"><span class="pre">DLSS</span></code> or <code class="docutils literal notranslate"><span class="pre">DLAA</span></code>. <code class="docutils literal notranslate"><span class="pre">Off</span></code> and <code class="docutils literal notranslate"><span class="pre">FXAA</span></code> work on single frames; the others carry a temporal history that is empty on frame 0.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Off</span></code>, <code class="docutils literal notranslate"><span class="pre">FXAA</span></code>, <code class="docutils literal notranslate"><span class="pre">TAA</span></code>, <code class="docutils literal notranslate"><span class="pre">DLSS</span></code> or <code class="docutils literal notranslate"><span class="pre">DLAA</span></code>. <code class="docutils literal notranslate"><span class="pre">Off</span></code> and <code class="docutils literal notranslate"><span class="pre">FXAA</span></code> work on single frames, the others carry a temporal history that is empty on frame 0. Has no effect under the shipped path-tracing files. See <a class="reference internal" href="#common-pitfalls">Common pitfalls</a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--disable_dlss</span></code></p></td>
 <td><p>off</p></td>
@@ -982,7 +1013,7 @@ missing episode.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--env_spacing</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (5.0)</p></td>
-<td><p>Override the scene’s env spacing. Larger spacing stops a neighbouring env’s backdrop from leaking into a camera’s peripheral view when a skybox is used.</p></td>
+<td><p>Override the scene’s env spacing. Larger spacing stops a neighbouring env’s backdrop from leaking into a camera’s peripheral view when a skybox is used. <strong>A YAML <code class="docutils literal notranslate"><span class="pre">env_spacing</span></code> wins over this flag</strong>, so a file that sets one, as <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a> and both <code class="docutils literal notranslate"><span class="pre">allrand</span></code> files do, decides the spacing.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1037,8 +1068,8 @@ missing episode.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">render.py</span></code> hangs after it finishes<a class="headerlink" href="#render-py-hangs-after-it-finishes" title="Link to this heading">#</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> prints <code class="docutils literal notranslate"><span class="pre">all</span> <span class="pre">jobs</span> <span class="pre">done</span></code> and then often <strong>hangs in Isaac teardown</strong>. Run it through
 <code class="docutils literal notranslate"><span class="pre">scripts/render/run_local_render.py</span></code>, which watches for that marker and kills the process group
-30 s later; the pipeline always does. Never judge success from the exit status; judge it from the
-marker and the result on disk.</p>
+30 s later, as the pipeline always does. Never judge success from the exit status. Judge it from
+the marker and the result on disk.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/render/run_local_render.py<span class="w"> </span>--<span class="w"> </span>python<span class="w"> </span>scripts/render/render.py<span class="w"> </span>&lt;dataset_dir&gt;<span class="w"> </span>...
 </pre></div>
 </div>
@@ -1047,9 +1078,10 @@ marker and the result on disk.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> does not mean the render produced data<a class="headerlink" href="#completed-true-does-not-mean-the-render-produced-data" title="Link to this heading">#</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> means the render reached a final state, not that it <em>has data</em>. It is written
 so that a re-run does not retry the problem forever, so it is also written when the recorded block
-size is not in the problem’s size table, or when every source parquet is unreadable. Those cases write a
-<code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> but <strong>no <code class="docutils literal notranslate"><span class="pre">info.json</span></code></strong>, and <code class="docutils literal notranslate"><span class="pre">info.json</span></code> is what merge actually needs. Note
-also that there is no <code class="docutils literal notranslate"><span class="pre">total_episodes</span></code> key; the problem-wide count is <code class="docutils literal notranslate"><span class="pre">episodes_total</span></code>.</p>
+size is not in the problem’s size table, or when every source parquet is unreadable. Those cases
+write a <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code> but <strong>no <code class="docutils literal notranslate"><span class="pre">info.json</span></code></strong>, and <code class="docutils literal notranslate"><span class="pre">info.json</span></code> is what merge actually needs.
+Note also that there is no <code class="docutils literal notranslate"><span class="pre">total_episodes</span></code> key, because the problem-wide count is
+<code class="docutils literal notranslate"><span class="pre">episodes_total</span></code>.</p>
 </section>
 <section id="a-broken-render-can-still-look-complete">
 <h3>A broken render can still look complete<a class="headerlink" href="#a-broken-render-can-still-look-complete" title="Link to this heading">#</a></h3>
@@ -1059,10 +1091,20 @@ says <code class="docutils literal notranslate"><span class="pre">completed:</sp
 before using a rendered dataset.</p>
 </section>
 <section id="render-flags-camtest-yaml-produces-identical-copies">
-<h3><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code> produces identical copies<a class="headerlink" href="#render-flags-camtest-yaml-produces-identical-copies" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code> has <strong>no random section at all</strong>. An <code class="docutils literal notranslate"><span class="pre">-N</span> <span class="pre">4</span></code> run with it produces
-four pixel-identical copies, while every size-based check still reports 4x. Use it only to test
-the camera rig, never to check that randomization works.</p>
+<h3><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code></a> produces identical copies<a class="headerlink" href="#render-flags-camtest-yaml-produces-identical-copies" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code></a> has <strong>no random section at all</strong>. A <code class="docutils literal notranslate"><span class="pre">:4</span></code> pass with it produces four
+copies of the same look, identical in depth and differing in RGB only by renderer noise, while
+every size-based check still reports 4x. Use it only to test the camera rig, never to check that
+randomization works.</p>
+</section>
+<section id="antialiasing-has-no-effect-under-the-shipped-path-tracing-files">
+<h3><code class="docutils literal notranslate"><span class="pre">--antialiasing</span></code> has no effect under the shipped path-tracing files<a class="headerlink" href="#antialiasing-has-no-effect-under-the-shipped-path-tracing-files" title="Link to this heading">#</a></h3>
+<p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a> and both <code class="docutils literal notranslate"><span class="pre">allrand</span></code> files select RTX Real-Time 2.0 path tracing through
+their <code class="docutils literal notranslate"><span class="pre">carb_settings</span></code>, and that renderer does not let antialiasing be turned off.
+<code class="docutils literal notranslate"><span class="pre">--antialiasing</span></code> and <code class="docutils literal notranslate"><span class="pre">--disable_dlss</span></code> set the simulation’s antialiasing mode, which the YAML’s
+render mode then overrides, so the log prints the mode you asked for and the pixels do not
+change. Verify any antialiasing change with a pixel difference, never with the log line. To get
+a genuinely different mode, change the render mode in the YAML.</p>
 </section>
 <section id="mixing-seeding-modes-in-one-dataset">
 <h3>Mixing seeding modes in one dataset<a class="headerlink" href="#mixing-seeding-modes-in-one-dataset" title="Link to this heading">#</a></h3>
@@ -1072,16 +1114,18 @@ values. To reproduce or patch an existing dataset, pass the mode recorded in its
 </section>
 <section id="two-renders-into-the-same-output-delete-each-other-s-work">
 <h3>Two renders into the same output delete each other’s work<a class="headerlink" href="#two-renders-into-the-same-output-delete-each-other-s-work" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">--resume</span></code> <strong><code class="docutils literal notranslate"><span class="pre">rmtree</span></code>s a non-finalized <code class="docutils literal notranslate"><span class="pre">&lt;output&gt;/&lt;problem&gt;</span></code></strong>. So two renders pointed at the same
-problem directory delete each other’s work rather than failing. Never run two renders against the
-same output problem directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> <strong>deletes a non-finalized <code class="docutils literal notranslate"><span class="pre">&lt;output&gt;/&lt;problem&gt;</span></code> before rendering it</strong>, on every run
+and not only under <code class="docutils literal notranslate"><span class="pre">--resume</span></code>, because partial output can never be appended to safely. A
+finalized directory is left alone. So two renders pointed at the same problem directory delete
+each other’s work rather than failing. Never run two renders against the same output problem
+directory.</p>
 </section>
-<section id="checking-n-by-file-size-gives-the-wrong-answer">
-<h3>Checking <code class="docutils literal notranslate"><span class="pre">-N</span></code> by file size gives the wrong answer<a class="headerlink" href="#checking-n-by-file-size-gives-the-wrong-answer" title="Link to this heading">#</a></h3>
-<p>To confirm that <code class="docutils literal notranslate"><span class="pre">-N</span></code> really multiplied the dataset, count episodes, frames and distinct video
+<section id="checking-a-multiplier-by-file-size-gives-the-wrong-answer">
+<h3>Checking a multiplier by file size gives the wrong answer<a class="headerlink" href="#checking-a-multiplier-by-file-size-gives-the-wrong-answer" title="Link to this heading">#</a></h3>
+<p>To confirm that <code class="docutils literal notranslate"><span class="pre">:N</span></code> really multiplied the dataset, count episodes, frames and distinct video
 files, <strong>never bytes</strong>. Merge hardlinks videos into the merged tree, so <code class="docutils literal notranslate"><span class="pre">du</span></code> of the merged
-directory is meaningless, and different draws compress differently (measured at 2.055× for N=2,
-not 2×).</p>
+directory is meaningless, and different draws compress differently (measured at 2.055x for N=2,
+not 2x).</p>
 <p>The failure a size check cannot catch is N copies that are pixel-identical because nothing was
 randomized. Check that the copies actually <em>differ</em>: there should be distinct
 <code class="docutils literal notranslate"><span class="pre">observation.camera_pose.*</span></code> values per episode under camera randomization, and differing
@@ -1100,12 +1144,11 @@ against that.</p>
 <section id="see-also">
 <h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="local.html"><span class="std std-doc">Running locally</span></a>: the local pipeline, and the gate that decides what gets merged</p></li>
+<li><p><a class="reference internal" href="local.html"><span class="std std-doc">Running the pipeline locally</span></a>: the local pipeline, the render schedules, HDRI backdrops, and the gate that decides what gets merged</p></li>
 <li><p><a class="reference internal" href="execution.html"><span class="std std-doc">Execution</span></a>: the stage that produces the trajectories this stage replays</p></li>
 <li><p><a class="reference internal" href="merge.html"><span class="std std-doc">Merge</span></a>: how rendered problems become one training dataset</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/YAML_REFERENCE.md">YAML reference</a>: every randomization key</p></li>
 <li><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/docs/render/DETERMINISM.md">DETERMINISM.md</a>: what is reproducible, and what is not</p></li>
-<li><p><a class="reference internal" href="local.html"><span class="std std-doc">Running locally</span></a>: the two pipeline render modes, HDRI backdrops, and the invariants behind the gate</p></li>
 </ul>
 </section>
 </section>
@@ -1169,8 +1212,10 @@ against that.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-randomization">Domain randomization</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#render-passes">Render passes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#multiplexing-n-copies-within-one-pass">Multiplexing: N copies within one pass</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#render-passes">Render passes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#n-copies-within-one-pass">N copies within one pass</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reproducing-a-recorded-look">Reproducing a recorded look</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags">Flags</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source-and-output">Source and output</a></li>
@@ -1186,9 +1231,10 @@ against that.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#completed-true-does-not-mean-the-render-produced-data"><code class="docutils literal notranslate"><span class="pre">completed:</span> <span class="pre">true</span></code> does not mean the render produced data</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-broken-render-can-still-look-complete">A broken render can still look complete</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#render-flags-camtest-yaml-produces-identical-copies"><code class="docutils literal notranslate"><span class="pre">render_flags_camtest.yaml</span></code> produces identical copies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#antialiasing-has-no-effect-under-the-shipped-path-tracing-files"><code class="docutils literal notranslate"><span class="pre">--antialiasing</span></code> has no effect under the shipped path-tracing files</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mixing-seeding-modes-in-one-dataset">Mixing seeding modes in one dataset</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-renders-into-the-same-output-delete-each-other-s-work">Two renders into the same output delete each other’s work</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-n-by-file-size-gives-the-wrong-answer">Checking <code class="docutils literal notranslate"><span class="pre">-N</span></code> by file size gives the wrong answer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-a-multiplier-by-file-size-gives-the-wrong-answer">Checking a multiplier by file size gives the wrong answer</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next">Next</a></li>
