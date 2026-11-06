@@ -10,14 +10,15 @@ In this repository it is consumed by:
 |---|---|
 | `scripts/render/render.py` | `--flags` |
 | `scripts/render/render_from_params.py` | reads the recorded flags back |
-| `scripts/datagen/run_datagen_pipeline.py`, `scripts/datagen/run_playdata_pipeline.py` | `--render-flags` (default: `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml`, the RI training set's) |
+| `scripts/datagen/run_datagen_pipeline.py`, `scripts/datagen/run_playdata_pipeline.py` | `--render-pass FLAGS.yaml[:N]`, repeatable, one pass per look; there is no default |
 | the library itself | `DRSession`, for in-process consumers |
 
 The presets live in `src/toyblocks/domain_randomization/flags/`:
 
 | preset | use |
 |---|---|
-| `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | the RI training set's render and the pipeline default: `allrand_texcache` plus the train glyph split (symmetry-preserving) and per-env block colours |
+| `render_flags_plain.yaml` | one fixed look, nothing sampled: the plain baseline |
+| `render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml` | `allrand_texcache` plus the train glyph split (symmetry-preserving) and per-env block colours |
 | `render_flags_allrand_texcache.yaml` | the production all-random lighting / materials / camera render, without glyph or colour swaps |
 | `render_flags_camtest.yaml` | fixed camera overrides for quick local tests of the camera rig; randomizes nothing |
 | `render_flags_open_hybrid_camera_rand_only.yaml` | camera randomization only |

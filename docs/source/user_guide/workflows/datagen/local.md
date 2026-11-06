@@ -97,42 +97,26 @@ Each pass is a separate renderer invocation rather than extra copies inside one,
 per-wave settings (dome, skybox, exposure) are global to the scene, so two differently-flagged
 looks cannot share a wave. [Render passes](render.md#render-passes) covers this in more detail.
 
-### Which flag does what
+### What the other render flags do
+
+`--render-pass` is the only flag that turns the stage on. Every other `--render-*` flag applies
+to **every** pass the run produces, so a run cannot give two passes different cameras, different
+sidecars or different schedules.
 
 | Flag | Default | What it does |
 |---|---|---|
-| `--render-pass FLAGS.yaml[:N]` | none | Adds one pass. Repeatable. |
-| `--render-flags FLAGS.yaml` | none | Names the YAML that the two shorthand flags below use. It adds no pass on its own. |
-| `--render-randomized` | off | Shorthand for one pass of `--render-flags`, repeated `--render-n` times. |
-| `--render-n N` | `1` | Copies per source episode for `--render-randomized`. |
-| `--render-non-randomized` | off | Shorthand for one pass of [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml), which needs no YAML of your own. |
-| `--render-non-randomized-flags` | [`render_flags_plain.yaml`](https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml) | A different YAML for that pass. |
+| `--render-pass FLAGS.yaml[:N]` | none | Adds one pass, optionally `N` copies of each episode. Repeatable. |
+| `--render-schedule` | `coupled` | How every render is scheduled against the executions. |
+| `--render-skip-cameras` | `left_camera` | Cameras no pass renders. |
+| `--render-skip-failure-episodes` | on | Render only successful episodes, in every pass. |
+| `--render-extra` | none | Extra `render.py` options for every pass. |
 
-The two shorthands name the common cases, and they compose with each other and with
-`--render-pass` exactly as further `--render-pass` entries would. These two commands are
-equivalent:
-
-```bash
---render-randomized --render-flags path/to/dr.yaml --render-n 3 --render-non-randomized
-```
-
-```bash
---render-pass path/to/dr.yaml:3 --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
-```
-
-**`--render-flags` on its own renders nothing.** It carries a value for the shorthands rather
-than requesting a pass, so a command with `--render-flags` and no `--render-randomized` runs the
-pipeline with the render stage off. Older commands pair the two, because `--render-randomized`
-was once the only way to render. `--render`, `--render-local` and the `--rerender*` spellings are
-superseded, and the pipeline says so when it sees them.
-
-**With no render flag at all the stage is off.** The merge then takes the execution data
+**With no `--render-pass` the stage is off.** The merge then takes the execution data
 directly, the dataset holds state and actions with no video, and annotation is skipped with a
 warning, because projecting goals into the front camera needs a camera.
 
-**Asking for a render that resolves to no pass is an error.** `--render-randomized` without
-`--render-flags` stops the run before any work and names the shipped YAMLs, rather than
-quietly skipping the stage.
+**A YAML that is not readable here stops the run before any work**, rather than failing minutes
+into Isaac startup once the GPU is already busy. Every pass is checked.
 
 A render cannot be combined with `--vecgen-record-videos`. Recording in-physics video and then
 overwriting it pays the slow physics-render cost for frames nothing reads.
@@ -182,11 +166,10 @@ between the two, or a first finished problem early rather than at the end of a c
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--render-local-num-envs` | `8` | Envs per render wave, under either schedule. A **floor**, not a preference: the render spawns env *i* at block-size slot *i* % *profiles*, so a value below `--num-scene-profiles` leaves the high slots without an env and **every problem is skipped**. The pipeline refuses that pairing up front. 8 keeps the encoder's memory use survivable beside Isaac. |
-| `--render-local-stall-timeout` | `3600` | SIGKILL the render if it prints nothing for this many seconds. |
-| `--render-local-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and `scripts/render/fast_patch.py` fills video holes afterwards. |
+| `--render-num-envs` | `8` | Envs per render wave, under either schedule. A **floor**, not a preference: the render spawns env *i* at block-size slot *i* % *profiles*, so a value below `--num-scene-profiles` leaves the high slots without an env and **every problem is skipped**. The pipeline refuses that pairing up front. 8 keeps the encoder's memory use survivable beside Isaac. |
+| `--render-stall-timeout` | `3600` | SIGKILL the render if it prints nothing for this many seconds. |
+| `--render-fail-on-video-defects` | off | Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and `scripts/render/fast_patch.py` fills video holes afterwards. |
 
-Despite their names, the `--render-local-*` flags apply to both schedules.
 `--render-skip-cameras` and `--render-extra` are described in [Rendering](render.md).
 
 ### Render arguments the pipeline pins for you
@@ -201,7 +184,7 @@ against one you ran by hand:
 | `--camera_base` | `scene` | `data` |
 | `--rtx_warmup_frames` | `16` | `1` |
 
-`--num_envs` comes from `--render-local-num-envs`. `--render-extra` is appended after these and
+`--num_envs` comes from `--render-num-envs`. `--render-extra` is appended after these and
 wins over them, apart from the exceptions noted under
 [`--render-extra` needs the `=` form](#troubleshooting).
 
@@ -252,7 +235,7 @@ at the end, and the next stage works with the problems that succeeded.
 
 ### How much fits
 
-Measured on one RTX 5090 (32,607 MiB) at `--render-local-num-envs 8`:
+Measured on one RTX 5090 (32,607 MiB) at `--render-num-envs 8`:
 
 | | peak VRAM | peak GPU util | mean util while busy |
 |---|---|---|---|

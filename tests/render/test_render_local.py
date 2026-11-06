@@ -1,4 +1,4 @@
-"""`--render-local`: the guards, and the argv it hands render.py.
+"""`--render-pass`: the guards, and the argv it hands render.py.
 
 Everything here is CPU-only and sub-second. The expensive failure this guards against is a typo in
 the composed argv: render.py uses strict parse_args(), so one bad flag dies ~245s into Kit
@@ -17,7 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 PIPELINE = ROOT / "scripts/datagen/run_datagen_pipeline.py"
 RENDER = ROOT / "scripts/render/render.py"
-#: A real, locally-readable flags YAML. --render-flags has no default, so every run that
+#: A real, locally-readable flags YAML. --render-pass has no default, so every run that
 #: renders has to name one.
 CAMTEST = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"
 
@@ -49,47 +49,108 @@ def _run(*flags: str):
 
 def test_rejects_in_physics_video():
     """Recording video in the physics loop and then rendering over it is pure waste."""
-    rc, out = _run("--render-local", "--vecgen-record-videos",
-                   "--render-flags", str(CAMTEST))
+    rc, out = _run("--render-pass", str(CAMTEST), "--vecgen-record-videos")
     assert rc != 0 and "--vecgen-record-videos" in out
-
-
-def test_render_local_is_the_coupled_schedule_not_an_alternative_stage():
-    """The old spelling now selects a SCHEDULE, so it composes with the stage flag."""
-    rc, out = _run("--render-local", "--render-randomized", "--render-flags", str(CAMTEST))
-    assert "deprecated" in out
-    assert "alternatives" not in out
 
 
 def test_rejects_a_flags_yaml_that_is_not_local():
     """A YAML that exists only inside the render image cannot drive a local render."""
-    rc, out = _run("--render-local", "--render-flags",
+    rc, out = _run("--render-pass",
                    "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml")
     assert rc != 0 and "readable on THIS machine" in out
 
 
-def test_render_flags_has_no_default_and_both_shipped_yamls_exist():
-    """The look is always named explicitly; neither render runs on an implicit YAML."""
+def test_render_pass_has_no_default_and_the_shipped_yamls_exist():
+    """The look is always named explicitly: no render runs on an implicit YAML."""
     mod = _pipeline_module()
-    assert mod.build_parser().get_default("render_flags") is None
-    ri = mod.RENDER_FLAGS_DEFAULT
-    assert ri.endswith("render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml")
-    assert (ROOT / ri).is_file(), ri
-    plain = "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
-    assert (ROOT / plain).is_file(), plain
+    assert mod.build_parser().get_default("render_pass") is None
+    for name in ("render_flags_plain.yaml",
+                 "render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"):
+        f = ROOT / "src/toyblocks/domain_randomization/flags" / name
+        assert f.is_file(), f
 
 
-def test_a_randomized_render_without_a_flags_yaml_is_refused():
-    """It would otherwise resolve to no pass and skip the stage in silence."""
-    rc, out = _run("--render-randomized")
-    assert rc != 0 and "--render-flags" in out
+#: Every spelling the cleanup removed. None may be SILENTLY accepted: argparse abbreviates, so a
+#: removed flag that is a unique prefix of a surviving one is absorbed by it. --render-n 16 was
+#: taken as --render-num-envs 16, rendering one copy per episode with 16 envs per wave -- a run
+#: that looks successful and ships the wrong number of episodes.
+REMOVED_SPELLINGS = [
+    "--render-randomized", "--rerender", "--render-flags", "--rerender-flags",
+    "--render-n", "--rerender-n", "--render-non-randomized",
+    "--render-non-randomized-flags", "--render", "--render-local", "--rerender-local",
+    "--render-local-num-envs", "--render-local-stall-timeout",
+    "--render-local-fail-on-video-defects", "--rerender-schedule", "--rerender-extra",
+    "--rerender-skip-cameras", "--rerender-skip-failure-episodes",
+]
 
 
-def test_a_plain_render_needs_no_flags_yaml():
-    """--render-non-randomized falls back to the shipped plain YAML."""
+@pytest.mark.parametrize("flag", REMOVED_SPELLINGS)
+def test_a_removed_spelling_is_never_silently_accepted(flag):
     mod = _pipeline_module()
-    args = mod.build_parser().parse_args(["--experiment-id", "x", "--render-non-randomized"])
-    assert [f for f, _ in mod.resolve_render_passes(args)] == [mod.PLAIN_RENDER_FLAGS]
+    with pytest.raises(SystemExit):
+        mod.build_parser().parse_args(
+            ["--experiment-id", "x", "--render-pass", str(CAMTEST), flag, "16"])
+
+
+def test_render_n_says_what_replaced_it(capsys):
+    """It is a unique prefix of --render-num-envs, so without an exact option it is absorbed."""
+    mod = _pipeline_module()
+    with pytest.raises(SystemExit):
+        mod.build_parser().parse_args(
+            ["--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-n", "3"])
+    err = capsys.readouterr().err
+    assert "--render-n has been removed" in err and "--render-pass FLAGS.yaml:3" in err
+
+
+PLAIN = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+
+
+def _resumable_experiment(root: Path, *, job_dirs: tuple[str, ...]) -> None:
+    """An experiment whose earlier run finished every stage up to the merge."""
+    base = root / "datasets" / "unmerged" / "_guard"
+    (base / ".pipeline_state").mkdir(parents=True)
+    for stage in ("task_gen", "env", "exec", "render"):
+        (base / ".pipeline_state" / f"{stage}.done").write_text("")
+    for job in job_dirs:
+        (base / "render" / "out" / job / "problem_a" / "blocks_success" / "meta").mkdir(parents=True)
+
+
+def test_resuming_with_a_new_pass_refuses_to_merge_without_it(tmp_path):
+    """--resume disables every stage before the first unfinished one, so the render is skipped.
+
+    Merging anyway would ship only the passes the EARLIER run rendered, at a size this command
+    does not describe -- the silent-wrong-size failure the pass accounting exists to prevent.
+    """
+    _resumable_experiment(tmp_path, job_dirs=("job_plain",))
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "--experiment-id", "_guard",
+         "--output-root", str(tmp_path), "--resume", "--skip-annotate",
+         "--render-pass", str(PLAIN), "--render-pass", str(CAMTEST)],
+        capture_output=True, text=True, cwd=ROOT, timeout=600,
+    )
+    out = r.stdout + r.stderr
+    assert r.returncode != 0, out[-600:]
+    assert "job_camtest was asked for but never rendered" in out, out[-600:]
+
+
+def test_resuming_with_the_same_passes_still_merges(tmp_path):
+    """The guard must not fire when every pass this run asks for is already on disk."""
+    _resumable_experiment(tmp_path, job_dirs=("job_plain",))
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "--experiment-id", "_guard",
+         "--output-root", str(tmp_path), "--resume", "--skip-annotate",
+         "--render-pass", str(PLAIN)],
+        capture_output=True, text=True, cwd=ROOT, timeout=600,
+    )
+    out = r.stdout + r.stderr
+    assert "was asked for but never rendered" not in out, out[-600:]
+
+
+def test_no_render_pass_means_no_render_stage():
+    """--render-pass is the only thing that turns the stage on."""
+    mod = _pipeline_module()
+    args = mod.build_parser().parse_args(["--experiment-id", "x"])
+    assert mod.resolve_render_passes(args) == []
 
 
 def test_render_pass_names_a_look_directly():
@@ -105,11 +166,11 @@ def test_render_pass_names_a_look_directly():
 def argv():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-local",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
     ])
     return mod, mod.local_render_argv(args, Path("/b/rr/src/problem_x"),
-                                        Path("/b/rr/out/job_local"), "/b/envs")
+                                        Path("/b/rr/out/job_camtest"), "/b/envs",
+                                        flags_path=CAMTEST, renders_per_episode=1)
 
 
 def test_argv_is_accepted_by_render_argparse(argv):
@@ -165,11 +226,11 @@ def test_every_skipped_camera_survives_render_argparse():
 
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-local",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
         "--render-skip-cameras", "left_camera", "gripper_camera",
     ])
-    cmd = mod.local_render_argv(args, Path("/b/rr/src/p"), Path("/b/rr/out/job_local"), "/b/envs")
+    cmd = mod.local_render_argv(args, Path("/b/rr/src/p"), Path("/b/rr/out/job_camtest"),
+                                "/b/envs", flags_path=CAMTEST, renders_per_episode=1)
     assert cmd.count("--skip_cameras") == 1, "repeated --skip_cameras drops all but the last camera"
 
     # Parse it the way render.py does, so this fails on behaviour and not on spelling.
@@ -184,8 +245,7 @@ def test_staged_dir_is_named_problem_star():
     """stage_render_source only picks up problem_* dirs, and merge_datasets assumes the same."""
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-local",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
     ])
     steps = mod.local_render_steps(args, "/b", "/b/envs", "problem_abc")
     joined = " ".join(steps)
@@ -210,8 +270,7 @@ def test_each_pass_gets_its_own_job_dir():
 def _steps():
     mod = _pipeline_module()
     args = mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-randomized", "--render-schedule", "coupled",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml", "--render-schedule", "coupled",
     ])
     return mod, mod.local_render_steps(args, "/b", "/b/envs", "problem_abc")
 
@@ -275,23 +334,74 @@ def test_render_params_records_env_spacing_when_the_run_sets_it():
 # ------------------------------------------------------------------- --render-extra
 def _argv(*extra_flags: str):
     mod = _pipeline_module()
-    a = ["--experiment-id", "x", "--render-local",
-         "--render-flags", str(CAMTEST), "--render-skip-cameras", "left_camera", *extra_flags]
+    a = ["--experiment-id", "x", "--render-pass", str(CAMTEST),
+         "--render-skip-cameras", "left_camera", *extra_flags]
     ns = mod.build_parser().parse_args(a)
-    return mod, mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs")
+    return mod, mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                                      flags_path=CAMTEST, renders_per_episode=1)
+
+
+#: Every pass re-applies its own identity after --render-extra, so the extra is never the last
+#: thing on the line. Anything after it must be exactly that identity and nothing else.
+_PASS_IDENTITY = 4  # --flags <yaml> -N <n>
+
+
+def _tail(v, n):
+    """The n tokens the extra contributed, i.e. the ones before the pass identity."""
+    assert v[-_PASS_IDENTITY] == "--flags" and v[-2] == "-N", v[-_PASS_IDENTITY:]
+    return v[-(n + _PASS_IDENTITY):-_PASS_IDENTITY]
 
 
 def test_render_extra_reaches_the_local_render():
-    """Without it a local dataset silently lacks the HVLA sidecar streams."""
+    """Without it a local dataset silently lacks the sidecar streams."""
     _, v = _argv("--render-extra", "--extra_rgb 224 --extra_depth g12_224")
-    assert v[-4:] == ["--extra_rgb", "224", "--extra_depth", "g12_224"], v[-4:]
+    assert _tail(v, 4) == ["--extra_rgb", "224", "--extra_depth", "g12_224"], v[-8:]
 
 
 def test_render_extra_can_beat_the_pipeline_hardcodes():
     """render.py has no append/extend/count actions, so a repeat is last-wins."""
     _, v = _argv("--render-extra", "--env_spacing 999")
-    assert v[-2:] == ["--env_spacing", "999"], v[-2:]
+    assert _tail(v, 2) == ["--env_spacing", "999"], v[-6:]
     assert v.count("--env_spacing") == 2, "the pipeline's own value must still be emitted first"
+
+
+def test_the_pass_identity_carries_the_passs_own_copy_count():
+    """-N is re-applied after --render-extra, so its VALUE is what the pass asked for."""
+    mod = _pipeline_module()
+    ns = mod.build_parser().parse_args(["--experiment-id", "x", "--render-pass", f"{CAMTEST}:3"])
+    v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                              flags_path=CAMTEST, renders_per_episode=3)
+    assert v[-4:] == ["--flags", str(CAMTEST.resolve()), "-N", "3"], v[-4:]
+
+
+def test_render_num_envs_reaches_the_renders_num_envs():
+    """The renamed flag must still be the value render.py is given, not just >= the floor."""
+    mod = _pipeline_module()
+    ns = mod.build_parser().parse_args(
+        ["--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-num-envs", "16"])
+    v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                              flags_path=CAMTEST, renders_per_episode=1)
+    assert v[v.index("--num_envs") + 1] == "16"
+
+
+def test_render_fail_on_video_defects_reaches_the_render():
+    mod = _pipeline_module()
+    P = mod.build_parser()
+
+    def argv_for(*extra: str) -> list[str]:
+        ns = P.parse_args(["--experiment-id", "x", "--render-pass", str(CAMTEST), *extra])
+        return mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                                     flags_path=CAMTEST, renders_per_episode=1)
+
+    assert "--fail_on_video_defects" not in argv_for()
+    assert "--fail_on_video_defects" in argv_for("--render-fail-on-video-defects")
+
+
+def test_a_pass_identity_cannot_be_overridden_by_render_extra():
+    """--flags/-N in an extra would otherwise rewrite one pass into another."""
+    _, v = _argv("--render-extra", "--flags /tmp/other.yaml -N 9")
+    assert v[-4:-2] == ["--flags", str(CAMTEST)], v[-4:]
+    assert v[-2:] == ["-N", "1"], v[-2:]
 
 
 def test_skip_cameras_is_never_the_last_option_before_the_extra():
@@ -317,7 +427,7 @@ def test_skip_cameras_is_never_the_last_option_before_the_extra():
 
 
 def test_render_extra_cannot_steer_a_problem_out_of_the_merge():
-    """--output would move it out of render/out/job_local, where merge globs. Dropped, not fatal:
+    """--output would move it out of its render/out/job_<name> dir, where merge globs. Dropped, not fatal:
     dropping restores the pipeline's own value, which is the correct one."""
     for bad, rest in (("--output /tmp/evil", "/tmp/evil"),
                       ("--max_episodes=3", "--max_episodes"),
@@ -333,17 +443,15 @@ ALLRAND = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_allrand_
 
 
 def _mx_args(mod, *extra: str, flags=None):
-    # the current spelling: local_render_passes is called directly, so the deprecated
-    # alias resolution in main() does not run here
     return mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-randomized", "--render-schedule", "coupled",
-        "--render-flags", str(flags or CAMTEST), *extra,
+        "--experiment-id", "x", "--render-pass", str(flags or CAMTEST),
+        "--render-schedule", "coupled", *extra,
     ])
 
 
 def test_one_pass_by_default(tmp_path):
+    """One --render-pass is one look: no second pass appears unless it is asked for."""
     mod = _pipeline_module()
-    assert mod.build_parser().get_default("render_non_randomized") is False
     passes = mod.local_render_passes(_mx_args(mod), str(tmp_path))
     assert [j for j, _ in passes] == ["job_camtest"], passes
 
@@ -364,10 +472,15 @@ def test_each_look_is_a_sibling_job_dir_with_its_own_copy_count(tmp_path):
     assert passes[1][1]["flags_path"].name == CAMTEST.name
 
 
-def test_the_old_two_mode_spelling_still_produces_both_passes(tmp_path):
-    """--render-randomized -N 3 plus --render-non-randomized is the (N+1)x multiplex."""
+def test_a_randomized_pass_beside_a_plain_one_is_the_n_plus_one_multiplex(tmp_path):
+    """Three randomized copies plus one plain pass is (N+1)x the source."""
     mod = _pipeline_module()
-    args = _mx_args(mod, "--render-n", "3", "--render-non-randomized", flags=ALLRAND)
+    plain = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+    args = mod.build_parser().parse_args([
+        "--experiment-id", "x",
+        "--render-pass", f"{ALLRAND}:3",
+        "--render-pass", str(plain),
+    ])
     passes = mod.local_render_passes(args, str(tmp_path))
     assert [j for j, _ in passes] == ["job_allrand_texcache", "job_plain"]
     assert passes[0][1]["renders_per_episode"] == 3
@@ -381,6 +494,7 @@ def test_two_passes_cannot_collide_on_one_job_dir(tmp_path):
         "--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-pass", f"{CAMTEST}:2",
     ])
     assert [j for j, _ in mod.local_render_passes(args, str(tmp_path))] == ["job_camtest"]
+    assert mod.resolve_render_passes(args) == [(str(CAMTEST), 1)], "the FIRST spec must survive"
 
 
 def test_a_pass_spec_parses_its_copy_count(tmp_path):
@@ -393,7 +507,8 @@ def test_a_pass_spec_parses_its_copy_count(tmp_path):
 def test_every_pass_is_one_dispatch_item(tmp_path):
     """Exactly-once dispatch is per PROBLEM; a problem owes every pass before it is finished."""
     mod = _pipeline_module()
-    args = _mx_args(mod, "--render-non-randomized")
+    plain = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+    args = _mx_args(mod, "--render-pass", str(plain))
     steps = mod.local_render_steps(args, str(tmp_path), str(tmp_path / "envs"), "problem_x")
     renders = [s for s in steps if "run_local_render.py" in s]
     assert len(renders) == 2, steps
@@ -411,10 +526,11 @@ def test_camera_base_data_is_refused_locally():
 
     def eff(extra: str):
         ns = mod.build_parser().parse_args([
-            "--experiment-id", "x", "--render-local",
-            "--render-flags", str(CAMTEST), f"--render-extra={extra}",
+            "--experiment-id", "x", "--render-pass", str(CAMTEST),
+            f"--render-extra={extra}",
         ])
-        v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs")
+        v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                                  flags_path=CAMTEST, renders_per_episode=1)
         i = [k for k, x in enumerate(v) if x == "--camera_base"]
         assert not any(x.startswith("--camera_base=") for x in v), v
         return v[i[-1] + 1], v
@@ -427,24 +543,20 @@ def test_camera_base_data_is_refused_locally():
     assert val == "scene"
     # dropping it must not eat the rest of the extra
     val, v = eff("--camera_base data --extra_rgb 224")
-    assert val == "scene" and v[-2:] == ["--extra_rgb", "224"], v[-4:]
+    assert val == "scene" and v[-6:-4] == ["--extra_rgb", "224"], v[-6:]
 
 
 @pytest.mark.parametrize(("flags", "refused"), [
-    (("--render-flags=",), False),
-    (("--skip-annotate", "--render-flags="), False),
-    (("--render-randomized", "--render-flags="), True),
-    (("--render-local", "--render-flags="), True),
-    (("--rerender", "--rerender-flags="), True),
-    # the plain shorthand names its own YAML, so --render-flags is not consulted
-    (("--render-non-randomized", "--render-flags="), False),
+    ((), False),
+    (("--skip-annotate",), False),
+    (("--render-pass=",), True),
 ])
-def test_empty_render_flags_refused_only_when_rendering(flags, refused):
+def test_an_unreadable_render_pass_is_refused_only_when_rendering(flags, refused):
     """An explicitly empty YAML is refused exactly when a render will happen.
 
     The guard keys on enabled["render"], not on argv, because it has to sit AFTER
-    prompt_steps (interactive mode can tick the stage on without either flag) and after the
-    --render-local flip. A run that does not render must be completely unaffected.
+    prompt_steps (interactive mode can tick the stage on without the flag). A run that does
+    not render must be completely unaffected.
     """
     rc, out = _run(*flags)
-    assert ("--render-flags" in out) is refused, (flags, out[:400])
+    assert ("readable on THIS machine" in out) is refused, (flags, out[:400])

@@ -5,12 +5,12 @@ Pipeline:
   task-gen   Generate PDDL scenes                     (task_gen/play_scene.py)
   env        Build env packages + reset states         (generate_task_from_pddl.py)
   play       Generate play data                        (vecgen/run.py --play)
-  render   Render each play problem (opt-in: --render)
+  render     Render each play problem                   (opt-in: --render-pass)
   merge      Merge goal-reached episodes into one LeRobot dataset (scripts/datagen/merge_datasets.py)
   annotate   Annotate the merged dataset               (annotate_target_xy.py)
 
 Play data records exactly like the datagen pipeline's execution stage (same
-LeRobot recorder, Parquet only; images come from --render). Episodes whose goal was
+LeRobot recorder, Parquet only; images come from --render-pass). Episodes whose goal was
 reached go to ``blocks_success`` and missed ones to ``blocks_failure``, so the merge keeps
 only goal-reached episodes. The merge hardlinks every rendered video instead of copying it.
 
@@ -26,17 +26,18 @@ high-level actions.
 The play stage runs on the vecgen engine (``scripts/vecgen/run.py --play``): no TAMP and
 no planner workers. Each goal is one FF call from the symbolic state read off the sim
 (with the derived geometric facts), and the plan runs as batched vecgen skills.
---render (or --render-local) renders each problem inside its play job, right after play,
-with the datagen pipeline's render defaults (the RI training set's flags and sidecars).
+--render-pass FLAGS.yaml[:N] renders each problem inside its play job, right after play, with
+the datagen pipeline's render defaults. Repeat the flag for more looks.
 
-Every stage runs on this machine, one problem per GPU (--local-gpus, default every visible GPU).
+Every stage runs locally, one problem per GPU (--local-gpus, default every visible GPU).
 Datasets land under --output-root (default data/).
 
 Usage:
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play \\
       --num-pddls 8 --env-per-pddl 16 --play-num-envs 8 \\
       --max-plans-per-env 20 --min-successful-plans-per-env 10 --local-gpus 0 1 2 3
-  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --render \\
+  python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play \\
+      --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml \\
       --num-pddls 2 --usd-library train_blocks_large
   python scripts/datagen/run_playdata_pipeline.py --experiment-id sep25_play --resume
 
@@ -107,8 +108,7 @@ PARAM_GROUPS: list[tuple[str, str | None, list[tuple[str, str, str]]]] = [
         ("abandon_plan_percent", "abandon-plan-percent", "float"),
     ]),
     ("Render", "render", [
-        ("render_flags", "render-flags", "str"),
-        ("render_n", "render-n", "int"),
+        ("render_pass", "render-pass", "[str]"),
         ("render_skip_cameras", "render-skip-cameras", "[str]"),
         ("render_skip_failure_episodes", "render-skip-failure-episodes", "bool"),
         ("render_extra", "render-extra", "[str]"),
@@ -213,7 +213,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--play-record-videos", action="store_true",
                         help="Record the front / gripper camera videos while playing (run.py "
                              "--record-videos); without it play records Parquet only and images "
-                             "come from --render")
+                             "come from --render-pass")
     parser.add_argument("--dfa-spec", default=None,
                         help="DFA strategy choosing the goals (e.g. "
                              "src/toyblocks/playdata/dfa/library/flip_search.yaml) instead of "
@@ -284,33 +284,42 @@ def robot_init_flags(args: argparse.Namespace, style: str) -> list[str]:
     ]
 
 
-def stage_merge_source(roots: list[Path], staging_dir: Path) -> list[str]:
+def stage_merge_source(roots: list[Path], staging_dir: Path) -> tuple[list[Path], list[str]]:
     """Symlink every ``problem_*`` dir under *roots* that holds a ``blocks_success`` dataset.
 
-    merge_datasets.py decides between its layouts from the first ``problem_*`` dir it
+    The merge script decides between its layouts from the first ``problem_*`` dir it
     sees, and in the fallback layout takes whichever dataset subdir it lists first,
     which may be ``blocks_failure``. A problem dir with no ``blocks_success`` (a base
     dir whose data went to a ``__sNNN`` shard, or one whose episodes all missed) would
     trip that, so the merge reads a staging dir holding only dirs with a
     ``blocks_success``. Hardlinking videos through the symlinks still works.
-    Returns the linked names.
+
+    Each root is staged into its OWN subdirectory and handed over as a separate input
+    directory: every render pass holds the same ``problem_*`` names, so one flat staging
+    dir made a second ``--render-pass`` abort on a name collision.
+
+    Returns (staging dirs to merge, linked problem names).
     """
     if staging_dir.exists():
-        for link in staging_dir.iterdir():
-            if link.is_symlink():
-                link.unlink()
+        shutil.rmtree(staging_dir)
     staging_dir.mkdir(parents=True, exist_ok=True)
+    staged: list[Path] = []
     linked: list[str] = []
     for root in roots:
+        sub_dir = staging_dir / root.name
+        sub_dir.mkdir(parents=True, exist_ok=True)
+        found = False
         for src in sorted(root.glob("problem_*")):
             if not (src / "blocks_success" / "meta" / "info.json").exists():
                 continue
-            link = staging_dir / src.name
-            if link.is_symlink() or link.exists():
-                raise SystemExit(f"Merge: two sources are both named {src.name} ({src}, {os.readlink(link)})")
-            os.symlink(str(src.resolve()), link)
+            os.symlink(str(src.resolve()), sub_dir / src.name)
             linked.append(src.name)
-    return linked
+            found = True
+        if found:
+            staged.append(sub_dir)
+        else:
+            sub_dir.rmdir()
+    return staged, linked
 
 
 def summarize_play(play_dir: Path, slugs: list[str]) -> dict[str, Any]:
@@ -350,7 +359,7 @@ def main() -> int:
         "task_gen": not args.skip_task_gen,
         "env": not args.skip_env,
         "play": not args.skip_play,
-        "render": args.render or args.render_local,
+        "render": bool(dg.resolve_render_passes(args)),
         "merge": not args.skip_merge,
         "annotate": not args.skip_annotate,
     }
@@ -358,13 +367,34 @@ def main() -> int:
         enabled = dg.prompt_steps(enabled, steps=PLAY_STEPS)
         dg.prompt_params(args, enabled, param_groups=PARAM_GROUPS)
         exp = args.experiment_id
+        # The render runs inside each play job from resolve_render_passes, not from
+        # enabled["render"], so unticking the stage has to drop the passes too. Ticking it with
+        # no --render-pass would otherwise mark the stage complete having rendered nothing.
+        if not enabled["render"]:
+            args.render_pass = []
+        elif not dg.resolve_render_passes(args):
+            log.error("Render: the stage is ticked but no --render-pass was given. Pass "
+                      "--render-pass FLAGS.yaml[:N]")
+            return 1
 
     # -- validate -------------------------------------------------------------
     # As in the datagen pipeline: render.py spawns env i at block-size slot i % profiles, so fewer
     # envs than profiles leaves slots without an env and every problem is skipped.
-    if enabled["render"] and args.render_local_num_envs < args.num_scene_profiles:
-        log.error("--render-local-num-envs (%d) must be at least --num-scene-profiles (%d)",
-                  args.render_local_num_envs, args.num_scene_profiles)
+    if enabled["render"]:
+        # Checked before the play stage burns its GPU hours: an unreadable YAML would otherwise
+        # fail inside the render, one Isaac startup per problem later.
+        for _flags, _copies in dg.resolve_render_passes(args):
+            try:
+                readable = Path(_flags).is_file()
+            except OSError:
+                readable = False
+            if not readable:
+                log.error("the render needs a flags YAML readable on THIS machine; %s is not",
+                          _flags)
+                return 1
+    if enabled["render"] and args.render_num_envs < args.num_scene_profiles:
+        log.error("--render-num-envs (%d) must be at least --num-scene-profiles (%d)",
+                  args.render_num_envs, args.num_scene_profiles)
         return 1
     if enabled["env"] and args.env_per_pddl % args.num_envs != 0:
         log.error("env-per-pddl (%d) must be divisible by num-envs (%d)", args.env_per_pddl, args.num_envs)
@@ -548,14 +578,15 @@ def main() -> int:
         log.info("Merge: merge goal-reached episodes (%s)", "rendered" if render_ran else "play")
         log.info("=" * 60)
         roots = sorted(d for d in (render_dir / "out").glob("job_*") if d.is_dir()) if render_ran else [play_dir]
-        linked = stage_merge_source(roots, merge_source_dir)
+        staged, linked = stage_merge_source(roots, merge_source_dir)
         if not linked:
             log.error("Merge: no blocks_success dataset under %s", " ".join(str(r) for r in roots))
             return 1
-        log.info("Merge: %d problem dir(s) staged in %s", len(linked), merge_source_dir)
+        log.info("Merge: %d problem dir(s) staged in %s: %s", len(linked), merge_source_dir,
+                 " ".join(d.name for d in staged))
         dg.run([
             sys.executable, "scripts/datagen/merge_datasets.py",
-            "--input_dirs", str(merge_source_dir),
+            "--input_dirs", *(str(d) for d in staged),
             "--output_dir", merge_output_dir,
             "--cameras", *args.merge_cameras,
             "--num_workers", str(args.merge_num_workers),
@@ -568,7 +599,8 @@ def main() -> int:
     # The annotator projects goals into the front camera: needs recorded (--play-record-videos)
     # or rendered episodes.
     if enabled["annotate"] and not render_ran and not args.play_record_videos:
-        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need --render)")
+        log.warning("Annotate: skipped, the dataset records no camera (pixel goals need "
+                    "--render-pass or --play-record-videos)")
         enabled["annotate"] = False
     if enabled["annotate"]:
         log.info("=" * 60)
