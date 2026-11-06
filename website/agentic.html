@@ -85,15 +85,7 @@
 
 <section id="run"><div class="col">
   <h2>Running it</h2>
-  <p>Install ToyBlocks with the <code>vecgen</code> and <code>agentic</code> extras and bring your own OpenRouter key:</p>
-<pre>git submodule update --init curobo agentic_robotics
-uv pip install -e ".[dev,isaac,torch-cu128,vecgen,agentic]"
-export OPENROUTER_API_KEY=...
-
-agentic-robotics tasks
-agentic-robotics generate-env --task spell_hen_patterned_0_feasible_0
-agentic-robotics page --task spell_hen_patterned_0_feasible_0 --backend oracle
-agentic-robotics portal</pre>
+  <p>You need ToyBlocks installed with the <code>vecgen</code> and <code>agentic</code> extras and your own OpenRouter key. The guide covers setup, building a task's environments, and running an episode headless or in the web UI.</p>
   <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#setup">setup</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#run-an-episode">run an episode</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html#agentic-robotics-setup">install</a></p>
 </div></section>
 

@@ -119,13 +119,7 @@
 
 <section id="run"><div class="col">
   <h2>Running it</h2>
-  <p>This generates four stacking problems, runs 16 episodes of each, renders them and merges everything into one dataset:</p>
-<pre>python scripts/datagen/run_datagen_pipeline.py \
-    --render-pass src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml \
-    --experiment-id my_run --output-root outputs \
-    --task-gen-script scripts/task_gen/stack_three.py --task-gen-count 4 \
-    --env-per-problem 16 --num-envs 16 --exec-num-envs 16 \
-    --vecgen-problems-per-env 1</pre>
+  <p>The local-run guide walks through a complete run: four stacking problems, 16 episodes each, rendered and merged into one dataset, with the command to start it.</p>
   <p>The stages run one at a time. Peak GPU memory we measured on one GPU:</p>
   <div class="tbl-wrap"><table>
     <tr><th>Stage</th><th>Peak VRAM</th></tr>

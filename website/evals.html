@@ -34,12 +34,12 @@
   <h2>Modes</h2>
   <p>A mode is a choice of high level and low level. All of them are started with <code>scripts/launch_eval.py</code>.</p>
   <div class="tbl-wrap"><table>
-    <tr><th>Mode</th><th>High level</th><th>Low level</th><th>What it tells you</th><th>Flag</th></tr>
-    <tr><td>Full system</td><td>Molmo 2, queried every action chunk</td><td>ManiFlow</td><td>End-to-end performance. This is the default.</td><td><code>--policy molmo2_maniflow</code></td></tr>
-    <tr><td>Asynchronous high level</td><td>Molmo 2, queried at the start and whenever ManiFlow finishes a skill</td><td>ManiFlow (play-mode checkpoint)</td><td>The full system with fewer high-level calls.</td><td><code>--async-hl</code></td></tr>
-    <tr><td>High-level oracle</td><td>Symbolic planner using the episode's PDDL problem</td><td>ManiFlow</td><td>How good the low level is when it always gets the right command.</td><td><code>--policy maniflow</code></td></tr>
-    <tr><td>Low-level oracle</td><td>Molmo 2</td><td>The motion-planned skills used for data generation</td><td>How good the high level is when every command is carried out well. Each command acts on the block nearest its target pixel.</td><td><code>--ll-oracle</code></td></tr>
-    <tr><td>Replay</td><td>none</td><td>The dataset's recorded actions, open loop</td><td>Whether the simulation, the dataset and the eval setup agree. If replay fails, policy numbers on that data don't mean much.</td><td><code>--replay</code></td></tr>
+    <tr><th>Mode</th><th>High level</th><th>Low level</th><th>What it tells you</th><th>Docs</th></tr>
+    <tr><td>Full system</td><td>Molmo 2, queried every action chunk</td><td>ManiFlow</td><td>End-to-end performance. This is the default.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#per-policy-defaults">defaults</a></td></tr>
+    <tr><td>Asynchronous high level</td><td>Molmo 2, queried at the start and whenever ManiFlow finishes a skill</td><td>ManiFlow (play-mode checkpoint)</td><td>The full system with fewer high-level calls.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a></td></tr>
+    <tr><td>High-level oracle</td><td>Symbolic planner using the episode's PDDL problem</td><td>ManiFlow</td><td>How good the low level is when it always gets the right command.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#high-level-conditioning-modes">modes</a></td></tr>
+    <tr><td>Low-level oracle</td><td>Molmo 2</td><td>The motion-planned skills used for data generation</td><td>How good the high level is when every command is carried out well. Each command acts on the block nearest its target pixel.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a></td></tr>
+    <tr><td>Replay</td><td>none</td><td>The dataset's recorded actions, open loop</td><td>Whether the simulation, the dataset and the eval setup agree. If replay fails, policy numbers on that data don't mean much.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/replay.html">replay</a></td></tr>
   </table></div>
   <p>There is no mode with both oracles: that is just data generation. The low-level oracle always queries Molmo 2 when a skill ends, so it has no every-chunk variant. Running <code>--policy maniflow --no-use-oracle</code> gives ManiFlow only the episode's goal sentence, with no high level at all.</p>
   <div class="pair">
@@ -90,11 +90,6 @@
     <li><b>Relabel.</b> vecgen plans from the captured scene toward the recorded goal and executes it with the usual verified skills.</li>
     <li><b>Retrain and evaluate again.</b> Annotate and merge the new episodes, add them to the training mix, and repeat.</li>
   </ol>
-<pre><span class="c"># 1. evaluate with capture on</span>
-python scripts/evaluate.py ... --tamper_output_dir outputs/tamper/round1
-
-<span class="c"># 3. plan, execute, annotate and merge the recovery episodes</span>
-python scripts/datagen/run_tamper_pipeline.py --tamper-dir outputs/tamper/round1 --exec-num-envs 32</pre>
   <p>In a small test on one RTX 5090, a random-action eval on a 16-episode stacking set captured 16 states, and vecgen recovered 12–13 of them in about 72 seconds.</p>
   <p class="docs">Guide: <a href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">docs/tamper.md</a></p>
 </div></section>
@@ -107,11 +102,7 @@ python scripts/datagen/run_tamper_pipeline.py --tamper-dir outputs/tamper/round1
 
 <section id="run"><div class="col">
   <h2>Running it</h2>
-  <p><code>--smoke-test</code> runs a small profile (10 episodes, one eval GPU, two environments, three-second episodes). Leave it off for a full run over the dataset.</p>
-<pre>python scripts/launch_eval.py --smoke-test \
-    --model-path &lt;maniflow&gt;.safetensors \
-    --hl-model-path &lt;molmo2_checkpoint&gt; \
-    --dataset-path data/datasets/my_dataset</pre>
+  <p>The quick start covers a small smoke-test run (10 episodes, one eval GPU, two environments) and a full run over a dataset, for each mode above.</p>
   <p>Peak GPU memory we measured per process:</p>
   <div class="tbl-wrap"><table>
     <tr><th>Process</th><th>Peak VRAM</th></tr>
