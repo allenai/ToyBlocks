@@ -108,7 +108,7 @@ docs = [
     "sphinx-autobuild==2025.8.25",
     "myst-parser==5.1.0",
     "sphinx-copybutton>=0.5.2",
-    "sphinx-design==0.6.1",
+    "sphinx-design==0.7.0",
 ]
 
 [tool.uv]
