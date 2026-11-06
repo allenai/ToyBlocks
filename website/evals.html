@@ -20,7 +20,7 @@
   <div class="label">Training and evaluation</div>
   <h1>Training a two-level policy, then finding out which level failed</h1>
   <p class="sub">The policies we train have two levels. A high-level model (Molmo 2) looks at the camera and picks the next skill and a target point; a low-level model (ManiFlow) moves the arm. Both are trained only on ToyBlocks data. When an episode fails, we want to know which of the two was responsible, so the eval system lets you swap either one for an oracle.</p>
-  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#options">Other options</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
+  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
 </div></header>
 
 <section style="border-top:0;padding-top:8px"><div class="col">
@@ -174,20 +174,6 @@
   <p>The queue hands episodes out to GPU-parallel environments, so the same command works on a single workstation GPU or across a multi-GPU machine.</p>
   <figure><video data-src="media/ev_mosaic.mp4" poster="media/ev_mosaic.jpg" muted loop playsinline></video><figcaption>50 eval environments running at once, shown at 8× speed.</figcaption></figure>
   <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a></p>
-</div></section>
-
-<section id="options"><div class="col">
-  <h2>Other options</h2>
-  <p>These work on top of the modes above:</p>
-  <ul>
-    <li><code>--oracle-comparison</code> runs the symbolic planner alongside Molmo 2 and puts both in the overlay video (Molmo 2 modes only).</li>
-    <li><code>--init-after-hl-action flip,rotate</code> starts each episode right after a given skill, which is handy for testing just the part of a task that comes next.</li>
-    <li><code>--use-render-params</code> reproduces each rendered episode's camera, HDRI, table material, lights and exposure. <code>--wave-resets</code> groups episodes so each batch shares one look. Both need <code>--no-use-calibrated-cameras</code>.</li>
-    <li><code>--use-calibrated-cameras</code> is on by default and gives every environment the real cameras' intrinsics.</li>
-    <li><code>--episode-end</code> chooses what ends an episode: the goal, the time limit, or a play-mode low level saying it's done.</li>
-    <li><code>--replicate-noise</code> starts every batched ManiFlow sample from the same noise, so identical observations give identical actions.</li>
-  </ul>
-  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html">all launch_eval.py flags</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/evaluate.html">evaluate.py</a></p>
 </div></section>
 
 <section id="compare"><div class="col side">
