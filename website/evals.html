@@ -20,7 +20,7 @@
   <div class="label">Training and evaluation</div>
   <h1>Training a two-level policy, then finding out which level failed</h1>
   <p class="sub">The policies we train have two levels. A high-level model (Molmo 2) looks at the camera and picks the next skill and a target point; a low-level model (ManiFlow) moves the arm. Both are trained only on ToyBlocks data. When an episode fails, we want to know which of the two was responsible, so the eval system lets you swap either one for an oracle.</p>
-  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Modes</a><a href="#scenes">Rebuilding the scene</a><a href="#generalization">Generalization</a><a href="#options">Other options</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
+  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#generalization">Generalization</a><a href="#options">Other options</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
 </div></header>
 
 <section style="border-top:0;padding-top:8px"><div class="col">
@@ -150,7 +150,7 @@
 </div></section>
 
 <section id="modes"><div class="col">
-  <h2>Modes</h2>
+  <h2>Evaluation Modes</h2>
   <p>A mode is a choice of high level and low level. All of them are started with <code>scripts/launch_eval.py</code>.</p>
   <div class="tbl-wrap"><table>
     <tr><th>Mode</th><th>High level</th><th>Low level</th><th>What it tells you</th><th>Docs</th></tr>
@@ -169,7 +169,7 @@
 </div></section>
 
 <section id="scenes"><div class="col">
-  <h2>Rebuilding the scene</h2>
+  <h2>Evaluation at Scale</h2>
   <p>Every eval episode starts from an episode in a dataset. An episode queue reads the robot pose, block poses and sizes, table height and goal from the recording, and the policy has to reach the goal from there. Since the scene comes straight from the dataset, a difference in success rate between two models reflects the models and not a difference in setup.</p>
   <p>The queue hands episodes out to GPU-parallel environments, so the same command works on a single workstation GPU or across a multi-GPU machine.</p>
   <figure><video data-src="media/ev_mosaic.mp4" poster="media/ev_mosaic.jpg" muted loop playsinline></video><figcaption>50 eval environments running at once, shown at 8× speed.</figcaption></figure>
