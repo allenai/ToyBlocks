@@ -10,7 +10,7 @@ templates_path = ['_templates']
 exclude_patterns = []
 html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
-html_logo = "_static/ToyBlocksLogo_latest.svg"
+html_logo = "_static/ToyBlocksLogo_new.svg"
 html_theme_options = {
   "show_nav_level": 2,
   "icon_links": [

@@ -1,4 +1,4 @@
-![ToyBlocks](../_static/ToyBlocksLogo_latest.svg)
+![ToyBlocks](../_static/ToyBlocksLogo_new.svg)
 
 # Workflows
 
