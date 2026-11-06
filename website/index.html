@@ -13,7 +13,7 @@
 <body>
 <nav class="nav"><div class="col">
   <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
-  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Evaluation</a><a href="sim2real.html">Sim-to-real</a><a href="agentic.html">Agents</a></div>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a></div>
   <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a></div>
 </div></nav>
 <header class="title"><div class="col">
@@ -64,12 +64,12 @@
     </a>
     <a href="sim2real.html">
       <video data-src="media/s2r_side.mp4" poster="media/s2r_side.jpg" muted loop playsinline></video>
-      <h3>Sim-to-real</h3>
+      <h3>Sim-to-real Toolkit</h3>
       <p>Molmo 2 + ManiFlow, trained only on ToyBlocks data, spelled three-letter words on a real Franka FR3 in 15 of 30 attempts.</p>
     </a>
     <a href="agentic.html">
       <video data-src="media/ag_spell.mp4" poster="media/ag_spell.jpg" muted loop playsinline></video>
-      <h3>Agents</h3>
+      <h3>Agentic Framework</h3>
       <p>Each skill is exposed as an MCP tool, so a frontier model can drive the robot from camera images. We use it to study how these models search, plan and recover.</p>
     </a>
   </div>
@@ -100,7 +100,7 @@ git submodule update --init --recursive
 uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
 get-toyblocks-assets --asset-manifest asset_manifest.json
 pytest tests/install          <span class="c"># checks the install in a few seconds</span></pre>
-  <p class="docs">More: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html">installation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">data generation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html">evaluation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html">agents</a></p>
+  <p class="docs">More: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html">installation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">data generation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html">evaluation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html">agentic framework</a></p>
 </div></section>
 <footer><div class="col">
   <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
