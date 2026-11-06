@@ -57,8 +57,7 @@ b, strong { color: var(--ink); font-weight: 600; }
 .btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .btns a { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 15px; font-weight: 500; }
 .btns a:hover { background: #000; text-decoration: none; }
-.btns a.alt { background: var(--soft); color: var(--ink); border: 1px solid var(--line); }
-.btns a.alt:hover { background: #eceef2; }
+.btns a svg { width: 1.05em; height: 1.05em; fill: currentColor; flex: none; }
 .ptitle { padding: 48px 0 8px; }
 .ptitle .sub { font-size: 18px; color: var(--muted); max-width: 720px; margin-top: 12px; }
 .toc { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 18px; font-size: 15px; }
