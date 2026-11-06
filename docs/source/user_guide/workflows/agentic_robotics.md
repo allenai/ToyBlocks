@@ -147,7 +147,7 @@ prompt and tool-call budget.
        prompt=PROMPT_PREFIX
        + (
            "The letter block has the letter 'M' on one of its faces. Your task is to flip "
-           "that block once so that the face now on its top ends up facing the camera. "
+           "that block once so that the face now on its top ends up facing the camera.\n\n"
        )
        + PROMPT_SUFFIX,
        max_tool_calls=10,             # the model's budget of MCP tool calls
@@ -201,7 +201,7 @@ agentic-robotics serve --maniflow maniflow-tb        # the policy server, on por
 # In a second terminal. A new shell starts without this one's environment, so restore it:
 cd ToyBlocks && source .venv/bin/activate
 export OMNI_KIT_ACCEPT_EULA=YES                      # and OPENROUTER_API_KEY, unless it is in ~/.openrouter_key
-agentic-robotics episode --task spell_hen_patterned_0_feasible_0 --backend maniflow --maniflow maniflow-tb
+agentic-robotics page --task spell_hen_patterned_0_feasible_0 --backend maniflow --maniflow maniflow-tb
 ```
 
 Without `--maniflow`, both use the experiment file's `maniflow` key; without `--backend`, the
