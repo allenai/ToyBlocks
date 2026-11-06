@@ -1,4 +1,4 @@
-"""`--render`: the scheduler that overlaps execution and render on one slot pool.
+"""`--render-schedule pipelined`: the scheduler that overlaps execution and render on one slot pool.
 
 Everything here is CPU-only and sub-second. The scheduler is exercised with fake commands
 (``true`` / ``false``) over a real ``run_local_stage``, so the concurrency is real while Isaac
@@ -603,3 +603,24 @@ def test_every_pass_job_dir_is_a_sibling_merge_already_globs(mod):
     assert all(n.startswith("job_") for n in names)
     assert len(set(names)) == len(names), "each pass needs its own directory"
     assert 'glob("job_*")' in PIPELINE.read_text()
+
+
+# ------------------------------------------- the pipelined scheduler composes the real argv
+def test_the_scheduler_composes_one_render_per_pass(mod, tmp_path):
+    """render_cmd's body had no test: a mutation of the stall timeout or of the multi-pass
+    chaining left the whole suite green, while an e2e covers only what it happens to run."""
+    plain = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+    camtest = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"
+    args = mod.build_parser().parse_args([
+        "--experiment-id", "x", "--render-schedule", "pipelined",
+        "--render-pass", f"{camtest}:2", "--render-pass", str(plain),
+        "--render-stall-timeout", "77",
+    ])
+    sched = mod.LocalRenderScheduler(args, str(tmp_path / "envs"), tmp_path / "execution",
+                                     tmp_path / "render")
+    joined = " ".join(sched.render_cmd("problem_x"))
+
+    assert joined.count("run_local_render.py") == 2, "one render per pass"
+    assert "job_camtest" in joined and "job_plain" in joined
+    assert "--stall-timeout 77" in joined, "the renamed flag must reach the hang guard"
+    assert "-N 2" in joined and "-N 1" in joined, "each pass carries its own copy count"

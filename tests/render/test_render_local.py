@@ -102,6 +102,50 @@ def test_render_n_says_what_replaced_it(capsys):
     assert "--render-n has been removed" in err and "--render-pass FLAGS.yaml:3" in err
 
 
+PLAIN = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+
+
+def _resumable_experiment(root: Path, *, job_dirs: tuple[str, ...]) -> None:
+    """An experiment whose earlier run finished every stage up to the merge."""
+    base = root / "datasets" / "unmerged" / "_guard"
+    (base / ".pipeline_state").mkdir(parents=True)
+    for stage in ("task_gen", "env", "exec", "render"):
+        (base / ".pipeline_state" / f"{stage}.done").write_text("")
+    for job in job_dirs:
+        (base / "render" / "out" / job / "problem_a" / "blocks_success" / "meta").mkdir(parents=True)
+
+
+def test_resuming_with_a_new_pass_refuses_to_merge_without_it(tmp_path):
+    """--resume disables every stage before the first unfinished one, so the render is skipped.
+
+    Merging anyway would ship only the passes the EARLIER run rendered, at a size this command
+    does not describe -- the silent-wrong-size failure the pass accounting exists to prevent.
+    """
+    _resumable_experiment(tmp_path, job_dirs=("job_plain",))
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "--experiment-id", "_guard",
+         "--output-root", str(tmp_path), "--resume", "--skip-annotate",
+         "--render-pass", str(PLAIN), "--render-pass", str(CAMTEST)],
+        capture_output=True, text=True, cwd=ROOT, timeout=600,
+    )
+    out = r.stdout + r.stderr
+    assert r.returncode != 0, out[-600:]
+    assert "job_camtest was asked for but never rendered" in out, out[-600:]
+
+
+def test_resuming_with_the_same_passes_still_merges(tmp_path):
+    """The guard must not fire when every pass this run asks for is already on disk."""
+    _resumable_experiment(tmp_path, job_dirs=("job_plain",))
+    r = subprocess.run(
+        [sys.executable, str(PIPELINE), "--experiment-id", "_guard",
+         "--output-root", str(tmp_path), "--resume", "--skip-annotate",
+         "--render-pass", str(PLAIN)],
+        capture_output=True, text=True, cwd=ROOT, timeout=600,
+    )
+    out = r.stdout + r.stderr
+    assert "was asked for but never rendered" not in out, out[-600:]
+
+
 def test_no_render_pass_means_no_render_stage():
     """--render-pass is the only thing that turns the stage on."""
     mod = _pipeline_module()
@@ -321,6 +365,38 @@ def test_render_extra_can_beat_the_pipeline_hardcodes():
     assert v.count("--env_spacing") == 2, "the pipeline's own value must still be emitted first"
 
 
+def test_the_pass_identity_carries_the_passs_own_copy_count():
+    """-N is re-applied after --render-extra, so its VALUE is what the pass asked for."""
+    mod = _pipeline_module()
+    ns = mod.build_parser().parse_args(["--experiment-id", "x", "--render-pass", f"{CAMTEST}:3"])
+    v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                              flags_path=CAMTEST, renders_per_episode=3)
+    assert v[-4:] == ["--flags", str(CAMTEST.resolve()), "-N", "3"], v[-4:]
+
+
+def test_render_num_envs_reaches_the_renders_num_envs():
+    """The renamed flag must still be the value render.py is given, not just >= the floor."""
+    mod = _pipeline_module()
+    ns = mod.build_parser().parse_args(
+        ["--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-num-envs", "16"])
+    v = mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                              flags_path=CAMTEST, renders_per_episode=1)
+    assert v[v.index("--num_envs") + 1] == "16"
+
+
+def test_render_fail_on_video_defects_reaches_the_render():
+    mod = _pipeline_module()
+    P = mod.build_parser()
+
+    def argv_for(*extra: str) -> list[str]:
+        ns = P.parse_args(["--experiment-id", "x", "--render-pass", str(CAMTEST), *extra])
+        return mod.local_render_argv(ns, Path("/b/src/p"), Path("/b/out"), "/b/envs",
+                                     flags_path=CAMTEST, renders_per_episode=1)
+
+    assert "--fail_on_video_defects" not in argv_for()
+    assert "--fail_on_video_defects" in argv_for("--render-fail-on-video-defects")
+
+
 def test_a_pass_identity_cannot_be_overridden_by_render_extra():
     """--flags/-N in an extra would otherwise rewrite one pass into another."""
     _, v = _argv("--render-extra", "--flags /tmp/other.yaml -N 9")
@@ -351,7 +427,7 @@ def test_skip_cameras_is_never_the_last_option_before_the_extra():
 
 
 def test_render_extra_cannot_steer_a_problem_out_of_the_merge():
-    """--output would move it out of render/out/job_local, where merge globs. Dropped, not fatal:
+    """--output would move it out of its render/out/job_<name> dir, where merge globs. Dropped, not fatal:
     dropping restores the pipeline's own value, which is the correct one."""
     for bad, rest in (("--output /tmp/evil", "/tmp/evil"),
                       ("--max_episodes=3", "--max_episodes"),
@@ -418,6 +494,7 @@ def test_two_passes_cannot_collide_on_one_job_dir(tmp_path):
         "--experiment-id", "x", "--render-pass", str(CAMTEST), "--render-pass", f"{CAMTEST}:2",
     ])
     assert [j for j, _ in mod.local_render_passes(args, str(tmp_path))] == ["job_camtest"]
+    assert mod.resolve_render_passes(args) == [(str(CAMTEST), 1)], "the FIRST spec must survive"
 
 
 def test_a_pass_spec_parses_its_copy_count(tmp_path):

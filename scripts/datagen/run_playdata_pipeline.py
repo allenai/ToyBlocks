@@ -284,19 +284,21 @@ def robot_init_flags(args: argparse.Namespace, style: str) -> list[str]:
     ]
 
 
-def stage_merge_source(roots: list[Path], staging_dir: Path) -> list[str]:
+def stage_merge_source(roots: list[Path], staging_dir: Path) -> tuple[list[Path], list[str]]:
     """Symlink every ``problem_*`` dir under *roots* that holds a ``blocks_success`` dataset.
 
-    merge_datasets.py decides between its layouts from the first ``problem_*`` dir it
+    The merge script decides between its layouts from the first ``problem_*`` dir it
     sees, and in the fallback layout takes whichever dataset subdir it lists first,
     which may be ``blocks_failure``. A problem dir with no ``blocks_success`` (a base
     dir whose data went to a ``__sNNN`` shard, or one whose episodes all missed) would
     trip that, so the merge reads a staging dir holding only dirs with a
     ``blocks_success``. Hardlinking videos through the symlinks still works.
+
+    Each root is staged into its OWN subdirectory and handed over as a separate input
+    directory: every render pass holds the same ``problem_*`` names, so one flat staging
+    dir made a second ``--render-pass`` abort on a name collision.
+
     Returns (staging dirs to merge, linked problem names).
-    Each root is staged into its OWN subdirectory and handed to merge_datasets.py as its own
-    --input_dirs entry: every render pass holds the same ``problem_*`` names, so one flat
-    staging dir made a second --render-pass abort on a name collision.
     """
     if staging_dir.exists():
         shutil.rmtree(staging_dir)

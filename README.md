@@ -38,6 +38,45 @@ The overall goal of ToyBlocks is to provide a controlled world for robot learnin
 By providing full control over the data generation process, ToyBlocks provides tools for researchers 
 to trace the outcomes of trained policies back to the training data.
 
+## Quick start
+
+Install, fetch the assets, and generate a small dataset on one GPU:
+
+```bash
+git submodule update --init --recursive
+uv venv --python 3.11
+uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
+```
+
+```bash
+get-toyblocks-assets --asset-manifest asset_manifest.json
+```
+
+```bash
+python scripts/datagen/run_datagen_pipeline.py \
+    --experiment-id my_first_run --output-root data \
+    --task-gen-script scripts/task_gen/stack_three.py --task-gen-count 2 \
+    --env-per-problem 8 --num-envs 8 --exec-num-envs 8 --vecgen-problems-per-env 1 \
+    --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
+```
+
+That plans and executes 2 stacking problems, renders the recorded episodes, and merges them
+into one LeRobot dataset under `data/datasets/merged/train/my_first_run`.
+
+Execution records no camera images, so the video comes from the render stage.
+`--render-pass FLAGS.yaml[:N]` is the only flag that turns it on: each one renders every
+episode under one flags YAML into its own output directory, and `:N` asks for N differently
+randomized copies. Repeat the flag for more looks, and the merge takes them all:
+
+```bash
+    --render-pass src/toyblocks/domain_randomization/flags/render_flags_plain.yaml \
+    --render-pass src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache.yaml:3
+```
+
+That ships 4 episodes per executed one: the plain look once, the randomized look three times.
+See [Automatic Data Generation](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html)
+and [Rendering](https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html).
+
 ## How to get started
 
 The [docs](https://allenai.github.io/ToyBlocks/docs/user_guide/index.html) walk through each workflow:

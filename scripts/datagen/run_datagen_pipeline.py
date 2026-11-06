@@ -201,7 +201,7 @@ RENDER_ITEM_PREFIX = "render:"
 #: goes through this wrapper, which keys completion on the marker and SIGKILLs the group.
 RUN_LOCAL_RENDER = Path(__file__).resolve().parents[2] / "scripts" / "render" / "run_local_render.py"
 #: The video sidecars and GOPs every pass gets; --render-extra (appended after) overrides them.
-RENDER_RI_SIDECARS = ("--extra_rgb", "224", "--extra_depth", "rg8_55_224",
+RENDER_SIDECARS = ("--extra_rgb", "224", "--extra_depth", "rg8_55_224",
                         "--extra_rgb_GOP", "2", "--rgb_GOP", "2")
 
 
@@ -266,7 +266,7 @@ def local_env_argv(args, pddl, envs_dir: str) -> list[str]:
 
 def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
                         flags_path: Path, renders_per_episode: int) -> list[str]:
-    """The render.py command for one problem, with the settings the RI training set used.
+    """The render.py command for ONE PASS of one problem.
 
     Four of these differ from ``render.py``'s OWN argparse defaults and silently change the
     pixels when omitted:
@@ -282,7 +282,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
                               in the env package, and the generated table has
                               MAX_NON_SIM_STATE_RANDOMIZATIONS (8) of them.
 
-    The video sidecars (RENDER_RI_SIDECARS) come before ``--render-extra``, which can
+    The video sidecars (RENDER_SIDECARS) come before ``--render-extra``, which can
     override them (render.py is last-wins).
 
     render.py is run BY ABSOLUTE PATH with -u, never ``-m`` and never imported: it sibling-imports
@@ -319,7 +319,7 @@ def local_render_argv(args, src_dir: Path, out_dir: Path, envs_dir: str, *,
         argv.append("--skip_failure_episodes")
     if args.render_fail_on_video_defects:
         argv.append("--fail_on_video_defects")
-    argv += list(RENDER_RI_SIDECARS)
+    argv += list(RENDER_SIDECARS)
     argv += render_extra_tokens(args)
     # A pass's IDENTITY goes after the extra. render.py is last-wins, so a shared
     # --render-extra carrying -N or --flags would otherwise rewrite one pass into another:
@@ -1790,7 +1790,7 @@ def main() -> int:
         # physics-render cost for frames nothing reads.
         if args.vecgen_record_videos:
             log.error(
-                "the local render supplies the videos; drop --vecgen-record-videos "
+                "the render supplies the videos; drop --vecgen-record-videos "
                 "(vecgen stays parquet-only and the render renders the cameras)"
             )
             return 1
@@ -1804,7 +1804,7 @@ def main() -> int:
                 readable = False
             if not readable:
                 log.error(
-                    "the local render needs a flags YAML readable on THIS machine; %s is not",
+                    "the render needs a flags YAML readable on THIS machine; %s is not",
                     flags,
                 )
                 return 1
@@ -2285,6 +2285,19 @@ def main() -> int:
             log.info("Merge: input job dirs: %s",
                      " ".join(Path(d).name for d in merge_input_dirs))
             owed = {render_job_name(f) for f, _ in resolve_render_passes(args)}
+            # A pass this run asked for that is not on disk must never be merged around.
+            # --resume disables every stage before the first unfinished one, so adding a
+            # --render-pass to a run whose render marker already exists skips the render and
+            # would ship only the older passes, at a size the command does not describe.
+            present = {Path(d).name for d in merge_input_dirs}
+            if owed - present:
+                log.error(
+                    "Merge: %s was asked for but never rendered, so the merged dataset would be "
+                    "smaller than this command describes. Re-run without --resume, or delete "
+                    "%s to re-run the render stage.",
+                    " ".join(sorted(owed - present)), stage_marker(base, "render"),
+                )
+                return 1
             # `owed` is empty on a merge-only or resumed run, where every job dir is legitimately
             # from an earlier invocation; warning there would cry wolf on the normal case.
             stale = sorted(
