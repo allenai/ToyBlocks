@@ -115,11 +115,15 @@ prompt and tool-call budget.
    `agentic_robotics/data/problems/<slug>.pddl`, or several variants in
    `agentic_robotics/data/problems/<slug>/*.pddl` (a run draws one at random). Each variant's file
    stem becomes its env-package name, so it must be a valid Python identifier once hyphens become
-   underscores. ToyBlocks's task generators write suitable problems, for example:
+   underscores. ToyBlocks's task generators write suitable problems. This one writes three
+   variants of the scene the ToyBlocks quick start generates training data for, the letter-M
+   block beside a red block, each with the goal of one flip of the M block that brings the face
+   on its top around to the front:
 
    ```bash
-   python scripts/task_gen/stack_three.py --train --count 3 --seed 0 \
-       --out-dir agentic_robotics/data/problems/my_stack
+   python scripts/task_gen/flip.py --direction backward --target-block block_m \
+       --distractor-blocks block_red --distractor-count-min 1 \
+       --count 3 --seed 0 --out-dir agentic_robotics/data/problems/flip_m
    ```
 
    See [Task generation](datagen/task_generation.md) for the generators and the PDDL comments
@@ -129,18 +133,23 @@ prompt and tool-call budget.
    `agentic_robotics/src/agentic_robotics/adapters/toyblocks/config.py`:
 
    ```python
-   "my_stack": TaskConfig(
-       name="Custom New Task",
-       task_slug="my_stack",          # data/problems/my_stack(.pddl | /)
+   "flip_m": TaskConfig(
+       name="Flip M",
+       task_slug="flip_m",            # data/problems/flip_m(.pddl | /)
        prompt=PROMPT_PREFIX
-       + "Stack any three letter blocks so their letters read top to bottom. "
+       + (
+           "The letter block has the letter 'M' on one of its faces. Your task is to flip "
+           "that block once so that the face now on its top ends up facing the camera. "
+       )
        + PROMPT_SUFFIX,
-       max_tool_calls=30,             # the model's budget of MCP tool calls
+       max_tool_calls=10,             # the model's budget of MCP tool calls
    ),
    ```
 
    `PROMPT_PREFIX` and `PROMPT_SUFFIX` frame every task (the robot's role, how pixel coordinates
-   work, how to end the episode); the middle is what the model is asked to do. An optional
+   work, how to end the episode); the middle is what the model is asked to do, and it should say
+   in words what the problem's PDDL goal checks: a run is scored by the package's goal classifier,
+   so a prompt that asks for more or less than the goal scores wrongly. An optional
    `glyph_library` field names the asset library the letter and digit blocks are drawn from,
    `train_blocks` or `train_blocks_large` (ToyBlocks's `GLYPH_LIBRARIES`); leave it out for the
    default, `train_blocks_large`.
@@ -148,9 +157,9 @@ prompt and tool-call budget.
 3. **Build and run it.**
 
    ```bash
-   agentic-robotics generate-env --task my_stack
-   agentic-robotics human --task my_stack --backend oracle     # try it yourself first
-   agentic-robotics page --task my_stack --backend oracle      # then watch the model try, and interject
+   agentic-robotics generate-env --task flip_m
+   agentic-robotics human --task flip_m --backend oracle       # try it yourself first
+   agentic-robotics page --task flip_m --backend oracle        # then watch the model try, and interject
    ```
 
    `generate-env` builds one package per variant, so a task with many variants takes a while;
