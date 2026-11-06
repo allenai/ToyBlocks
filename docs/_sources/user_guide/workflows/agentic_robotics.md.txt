@@ -54,7 +54,7 @@ Runs are written under `$AGENTIC_ROBOTICS_RUNS_DIR`, or `agentic_robotics/runs/`
 
 A task's scenes are ordinary ToyBlocks env packages, generated with ToyBlocks's codegen the first
 time they are needed and kept in `agentic_robotics/data/tasks/` (not tracked in git). List what is
-defined and what is built on this machine, then build a task:
+defined and what is built locally, then build a task:
 
 ```bash
 agentic-robotics tasks

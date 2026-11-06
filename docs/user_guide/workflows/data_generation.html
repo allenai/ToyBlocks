@@ -711,8 +711,7 @@ Turn it on with <code class="docutils literal notranslate"><span class="pre">--r
 <p>There is no default YAML, so every pass names the look it renders, and the pipeline records that
 file in the problem’s <code class="docutils literal notranslate"><span class="pre">render_params.json</span></code>. <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_plain.yaml</span></code></a>
 is the plain baseline and <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml"><code class="docutils literal notranslate"><span class="pre">src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml</span></code></a>
-adds lighting, material, camera, glyph and colour randomization. <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> with
-<code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>, and <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code>, are shorthand for those two passes.</p>
+adds lighting, material, camera, glyph and colour randomization.</p>
 <p>A pipeline render defaults to one copy per episode, the 224 RGB and depth sidecars,
 <code class="docutils literal notranslate"><span class="pre">left_camera</span></code> skipped and failure episodes skipped. The <code class="docutils literal notranslate"><span class="pre">allrand</span></code> flags draw HDRI backdrops from
 polyhaven (part of the base asset download) and the separately licensed Laval indoor set. See

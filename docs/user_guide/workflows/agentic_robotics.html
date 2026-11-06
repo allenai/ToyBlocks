@@ -421,7 +421,7 @@ key fails with the list of known ones.</p>
 <h2>Build a task’s environment packages<a class="headerlink" href="#build-a-task-s-environment-packages" title="Link to this heading">#</a></h2>
 <p>A task’s scenes are ordinary ToyBlocks env packages, generated with ToyBlocks’s codegen the first
 time they are needed and kept in <code class="docutils literal notranslate"><span class="pre">agentic_robotics/data/tasks/</span></code> (not tracked in git). List what is
-defined and what is built on this machine, then build a task:</p>
+defined and what is built locally, then build a task:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>tasks
 agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--task<span class="w"> </span>ai2_stacked<span class="w">     </span><span class="c1"># one package per PDDL variant</span>
 </pre></div>

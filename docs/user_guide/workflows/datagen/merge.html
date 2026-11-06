@@ -388,7 +388,7 @@ datasets from several runs.</p>
 <p>Point <code class="docutils literal notranslate"><span class="pre">--input_dirs</span></code> at the directory that contains the <code class="docutils literal notranslate"><span class="pre">problem_*</span></code> directories, and
 <code class="docutils literal notranslate"><span class="pre">--output_dir</span></code> at where the merged dataset should go:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/datagen/merge_datasets.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--input_dirs<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/render/out/job_local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input_dirs<span class="w"> </span>data/datasets/unmerged/&lt;experiment-id&gt;/render/out/job_plain<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output_dir<span class="w"> </span>data/datasets/merged/train/&lt;experiment-id&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--cameras<span class="w"> </span>all<span class="w"> </span>--num_workers<span class="w"> </span><span class="m">16</span>
 </pre></div>
@@ -439,12 +439,11 @@ complete, the pipeline merges <strong><code class="docutils literal notranslate"
 no longer read. A problem that was executed but never rendered therefore vanishes from the
 merged dataset. The local flow has <a class="reference internal" href="local.html#what-counts-as-rendered"><span class="std std-ref">a three-state gate</span></a> to
 stop that from happening silently.</p>
-<p>The glob is deliberately wide, so that both <code class="docutils literal notranslate"><span class="pre">job_local</span></code> and the <code class="docutils literal notranslate"><span class="pre">job_local_nonrand</span></code> directory of
-<a class="reference internal" href="render.html#render-passes"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></span></a> are picked up.
-That means a <code class="docutils literal notranslate"><span class="pre">job_local*</span></code> directory left by an <strong>earlier</strong> run is merged again, whether or not
-this run produced it: dropping <code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code> from an otherwise identical command keeps
-shipping the old baseline copies. The pipeline only warns about it, so clean up old job directories
-before re-running.</p>
+<p>The glob is deliberately wide, so that every <a class="reference internal" href="render.html#render-passes"><span class="std std-ref">render pass</span></a> is picked up.
+That means a <code class="docutils literal notranslate"><span class="pre">job_*</span></code> directory left by an <strong>earlier</strong> run is merged again, whether or not this run
+produced it: dropping a <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> from an otherwise identical command keeps shipping that
+pass’s copies. The pipeline only warns about it, so clean up old job directories before
+re-running.</p>
 </section>
 <section id="what-union-schema-actually-does">
 <h2>What <code class="docutils literal notranslate"><span class="pre">--union_schema</span></code> actually does<a class="headerlink" href="#what-union-schema-actually-does" title="Link to this heading">#</a></h2>

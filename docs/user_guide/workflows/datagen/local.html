@@ -464,8 +464,11 @@ each episode within the pass, resampling the randomization for each copy. The me
 <p>Each pass is a separate renderer invocation rather than extra copies inside one, because the
 per-wave settings (dome, skybox, exposure) are global to the scene, so two differently-flagged
 looks cannot share a wave. <a class="reference internal" href="render.html#render-passes"><span class="std std-ref">Render passes</span></a> covers this in more detail.</p>
-<section id="which-flag-does-what">
-<h3>Which flag does what<a class="headerlink" href="#which-flag-does-what" title="Link to this heading">#</a></h3>
+<section id="what-the-other-render-flags-do">
+<h3>What the other render flags do<a class="headerlink" href="#what-the-other-render-flags-do" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> is the only flag that turns the stage on. Every other <code class="docutils literal notranslate"><span class="pre">--render-*</span></code> flag applies
+to <strong>every</strong> pass the run produces, so a run cannot give two passes different cameras, different
+sidecars or different schedules.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Flag</p></th>
@@ -476,51 +479,32 @@ looks cannot share a wave. <a class="reference internal" href="render.html#rende
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-pass</span> <span class="pre">FLAGS.yaml[:N]</span></code></p></td>
 <td><p>none</p></td>
-<td><p>Adds one pass. Repeatable.</p></td>
+<td><p>Adds one pass, optionally <code class="docutils literal notranslate"><span class="pre">N</span></code> copies of each episode. Repeatable.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-flags</span> <span class="pre">FLAGS.yaml</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-schedule</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">coupled</span></code></p></td>
+<td><p>How every render is scheduled against the executions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">left_camera</span></code></p></td>
+<td><p>Cameras no pass renders.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-skip-failure-episodes</span></code></p></td>
+<td><p>on</p></td>
+<td><p>Render only successful episodes, in every pass.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-extra</span></code></p></td>
 <td><p>none</p></td>
-<td><p>Names the YAML that the two shorthand flags below use. It adds no pass on its own.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Shorthand for one pass of <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code>, repeated <code class="docutils literal notranslate"><span class="pre">--render-n</span></code> times.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-n</span> <span class="pre">N</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
-<td><p>Copies per source episode for <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized</span></code></p></td>
-<td><p>off</p></td>
-<td><p>Shorthand for one pass of <a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a>, which needs no YAML of your own.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-non-randomized-flags</span></code></p></td>
-<td><p><a class="reference external" href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"><code class="docutils literal notranslate"><span class="pre">render_flags_plain.yaml</span></code></a></p></td>
-<td><p>A different YAML for that pass.</p></td>
+<td><p>Extra <code class="docutils literal notranslate"><span class="pre">render.py</span></code> options for every pass.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The two shorthands name the common cases, and they compose with each other and with
-<code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> exactly as further <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> entries would. These two commands are
-equivalent:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-randomized<span class="w"> </span>--render-flags<span class="w"> </span>path/to/dr.yaml<span class="w"> </span>--render-n<span class="w"> </span><span class="m">3</span><span class="w"> </span>--render-non-randomized
-</pre></div>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--render-pass<span class="w"> </span>path/to/dr.yaml:3<span class="w"> </span>--render-pass<span class="w"> </span>src/toyblocks/domain_randomization/flags/render_flags_plain.yaml
-</pre></div>
-</div>
-<p><strong><code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> on its own renders nothing.</strong> It carries a value for the shorthands rather
-than requesting a pass, so a command with <code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> and no <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> runs the
-pipeline with the render stage off. Older commands pair the two, because <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code>
-was once the only way to render. <code class="docutils literal notranslate"><span class="pre">--render</span></code>, <code class="docutils literal notranslate"><span class="pre">--render-local</span></code> and the <code class="docutils literal notranslate"><span class="pre">--rerender*</span></code> spellings are
-superseded, and the pipeline says so when it sees them.</p>
-<p><strong>With no render flag at all the stage is off.</strong> The merge then takes the execution data
+<p><strong>With no <code class="docutils literal notranslate"><span class="pre">--render-pass</span></code> the stage is off.</strong> The merge then takes the execution data
 directly, the dataset holds state and actions with no video, and annotation is skipped with a
 warning, because projecting goals into the front camera needs a camera.</p>
-<p><strong>Asking for a render that resolves to no pass is an error.</strong> <code class="docutils literal notranslate"><span class="pre">--render-randomized</span></code> without
-<code class="docutils literal notranslate"><span class="pre">--render-flags</span></code> stops the run before any work and names the shipped YAMLs, rather than
-quietly skipping the stage.</p>
+<p><strong>A YAML that is not readable here stops the run before any work</strong>, rather than failing minutes
+into Isaac startup once the GPU is already busy. Every pass is checked.</p>
 <p>A render cannot be combined with <code class="docutils literal notranslate"><span class="pre">--vecgen-record-videos</span></code>. Recording in-physics video and then
 overwriting it pays the slow physics-render cost for frames nothing reads.</p>
 </section>
@@ -586,23 +570,22 @@ between the two, or a first finished problem early rather than at the end of a c
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-num-envs</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
 <td><p>Envs per render wave, under either schedule. A <strong>floor</strong>, not a preference: the render spawns env <em>i</em> at block-size slot <em>i</em> % <em>profiles</em>, so a value below <code class="docutils literal notranslate"><span class="pre">--num-scene-profiles</span></code> leaves the high slots without an env and <strong>every problem is skipped</strong>. The pipeline refuses that pairing up front. 8 keeps the encoder’s memory use survivable beside Isaac.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-stall-timeout</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--render-stall-timeout</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3600</span></code></p></td>
 <td><p>SIGKILL the render if it prints nothing for this many seconds.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-local-fail-on-video-defects</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--render-fail-on-video-defects</span></code></p></td>
 <td><p>off</p></td>
 <td><p>Fail a problem whose encoder could not publish every video. Off by default because a failed problem renders whole, and <code class="docutils literal notranslate"><span class="pre">scripts/render/fast_patch.py</span></code> fills video holes afterwards.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Despite their names, the <code class="docutils literal notranslate"><span class="pre">--render-local-*</span></code> flags apply to both schedules.
-<code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> are described in <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--render-skip-cameras</span></code> and <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> are described in <a class="reference internal" href="render.html"><span class="std std-doc">Rendering</span></a>.</p>
 </section>
 <section id="render-arguments-the-pipeline-pins-for-you">
 <h3>Render arguments the pipeline pins for you<a class="headerlink" href="#render-arguments-the-pipeline-pins-for-you" title="Link to this heading">#</a></h3>
@@ -632,7 +615,7 @@ against one you ran by hand:</p>
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> comes from <code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span></code>. <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> is appended after these and
+<p><code class="docutils literal notranslate"><span class="pre">--num_envs</span></code> comes from <code class="docutils literal notranslate"><span class="pre">--render-num-envs</span></code>. <code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> is appended after these and
 wins over them, apart from the exceptions noted under
 <a class="reference internal" href="#troubleshooting"><code class="docutils literal notranslate"><span class="pre">--render-extra</span></code> needs the <code class="docutils literal notranslate"><span class="pre">=</span></code> form</a>.</p>
 </section>
@@ -712,7 +695,7 @@ if that is unavailable it runs one problem at a time on the default GPU.</p>
 at the end, and the next stage works with the problems that succeeded.</p>
 <section id="how-much-fits">
 <h3>How much fits<a class="headerlink" href="#how-much-fits" title="Link to this heading">#</a></h3>
-<p>Measured on one RTX 5090 (32,607 MiB) at <code class="docutils literal notranslate"><span class="pre">--render-local-num-envs</span> <span class="pre">8</span></code>:</p>
+<p>Measured on one RTX 5090 (32,607 MiB) at <code class="docutils literal notranslate"><span class="pre">--render-num-envs</span> <span class="pre">8</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p></p></th>
@@ -1040,7 +1023,7 @@ and <code class="docutils literal notranslate"><span class="pre">-N</span></code
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">Before you start</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-complete-run">A complete run</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rendering-locally">Rendering locally</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#which-flag-does-what">Which flag does what</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-other-render-flags-do">What the other render flags do</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parity-across-passes">Parity across passes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-renders-are-scheduled">How renders are scheduled</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options-that-matter-on-one-machine">Options that matter on one machine</a></li>

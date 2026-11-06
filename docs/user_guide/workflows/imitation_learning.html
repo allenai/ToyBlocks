@@ -369,7 +369,7 @@ training command,</p>
     --config_yaml ./examples/Franka/train_maniflow_multimodal.yaml --framework.name ManiFlowMultiModal ...
 </pre></div>
 </div>
-<p>and runs it on this machine: <code class="docutils literal notranslate"><span class="pre">accelerate</span> <span class="pre">launch</span></code> on all visible GPUs by default, or
+<p>and runs it locally: <code class="docutils literal notranslate"><span class="pre">accelerate</span> <span class="pre">launch</span></code> on all visible GPUs by default, or
 <code class="docutils literal notranslate"><span class="pre">torchrun</span></code> across several nodes. It trains on a merged LeRobot dataset, the output of the
 <a class="reference internal" href="data_generation.html"><span class="std std-doc">data generation pipeline</span></a>. Every flag is listed in the
 <code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> <a class="reference internal" href="imitation_learning/train_maniflow.html"><span class="std std-doc">Reference</span></a>.</p>

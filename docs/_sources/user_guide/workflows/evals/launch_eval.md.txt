@@ -8,7 +8,7 @@ the one pipeline that starts the policy server, generates the gym task from the 
 serves the episode queue, runs the eval workers and merges the results (see
 [Policy Evaluation](../evaluations.md)). This page lists every flag it accepts.
 
-Everything runs as subprocesses on this machine, from your working tree as it is:
+Everything runs as local subprocesses, from your working tree as it is:
 
 - **GPU layout.** GPU 0 runs the policy server and GPUs 1..N run the N eval workers
   (GPUs 0..N-1 under `--replay`, which has no server). With fewer GPUs than that, the
