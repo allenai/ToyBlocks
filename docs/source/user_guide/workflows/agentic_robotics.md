@@ -162,12 +162,14 @@ prompt and tool-call budget.
 ## ManiFlow skills
 
 The `maniflow` backend runs a trained ManiFlow policy instead of the scripted skills. It needs the
-`maniflow` extra (`uv pip install -e ".[dev,isaac,torch-cu128,vecgen,maniflow,agentic]"`) and a
-checkpoint directory in the layout a training run writes (`checkpoints/steps_N_model.safetensors`,
+`maniflow` extra, which builds the `maniflow-tb` and `molmo2` submodules, and a checkpoint
+directory in the layout a training run writes (`checkpoints/steps_N_model.safetensors`,
 `config.yaml`, `stats.json`; see [Imitation learning](imitation_learning.md)). The released
 checkpoint, [allenai/maniflow-tb](https://huggingface.co/allenai/maniflow-tb), has that layout:
 
 ```bash
+git submodule update --init maniflow-tb molmo2
+uv pip install -e ".[dev,isaac,torch-cu128,vecgen,maniflow,agentic]"
 hf download allenai/maniflow-tb --local-dir checkpoints/maniflow-tb
 ```
 
