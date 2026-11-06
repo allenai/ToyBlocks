@@ -26,11 +26,11 @@
 <section id="stages" style="border-top:0"><div class="col">
   <h2>The six stages</h2>
   <p><code>scripts/datagen/run_datagen_pipeline.py</code> runs all of them on the machine you start it on and spreads problems across every GPU it can see.</p>
-  <div class="tbl-wrap"><table>
+  <div class="tbl-wrap"><table class="stages">
     <tr><th>Stage</th><th>What it does</th><th>Docs</th></tr>
     <tr><td>1. Tasks</td><td>Task generators write PDDL problems for a whole family of tasks.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html">Task generation</a></td></tr>
-    <tr><td>2. Environments</td><td>Each problem becomes an Isaac Lab environment package with sampled reset states.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/env_generation.html">Environment generation</a></td></tr>
-    <tr><td>3. Execution</td><td>The TAMP planner plans every episode and vecgen executes the plans, batched on the GPU.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html">Execution</a></td></tr>
+    <tr><td>2. Environments</td><td>Each problem becomes an environment package with sampled reset states.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/env_generation.html">Environment generation</a></td></tr>
+    <tr><td>3. Execution</td><td>The TAMP planner plans each episode; vecgen executes it on the GPU.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html">Execution</a></td></tr>
     <tr><td>4. Rendering</td><td>Recorded episodes are replayed and re-rendered with domain randomization.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html">Rendering</a></td></tr>
     <tr><td>5. Merge</td><td>All problems go into one LeRobot v3 dataset.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/merge.html">Merge</a></td></tr>
     <tr><td>6. Annotation</td><td>Adds per-frame goal text and the target's pixel position in the front camera.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/annotate.html">Annotation</a></td></tr>
