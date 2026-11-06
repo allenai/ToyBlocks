@@ -90,18 +90,6 @@
     <figcaption>The TAMP planner working through a four-block stack: the plan is on the right, the current step is highlighted.</figcaption>
   </figure>
 </div></section>
-
-<section><div class="col">
-  <h2>Getting started</h2>
-  <p>You need Linux, an NVIDIA GPU and <code>uv</code>. The whole data generation pipeline fits on a 16 GB card.</p>
-<pre>git clone https://github.com/allenai/ToyBlocks.git && cd ToyBlocks
-uv venv --python 3.11 && source .venv/bin/activate
-git submodule update --init --recursive
-uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
-get-toyblocks-assets --asset-manifest asset_manifest.json
-pytest tests/install          <span class="c"># checks the install in a few seconds</span></pre>
-  <p class="docs">More: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html">installation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">data generation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html">evaluation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html">agentic framework</a></p>
-</div></section>
 <footer><div class="col">
   <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
   <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
