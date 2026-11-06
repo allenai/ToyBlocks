@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Sequence
 import torch
 import trimesh
+from PIL import Image
 import viser
 import viser.extras
 import numpy as np
@@ -80,6 +81,13 @@ class ViewerCfg:
     on the scene alone (viser >= 1.1; older viser docks it but starts it expanded), and no debug
     markers (goal and block frame arrows, cube-corner spheres). For a screen-facing view where the
     panel is not the subject and nothing in the viewer can be interacted with."""
+    texture_max_px: int = 2048
+    """Longest side a mesh texture is downscaled to before it is uploaded to the browser. The letter
+    blocks ship a 4096px decal sheet and a 2048px base texture, and every block's glTF embeds its own
+    copy: 14 MB per block as shipped, 8.4 MB at 2048, 2.6 MB at 1024, 0.8 MB at 512. The scene is
+    re-sent to every browser that connects, so this is what a task load or a reconnect costs. 2048
+    halves the decal sheet and leaves the glyphs legible; 1024 made them visibly soft. 0 disables
+    the cap."""
 
 class Viewer:
     def __init__(self, cfg: ViewerCfg = ViewerCfg()):
@@ -308,6 +316,53 @@ class Viewer:
             # TODO
             pass
 
+    def _add_prim(self, prim_path: str, stage):
+        """Add one prim's visual meshes to the scene, keeping each sub-mesh's own material.
+
+        A prim with several textured sub-meshes cannot become one trimesh without an atlas
+        repack, and that repack rewrites UVs: the letter blocks' glyph is a UV window into a
+        shared decal sheet, so the decal faces land on the base texture and every block renders
+        as bare wood. A glTF scene carries one material per sub-mesh, so nothing is repacked.
+
+        Textures are downscaled to `cfg.texture_max_px` first, so the upload -- and the concatenated
+        mesh `export_assets` pickles -- carry the smaller copies.
+
+        :return: The viser handle, and the concatenated mesh the caller records for `export_assets`
+        """
+        parts = usd_utils.prim_to_trimesh_parts(prim_path, stage, visual_only=True)
+        self._shrink_textures(parts)
+        mesh = trimesh.util.concatenate(parts)
+
+        if len(parts) > 1:
+            scene = trimesh.Scene()
+            for i, part in enumerate(parts):
+                scene.add_geometry(part, node_name=f"part_{i}")
+            handle = self._server.scene.add_glb(name=prim_path, glb_data=scene.export(file_type="glb"))
+        else:
+            handle = self._server.scene.add_mesh_trimesh(name=prim_path, mesh=mesh)
+
+        return handle, mesh
+
+    def _shrink_textures(self, parts: list[trimesh.Trimesh]) -> None:
+        """Downscale every texture image on `parts` to at most `cfg.texture_max_px` a side, in place.
+
+        Covers both material classes trimesh reads from USD: `PBRMaterial` (baseColor, normal,
+        emissive, metallicRoughness textures) and `SimpleMaterial` (a single `image`).
+        """
+        max_px = self.cfg.texture_max_px
+        if max_px <= 0:
+            return
+        attrs = ("baseColorTexture", "normalTexture", "emissiveTexture", "metallicRoughnessTexture", "image")
+        for part in parts:
+            material = getattr(part.visual, "material", None)
+            for attr in attrs:
+                image = getattr(material, attr, None)
+                if not isinstance(image, Image.Image) or max(image.size) <= max_px:
+                    continue
+                scale = max_px / max(image.size)
+                size = (max(1, round(image.size[0] * scale)), max(1, round(image.size[1] * scale)))
+                setattr(material, attr, image.resize(size, Image.LANCZOS))
+
     def load_assets(self, base_env: BaseEnv):
         # clear out all the old viser handles and old dicts
         for k in self._articulations.keys():
@@ -334,8 +389,7 @@ class Viewer:
             else:
                 self._articulations[k] = Articulation(name=k, prim_path=k, links=dict())
                 for i, link_prim_path in enumerate(base_env.robot.articulation.root_physx_view.link_paths[0]):
-                    mesh = usd_utils.prim_to_trimesh(link_prim_path, stage, visual_only=True)
-                    handle = self._server.scene.add_mesh_trimesh(name=link_prim_path, mesh=mesh)
+                    handle, mesh = self._add_prim(link_prim_path, stage)
                     link = Link(name=link_prim_path, prim_path=link_prim_path, handle=handle, mesh=mesh)
                     self._articulations[k].links[link_prim_path] = link
                     @handle.on_click
@@ -345,8 +399,7 @@ class Viewer:
         for k, rigid_object in rigid_objects.items():
             def create_rigid(k, rigid_object):
                 prim_path = rigid_object.root_physx_view.prim_paths[0]
-                mesh = usd_utils.prim_to_trimesh(prim_path, stage, visual_only=True)
-                handle = self._server.scene.add_mesh_trimesh(name=prim_path, mesh=mesh)
+                handle, mesh = self._add_prim(prim_path, stage)
                 self._rigid_objects[k] = RigidObject(name=k, prim_path=prim_path, handle=handle, mesh=mesh)
                 @handle.on_click
                 def _(_):

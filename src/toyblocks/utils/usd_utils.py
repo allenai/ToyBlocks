@@ -317,6 +317,34 @@ def bake_relative_transform_into_mesh(tm: trimesh.Trimesh, rel_tf: np.ndarray) -
         out.visual = trimesh.visual.ColorVisuals(mesh=out, face_colors=tm.visual.face_colors.copy())
     return out
 
+def _apply_texture_alpha_mode(mesh):
+    """Declare how a textured mesh's base color alpha should be composited.
+
+    USD albedo/transparency textures carry cutout alpha: the letter blocks' decal sheet is ~70%
+    transparent and only the glyph itself is opaque. glTF defaults alphaMode to OPAQUE, which
+    ignores that channel and renders the whole sheet solid over the block face. Isaac reads the USD
+    material directly and is unaffected, which is why only the viser view looks wrong.
+
+    MASK rather than BLEND: the decal is a hard-edged glyph sitting on the block face, and alpha
+    testing needs no back-to-front sort to composite correctly.
+
+    trimesh.util.concatenate packs per-mesh textures into an atlas and builds a *new* PBRMaterial
+    that does not carry alphaMode across, so this runs on the concatenated result as well as on the
+    single-mesh one.
+    """
+    material = getattr(getattr(mesh, "visual", None), "material", None)
+    texture = getattr(material, "baseColorTexture", None)
+    if texture is None or texture.mode not in ("RGBA", "LA"):
+        return mesh
+    # getextrema() rather than np.asarray: these atlases reach 8192x8192 and only the alpha band's
+    # minimum decides this.
+    if texture.getextrema()[-1][0] == 255:
+        return mesh  # alpha channel present but fully opaque; leave it OPAQUE so nothing is tested
+    material.alphaMode = "MASK"
+    material.alphaCutoff = 0.5
+    return mesh
+
+
 def usd_mesh_to_trimesh(
     mesh_prim,
     time=Usd.TimeCode.Default(),
@@ -520,7 +548,7 @@ def usd_mesh_to_trimesh(
             uv=np.asarray(textured_uvs, dtype=np.float32),
             material=texture_material,
         )
-        return tm
+        return _apply_texture_alpha_mode(tm)
 
     faces = np.asarray(triangles, dtype=np.int64)
     tm = trimesh.Trimesh(vertices=points, faces=faces, process=False)
@@ -579,7 +607,15 @@ def usd_geom_to_mesh(prim):
     else:
         return None
 
-def prim_to_trimesh(prim_path: str, stage: Usd.Stage, visual_only: bool = True):
+def prim_to_trimesh_parts(prim_path: str, stage: Usd.Stage, visual_only: bool = True):
+    """Collect a prim's visual meshes, one per sub-prim, each keeping its own material.
+
+    Concatenating these is lossy for anything textured: trimesh packs the sub-meshes' images into
+    a single atlas and rewrites their UVs to match, and a mesh whose appearance lives entirely in
+    its UVs -- the letter blocks' glyph is a window into a shared decal sheet -- loses it in that
+    rewrite. Callers that render should keep the parts separate; `prim_to_trimesh` concatenates
+    for callers that only want geometry.
+    """
     root = stage.GetPrimAtPath(prim_path) # root should correspond to a particular link or rigid object
     meshes = []
     for prim in Usd.PrimRange(root):
@@ -612,4 +648,9 @@ def prim_to_trimesh(prim_path: str, stage: Usd.Stage, visual_only: bool = True):
                     rel_tf = rot180_z @ rel_tf
             mesh = bake_relative_transform_into_mesh(mesh, rel_tf)
             meshes.append(mesh)
-    return trimesh.util.concatenate(meshes)
+    return meshes
+
+
+def prim_to_trimesh(prim_path: str, stage: Usd.Stage, visual_only: bool = True):
+    parts = prim_to_trimesh_parts(prim_path, stage, visual_only=visual_only)
+    return _apply_texture_alpha_mode(trimesh.util.concatenate(parts))
