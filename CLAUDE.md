@@ -59,18 +59,18 @@ tmux ls
 ## Critical Files & Data Flow
 
 ### Datagen Pipeline (vecgen)
-Orchestrated by `scripts/datagen/run_datagen_pipeline.py` on this machine (one problem per GPU slot: `--local-gpus` x `--local-gpu-workers`; output under `--output-root`, default `data`; `--resume` skips stages marked done in `<base>/.pipeline_state/`):
+Orchestrated by `scripts/datagen/run_datagen_pipeline.py` locally (one problem per GPU slot: `--local-gpus` x `--local-gpu-workers`; output under `--output-root`, default `data`; `--resume` skips stages marked done in `<base>/.pipeline_state/`):
 1. **Task Generation** (`scripts/task_gen/*.py`): PDDL problems.
 2. **Env** (`scripts/generate_task_from_pddl.py`): PDDL problem → autogen Isaac Lab env package + sampled reset states (`--randomize_robot_init`: collision-free cuRobo IK starts). With `--vecgen-problems-per-env G > 1` the vecgen jobs build multi-problem packages instead (`scripts/vecgen/make_superset_env.py`).
 3. **Execution** (`scripts/vecgen/run.py`, `src/toyblocks/vecgen/`): FF plans per env (`symbolic/`), batched skills on a cuRobo v2 planner pool (`skills/`, `planner/`), verified effects and goals (`symbolic/predicates.py`), LeRobot recording → `execution/<slug>/`.
 4. **Merge / annotate / plot** (`scripts/datagen/merge_datasets.py`, `src/toyblocks/data_annotation/annotate_target_xy.py`, `scripts/datagen/plot_episode.py`).
 
-Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rendering (`scripts/render/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines (`--render-local`; datagen also has `--render`, which schedules each render as its own job), with the RI training set's flags and sidecars as defaults; HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/render/README_local.md`.
+Play data and TAMPER (`scripts/datagen/run_tamper_pipeline.py`, `docs/tamper.md`) run on vecgen too. Rendering (`scripts/render/`) runs on `toyblocks.domain_randomization.render_sim.RenderSim`. It runs inside the datagen and play pipelines via `--render-pass FLAGS.yaml[:N]`, the only flag that turns the stage on (repeatable, one pass per look, no default YAML); datagen's `--render-schedule` picks whether each render is its own job or rides the execution job. HDRI backdrops: polyhaven comes with `asset_manifest.json`, the Laval indoor-2018 pool is installed separately; see `docs/source/user_guide/workflows/datagen/render.md`.
 
 ### Evaluation
 - `scripts/evaluate.py`: Eval worker: remote policy server, LL oracle, dataset replay, or random actions.
 - `src/toyblocks/serving/serve_maniflow_policy.py`: ManiFlow LL policy server (`--hl oracle`), or Molmo2 HL + ManiFlow LL (`--hl model`).
-- `scripts/launch_eval.py`: Queue-driven eval launcher: policy server, episode queue and eval workers on this machine.
+- `scripts/launch_eval.py`: Queue-driven eval launcher: policy server, episode queue and eval workers, all local.
 
 ### TAMP Domain (Blocks)
 - `src/toyblocks/tamp/blocks/domain.pddl`: Symbolic domain definition.
@@ -118,7 +118,7 @@ python scripts/vecgen/run.py --env-path outputs/${task} --pddl ${problem} \
 ### Evaluation (Molmo2 HL + ManiFlow LL)
 
 ```bash
-# Starts the policy server, episode queue and eval worker on this machine
+# Starts the policy server, episode queue and eval worker locally
 uv run python scripts/launch_eval.py --num-eval-gpus 1 \
     --dataset-path <merged LeRobot val set> --episode-indices 0-3 --queue-limit 4 \
     --model-path <run>/checkpoints/steps_N_model.safetensors --hl-model-path <molmo2 step dir> \

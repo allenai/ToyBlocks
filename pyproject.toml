@@ -82,7 +82,7 @@ maniflow = [
     # <5.18: transformers 5.18.0 (2026-09-30) needs huggingface_hub >= 1.31, but the
     # huggingface_hub override below replaces that requirement and resolves 1.16.1, so a
     # fresh install died at import ("cannot import name 'ResolvedRevision'"), e.g. the
-    # policy server of every Beaker maniflow eval. Lift once the hub override allows 1.31.
+    # ManiFlow policy server. Lift once the hub override allows 1.31.
     "transformers<5.18",
     "maniflow-tb",
     "ai2-molmo2",

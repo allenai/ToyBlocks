@@ -58,7 +58,7 @@ before isaaclab imports). The task package must already be generated:
         --obs-mode rgb+state --output-dir runs/verify --headless --enable_cameras
 
 ``tests/eval/scene_load.sh`` drives this one subprocess per dataset; run
-standalone it is meant for a GPU box with the weka datasets mounted.
+standalone it is meant for a GPU box with the datasets mounted.
 
 Every comparison also reports a *margin* (fraction of its allowance consumed),
 and the console prints the tightest few -- that is what flags a field about to

@@ -8,7 +8,7 @@ DIRECTORY -- read that as a nested JSON key and EVERY problem looks unfinished. 
 on 2026-09-15 two partial merges exited "0 completed problem(s)" against an output that had six
 finished problems and ~1000 episodes, because the selector looked for d["meta"]["completed"].
 
-Fixture keys mirror a real render_params.json pulled off weka.
+Fixture keys mirror a real render_params.json.
 """
 import json
 import sys

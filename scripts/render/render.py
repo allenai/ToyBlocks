@@ -2007,7 +2007,7 @@ def _read_video_defects(out_dir):
     """Defect rows the encoder appended for this problem, if any.
 
     Written by the encoder process (which is the only thing that knows a publish failed) rather
-    than inferred later: reconstructing the list from weka afterwards means listing ~115k objects.
+    than inferred later: reconstructing the list afterwards means listing ~115k files.
     """
     path = os.path.join(out_dir, "_video_defects.jsonl")
     rows = []
@@ -2189,9 +2189,9 @@ def _load_episode_filter(path: Optional[str]):
             ms = re.search(r"(blocks_success|blocks_failure)", ln)
             split = ms.group(1) if ms else "blocks_success"
             # An episode lives at chunk-{ep//1000}/file-{ep%1000}.mp4, so the chunk is part of the
-            # index -- beaker_orchestrator decodes it the same way (base = chunk*1000). Reading only
-            # file-NNN made chunk-001/file-003 mean episode 3 instead of 1003, so on any split with
-            # 1000+ episodes a video-key list patched the WRONG episodes. Silently, too: the
+            # index (base = chunk*1000). Reading only file-NNN made chunk-001/file-003 mean
+            # episode 3 instead of 1003, so on any split with 1000+ episodes a video-key list
+            # patched the WRONG episodes. Silently, too: the
             # empty-fragment guard is deliberately off for --episodes_file, where a problem
             # legitimately renders nothing.
             mc = re.search(r"chunk-(\d+)[/\\]", ln)
@@ -2203,16 +2203,15 @@ def _load_episode_filter(path: Optional[str]):
 # How often replay_job speaks from INSIDE a wave, and how finely. The wave rollout is the whole
 # silent window of a render: a 32-env wave of 2500-frame episodes sits in it 60+ min, and the next
 # print is the wave-boundary [progress] line. Every render watchdog keys on OUTPUT, so that one
-# silence trips all three -- beaker_worker --stall_timeout (3600s, SIGKILL), beaker_orchestrator
-# --worker_idle_timeout (4200s, cancel) and --no_output_timeout (14400s, exit 9). Measured
-# 2026-10-09 on oct09_stack2_rg855: a HEALTHY 18-episode batch took 60.5 min -- 30s past
-# --stall_timeout -- and 12 jobs were killed for rendering slowly rather than for being stuck.
+# silence looks like a hang to any output-keyed watchdog (run_local_render.py --stall_timeout,
+# fast_patch.py --stall_timeout): a HEALTHY 18-episode batch once took 60.5 min, past an
+# hour-long stall timeout, and was killed for rendering slowly rather than for being stuck.
 #
 # BOTH gates are required; they guard opposite mistakes. The seconds gate keeps the line rare
-# (log volume, and worker_pulse only reads WORKER_PULSE_TAIL=40 lines). The frames gate keeps
-# --worker_idle_timeout able to do its job: a render parked on encoder backpressure blocks per
-# FRAME, so it advances none, stays silent, and is still correctly reaped as a corpse. A
-# wall-clock-only heartbeat would instead make any render that merely creeps forward immortal.
+# (log volume). The frames gate keeps the stall timeout able to do its job: a render parked on
+# encoder backpressure blocks per FRAME, so it advances none, stays silent, and is still
+# correctly reaped as a corpse. A wall-clock-only heartbeat would instead make any render that
+# merely creeps forward immortal.
 def sort_units_into_waves(units: List[Dict[str, Any]], num_envs: int,
                           block_waves: int) -> List[List[Dict[str, Any]]]:
     """Waves of `num_envs` units, longest episodes first within each block of `block_waves` waves.
@@ -2633,11 +2632,10 @@ def replay_job(sim, job: Dict[str, Any], max_episodes: Optional[int],
                        f"({len(_skipped_parquet)} file(s), e.g. {_skipped_parquet[0].name})")
             print(f"[render] {Path(out_dir).name}: nothing renderable -- {_reason}. "
                   f"Skipping this problem; NOT a fragment error.", flush=True)
-            # Mark it FINISHED. beaker_worker acks an item only when bp.item_complete() is true,
-            # which needs every problem to carry render_params.completed=true. Returning without
-            # one left the item un-acked forever: the lease expired, SQS redelivered it, and the
-            # next worker skipped it just as fast and still could not ack -- so the item count
-            # could never reach the total, COMPLETION never ran, and the merge never happened.
+            # Mark it FINISHED. A render counts as done only when every problem carries
+            # render_params.completed=true (completion.problem_complete). Returning without one
+            # left the problem looking unfinished forever: every retry skipped it just as fast,
+            # completion never ran, and the merge never happened.
             # There is nothing to render here ever, so "completed" is the truthful terminal state;
             # empty_reason records why it is empty.
             _write_render_params(out_dir, job, flags, 0, False, {}, [], completed=True,
@@ -3078,12 +3076,9 @@ def replay_job(sim, job: Dict[str, Any], max_episodes: Optional[int],
                 break
             # Speak from inside the wave (see WAVE_HEARTBEAT_EVERY_S). Deliberately NOT the
             # "[progress] ... episodes N/M" shape of the boundary line below: that exact string is
-            # what feeds the orchestrator's rendered_hwm (beaker_worker gates on `"[progress]" in
-            # line`, beaker_orchestrator reads HEARTBEAT_EPISODES), and rendered_hwm is a
-            # never-reset high-water mark gating BOTH the exit-9 give-up path and the
-            # launch-cooldown reset. Frames pushed into an encoder queue are not episodes on disk
-            # -- under backpressure a render sits in this loop for hours having saved none -- so
-            # crediting them there would reopen the hole --no_output_timeout exists to close.
+            # what progress monitors count as episodes saved. Frames pushed into an encoder queue
+            # are not episodes on disk -- under backpressure a render sits in this loop for hours
+            # having saved none -- so counting them as episodes would hide a stuck render.
             if t - _hb_t >= _hb_stride and time.time() >= _hb_next:
                 _hb_t, _hb_next = t, time.time() + WAVE_HEARTBEAT_EVERY_S
                 print(f"[render] {Path(out_dir).name}: wave {wi+1}/{len(waves)} "
@@ -3375,11 +3370,10 @@ def main():
     # (Copying the source table, the non-glyph path, is safe under sharding because every worker
     # writes byte-identical content.)
     #
-    # --episode_offset is NOT refused. It was, and that made the flag unusable on the fleet: the
-    # Beaker worker ALWAYS passes a slice, so on 2026-10-02 all 123 workers of a 5000-episode run
-    # exited here having rendered nothing. The planner's slices land on problem boundaries
-    # (beaker_plan.build_items / build_items_k: episode_offset = starts[group[0]],
-    # max_episodes = sum of the group's sizes), so a fragment owns every episode of every problem
+    # --episode_offset is NOT refused. It was, and that made sharded renders impossible: a shard
+    # ALWAYS passes a slice, so every shard exited here having rendered nothing. Slices that land
+    # on problem boundaries (episode_offset = the first problem's start, max_episodes = the
+    # group's total) mean a fragment owns every episode of every problem
     # it touches and its interning is self-consistent. That is CHECKED below once the slice has
     # been compiled against THIS process's own enumeration -- search _GLYPH_SHARD -- rather than
     # assumed here, because the argv alone cannot tell an aligned slice from a mid-problem one
@@ -3445,12 +3439,11 @@ def main():
                 _pairs.append((_pname, _split, _src))
 
         # The offset is ABSOLUTE into the global list, so every problem's count is needed even
-        # though this fragment renders ~10 of them. Counting them one at a time is ~1 weka read
-        # each with NO output in between: on this 2382-problem source that measured ~1541 s in a
-        # single process, and with 134 render processes starting at once on 2026-09-10 it
-        # congested weka past the worker's --stall_timeout 3600, so every fragment was SIGKILLed
-        # (rc=-9) before build_simulator ever ran. The fleet produced zero episodes for hours
-        # while the orchestrator's own counters stayed clean. Prefer the planner's cache; fall
+        # though this fragment renders ~10 of them. Counting them one at a time is ~1 shared-
+        # filesystem read each with NO output in between: on a 2382-problem source that measured
+        # ~1541 s in a single process, and with 134 render processes starting at once it
+        # congested the filesystem past an hour-long stall timeout, so every fragment was killed
+        # (rc=-9) before build_simulator ever ran. Prefer the planner's cache; fall
         # back to a PARALLEL scan, and print on both paths so the watchdog sees a live process.
         _cache = _enum_counts_from_cache(args_cli.datasets_dir)
         if _split_glob is not None:

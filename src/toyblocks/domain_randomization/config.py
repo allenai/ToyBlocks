@@ -27,7 +27,7 @@ TOP_LEVEL = {
     # Disjoint from randomize_task_letters by spec type, not by name. See block_colors.py.
     "randomize_block_colors",
     # RAM-backed HDRI path cache: {enabled, dir, preload, max_gb, verbose}. Rewrites the asset
-    # path handed to USD to a tmpfs copy so the per-wave re-read hits memory, not weka.
+    # path handed to USD to a tmpfs copy so the per-wave re-read hits memory, not the disk.
     "texture_cache",
 }
 _SKYBOX_KEYS = {"set", "sets", "names", "textures", "textures_dir", "texture_format", "rotation_deg",

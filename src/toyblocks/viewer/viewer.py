@@ -74,7 +74,7 @@ class ViewerCfg:
     ignore_empty_trajectories: bool = True
     """Whether to ignore trajectories that have no frames saved for viewing other than the reset frame."""
     share_url: bool = False
-    """Use this setting to allow viser to share a public url (handy if using beaker)"""
+    """Use this setting to allow viser to share a public url (handy on a remote machine)."""
     minimal_gui: bool = False
     """Strip the viser front-end down toward the scene itself: dark mode, no logo or share button,
     the control panel docked to the right edge and minimized to a rail strip, so the browser opens
@@ -85,9 +85,8 @@ class ViewerCfg:
     """Longest side a mesh texture is downscaled to before it is uploaded to the browser. The letter
     blocks ship a 4096px decal sheet and a 2048px base texture, and every block's glTF embeds its own
     copy: 14 MB per block as shipped, 8.4 MB at 2048, 2.6 MB at 1024, 0.8 MB at 512. The scene is
-    re-sent to every browser that connects, so this is what a task load or a reconnect costs. 2048
-    halves the decal sheet and leaves the glyphs legible; 1024 made them visibly soft. 0 disables
-    the cap."""
+    re-sent to every browser that connects, so this is the cost of a reconnect. 2048 halves the decal
+    sheet and leaves the glyphs legible; 1024 made them visibly soft. 0 disables the cap."""
 
 class Viewer:
     def __init__(self, cfg: ViewerCfg = ViewerCfg()):

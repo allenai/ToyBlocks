@@ -241,5 +241,5 @@ arguments". Use `--target-block` there.
 ## Next
 
 Feed the problems to [stage 2, env generation](env_generation.md), or let
-[the pipeline](../data_generation.md) run every stage for you on this machine
-([Running on this machine](local.md)).
+[the pipeline](../data_generation.md) run every stage for you locally
+([Running the pipeline locally](local.md)).

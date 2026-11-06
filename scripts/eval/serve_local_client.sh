@@ -24,7 +24,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/eval/_common.sh
 source "${SCRIPT_DIR}/_common.sh"
 
-# DATASET_PATH has no repo default (per-user weka path), and without it the queue
+# DATASET_PATH has no repo default (it is machine-specific), and without it the queue
 # is silently skipped and codegen runs against an empty task slug.
 if [ -z "$PDDL_PROBLEM_FILE" ] && [ -z "$DATASET_PATH" ]; then
   echo "DATASET_PATH (or PDDL_PROBLEM_FILE) is required; set it in scripts/eval/_common.sh or export it" >&2

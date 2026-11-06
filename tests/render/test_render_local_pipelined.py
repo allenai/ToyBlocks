@@ -1,4 +1,4 @@
-"""`--render`: the scheduler that overlaps execution and render on one slot pool.
+"""`--render-schedule pipelined`: the scheduler that overlaps execution and render on one slot pool.
 
 Everything here is CPU-only and sub-second. The scheduler is exercised with fake commands
 (``true`` / ``false``) over a real ``run_local_stage``, so the concurrency is real while Isaac
@@ -39,8 +39,7 @@ def mod():
 
 def _args(mod, *extra: str):
     return mod.build_parser().parse_args([
-        "--experiment-id", "x", "--render-randomized",
-        "--render-flags", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
+        "--experiment-id", "x", "--render-pass", "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml",
         *extra,
     ])
 
@@ -521,13 +520,15 @@ def test_the_coupled_report_block_is_gone(mod):
     assert src.count('mark_stage_complete(base, "render")') == 1,         "the local marker must be set in exactly one place (the sweep)"
 
 
-def test_the_local_render_is_a_real_stage_enabled_after_prompt_steps(mod):
-    """Flipped before prompt_steps, an interactive run could untick the stage while the exec
-    chains still carry the render: full GPU cost, then the un-rendered tree merged at exit 0."""
+def test_unticking_the_stage_interactively_also_drops_the_passes(mod):
+    """The coupled schedule appends the render to each execution job from
+    resolve_render_passes, not from enabled["render"]. If unticking the stage left the passes
+    in place, the run would burn the GPU rendering and then merge the un-rendered tree at
+    exit 0."""
     src = PIPELINE.read_text()
-    flip = src.index('        enabled["render"] = True')
-    assert src.index("enabled = prompt_steps(enabled)") < flip, "flip must follow prompt_steps"
-    assert src.index('args.render_schedule == "pipelined"') < flip,         "the schedule guard must stay ahead of the flip, which keys on enabled['render']"
+    clear = src.index("            args.render_pass = []")
+    assert src.index("enabled = prompt_steps(enabled)") < clear, "must follow prompt_steps"
+    assert 'if not enabled["render"]:' in src[clear - 200:clear]
 
 
 def test_a_coupled_run_can_resume_into_the_render(mod, tmp_path):
@@ -548,7 +549,7 @@ def test_a_coupled_run_can_resume_into_the_render(mod, tmp_path):
         return next((k for k, v in enabled.items() if v), None)
 
     assert resume_point(False) == "merge", "the old behaviour; kept here as the contrast"
-    assert resume_point(True) == "render", "--render-local must be resumable"
+    assert resume_point(True) == "render", "a coupled render must be resumable"
 
 
 def test_coupled_mode_never_arms_the_scheduler(mod):
@@ -560,7 +561,7 @@ def test_coupled_mode_never_arms_the_scheduler(mod):
 def test_the_gate_fails_on_missing_problems_by_default(mod):
     src = PIPELINE.read_text()
     assert "if not args.merge_allow_missing_problems:" in src
-    assert "args.render_merge_incomplete" not in src.split("def main")[-1] or         src.count("args.render_merge_incomplete") == 1,         "the local gate must not key on the Beaker per-episode knob"
+    assert "args.render_merge_incomplete" not in src.split("def main")[-1] or         src.count("args.render_merge_incomplete") == 1,         "the local gate must not key on the per-episode --render_merge_incomplete knob"
     assert mod.build_parser().get_default("merge_allow_missing_problems") is False,         "a dataset must never silently drop problems by default"
 
 
@@ -570,39 +571,11 @@ def test_worker_count_multiplies_the_slots_per_gpu(mod):
     assert mod.build_parser().get_default("local_gpu_workers") == 1, "default must be a no-op"
 
 
-def test_the_old_spelling_contradicting_the_new_schedule_is_refused():
-    """--render-local IS the coupled schedule, so asking for pipelined too is a contradiction."""
+def test_an_unreadable_pass_yaml_is_caught_before_kit_starts():
+    """Every pass is checked up front; otherwise it dies ~245s into Kit startup per problem."""
     r = subprocess.run(
         [sys.executable, str(PIPELINE), "--experiment-id", "_g",
-         "--render-local", "--render-schedule", "pipelined"],
-        capture_output=True, text=True, cwd=ROOT, timeout=600,
-    )
-    assert r.returncode != 0 and "contradicts" in (r.stdout + r.stderr)
-
-
-def test_the_old_spelling_composes_with_the_stage_flag():
-    """It used to be an alternative to --render; now it only selects the schedule.
-
-    The YAML path is deliberately missing so the run stops at validation: the deprecation
-    warning is emitted before that check, and nothing here should start a render.
-    """
-    r = subprocess.run(
-        [sys.executable, str(PIPELINE), "--experiment-id", "_g",
-         "--render-randomized", "--render-local", "--render-flags", "/nonexistent/none.yaml"],
-        capture_output=True, text=True, cwd=ROOT, timeout=120,
-    )
-    out = r.stdout + r.stderr
-    assert r.returncode != 0 and "readable on THIS machine" in out
-    assert "alternatives" not in out
-    assert "deprecated" in out
-
-
-def test_pipelined_mode_checks_the_flags_yaml_too():
-    """This guard used to sit inside `if args.render_local`, so --render skipped it
-    and burned ~245s of Kit startup per problem before dying."""
-    r = subprocess.run(
-        [sys.executable, str(PIPELINE), "--experiment-id", "_g", "--render-randomized",
-         "--render-flags", "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml"],
+         "--render-pass", "/root/toyblocks/src/toyblocks/domain_randomization/flags/x.yaml"],
         capture_output=True, text=True, cwd=ROOT, timeout=600,
     )
     assert r.returncode != 0 and "readable on THIS machine" in (r.stdout + r.stderr)
@@ -630,3 +603,24 @@ def test_every_pass_job_dir_is_a_sibling_merge_already_globs(mod):
     assert all(n.startswith("job_") for n in names)
     assert len(set(names)) == len(names), "each pass needs its own directory"
     assert 'glob("job_*")' in PIPELINE.read_text()
+
+
+# ------------------------------------------- the pipelined scheduler composes the real argv
+def test_the_scheduler_composes_one_render_per_pass(mod, tmp_path):
+    """render_cmd's body had no test: a mutation of the stall timeout or of the multi-pass
+    chaining left the whole suite green, while an e2e covers only what it happens to run."""
+    plain = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_plain.yaml"
+    camtest = ROOT / "src/toyblocks/domain_randomization/flags/render_flags_camtest.yaml"
+    args = mod.build_parser().parse_args([
+        "--experiment-id", "x", "--render-schedule", "pipelined",
+        "--render-pass", f"{camtest}:2", "--render-pass", str(plain),
+        "--render-stall-timeout", "77",
+    ])
+    sched = mod.LocalRenderScheduler(args, str(tmp_path / "envs"), tmp_path / "execution",
+                                     tmp_path / "render")
+    joined = " ".join(sched.render_cmd("problem_x"))
+
+    assert joined.count("run_local_render.py") == 2, "one render per pass"
+    assert "job_camtest" in joined and "job_plain" in joined
+    assert "--stall-timeout 77" in joined, "the renamed flag must reach the hang guard"
+    assert "-N 2" in joined and "-N 1" in joined, "each pass carries its own copy count"

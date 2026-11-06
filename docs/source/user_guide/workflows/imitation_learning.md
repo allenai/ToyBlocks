@@ -10,14 +10,14 @@ accelerate launch --config_file hvla/config/deepseeds/deepspeed_zero2.yaml ... h
     --config_yaml ./examples/Franka/train_maniflow_multimodal.yaml --framework.name ManiFlowMultiModal ...
 ```
 
-and runs it on this machine: `accelerate launch` on all visible GPUs by default, or
+and runs it locally: `accelerate launch` on all visible GPUs by default, or
 `torchrun` across several nodes. It trains on a merged LeRobot dataset, the output of the
 [data generation pipeline](data_generation.md). Every flag is listed in the
 `train_maniflow.py` [Reference](imitation_learning/train_maniflow.md).
 
 ## Setup
 
-These docs describe maniflow-tb commit `7b10edf` ("toyblocks release"), the commit the
+These docs describe maniflow-tb commit `c04eab7`, the commit the
 `maniflow-tb` submodule is pinned to. The `maniflow` extra installs it in editable mode, together
 with `molmo2` (see [Installation and Setup](installation_and_setup_instructions.md)):
 

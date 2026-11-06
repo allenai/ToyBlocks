@@ -41,7 +41,7 @@ def _enum_cache_load(root: Path, problems: list, splits_wanted: tuple):
     """Return the cached [(problem, split, ep)] list, or None if absent/stale/unusable.
 
     Validated against `problems` -- the problem_* dir names from the ONE root listing the caller
-    already had to do. That listing is a single weka round-trip; the scan it replaces is ~6 per
+    already had to do. That listing is a single round-trip; the scan it replaces is ~6 per
     problem (exists + is_dir + read x 2 splits), which on a 2400-problem source is ~25 minutes of
     pure latency before the first worker can spawn.
 
@@ -58,7 +58,7 @@ def _enum_cache_load(root: Path, problems: list, splits_wanted: tuple):
     Coverage is read from `scanned` when present and otherwise DERIVED from the rows, so caches
     already written by a skipped run (schema 1, no `scanned`) are correctly rejected rather than
     trusted -- that is why this does not need a schema bump, which would invalidate every good
-    cache on weka and force a ~25-minute rescan per source.
+    cache already written and force a ~25-minute rescan per source.
     """
     f = root / ENUM_CACHE_NAME
     try:
@@ -271,9 +271,9 @@ def _enumerate_source_episodes(src: str, skip_failures: bool = False):
                       f"(skipped the full scan; rm {root / ENUM_CACHE_NAME} to force a rescan)",
                       file=sys.stderr, flush=True)
                 return cached
-        # This walk is O(problems x splits) weka round-trips and MUST cover the whole source even
-        # when only a few problems will be rendered: item offsets are absolute into this list
-        # (see beaker_plan.select_items), so a filtered scan would re-target every slice. On a
+        # This walk is O(problems x splits) filesystem round-trips and MUST cover the whole source
+        # even when only a few problems will be rendered: --episode_offset is absolute into this
+        # list, so a filtered scan would re-target every slice. On a
         # 2400-problem source it can run for many minutes; without progress it is indistinguishable
         # from a hang, and a stuck-looking orchestrator invites someone to kill a healthy run.
         _t0 = time.time()
@@ -282,7 +282,7 @@ def _enumerate_source_episodes(src: str, skip_failures: bool = False):
         # Announce the scan BEFORE it starts. The cache miss is the whole reason for the silence,
         # and saying so up front is what tells an operator the run is working rather than wedged.
         print(f"[enumerate] cache miss -- cold scan of {_n} problem(s) under {root}. "
-              f"This is O(problems x splits) weka round-trips and can take many minutes; "
+              f"This is O(problems x splits) filesystem round-trips and can take many minutes; "
               f"progress follows.", file=sys.stderr, flush=True)
         # Progress on BOTH counts and time. The old rule (every 250, and only when >=500 problems)
         # left a 397-problem source completely silent for its whole scan -- 12 min of nothing on

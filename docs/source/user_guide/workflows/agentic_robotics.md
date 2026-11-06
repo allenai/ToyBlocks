@@ -69,7 +69,7 @@ This walkthrough runs `spell_hen_patterned_0_feasible_0`, one variant of the Sea
 letters hidden, and the goal of spelling HEN in a tower. It is a feasible variant, its letters are
 ones the released ManiFlow checkpoint trained on, and its blocks come from that checkpoint's
 library, so the same scene runs under both skill backends. List what is defined and what is built
-on this machine, then build the scene (a family key would build every variant, twelve here, one
+locally, then build the scene (a family key would build every variant, twelve here, one
 Isaac boot each):
 
 ```bash

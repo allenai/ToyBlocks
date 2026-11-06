@@ -1,7 +1,6 @@
 """Pick and place as batched keyframe generators.
 
-Geometry follows the TAMP generators/executors (see docs/datagen_revamp.md and the
-executor spec): top-down grasps with the EE 0.14 m above the top face, a 5 cm post-grasp
+Geometry follows the TAMP generators/executors (see the executor spec): top-down grasps with the EE 0.14 m above the top face, a 5 cm post-grasp
 lift by IK interpolation, transport to a 3 cm pre-place standoff with XY-padded obstacles,
 an IK-interpolated descent to 1 mm above the support, release, and a short retreat.
 Block sizes are the spawned colliders' edge lengths (``VecSim.measure_block_dims``); heights

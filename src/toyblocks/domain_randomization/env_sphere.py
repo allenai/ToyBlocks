@@ -222,8 +222,8 @@ def _sample_episode_env_spheres(spec: dict, episode_indices, seed: int, default_
         print(f"[render] env_sphere: emissive_normalize ON -> per-skybox scale = target/median_lum "
               f"(target={ei}, clamp={list(clamp)}) so dim HDRIs stay visible")
     # Draw every episode first (the rng stream is consumed in exactly the original order), then
-    # fetch + measure the unique HDRIs in parallel: serially, one copy off weka plus one full HDR
-    # decode per episode was ~16 min of a 310-episode item's setup on Beaker.
+    # fetch + measure the unique HDRIs in parallel: serially, one copy off network storage plus
+    # one full HDR decode per episode was ~16 min of a 310-episode render's setup.
     draws: List[Tuple[int, Optional[str], Optional[str], float, float]] = []
     for e in sorted(episode_indices):
         if indexed:
@@ -236,7 +236,7 @@ def _sample_episode_env_spheres(spec: dict, episode_indices, seed: int, default_
         draws.append((e, tex, bname, r, target))
     lums: Dict[str, Optional[float]] = {}
     if normalize:
-        # read the CACHED copy: else emissive_normalize pulls the full file off weka
+        # read the CACHED copy: else emissive_normalize pulls the full file off the disk
         # once per unique HDRI even with the renderer already on tmpfs.
         uniq = sorted({d[1] for d in draws if d[1]})
         with ThreadPoolExecutor(max_workers=max(1, min(_LUM_WORKERS, len(uniq)))) as ex:

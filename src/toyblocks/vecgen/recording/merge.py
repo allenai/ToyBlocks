@@ -261,7 +261,7 @@ def atomic_write(target: Path, write: Callable[[Path], None], verify_parquet: bo
 
 def write_parquet_table(table: pa.Table, target: Path) -> None:
     """Encode in memory, then one sequential write: 350-row groups are thousands of small
-    column-chunk writes, each a round trip on Weka."""
+    column-chunk writes, each a round trip on network storage."""
     sink = pa.BufferOutputStream()
     pq.write_table(table, sink, row_group_size=ROW_GROUP_SIZE)
     data = sink.getvalue()
@@ -656,7 +656,7 @@ def _read_piece(p: Piece) -> pa.Table:
     rgs = list(range(first, last + 1))
     # pre_buffer coalesces the column chunks into a few large reads. Recorders write small row
     # groups (vecgen: ~670 rows, ~6400 column chunks per 100 MB file), and one read per chunk
-    # costs Weka latency each time: 5.3 s -> 1.6 s per file measured on oct21_stack3_pnp_vg.
+    # costs network-storage latency each time: 5.3 s -> 1.6 s per file measured on a stack-3 set.
     t = pq.ParquetFile(p.file, pre_buffer=True).read_row_groups(rgs, use_threads=False)
     lo = p.start - int(bounds[first])
     return t.slice(lo, p.stop - p.start)
@@ -1898,7 +1898,7 @@ def _merge_locked(
         json.dump(stats, f, indent=4)
     log.info("Stats saved to %s", output_dir / "meta" / "stats.json")
 
-    # data/ and meta/ only: an rglob also walks every video directory (12 s for 60K clips on Weka)
+    # data/ and meta/ only: an rglob also walks every video directory (12 s for 60K clips on network storage)
     all_parquets = sorted(
         [*output_dir.glob("data/*/*.parquet"), *(output_dir / "meta").rglob("*.parquet")]
     )

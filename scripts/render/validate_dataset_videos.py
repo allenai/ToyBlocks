@@ -1,4 +1,4 @@
-"""Validate every mp4 in a (local) dataset directory before it is trusted / uploaded to weka.
+"""Validate every mp4 in a (local) dataset directory before it is trusted / uploaded.
 
 Catches the `moov atom not found` corruption (writer killed before close) AND short videos (killed
 mid-episode -> fewer frames than the episode length). Meant to run:

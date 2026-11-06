@@ -8,7 +8,7 @@ the one pipeline that starts the policy server, generates the gym task from the 
 serves the episode queue, runs the eval workers and merges the results (see
 [Policy Evaluation](../evaluations.md)). This page lists every flag it accepts.
 
-Everything runs as subprocesses on this machine, from your working tree as it is:
+Everything runs as local subprocesses, from your working tree as it is:
 
 - **GPU layout.** GPU 0 runs the policy server and GPUs 1..N run the N eval workers
   (GPUs 0..N-1 under `--replay`, which has no server). With fewer GPUs than that, the
@@ -519,7 +519,6 @@ render and block-identity flags work together.
 | `--robot-id` | dataset provenance | Robot config (`--env-cfg.robot-id`). |
 | `--scene-preset` | dataset provenance | Scene preset (`--env-cfg.scene-preset-id`). |
 | `--center-crop-ratio` | 0.95 for ManiFlow transforms | Centre-crop each resized 224x224 input to `int(224 * ratio)` and resize it back, matching a checkpoint trained with `random_crop_ratio`; `1.0` feeds the full frame. |
-| `--depth-aug` | none | ManiFlow transforms only: live depth augmentation (`ejbl`). The pipeline installs `opencv-contrib` from the HVLA requirements when it is set. |
 | `--enable-crop` | off | ManiFlow transforms only: build `target_front_crop_rgb` on the client. |
 | `--use-calibrated-cameras` | on | Use the fixed sim2real camera intrinsics; `--no-use-calibrated-cameras` uses each episode's recorded intrinsics. |
 | `--use-render-params` | off | On a rendered dataset, reproduce each episode's camera pose, HDRI, table material, lights, exposure and backdrop. Needs `--no-use-calibrated-cameras`; with `--num-envs > 1` add `--wave-resets`. |
