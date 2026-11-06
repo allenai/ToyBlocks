@@ -10,7 +10,7 @@ accelerate launch --config_file hvla/config/deepseeds/deepspeed_zero2.yaml ... h
     --config_yaml ./examples/Franka/train_maniflow_multimodal.yaml --framework.name ManiFlowMultiModal ...
 ```
 
-and runs it on this machine: `accelerate launch` on all visible GPUs by default, or
+and runs it locally: `accelerate launch` on all visible GPUs by default, or
 `torchrun` across several nodes. It trains on a merged LeRobot dataset, the output of the
 [data generation pipeline](data_generation.md). Every flag is listed in the
 `train_maniflow.py` [Reference](imitation_learning/train_maniflow.md).

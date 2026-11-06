@@ -796,7 +796,7 @@ class JobFeed:
     """A job list :func:`run_local_stage` may keep pulling from while the stage is running.
 
     A plain list is still accepted everywhere; this exists for the one case where finishing a
-    job creates another one -- the local render of a problem whose execution just finalized.
+    job creates another one -- the render of a problem whose execution just finalized.
 
     Render items are served BEFORE queued execution items. At one slot that reproduces the
     coupled chain's exec/render interleaving, so at most one un-rendered execution dataset sits
