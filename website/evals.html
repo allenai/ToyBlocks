@@ -43,7 +43,7 @@
         <li><b>Actions:</b> pick, place (on a block or on the table), flip (left, right, forward, backward), rotate (cw, ccw) and done.</li>
         <li><b>Training:</b> Molmo2-4B fine-tuned for 6,000 steps at batch size 256 on three-block stacking episodes. A quarter of each batch is general pointing data (PixMo-Points, PixMo-Count, CoSyn-Point) so the model keeps its general pointing ability. About 8 hours on 8 H100s.</li>
       </ul>
-      <p class="docs"><a href="https://huggingface.co/allenai/Molmo2-4B-tb">Model card</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#molmo2-high-level-model">Molmo 2 in evals</a></p>
+      <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#molmo2-high-level-model">Molmo 2 in evals</a></p>
     </div>
     <div>
       <h3>maniflow-tb <span>low level</span></h3>
@@ -53,7 +53,7 @@
         <li><b>Model:</b> flow matching with consistency training, a CLIP ViT-B/16 image encoder and a 12-layer DiT action head, 322.5M parameters.</li>
         <li><b>Training:</b> 200,000 steps on 8 GPUs, batch 128 per GPU, on three ToyBlocks-generated LeRobot datasets.</li>
       </ul>
-      <p class="docs"><a href="https://huggingface.co/allenai/maniflow-tb">Model card</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/train_maniflow.html">all training flags</a></p>
+      <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/train_maniflow.html">all training flags</a></p>
     </div>
   </div>
   <h3>Prompt format</h3>
@@ -64,7 +64,7 @@
     <div><span>With history</span><code>previous action: block A &lt;points coords="1 1 367 623"&gt;block A&lt;/points&gt; pick. stack A 4 B. plan. point to target. predict action.</code></div>
   </div>
   <p>The prompt can start with the previous step, written the same way as an answer. Point coordinates run from 0 to 1000 across the image width and height. Each target sits 5 px (in a 640×360 frame) below the block's center, on the face that points at the camera. ManiFlow then receives the action word (<code>pick</code>) and a heatmap drawn around that point.</p>
-  <p class="docs">Model cards: <a href="https://huggingface.co/allenai/Molmo2-4B-tb#prompt-format">Molmo2-4B-tb</a> · <a href="https://huggingface.co/allenai/maniflow-tb">maniflow-tb</a> · Data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">toyblocks-data</a></p>
+  <p class="docs">Data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">toyblocks-data</a></p>
 </div></section>
 
 <section id="play"><div class="col">
@@ -304,7 +304,7 @@
 </div>
     <figcaption>Three-letter block-spelling tasks, 200 episodes per bar. With the motion planner, failures are Molmo 2's. With ManiFlow, failures can come from either level.</figcaption>
   </figure>
-  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a> · Model card: <a href="https://huggingface.co/allenai/Molmo2-4B-tb#evaluation">Molmo2-4B-tb evaluation</a></p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a></p>
 </div></section>
 
 <section id="options"><div class="col">

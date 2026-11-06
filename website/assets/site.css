@@ -135,7 +135,8 @@ table.stages td:first-child, table.stages td:last-child { white-space: nowrap; }
 
 /* training: model cards and the prompt format */
 .models { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
-.models > div { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px 14px; min-width: 0; }
+.models > div { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px 14px; min-width: 0; display: flex; flex-direction: column; }
+.models > div > .docs { margin-top: auto; padding-top: 12px; }  /* links sit on the same line in both cards */
 .models h3 { margin-top: 0; font-size: 17px; font-family: var(--mono); font-weight: 500; }
 .models h3 span { font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-left: 6px; }
 .models ul { font-size: 15px; padding-left: 18px; }
