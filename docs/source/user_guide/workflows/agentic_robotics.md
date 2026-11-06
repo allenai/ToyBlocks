@@ -16,10 +16,13 @@ Two skill backends execute the tools:
 
 ## Setup
 
-Install ToyBlocks as in [Installation](installation_and_setup_instructions.md), with the
-`vecgen` and `agentic` extras, and initialize the submodule:
+This is the [Installation](installation_and_setup_instructions.md) sequence with the `vecgen`
+and `agentic` extras and the `agentic_robotics` submodule; it needs an NVIDIA GPU (driver 570 or
+newer) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
+git clone https://github.com/allenai/ToyBlocks.git && cd ToyBlocks
+uv venv --python 3.11 && source .venv/bin/activate
 git submodule update --init curobo agentic_robotics
 uv pip install -e ".[dev,isaac,torch-cu128,vecgen,agentic]"
 export OMNI_KIT_ACCEPT_EULA=YES
