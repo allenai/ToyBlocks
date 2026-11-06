@@ -38,6 +38,9 @@ guarantee comes from a plan, act and verify loop:
 Failed episodes go to a separate `blocks_failure` split rather than being mixed in or discarded,
 so you can study them later.
 
+Each skill and its `verify()` live in `src/toyblocks/vecgen/skills/`. To teach vecgen a new PDDL
+action, see [Adding a skill to vecgen](adding_a_skill.md).
+
 ## Running it
 
 To run the flip env package from stage 2 and record 32 episodes with 16 environments in

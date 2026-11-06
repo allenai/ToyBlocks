@@ -284,6 +284,7 @@ The final merged dataset is written to `<output-root>/datasets/merged/train/<exp
 datagen/task_generation
 datagen/env_generation
 datagen/execution
+datagen/adding_a_skill
 datagen/render
 datagen/merge
 datagen/annotate
