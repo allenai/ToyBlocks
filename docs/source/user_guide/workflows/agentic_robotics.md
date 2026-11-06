@@ -61,12 +61,20 @@ Runs are written under `$AGENTIC_ROBOTICS_RUNS_DIR`, or `agentic_robotics/runs/`
 ## Build a task's environment packages
 
 A task's scenes are ordinary ToyBlocks env packages, generated with ToyBlocks's codegen the first
-time they are needed and kept in `agentic_robotics/data/tasks/` (not tracked in git). List what is
-defined and what is built on this machine, then build a task:
+time they are needed and kept in `agentic_robotics/data/tasks/` (not tracked in git). A task key
+names a family of PDDL variants, and a run draws one; a variant's slug names that scene alone.
+
+This walkthrough runs `spell_hen_patterned_0_feasible_0`, one variant of the Search & Spell family
+`spell_hen_patterned` from the released experiments: ten blocks on the table, some stacked, some
+letters hidden, and the goal of spelling HEN in a tower. It is a feasible variant, its letters are
+ones the released ManiFlow checkpoint trained on, and its blocks come from that checkpoint's
+library, so the same scene runs under both skill backends. List what is defined and what is built
+on this machine, then build the scene (a family key would build every variant, twelve here, one
+Isaac boot each):
 
 ```bash
 agentic-robotics tasks
-agentic-robotics generate-env --task r_on_red        # one package per PDDL variant (r_on_red has one)
+agentic-robotics generate-env --task spell_hen_patterned_0_feasible_0
 ```
 
 Passing `--generate-env` to `episode`, `page` or `human` builds a missing package on the spot.
@@ -75,7 +83,7 @@ Passing `--generate-env` to `episode`, `page` or `human` builds a missing packag
 
 ```bash
 # One headless, model-driven episode with the scripted skills
-agentic-robotics episode --task r_on_red --backend oracle
+agentic-robotics episode --task spell_hen_patterned_0_feasible_0 --backend oracle
 ```
 
 The run directory holds the video (`video.mp4`), the model's transcript, the resolved
@@ -89,8 +97,8 @@ The commands below start local web pages; open the printed URL in a browser.
 | Command | Page | What it does |
 |---|---|---|
 | `agentic-robotics menu --backend oracle` | <http://127.0.0.1:8083> | Isaac starts with no scene; pick tasks one after another from the page, watch the model act, and interject |
-| `agentic-robotics page --task r_on_red --backend oracle` | <http://127.0.0.1:8083> | one model-driven episode with the interjection page around it |
-| `agentic-robotics human --task r_on_red --backend oracle` | <http://127.0.0.1:8083> | the same episode with you in the model's chair: call the skills yourself |
+| `agentic-robotics page --task spell_hen_patterned_0_feasible_0 --backend oracle` | <http://127.0.0.1:8083> | one model-driven episode with the interjection page around it |
+| `agentic-robotics human --task spell_hen_patterned_0_feasible_0 --backend oracle` | <http://127.0.0.1:8083> | the same episode with you in the model's chair: call the skills yourself |
 | `agentic-robotics portal` | <http://127.0.0.1:8082> | browse finished runs (videos, transcripts, scores); no Isaac, no model |
 | `agentic-robotics portal --static` | files | write the portal as static pages under `<runs dir>/portal/` |
 | `agentic-robotics mock` | <http://127.0.0.1:8083> | the page alone, without Isaac or a GPU, for working on the UI |
@@ -189,7 +197,7 @@ own shell, then run the episode against it:
 
 ```bash
 agentic-robotics serve --maniflow maniflow-tb                                     # policy server, port 8000
-agentic-robotics episode --task ai2_stacked --backend maniflow --maniflow maniflow-tb   # in another shell
+agentic-robotics episode --task spell_hen_patterned_0_feasible_0 --backend maniflow --maniflow maniflow-tb   # in another shell
 ```
 
 Without `--maniflow`, both use the experiment file's `maniflow` key; without `--backend`, the
