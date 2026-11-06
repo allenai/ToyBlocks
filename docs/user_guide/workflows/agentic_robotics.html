@@ -426,13 +426,20 @@ succeeded; it decides from the images when the task is done or impossible. Every
 </div>
 <section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">#</a></h2>
-<p>Install ToyBlocks as in <a class="reference internal" href="installation_and_setup_instructions.html"><span class="std std-doc">Installation</span></a>, with the
-<code class="docutils literal notranslate"><span class="pre">vecgen</span></code> and <code class="docutils literal notranslate"><span class="pre">agentic</span></code> extras, and initialize the submodule:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>curobo<span class="w"> </span>agentic_robotics
+<p>This is the <a class="reference internal" href="installation_and_setup_instructions.html"><span class="std std-doc">Installation</span></a> sequence with the <code class="docutils literal notranslate"><span class="pre">vecgen</span></code>
+and <code class="docutils literal notranslate"><span class="pre">agentic</span></code> extras and the <code class="docutils literal notranslate"><span class="pre">agentic_robotics</span></code> submodule; it needs an NVIDIA GPU (driver 570 or
+newer) and <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/allenai/ToyBlocks.git<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ToyBlocks
+uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.11<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>curobo<span class="w"> </span>agentic_robotics
 uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,isaac,torch-cu128,vecgen,agentic]"</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">OMNI_KIT_ACCEPT_EULA</span><span class="o">=</span>YES
+get-toyblocks-assets<span class="w"> </span>--asset-manifest<span class="w"> </span>asset_manifest.json<span class="w">   </span><span class="c1"># the robot, block and scene assets</span>
 </pre></div>
 </div>
+<p>The assets are downloaded once per machine into <code class="docutils literal notranslate"><span class="pre">~/.toyblocks</span></code> and symlinked into <code class="docutils literal notranslate"><span class="pre">assets/</span></code>; without
+them the first task build fails with a missing robot USD. <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/install</span></code> checks the install,
+the submodule pins and the assets (see <a class="reference internal" href="installation_and_setup_instructions.html#verify-the-installation"><span class="std std-ref">Verify the installation</span></a>).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">agentic</span></code> extra installs the <code class="docutils literal notranslate"><span class="pre">agentic-robotics</span></code> package (editable, from the submodule) and
 its <code class="docutils literal notranslate"><span class="pre">agentic-robotics</span></code> command. Its MCP SDK needs newer <code class="docutils literal notranslate"><span class="pre">starlette</span></code>, <code class="docutils literal notranslate"><span class="pre">fastapi</span></code>, <code class="docutils literal notranslate"><span class="pre">uvicorn</span></code> and
 <code class="docutils literal notranslate"><span class="pre">idna</span></code> than Isaac Sim pins; <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> overrides those four (they serve Isaac’s livestream
@@ -458,10 +465,17 @@ key fails with the list of known ones.</p>
 <section id="build-a-task-s-environment-packages">
 <h2>Build a task’s environment packages<a class="headerlink" href="#build-a-task-s-environment-packages" title="Link to this heading">#</a></h2>
 <p>A task’s scenes are ordinary ToyBlocks env packages, generated with ToyBlocks’s codegen the first
-time they are needed and kept in <code class="docutils literal notranslate"><span class="pre">agentic_robotics/data/tasks/</span></code> (not tracked in git). List what is
-defined and what is built locally, then build a task:</p>
+time they are needed and kept in <code class="docutils literal notranslate"><span class="pre">agentic_robotics/data/tasks/</span></code> (not tracked in git). A task key
+names a family of PDDL variants, and a run draws one; a variant’s slug names that scene alone.</p>
+<p>This walkthrough runs <code class="docutils literal notranslate"><span class="pre">spell_hen_patterned_0_feasible_0</span></code>, one variant of the Search &amp; Spell family
+<code class="docutils literal notranslate"><span class="pre">spell_hen_patterned</span></code> from the released experiments: ten blocks on the table, some stacked, some
+letters hidden, and the goal of spelling HEN in a tower. It is a feasible variant, its letters are
+ones the released ManiFlow checkpoint trained on, and its blocks come from that checkpoint’s
+library, so the same scene runs under both skill backends. List what is defined and what is built
+locally, then build the scene (a family key would build every variant, twelve here, one
+Isaac boot each):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>tasks
-agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--task<span class="w"> </span>ai2_stacked<span class="w">     </span><span class="c1"># one package per PDDL variant</span>
+agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--task<span class="w"> </span>spell_hen_patterned_0_feasible_0
 </pre></div>
 </div>
 <p>Passing <code class="docutils literal notranslate"><span class="pre">--generate-env</span></code> to <code class="docutils literal notranslate"><span class="pre">episode</span></code>, <code class="docutils literal notranslate"><span class="pre">page</span></code> or <code class="docutils literal notranslate"><span class="pre">human</span></code> builds a missing package on the spot.</p>
@@ -469,7 +483,7 @@ agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--ta
 <section id="run-an-episode">
 <h2>Run an episode<a class="headerlink" href="#run-an-episode" title="Link to this heading">#</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># One headless, model-driven episode with the scripted skills</span>
-agentic-robotics<span class="w"> </span>episode<span class="w"> </span>--task<span class="w"> </span>ai2_stacked<span class="w"> </span>--backend<span class="w"> </span>oracle
+agentic-robotics<span class="w"> </span>episode<span class="w"> </span>--task<span class="w"> </span>spell_hen_patterned_0_feasible_0<span class="w"> </span>--backend<span class="w"> </span>oracle
 </pre></div>
 </div>
 <p>The run directory holds the video (<code class="docutils literal notranslate"><span class="pre">video.mp4</span></code>), the model’s transcript, the resolved
@@ -478,41 +492,17 @@ goal (scored with the package’s goal classifier), the tool calls made and the 
 </section>
 <section id="web-ui-the-episode-pages-and-the-portal">
 <h2>Web UI: the episode pages and the portal<a class="headerlink" href="#web-ui-the-episode-pages-and-the-portal" title="Link to this heading">#</a></h2>
-<p>The commands below start local web pages; open the printed URL in a browser.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Command</p></th>
-<th class="head"><p>Page</p></th>
-<th class="head"><p>What it does</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">menu</span> <span class="pre">--backend</span> <span class="pre">oracle</span></code></p></td>
-<td><p><a class="reference external" href="http://127.0.0.1:8083">http://127.0.0.1:8083</a></p></td>
-<td><p>Isaac starts with no scene; pick tasks one after another from the page, watch the model act, and interject</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">page</span> <span class="pre">--task</span> <span class="pre">ai2_stacked</span> <span class="pre">--backend</span> <span class="pre">oracle</span></code></p></td>
-<td><p><a class="reference external" href="http://127.0.0.1:8083">http://127.0.0.1:8083</a></p></td>
-<td><p>one model-driven episode with the interjection page around it</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">human</span> <span class="pre">--task</span> <span class="pre">ai2_stacked</span> <span class="pre">--backend</span> <span class="pre">oracle</span></code></p></td>
-<td><p><a class="reference external" href="http://127.0.0.1:8083">http://127.0.0.1:8083</a></p></td>
-<td><p>the same episode with you in the model’s chair: call the skills yourself</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">portal</span></code></p></td>
-<td><p><a class="reference external" href="http://127.0.0.1:8082">http://127.0.0.1:8082</a></p></td>
-<td><p>browse finished runs (videos, transcripts, scores); no Isaac, no model</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">portal</span> <span class="pre">--static</span></code></p></td>
-<td><p>files</p></td>
-<td><p>write the portal as static pages under <code class="docutils literal notranslate"><span class="pre">&lt;runs</span> <span class="pre">dir&gt;/portal/</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">agentic-robotics</span> <span class="pre">mock</span></code></p></td>
-<td><p><a class="reference external" href="http://127.0.0.1:8083">http://127.0.0.1:8083</a></p></td>
-<td><p>the page alone, without Isaac or a GPU, for working on the UI</p></td>
-</tr>
-</tbody>
-</table>
+<p>The commands below start local web pages. Open <a class="reference external" href="http://127.0.0.1:8083">http://127.0.0.1:8083</a> for the interactive pages
+(the task menu, a model-driven episode, the human-controller interface, the mock page) and
+<a class="reference external" href="http://127.0.0.1:8082">http://127.0.0.1:8082</a> for the portal, which browses the logs of current and previous runs; the
+two ports differ so the portal can stay open while an episode runs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>menu<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">                       </span><span class="c1"># Isaac starts with no scene; pick tasks one after another, watch the model act, interject</span>
+agentic-robotics<span class="w"> </span>page<span class="w"> </span>--task<span class="w"> </span>spell_hen_patterned_0_feasible_0<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">    </span><span class="c1"># one model-driven episode with the interjection page around it</span>
+agentic-robotics<span class="w"> </span>human<span class="w"> </span>--task<span class="w"> </span>spell_hen_patterned_0_feasible_0<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">   </span><span class="c1"># the same episode with you in the model's chair: call the skills yourself</span>
+agentic-robotics<span class="w"> </span>portal<span class="w">                                      </span><span class="c1"># browse finished runs (videos, transcripts, scores); no Isaac, no model</span>
+agentic-robotics<span class="w"> </span>portal<span class="w"> </span>--static<span class="w">                             </span><span class="c1"># or write the portal as static pages under &lt;runs dir&gt;/portal/</span>
+agentic-robotics<span class="w"> </span>mock<span class="w">                                        </span><span class="c1"># the page alone, without Isaac or a GPU, for working on the UI</span>
+</pre></div>
 </div>
 <p>An episode page embeds the simulator’s 3D viewer, which listens on its own port (8080, or the next
 free one) and must be reachable from the browser too. The pages bind to localhost; on a remote
@@ -532,9 +522,13 @@ prompt and tool-call budget.</p>
 <code class="docutils literal notranslate"><span class="pre">agentic_robotics/data/problems/&lt;slug&gt;.pddl</span></code>, or several variants in
 <code class="docutils literal notranslate"><span class="pre">agentic_robotics/data/problems/&lt;slug&gt;/*.pddl</span></code> (a run draws one at random). Each variant’s file
 stem becomes its env-package name, so it must be a valid Python identifier once hyphens become
-underscores. ToyBlocks’s task generators write suitable problems, for example:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/task_gen/stack_three.py<span class="w"> </span>--train<span class="w"> </span>--count<span class="w"> </span><span class="m">5</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--out-dir<span class="w"> </span>agentic_robotics/data/problems/my_stack
+underscores. ToyBlocks’s task generators write suitable problems. This one writes three
+variants of the scene the ToyBlocks quick start generates training data for, the letter-M
+block beside a red block, each with the goal of one flip of the M block that brings the face
+on its top around to the front:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/task_gen/flip.py<span class="w"> </span>--direction<span class="w"> </span>backward<span class="w"> </span>--target-block<span class="w"> </span>block_m<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--distractor-blocks<span class="w"> </span>block_red<span class="w"> </span>--distractor-count-min<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--count<span class="w"> </span><span class="m">3</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--out-dir<span class="w"> </span>agentic_robotics/data/problems/flip_m
 </pre></div>
 </div>
 <p>See <a class="reference internal" href="datagen/task_generation.html"><span class="std std-doc">Task generation</span></a> for the generators and the PDDL comments
@@ -542,26 +536,35 @@ that randomize the scene.</p>
 </li>
 <li><p><strong>Register it.</strong> Add a <code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code> to <code class="docutils literal notranslate"><span class="pre">TOYBLOCKS_TASKS</span></code> in
 <code class="docutils literal notranslate"><span class="pre">agentic_robotics/src/agentic_robotics/adapters/toyblocks/config.py</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">"my_stack"</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">"My Stack"</span><span class="p">,</span>
-    <span class="n">task_slug</span><span class="o">=</span><span class="s2">"my_stack"</span><span class="p">,</span>          <span class="c1"># data/problems/my_stack(.pddl | /)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">"flip_m"</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"Flip M"</span><span class="p">,</span>
+    <span class="n">task_slug</span><span class="o">=</span><span class="s2">"flip_m"</span><span class="p">,</span>            <span class="c1"># data/problems/flip_m(.pddl | /)</span>
     <span class="n">prompt</span><span class="o">=</span><span class="n">PROMPT_PREFIX</span>
-    <span class="o">+</span> <span class="s2">"Stack the three letter blocks so the letters read top to bottom. "</span>
+    <span class="o">+</span> <span class="p">(</span>
+        <span class="s2">"The letter block has the letter 'M' on one of its faces. Your task is to flip "</span>
+        <span class="s2">"that block once so that the face now on its top ends up facing the camera.</span><span class="se">\n\n</span><span class="s2">"</span>
+    <span class="p">)</span>
     <span class="o">+</span> <span class="n">PROMPT_SUFFIX</span><span class="p">,</span>
-    <span class="n">max_tool_calls</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>             <span class="c1"># the model's budget of skill calls</span>
+    <span class="n">max_tool_calls</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>             <span class="c1"># the model's budget of MCP tool calls</span>
 <span class="p">),</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">PROMPT_PREFIX</span></code> and <code class="docutils literal notranslate"><span class="pre">PROMPT_SUFFIX</span></code> frame every task (the robot’s role, how pixel coordinates
-work, how to end the episode); the middle is what the model is asked to do. <code class="docutils literal notranslate"><span class="pre">glyph_library</span></code>
-picks the block asset library for letter and digit blocks (default <code class="docutils literal notranslate"><span class="pre">train_blocks_large</span></code>).</p>
+work, how to end the episode); the middle is what the model is asked to do, and it should say
+in words what the problem’s PDDL goal checks: a run is scored by the package’s goal classifier,
+so a prompt that asks for more or less than the goal scores wrongly. An optional
+<code class="docutils literal notranslate"><span class="pre">glyph_library</span></code> field names the asset library the letter and digit blocks are drawn from,
+<code class="docutils literal notranslate"><span class="pre">train_blocks</span></code> or <code class="docutils literal notranslate"><span class="pre">train_blocks_large</span></code> (ToyBlocks’s <code class="docutils literal notranslate"><span class="pre">GLYPH_LIBRARIES</span></code>); leave it out for the
+default, <code class="docutils literal notranslate"><span class="pre">train_blocks_large</span></code>.</p>
 </li>
 <li><p><strong>Build and run it.</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--task<span class="w"> </span>my_stack
-agentic-robotics<span class="w"> </span>human<span class="w"> </span>--task<span class="w"> </span>my_stack<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">     </span><span class="c1"># try it yourself first</span>
-agentic-robotics<span class="w"> </span>episode<span class="w"> </span>--task<span class="w"> </span>my_stack<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">   </span><span class="c1"># then let the model try</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>generate-env<span class="w"> </span>--task<span class="w"> </span>flip_m
+agentic-robotics<span class="w"> </span>human<span class="w"> </span>--task<span class="w"> </span>flip_m<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">       </span><span class="c1"># try it yourself first</span>
+agentic-robotics<span class="w"> </span>page<span class="w"> </span>--task<span class="w"> </span>flip_m<span class="w"> </span>--backend<span class="w"> </span>oracle<span class="w">        </span><span class="c1"># then watch the model try, and interject</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">generate-env</span></code> builds one package per variant, so a task with many variants takes a while;
+<code class="docutils literal notranslate"><span class="pre">page</span></code> serves the episode with the chat page around it (<code class="docutils literal notranslate"><span class="pre">episode</span></code> runs it headless).</p>
 <p><code class="docutils literal notranslate"><span class="pre">generate-env</span></code> reports reset states with unreachable or overlapping blocks; adjust the
 problem’s ranges if many are flagged.</p>
 </li>
@@ -569,14 +572,30 @@ problem’s ranges if many are flagged.</p>
 </section>
 <section id="maniflow-skills">
 <h2>ManiFlow skills<a class="headerlink" href="#maniflow-skills" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">maniflow</span></code> backend runs a trained ManiFlow policy instead of the scripted skills. Install the
-<code class="docutils literal notranslate"><span class="pre">maniflow</span></code> extra, point <code class="docutils literal notranslate"><span class="pre">MANIFLOW_CHECKPOINT_ROOT</span></code> at your checkpoints (the experiment file’s
-<code class="docutils literal notranslate"><span class="pre">maniflow</span></code> key names one, relative to that root), and start the policy server in its own shell
-before the episode:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>serve<span class="w">                       </span><span class="c1"># serves the experiment's checkpoint</span>
-agentic-robotics<span class="w"> </span>episode<span class="w"> </span>--task<span class="w"> </span>ai2_stacked<span class="w">  </span><span class="c1"># in another shell; backend from the experiment file</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">maniflow</span></code> backend runs a trained ManiFlow policy instead of the scripted skills. It needs the
+<code class="docutils literal notranslate"><span class="pre">maniflow</span></code> extra, which builds the <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> and <code class="docutils literal notranslate"><span class="pre">molmo2</span></code> submodules, and a checkpoint
+directory in the layout a training run writes (<code class="docutils literal notranslate"><span class="pre">checkpoints/steps_N_model.safetensors</span></code>,
+<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">stats.json</span></code>; see <a class="reference internal" href="imitation_learning.html"><span class="std std-doc">Imitation learning</span></a>). The released
+checkpoint, <a class="reference external" href="https://huggingface.co/allenai/maniflow-tb">allenai/maniflow-tb</a>, has that layout:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>maniflow-tb<span class="w"> </span>molmo2
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev,isaac,torch-cu128,vecgen,maniflow,agentic]"</span>
+hf<span class="w"> </span>download<span class="w"> </span>allenai/maniflow-tb<span class="w"> </span>--local-dir<span class="w"> </span>checkpoints/maniflow-tb
 </pre></div>
 </div>
+<p>The adapter’s checkpoint table (<code class="docutils literal notranslate"><span class="pre">maniflow_config.py</span></code>, <code class="docutils literal notranslate"><span class="pre">MANIFLOW_CONFIGS</span></code>) names each checkpoint
+directory relative to <code class="docutils literal notranslate"><span class="pre">$MANIFLOW_CHECKPOINT_ROOT</span></code> (default: <code class="docutils literal notranslate"><span class="pre">checkpoints/</span></code> under the working
+directory); <code class="docutils literal notranslate"><span class="pre">maniflow-tb</span></code> is the entry for the released checkpoint. Start the policy server in its
+own shell, then run the episode against it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>agentic-robotics<span class="w"> </span>serve<span class="w"> </span>--maniflow<span class="w"> </span>maniflow-tb<span class="w">        </span><span class="c1"># the policy server, on port 8000; leave it running</span>
+
+<span class="c1"># In a second terminal. A new shell starts without this one's environment, so restore it:</span>
+<span class="nb">cd</span><span class="w"> </span>ToyBlocks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMNI_KIT_ACCEPT_EULA</span><span class="o">=</span>YES<span class="w">                      </span><span class="c1"># and OPENROUTER_API_KEY, unless it is in ~/.openrouter_key</span>
+agentic-robotics<span class="w"> </span>page<span class="w"> </span>--task<span class="w"> </span>spell_hen_patterned_0_feasible_0<span class="w"> </span>--backend<span class="w"> </span>maniflow<span class="w"> </span>--maniflow<span class="w"> </span>maniflow-tb
+</pre></div>
+</div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">--maniflow</span></code>, both use the experiment file’s <code class="docutils literal notranslate"><span class="pre">maniflow</span></code> key; without <code class="docutils literal notranslate"><span class="pre">--backend</span></code>, the
+episode uses its <code class="docutils literal notranslate"><span class="pre">skill_backend</span></code>. A missing checkpoint file is reported by name before Isaac starts.</p>
 </section>
 <section id="experiments-and-further-reading">
 <h2>Experiments and further reading<a class="headerlink" href="#experiments-and-further-reading" title="Link to this heading">#</a></h2>
