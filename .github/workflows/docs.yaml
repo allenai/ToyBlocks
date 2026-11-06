@@ -32,11 +32,18 @@ jobs:
           uv venv --python 3.13
           source .venv/bin/activate
           uv pip install -e .[docs]
-          sphinx-build ./docs/source ./docs/build/html
+          sphinx-build ./docs/source ./docs/build/docs
 
 
       - name: Add root redirect
-        run: echo '<meta http-equiv="refresh" content="0; url=html/index.html">' > docs/build/index.html
+        run: |
+          cat > docs/build/index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="en"><head><meta charset="utf-8"><title>ToyBlocks docs</title>
+          <meta http-equiv="refresh" content="0; url=docs/">
+          <link rel="canonical" href="https://allenai.github.io/ToyBlocks/docs/">
+          </head><body><a href="docs/">ToyBlocks documentation</a></body></html>
+          HTML
 
       - name: Remove Sphinx build artifacts
         run: find docs/build -type d -name .doctrees -exec rm -rf {} +
@@ -45,5 +52,9 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub Pages is configured to serve this branch (Settings > Pages: docs, /).
+          # Publishing to gh-pages built the site into a branch nothing serves, so every
+          # docs change needed a manual build-and-push to `docs` to go live.
+          publish_branch: docs
           publish_dir: ./docs/build/
           keep_files: true
