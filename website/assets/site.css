@@ -181,3 +181,6 @@ table.stages td:first-child, table.stages td:last-child { white-space: nowrap; }
 .hscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .hscroll > svg { min-width: 660px; }
 .hscroll.wide > svg { min-width: 560px; }
+h3 + .nums { margin-top: 12px; }
+.nav .col { max-width: 1180px; }  /* six section links + Docs/GitHub on one line */
+.chart .narrow { max-width: 620px; }

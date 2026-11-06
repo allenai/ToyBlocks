@@ -13,7 +13,7 @@
 <body>
 <nav class="nav"><div class="col">
   <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
-  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a></div>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
   <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a></div>
 </div></nav>
 <header class="title"><div class="col">
@@ -43,7 +43,7 @@
   <div class="nums">
     <div><b>85,336</b><span>long-horizon demonstrations in the first release, 6–12 skills each</span></div>
     <div><b>~1,600 h</b><span>of robot execution, about 144M frames</span></div>
-    <div><b>24×</b><span>faster than real time on a single GPU</span></div>
+    <div><b>3,600</b><span>distinct task problems, 3,000 for training and 600 for validation</span></div>
     <div><b>0</b><span>teleoperated demonstrations</span></div>
   </div>
 </div></section>
@@ -75,20 +75,30 @@
   </div>
 </div></section>
 
-<section><div class="col side">
-  <div>
-    <h2>Example Evaluations</h2>
-    <ul>
-      <li>Does adding depth help compared to RGB alone?</li>
-      <li>If you train on stacks of 2 and 5 blocks, can the policy build stacks of 3 and 4? If blocks only spawn on the left of the table during training, does it work on the right?</li>
-      <li>How well do models handle long tasks, like finding hidden letters and spelling a word?</li>
-    </ul>
-    <p>In our first experiments, ManiFlow, π0.5 and MolmoAct 2 all generalized poorly to new spatial configurations, which is exactly the kind of result we want to be able to dig into.</p>
+<section><div class="col">
+  <h2>ToyBlocks by the numbers</h2>
+  <h3>Data generation</h3>
+  <div class="nums">
+    <div><b>24×</b><span>faster than real time on a single GPU</span></div>
+    <div><b>256</b><span>environments per GPU in one Isaac Sim process in our runs, each planned separately</span></div>
+    <div><b>70–75%+</b><span>of episodes reach their goal even on the hardest task families. Failures are kept apart, never mixed in.</span></div>
+    <div><b>16 GB</b><span>card is enough: about 6 GiB to execute plans, under 10 GiB to render</span></div>
   </div>
-  <figure>
-    <video data-src="media/dg_plan.mp4" poster="media/dg_plan.jpg" muted loop playsinline></video>
-    <figcaption>The TAMP planner working through a four-block stack: the plan is on the right, the current step is highlighted.</figcaption>
-  </figure>
+  <h3>Evaluation</h3>
+  <div class="nums">
+    <div><b>50</b><span>environments per eval GPU by default, with one batched model call per step</span></div>
+    <div><b>~85 min</b><span>for a 1,557-episode validation set on 7 GPUs (ManiFlow with the high-level oracle)</span></div>
+    <div><b>~41 min</b><span>for 192 episodes of Molmo 2 + ManiFlow on one H100</span></div>
+    <div><b>16 GB</b><span>card runs ManiFlow evals; Molmo 2 evals need about 24 GB, or two GPUs</span></div>
+  </div>
+  <h3>Data and training</h3>
+  <div class="nums">
+    <div><b>481,207</b><span>skill steps in the first release, with a median plan of 5 skills and up to 18</span></div>
+    <div><b>4–10</b><span>blocks per scene, 3.1–5.0 cm on a side, across 8 scene profiles</span></div>
+    <div><b>~8 h</b><span>to fine-tune Molmo 2 on 8 H100s</span></div>
+    <div><b>200k</b><span>ManiFlow training steps on 8 GPUs</span></div>
+  </div>
+  <p class="docs">Results from our first experiments are on the <a href="experiments.html">Experiments</a> page.</p>
 </div></section>
 <footer><div class="col">
   <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
