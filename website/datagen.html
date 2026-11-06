@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Data Generation</title>
+<meta name="description" content="How ToyBlocks turns PDDL goals into verified, rendered, annotated robot demonstrations, including play data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Evaluation</a><a href="sim2real.html">Sim-to-real</a><a href="agentic.html">Agents</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Data generation</div>
+  <h1>From a PDDL goal to a training set</h1>
+  <p class="sub">You write down what should be true at the end of a task, for example "the red block is on the green block". The pipeline samples starting scenes, plans each episode with a TAMP (task and motion planning) planner, runs the plan on many simulated environments in parallel, checks every step, renders the result and writes a LeRobot dataset.</p>
+  <div class="toc"><a href="#stages">The six stages</a><a href="#tasks">Tasks</a><a href="#tamp">The TAMP planner</a><a href="#execution">Execution</a><a href="#render">Rendering</a><a href="#play">Play data</a><a href="#dataset">The dataset</a><a href="#run">Running it</a></div>
+</div></header>
+
+<section id="stages" style="border-top:0"><div class="col">
+  <h2>The six stages</h2>
+  <p><code>scripts/datagen/run_datagen_pipeline.py</code> runs all of them on the machine you start it on and spreads problems across every GPU it can see.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Stage</th><th>What it does</th><th>Docs</th></tr>
+    <tr><td>1. Tasks</td><td>Task generators write PDDL problems for a whole family of tasks.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html">Task generation</a></td></tr>
+    <tr><td>2. Environments</td><td>Each problem becomes an Isaac Lab environment package with sampled reset states.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/env_generation.html">Environment generation</a></td></tr>
+    <tr><td>3. Execution</td><td>The TAMP planner plans every episode and vecgen executes the plans, batched on the GPU.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html">Execution</a></td></tr>
+    <tr><td>4. Rendering</td><td>Recorded episodes are replayed and re-rendered with domain randomization.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html">Rendering</a></td></tr>
+    <tr><td>5. Merge</td><td>All problems go into one LeRobot v3 dataset.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/merge.html">Merge</a></td></tr>
+    <tr><td>6. Annotation</td><td>Adds per-frame goal text and the target's pixel position in the front camera.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/annotate.html">Annotation</a></td></tr>
+  </table></div>
+  <p class="docs">Overview: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">Automatic data generation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html">Running the pipeline locally</a></p>
+</div></section>
+
+<section id="tasks"><div class="col">
+  <h2>Tasks are goals</h2>
+  <p>A ToyBlocks task is a PDDL problem: some initial facts and a goal written with predicates like <code>on</code>, <code>on_table</code> and <code>ori_of</code> (which face of a block points up and which way it's turned). The simulation environment and its reset states are generated from the problem, so adding a task means writing a goal, not writing simulation code.</p>
+  <p>The generators in <code>scripts/task_gen/</code> produce whole task families:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Generator</th><th>Tasks</th></tr>
+    <tr><td><code>flip.py</code></td><td>Tip a block over to a new face.</td></tr>
+    <tr><td><code>rotate.py</code></td><td>Turn a block about its vertical axis by one yaw step.</td></tr>
+    <tr><td><code>pnp.py</code></td><td>Stack one block on another, or take it off onto the table.</td></tr>
+    <tr><td><code>stack_three.py</code></td><td>Three-block towers in scenes of 4–10 letter, digit and color blocks, with every letter readable at the end. Separate letter sets for training and validation. This is the generator behind the released training sets.</td></tr>
+    <tr><td><code>play_scene.py</code>, <code>search.py</code>, <code>find_as.py</code></td><td>Scenes for play data and letter-search strategies (see below).</td></tr>
+  </table></div>
+  <p>Block size, table height and friction can also vary from one environment to the next.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html#the-generators">the generators</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html#how-scene-randomization-reaches-the-simulator">scene randomization</a></p>
+</div></section>
+
+<section id="tamp"><div class="col">
+  <h2>The TAMP planner</h2>
+  <p>Demonstrations come from a task and motion planner. The task level works over the blocks PDDL domain and decides the order of skills: what has to be cleared, moved aside, flipped or rotated before the goal stack can be built. The motion level checks each step against the actual scene. Is there room to flip this block to the right, or is another block in its landing spot? Is the side the gripper needs to reach free? When a step is blocked, the plan gets extra steps to clear the way first, and the arm motions themselves come from cuRobo.</p>
+  <figure>
+    <video data-src="media/dg_reason.mp4" poster="media/dg_reason.jpg" muted loop playsinline></video>
+    <figcaption>Stacking Z on M on G on red. Before moving, the planner checks the space around every pick, flip and turn: D is moved aside because it sits where M will land when flipped right, and each flip goes to the only free side. The plan is on the right. Shown at 3× speed.</figcaption>
+  </figure>
+  <div class="pair">
+    <figure><video data-src="media/dg_plan.mp4" poster="media/dg_plan.jpg" muted loop playsinline></video><figcaption>A four-block stack that needs 15 steps, most of them clearing other blocks off the goal blocks first.</figcaption></figure>
+    <figure><video data-src="media/ev_reason.mp4" poster="media/ev_reason.jpg" muted loop playsinline></video><figcaption>Moving the 5 block aside before flipping K to the left.</figcaption></figure>
+  </div>
+  <p>vecgen, the engine that runs data generation, is built on updated versions of our TAMP code, reworked so that planning and execution run batched across hundreds of environments.</p>
+</div></section>
+
+<section id="execution"><div class="col">
+  <h2>Execution</h2>
+  <p>Execution runs on vecgen, our vectorized engine. One Isaac Sim process per GPU holds hundreds of environments, and the skills (pick, place, flip, rotate and a few helpers) run as batched tensor operations on a pool of cuRobo inverse kinematics and trajectory optimization solvers. On a single GPU this gets up to 24× real time.</p>
+  <figure>
+    <video data-src="media/dg_exec.mp4" poster="media/dg_exec.jpg" muted loop playsinline></video>
+    <figcaption>16 environments in one process working on three-block stacking tasks, each from its own starting scene. A full run uses hundreds per GPU.</figcaption>
+  </figure>
+  <h3>Checking every step</h3>
+  <p>The TAMP planner plans each environment from its own state. After each skill, its effects are checked against the simulator. If the check fails, the environment goes back to a snapshot taken before the skill and tries again; if it keeps failing, the planner re-plans from wherever the scene is now. An episode only counts as a success if the goal actually holds at the end, and failed episodes are written to a separate split rather than mixed into the training data. Even on the hardest task families, 70–75% of episodes reach their goal.</p>
+  <div class="pair">
+    <figure><video data-src="media/dg_streams.mp4" poster="media/dg_streams.jpg" muted loop playsinline></video><figcaption>What gets recorded: RGB and depth from the front and wrist cameras, along with joint states, actions and the current skill.</figcaption></figure>
+    <figure><video data-src="media/dg_motion.mp4" poster="media/dg_motion.jpg" muted loop playsinline></video><figcaption>A motion-planned pick in a cluttered scene, in real time.</figcaption></figure>
+  </div>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html#correct-by-construction">correct by construction</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html#what-a-recorded-episode-contains">what an episode contains</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html#design-goals-for-the-datagen-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/adding_a_skill.html">adding a skill to vecgen</a></p>
+</div></section>
+
+<section id="render"><div class="col">
+  <h2>Rendering</h2>
+  <p>Physics and pixels are separate stages. Execution records what happened; rendering replays each episode and shoots it again with randomized lighting, HDRI backgrounds, table materials, exposure and camera poses. The robot's motion doesn't change, so one simulated episode can be rendered several different ways. Each render pass is a YAML file of flags, and a pass can produce several looks per episode.</p>
+  <figure>
+    <video data-src="media/dg_render.mp4" poster="media/dg_render.jpg" muted loop playsinline></video>
+    <figcaption>Episodes from a randomized render pass.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html#domain-randomization">domain randomization</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html#render-passes">render passes</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#hdri-backdrops">HDRI backgrounds</a></p>
+</div></section>
+
+<section id="play"><div class="col">
+  <h2>Play data</h2>
+  <p>Play data has no fixed task. Each environment starts from a reset state and keeps going: a goal policy looks at the current symbolic state and picks the next goal, the TAMP planner solves it, and the plan runs as batched vecgen skills. The scene isn't reset between goals, so each new goal starts from whatever the robot left behind. An environment keeps going until it hits a plan budget or a target number of successful plans, then moves on to the next reset state.</p>
+  <figure>
+    <video data-src="media/dg_play.mp4" poster="media/dg_play.jpg" muted loop playsinline></video>
+    <figcaption>Play episodes from three play sets, mostly flips and rotations to find letters.</figcaption>
+  </figure>
+  <p>A few things you can control:</p>
+  <ul>
+    <li><b>Skill balance.</b> By default goals are chosen so the data comes out roughly a third pick-and-place, a third flips (spread over the four directions) and a third rotations (both directions). <code>--no-balanced-skills</code> switches to random goals.</li>
+    <li><b>Abandoned grasps.</b> With <code>--abandon-plan-percent</code>, some pick-and-places are cut off partway through the carry. The next goal then drops the block and picks up a different one.</li>
+    <li><b>Search strategies.</b> A DFA goal policy is a small YAML state machine that proposes goals until it accepts or rejects, for example flipping blocks until it finds a hidden letter. <a href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/playdata/dfa/AUTHORING.md">How to write one</a>.</li>
+  </ul>
+  <p>Play episodes are recorded the same way as regular datagen episodes, and go through the same render, merge and annotation stages. Episodes that reach their goal land in <code>blocks_success</code>, the rest in <code>blocks_failure</code>.</p>
+  <p class="docs">Code: <a href="https://github.com/allenai/ToyBlocks/blob/main/scripts/datagen/run_playdata_pipeline.py">run_playdata_pipeline.py</a> · Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html#the-generators">play and search scenes</a></p>
+</div></section>
+
+<section id="dataset"><div class="col">
+  <h2>The dataset</h2>
+  <p>The merge stage collects every problem into a single LeRobot v3 dataset. Annotation then adds two columns per frame: what the robot is doing, as text (for example <code>pick</code>), and where the target block is in the front camera image, projected from the recorded poses and camera parameters. Those are the inputs a two-level policy like Molmo 2 + ManiFlow is trained on.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/merge.html">merge</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/annotate.html">annotation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/dataset_fields.html">recorded fields</a> · Released data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">allenai/toyblocks-data</a></p>
+</div></section>
+
+<section id="run"><div class="col">
+  <h2>Running it</h2>
+  <p>This generates four stacking problems, runs 16 episodes of each, renders them and merges everything into one dataset:</p>
+<pre>python scripts/datagen/run_datagen_pipeline.py \
+    --render-pass src/toyblocks/domain_randomization/flags/render_flags_allrand_texcache_glyphs_trainsplit_symmetric.yaml \
+    --experiment-id my_run --output-root outputs \
+    --task-gen-script scripts/task_gen/stack_three.py --task-gen-count 4 \
+    --env-per-problem 16 --num-envs 16 --exec-num-envs 16 \
+    --vecgen-problems-per-env 1</pre>
+  <p>The stages run one at a time. Peak GPU memory we measured on one GPU:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Stage</th><th>Peak VRAM</th></tr>
+    <tr><td>Environment generation</td><td>3.0 GiB</td></tr>
+    <tr><td>Execution, 16 to 256 environments</td><td>5.4–6.3 GiB</td></tr>
+    <tr><td>Rendering, 8 environments</td><td>9.6 GiB</td></tr>
+  </table></div>
+  <p>So a 16 GB card is enough.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#a-complete-run">a complete run</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#choosing-gpus-and-how-many-problems-run-at-once">GPUs and concurrency</a></p>
+</div></section>
+
+<section><div class="col pager"><a href="index.html">← Overview</a><a href="evals.html">Evaluation →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

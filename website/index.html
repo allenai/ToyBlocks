@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks</title>
+<meta name="description" content="An open simulated tabletop for controlled experiments in robot learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Evaluation</a><a href="sim2real.html">Sim-to-real</a><a href="agentic.html">Agents</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a></div>
+</div></nav>
+<header class="title"><div class="col">
+  <img class="logo" src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329">
+  <h1>An open simulated tabletop for controlled experiments in robot learning</h1>
+  <p class="sub">A robot arm, a table and a box of lettered blocks. You write the task as a goal, ToyBlocks generates the demonstrations, and you can train and evaluate policies on your own GPUs.</p>
+  <div class="btns">
+    <a href="https://github.com/allenai/ToyBlocks">Code</a>
+    <a class="alt" href="https://allenai.github.io/ToyBlocks/docs/">Documentation</a>
+    <a class="alt" href="https://huggingface.co/datasets/allenai/toyblocks-data">Dataset</a>
+    <a class="alt" href="https://huggingface.co/collections/allenai/toyblocks">Models</a>
+    <a class="alt" href="https://allenai.org/blog/toyblocks">Blog post</a>
+  </div>
+</div></header>
+
+<section style="padding-top:8px"><div class="col">
+  <figure>
+    <video data-src="media/hero.mp4" poster="media/hero.jpg" muted loop playsinline></video>
+    <figcaption>47 environments rendered with different lighting, backgrounds, table materials and camera poses. Every one of them was generated, planned and executed automatically.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="col">
+  <h2>Why blocks?</h2>
+  <p>Kids learn a lot about space and planning from a pile of toy blocks: rebuilding a tower after it falls, turning a block over to find the letter they want. We wanted a robot learning setup with the same flavor. The domain is small enough that we know everything about every scene (each block, its letters, its pose, the goal), but the robot still has to push, flip, rotate and stack precisely, and some tasks take a dozen skills in a row.</p>
+  <p>Because nothing is hidden from us, a failed rollout is something we can actually debug. Was it the training data, the model, or the way we evaluated it? ToyBlocks is built so you can change one of those and hold the other two fixed.</p>
+  <div class="nums">
+    <div><b>85,336</b><span>long-horizon demonstrations in the first release, 6–12 skills each</span></div>
+    <div><b>~1,600 h</b><span>of robot execution, about 144M frames</span></div>
+    <div><b>24×</b><span>faster than real time on a single GPU</span></div>
+    <div><b>0</b><span>teleoperated demonstrations</span></div>
+  </div>
+</div></section>
+
+<section><div class="col">
+  <h2>What's in the release</h2>
+  <p>ToyBlocks has four main parts. Each has its own page here, and every page links to the matching section of the documentation.</p>
+  <div class="comps">
+    <a href="datagen.html">
+      <video data-src="media/dg_render.mp4" poster="media/dg_render.jpg" muted loop playsinline></video>
+      <h3>Data generation</h3>
+      <p>PDDL goals in, LeRobot datasets out. A TAMP planner plans every episode, motion-planned skills run hundreds of environments per GPU, check every step, and the episodes are rendered with domain randomization and annotated. Includes play data.</p>
+    </a>
+    <a href="evals.html">
+      <video data-src="media/ev_compare.mp4" poster="media/ev_compare.jpg" muted loop playsinline></video>
+      <h3>Evaluation</h3>
+      <p>Replace the high level or the low level of a policy with an oracle to see which one is failing, replay datasets open loop, and send failure states back to data generation with TAMPER.</p>
+    </a>
+    <a href="sim2real.html">
+      <video data-src="media/s2r_side.mp4" poster="media/s2r_side.jpg" muted loop playsinline></video>
+      <h3>Sim-to-real</h3>
+      <p>Molmo 2 + ManiFlow, trained only on ToyBlocks data, spelled three-letter words on a real Franka FR3 in 15 of 30 attempts.</p>
+    </a>
+    <a href="agentic.html">
+      <video data-src="media/ag_spell.mp4" poster="media/ag_spell.jpg" muted loop playsinline></video>
+      <h3>Agents</h3>
+      <p>Each skill is exposed as an MCP tool, so a frontier model can drive the robot from camera images. We use it to study how these models search, plan and recover.</p>
+    </a>
+  </div>
+</div></section>
+
+<section><div class="col side">
+  <div>
+    <h2>Questions it's meant for</h2>
+    <ul>
+      <li>Does adding depth help compared to RGB alone?</li>
+      <li>If you train on stacks of 2 and 5 blocks, can the policy build stacks of 3 and 4? If blocks only spawn on the left of the table during training, does it work on the right?</li>
+      <li>How well do models handle long tasks, like finding hidden letters and spelling a word?</li>
+    </ul>
+    <p>In our first experiments, ManiFlow, π0.5 and MolmoAct 2 all generalized poorly to new spatial configurations, which is exactly the kind of result we want to be able to dig into.</p>
+  </div>
+  <figure>
+    <video data-src="media/dg_plan.mp4" poster="media/dg_plan.jpg" muted loop playsinline></video>
+    <figcaption>The TAMP planner working through a four-block stack: the plan is on the right, the current step is highlighted.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="col">
+  <h2>Getting started</h2>
+  <p>You need Linux, an NVIDIA GPU and <code>uv</code>. The whole data generation pipeline fits on a 16 GB card.</p>
+<pre>git clone https://github.com/allenai/ToyBlocks.git && cd ToyBlocks
+uv venv --python 3.11 && source .venv/bin/activate
+git submodule update --init --recursive
+uv pip install -e ".[dev,isaac,torch-cu128,vecgen]"
+get-toyblocks-assets --asset-manifest asset_manifest.json
+pytest tests/install          <span class="c"># checks the install in a few seconds</span></pre>
+  <p class="docs">More: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html">installation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">data generation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html">evaluation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html">agents</a></p>
+</div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
