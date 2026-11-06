@@ -170,7 +170,7 @@ prompt and tool-call budget.
    ```bash
    agentic-robotics generate-env --task flip_m
    agentic-robotics human --task flip_m --backend oracle       # try it yourself first
-   agentic-robotics page --task flip_m --backend oracle        # then watch the model try, and interject (http://localhost:8083/)
+   agentic-robotics page --task flip_m --backend oracle        # then watch the model try, and interject
    ```
 
    `generate-env` builds one package per variant, so a task with many variants takes a while;
