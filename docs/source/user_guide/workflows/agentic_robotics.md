@@ -92,16 +92,19 @@ goal (scored with the package's goal classifier), the tool calls made and the mo
 
 ## Web UI: the episode pages and the portal
 
-The commands below start local web pages; open the printed URL in a browser.
+The commands below start local web pages. Open <http://127.0.0.1:8083> for the interactive pages
+(the task menu, a model-driven episode, the human-controller interface, the mock page) and
+<http://127.0.0.1:8082> for the portal, which browses the logs of current and previous runs; the
+two ports differ so the portal can stay open while an episode runs.
 
-| Command | Page | What it does |
-|---|---|---|
-| `agentic-robotics menu --backend oracle` | <http://127.0.0.1:8083> | Isaac starts with no scene; pick tasks one after another from the page, watch the model act, and interject |
-| `agentic-robotics page --task spell_hen_patterned_0_feasible_0 --backend oracle` | <http://127.0.0.1:8083> | one model-driven episode with the interjection page around it |
-| `agentic-robotics human --task spell_hen_patterned_0_feasible_0 --backend oracle` | <http://127.0.0.1:8083> | the same episode with you in the model's chair: call the skills yourself |
-| `agentic-robotics portal` | <http://127.0.0.1:8082> | browse finished runs (videos, transcripts, scores); no Isaac, no model |
-| `agentic-robotics portal --static` | files | write the portal as static pages under `<runs dir>/portal/` |
-| `agentic-robotics mock` | <http://127.0.0.1:8083> | the page alone, without Isaac or a GPU, for working on the UI |
+```bash
+agentic-robotics menu --backend oracle                       # Isaac starts with no scene; pick tasks one after another, watch the model act, interject
+agentic-robotics page --task spell_hen_patterned_0_feasible_0 --backend oracle    # one model-driven episode with the interjection page around it
+agentic-robotics human --task spell_hen_patterned_0_feasible_0 --backend oracle   # the same episode with you in the model's chair: call the skills yourself
+agentic-robotics portal                                      # browse finished runs (videos, transcripts, scores); no Isaac, no model
+agentic-robotics portal --static                             # or write the portal as static pages under <runs dir>/portal/
+agentic-robotics mock                                        # the page alone, without Isaac or a GPU, for working on the UI
+```
 
 An episode page embeds the simulator's 3D viewer, which listens on its own port (8080, or the next
 free one) and must be reachable from the browser too. The pages bind to localhost; on a remote
@@ -167,7 +170,7 @@ prompt and tool-call budget.
    ```bash
    agentic-robotics generate-env --task flip_m
    agentic-robotics human --task flip_m --backend oracle       # try it yourself first
-   agentic-robotics page --task flip_m --backend oracle        # then watch the model try, and interject
+   agentic-robotics page --task flip_m --backend oracle        # then watch the model try, and interject (http://localhost:8083/)
    ```
 
    `generate-env` builds one package per variant, so a task with many variants takes a while;
