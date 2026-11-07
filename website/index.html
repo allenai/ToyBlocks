@@ -82,15 +82,15 @@
   <div class="nums">
     <div><b>24×</b><span>faster than real time on a single GPU</span></div>
     <div><b>256</b><span>environments per GPU in one Isaac Sim process in our runs, each planned separately</span></div>
-    <div><b>70–75%+</b><span>of episodes reach their goal even on the hardest task families. Failures are kept apart, never mixed in.</span></div>
-    <div><b>16 GB</b><span>card is enough: about 6 GiB to execute plans, under 10 GiB to render</span></div>
+    <div><b>~250</b><span>path-traced frames per second when rendering on one RTX 5090, about 10× real time</span></div>
+    <div><b>3 + 2</b><span>retries and re-plans: every skill is checked against the live simulation, retried up to 3 times, then re-planned up to twice</span></div>
   </div>
   <h3>Evaluation</h3>
   <div class="nums">
     <div><b>50</b><span>environments per eval GPU by default, with one batched model call per step</span></div>
     <div><b>~85 min</b><span>for a 1,557-episode validation set on 7 GPUs (ManiFlow with the high-level oracle)</span></div>
     <div><b>~41 min</b><span>for 192 episodes of Molmo 2 + ManiFlow on one H100</span></div>
-    <div><b>16 GB</b><span>card runs ManiFlow evals; Molmo 2 evals need about 24 GB, or two GPUs</span></div>
+    <div><b>5</b><span>evaluation modes: full system, asynchronous high level, high-level oracle, low-level oracle and replay</span></div>
   </div>
   <h3>Data and training</h3>
   <div class="nums">
