@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Data Generation</title>
+<meta name="description" content="How ToyBlocks turns PDDL goals into verified, rendered, annotated robot demonstrations, including play data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a><a class="ai2" href="https://allenai.org"><img src="assets/ai2-logo.svg" alt="Ai2" width="665" height="211"></a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Data generation</div>
+  <h1>From a PDDL goal to a training set</h1>
+  <p class="sub">You write down what should be true at the end of a task, for example "the red block is on the green block". The pipeline samples starting scenes, plans each episode with a TAMP (task and motion planning) planner, runs the plan on many simulated environments in parallel, checks every step, renders the result and writes a LeRobot dataset.</p>
+  <div class="toc"><a href="#tasks">Tasks</a><a href="#tamp">The TAMP planner</a><a href="#execution">Execution</a><a href="#render">Rendering</a><a href="#play">Play data</a><a href="#labels">Labels</a><a href="#dataset">The dataset</a><a href="#run">Running it</a></div>
+</div></header>
+
+<section id="tasks" style="border-top:0"><div class="col">
+  <h2>Tasks are goals</h2>
+  <p>A ToyBlocks task is a PDDL goal: which block should be on which, and which face should point where. The simulation environment and its starting scenes are generated from that goal, so adding a task means writing a goal, not simulation code.</p>
+  <p>Task generators produce whole families of these goals: flipping a block to a new face, turning it, stacking one block on another, three-block towers in scenes of 4–10 letter, digit and color blocks (the family behind the released training sets), and scenes for play data and letter search. Block size, table height and friction can vary from one environment to the next.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html">data generation overview</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html#the-generators">task generators</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html">running the pipeline</a></p>
+</div></section>
+
+<section id="tamp"><div class="col">
+  <h2>The TAMP planner</h2>
+  <p>Demonstrations come from a task and motion planner. The task level works over the blocks PDDL domain and decides the order of skills: what has to be cleared, moved aside, flipped or rotated before the goal stack can be built. The motion level checks each step against the actual scene. Is there room to flip this block to the right, or is another block in its landing spot? Is the side the gripper needs to reach free? When a step is blocked, the plan gets extra steps to clear the way first, and the arm motions themselves come from cuRobo.</p>
+  <figure>
+    <video data-src="media/dg_reason.mp4" poster="media/dg_reason.jpg" muted loop playsinline></video>
+    <figcaption>Stacking Z on M on G on red. Before moving, the planner checks the space around every pick, flip and turn: D is moved aside because it sits where M will land when flipped right, and each flip goes to the only free side. The plan is on the right. Shown at 3× speed.</figcaption>
+  </figure>
+  <div class="pair">
+    <figure><video data-src="media/dg_plan.mp4" poster="media/dg_plan.jpg" muted loop playsinline></video><figcaption>A four-block stack that needs 15 steps, most of them clearing other blocks off the goal blocks first.</figcaption></figure>
+    <figure><video data-src="media/ev_reason.mp4" poster="media/ev_reason.jpg" muted loop playsinline></video><figcaption>Moving the 5 block aside before flipping K to the left.</figcaption></figure>
+  </div>
+  <p>vecgen, the engine that runs data generation, is built on updated versions of our TAMP code, reworked so that planning and execution run batched across hundreds of environments.</p>
+</div></section>
+
+<section id="execution"><div class="col">
+  <h2>Execution</h2>
+  <p>Execution runs on vecgen, our vectorized engine. One GPU runs hundreds of environments at once, and the skills (pick, place, flip and rotate) run batched across all of them. On a single GPU this gets up to 24× real time.</p>
+  <figure>
+    <video data-src="media/dg_exec.mp4" poster="media/dg_exec.jpg" muted loop playsinline></video>
+    <figcaption>16 environments in one process working on three-block stacking tasks, each from its own starting scene. A full run uses hundreds per GPU.</figcaption>
+  </figure>
+  <h3>Checking every step</h3>
+  <p>After each skill, its effects are checked against the simulator. If the check fails, the skill is retried; if it keeps failing, the planner re-plans from wherever the scene is now. An episode only counts if the goal actually holds at the end, and failed episodes are kept out of the training data.</p>
+  <div class="pair">
+    <figure><video data-src="media/dg_streams.mp4" poster="media/dg_streams.jpg" muted loop playsinline></video><figcaption>What gets recorded: RGB and depth from the front and wrist cameras, along with joint states, actions and the current skill.</figcaption></figure>
+    <figure><video data-src="media/dg_motion.mp4" poster="media/dg_motion.jpg" muted loop playsinline></video><figcaption>A motion-planned pick in a cluttered scene, in real time.</figcaption></figure>
+  </div>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html#correct-by-construction">correct by construction</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/execution.html#what-a-recorded-episode-contains">what an episode contains</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/data_generation.html#design-goals-for-the-datagen-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/adding_a_skill.html">adding a skill to vecgen</a></p>
+</div></section>
+
+<section id="render"><div class="col">
+  <h2>Rendering</h2>
+  <p>Physics and pixels are separate stages. Execution records what happened; rendering replays each episode and shoots it again with randomized lighting, HDRI backgrounds, table materials, exposure, and camera poses and intrinsics. The robot's motion doesn't change, so one simulated episode can be rendered several different ways.</p>
+  <figure>
+    <video data-src="media/dg_render.mp4" poster="media/dg_render.jpg" muted loop playsinline></video>
+    <figcaption>Episodes from a randomized render pass.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html#domain-randomization">domain randomization</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html#render-passes">render passes</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#hdri-backdrops">HDRI backgrounds</a></p>
+</div></section>
+
+<section id="play"><div class="col">
+  <h2>Play data</h2>
+  <p>Play data has no fixed task. A goal policy looks at the current scene and picks the next goal, the TAMP planner solves it, and the robot carries it out. The scene isn't reset between goals, so each new goal starts from whatever the robot left behind.</p>
+  <figure>
+    <video data-src="media/dg_play.mp4" poster="media/dg_play.jpg" muted loop playsinline></video>
+    <figcaption>Play episodes from three play sets, mostly flips and rotations to find letters.</figcaption>
+  </figure>
+  <p>You can balance the skill mix (by default about a third pick-and-place, a third flips and a third rotations), cut some grasps off partway so the robot learns to recover, and script search strategies such as flipping blocks until a hidden letter turns up. Play episodes then go through the same rendering and labelling as everything else.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/task_generation.html#the-generators">play and search scenes</a></p>
+</div></section>
+
+<section id="labels"><div class="col">
+  <h2>Every frame comes labelled</h2>
+  <p>The planner knows what each part of a trajectory is for, so the labels come for free. Nobody annotates anything by hand.</p>
+  <div class="feats">
+    <div>
+      <h3>Sub-goal segments</h3>
+      <p>Every frame records which plan step the robot is carrying out (for example, moving block A onto block 4) and which motion phase it is in. The planner's symbolic state is recorded alongside. So each trajectory splits cleanly into one segment per sub-goal.</p>
+    </div>
+    <div>
+      <h3>Target x, y in the image</h3>
+      <p>Annotation projects the recorded block poses through the recorded front camera. That gives the pixel position of the block being acted on and of where it should go, on every frame, along with the action as text ("pick", "rotate cw" and so on).</p>
+    </div>
+    <div>
+      <h3>What it lets you train</h3>
+      <p>The text and the point are exactly what Molmo 2 learns to predict and what ManiFlow is conditioned on. The segment boundaries give ManiFlow its retract and "done" labels, which is how it learns to say when a skill is finished (<a href="evals.html#play">play mode</a>).</p>
+    </div>
+  </div>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/annotate.html">annotation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/dataset_fields.html">recorded fields</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/train_maniflow.html#action-chunk-labelling">pause labelling in training</a></p>
+</div></section>
+
+<section id="dataset"><div class="col">
+  <h2>The dataset</h2>
+  <p>The merge stage collects every problem into a single LeRobot v3 dataset. Annotation then adds the per-frame action text and target pixel positions described <a href="#labels">above</a>, and the dataset is ready for training.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/merge.html">merge</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/annotate.html">annotation</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/dataset_fields.html">recorded fields</a> · Released data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">allenai/toyblocks-data</a></p>
+</div></section>
+
+<section id="run"><div class="col">
+  <h2>Running it</h2>
+  <p>The local-run guide walks through a complete run: four stacking problems, 16 episodes each, rendered and merged into one dataset, with the command to start it.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#a-complete-run">a complete run</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/local.html#choosing-gpus-and-how-many-problems-run-at-once">GPUs and concurrency</a></p>
+</div></section>
+
+<section><div class="col pager"><a href="index.html">← Overview</a><a href="evals.html">Training and evaluation →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

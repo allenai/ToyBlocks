@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Training and Evaluation</title>
+<meta name="description" content="How ToyBlocks trains Molmo 2 and ManiFlow, play mode, evaluation modes, the high-level and low-level oracles, evaluation at scale and TAMPER.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a><a class="ai2" href="https://allenai.org"><img src="assets/ai2-logo.svg" alt="Ai2" width="665" height="211"></a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Training and evaluation</div>
+  <h1>Training a two-level policy, then finding out which level failed</h1>
+  <p class="sub">The policies we train have two levels. A high-level model (Molmo 2) looks at the camera and picks the next skill and a target point; a low-level model (ManiFlow) moves the arm. Both are trained only on ToyBlocks data. When an episode fails, we want to know which of the two was responsible, so the eval system lets you swap either one for an oracle.</p>
+  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
+</div></header>
+
+<section style="border-top:0;padding-top:8px"><div class="col">
+  <figure>
+    <video data-src="media/ev_hero.mp4" poster="media/ev_hero.jpg" muted loop playsinline></video>
+    <figcaption>Molmo 2 + ManiFlow on a stacking task. The panel on the right shows the high-level command and the goal checklist.</figcaption>
+  </figure>
+</div></section>
+
+<section id="training"><div class="col">
+  <h2>Training</h2>
+  <p>During data generation the planner reads every block's pose straight from the simulator. A trained policy doesn't get that. It has to work out where the blocks are from camera images, the same way it would on a real robot, so both models map raw camera images and the robot's joint state to actions.</p>
+  <p>We split the policy in two. Molmo 2, a vision-language model, is the high level: it chooses the skill to run and points at the block to run it on. ManiFlow is the low level and carries out that one instruction. ManiFlow is trained to pause once it has finished a skill and ask Molmo 2 for the next one.</p>
+  <div class="models">
+    <div>
+      <h3>Molmo2-4B-tb <span>high level</span></h3>
+      <ul>
+        <li><b>Input:</b> one 640×360 front-camera image and the goal as text.</li>
+        <li><b>Output:</b> a short plan, then the next action and its target as a point in the image.</li>
+        <li><b>Actions:</b> pick, place (on a block or on the table), flip (left, right, forward, backward), rotate (cw, ccw) and done.</li>
+        <li><b>Training:</b> Molmo2-4B fine-tuned for 6,000 steps at batch size 256 on three-block stacking episodes. A quarter of each batch is general pointing data (PixMo-Points, PixMo-Count, CoSyn-Point) so the model keeps its general pointing ability. About 8 hours on 8 H100s.</li>
+      </ul>
+      <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#molmo2-high-level-model">Molmo 2 in evals</a></p>
+    </div>
+    <div>
+      <h3>maniflow-tb <span>low level</span></h3>
+      <ul>
+        <li><b>Input:</b> front and wrist RGB at 224×224, a 9-D robot state, the action name, and a heatmap drawn around the high level's target point.</li>
+        <li><b>Output:</b> chunks of 9-D absolute actions (7 joints, gripper, play mode). It predicts 50 steps and runs the first 25.</li>
+        <li><b>Model:</b> flow matching with consistency training, a CLIP ViT-B/16 image encoder and a 12-layer DiT action head, 322.5M parameters.</li>
+        <li><b>Training:</b> 200,000 steps on 8 GPUs, batch 128 per GPU, on three ToyBlocks-generated LeRobot datasets.</li>
+      </ul>
+      <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/train_maniflow.html">all training flags</a></p>
+    </div>
+  </div>
+  <h3>Prompt format</h3>
+  <p>Molmo 2 gets the goal as a tower listed from top to bottom, followed by fixed instructions. It answers with the progress so far, the next step, and the action with its target point:</p>
+  <div class="prompt">
+    <div><span>Prompt</span><code>stack A 4 B. plan. point to target. predict action.</code></div>
+    <div><span>Answer</span><code>now: A not on 4, 4 on B. next: move A to 4. Do: block A &lt;points coords="1 1 367 623"&gt;block A&lt;/points&gt; pick</code></div>
+    <div><span>With history</span><code>previous action: block A &lt;points coords="1 1 367 623"&gt;block A&lt;/points&gt; pick. stack A 4 B. plan. point to target. predict action.</code></div>
+  </div>
+  <p>The prompt can start with the previous step, written the same way as an answer. Point coordinates run from 0 to 1000 across the image width and height. Each target sits 5 px (in a 640×360 frame) below the block's center, on the face that points at the camera. ManiFlow then receives the action word ("pick") and a heatmap drawn around that point.</p>
+  <p class="docs">Data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">toyblocks-data</a></p>
+</div></section>
+
+<section id="play"><div class="col">
+  <h2>Pausing and play mode</h2>
+  <p>ManiFlow doesn't just move the arm. It also learns to say <b>"I'm done."</b> ManiFlow's ninth action dimension is the <b>play mode</b>: <b>1</b> keeps going, <b>0</b> indicates to the model that the attempt is complete and the robot is retracting, and <b>−1</b> says the skill is done. ManiFlow learns it from the training labels: when a pick, place, flip or rotate finishes the attempt and retract stages partway through a chunk, it emits a −1 and the rest of that chunk repeats the final pose and is marked as done. At eval time, 1 and 0 are fed back as part of the next state. A −1 ends the skill, and the arm holds where it stopped until the next query. The skill boundaries behind these labels come straight from data generation, where every frame is <a href="datagen.html#labels">labelled with its sub-goal</a>.</p>
+  <figure>
+    <video data-src="media/ev_phase.mp4" poster="media/ev_phase.jpg" muted loop playsinline></video>
+    <figcaption>A training episode with its play-mode labels. <i>Input</i> is the play mode fed back to ManiFlow, which is only ever 1 or 0. <i>Phase target</i> is the 25-step chunk it learns to predict: green is 1 (keep going), yellow is 0 (attempt complete, retracting), and red is −1, which fills the rest of a chunk once a skill ends inside it. The bar along the bottom covers the whole episode.</figcaption>
+  </figure>
+  <p>Molmo 2 can be queried on two schedules:</p>
+  <ul>
+    <li><b>Synchronous</b> (the default): Molmo 2 is queried at every action-chunk boundary, together with ManiFlow, so it can change its command in the middle of a skill.</li>
+    <li><b>Asynchronous</b>: Molmo 2 is queried at the start of the episode and again only after ManiFlow reports −1. That needs far fewer high-level calls, and the command stays fixed for the whole skill. This mode needs a play-mode checkpoint.</li>
+  </ul>
+  <figure class="diagram">
+    <div class="hscroll"><svg viewBox="0 0 880 352" role="img" aria-labelledby="pm-t pm-d">
+      <title id="pm-t">Synchronous and asynchronous Molmo 2 queries over the same ManiFlow rollout</title>
+      <desc id="pm-d">Seven action chunks. ManiFlow runs pick A, reports −1 partway through chunk 3 and holds; runs place on 4, reports −1 partway through chunk 6 and holds. In synchronous mode Molmo 2 is queried at all seven chunk boundaries. In asynchronous mode it is queried only at the start and at the first boundary after each −1, three calls in total.</desc>
+      <defs>
+        <pattern id="pm-hold" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#eef0f3"/><line x1="0" y1="0" x2="0" y2="6" stroke="#cfd3da" stroke-width="2"/></pattern>
+      </defs>
+      <style>
+        .pm-t { font: 600 14px var(--font); fill: var(--ink); }
+        .pm-s { font: 400 12.5px var(--font); fill: var(--muted); }
+        .pm-l { font: 500 12.5px var(--font); fill: var(--body); }
+        .pm-c { font: 500 11.5px var(--mono); fill: var(--ink); }
+        .pm-cm { font: 400 11.5px var(--mono); fill: #9aa0ab; }
+        .pm-w { font: 500 12px var(--font); fill: #fff; }
+        .pm-h { font: 500 11.5px var(--font); fill: var(--muted); }
+        .pm-g { stroke: var(--line); stroke-dasharray: 3 4; }
+      </style>
+      <!-- chunk grid: x = 140 + 100*k -->
+      <g class="pm-g"><line x1="140" y1="36" x2="140" y2="306"/><line x1="240" y1="36" x2="240" y2="306"/><line x1="340" y1="36" x2="340" y2="306"/><line x1="440" y1="36" x2="440" y2="306"/><line x1="540" y1="36" x2="540" y2="306"/><line x1="640" y1="36" x2="640" y2="306"/><line x1="740" y1="36" x2="740" y2="306"/></g>
+
+      <!-- synchronous -->
+      <text class="pm-t" x="0" y="20">Synchronous</text><text class="pm-s" x="98" y="20">Molmo 2 is queried at every chunk boundary: 7 calls</text>
+      <text class="pm-l" x="0" y="64">Molmo 2</text>
+      <g>
+        <circle cx="140" cy="60" r="6" fill="var(--pink)"><title>Query 1: pick A</title></circle><text class="pm-c" x="148" y="48">pick A</text>
+        <circle cx="240" cy="60" r="6" fill="var(--pink)"><title>Query 2: pick A</title></circle><text class="pm-cm" x="248" y="48">pick A</text>
+        <circle cx="340" cy="60" r="6" fill="var(--pink)"><title>Query 3: pick A</title></circle><text class="pm-cm" x="348" y="48">pick A</text>
+        <circle cx="440" cy="60" r="6" fill="var(--pink)"><title>Query 4: place on 4</title></circle><text class="pm-c" x="448" y="48">place on 4</text>
+        <circle cx="540" cy="60" r="6" fill="var(--pink)"><title>Query 5: place on 4</title></circle><text class="pm-cm" x="548" y="48">place on 4</text>
+        <circle cx="640" cy="60" r="6" fill="var(--pink)"><title>Query 6: place on 4</title></circle><text class="pm-cm" x="648" y="48">place on 4</text>
+        <circle cx="740" cy="60" r="6" fill="var(--pink)"><title>Query 7: done</title></circle><text class="pm-c" x="748" y="48">done</text>
+      </g>
+      <text class="pm-l" x="0" y="106">ManiFlow</text>
+      <g>
+        <rect x="140" y="88" width="258" height="26" rx="4" fill="var(--blue)"><title>Play mode 1: running pick A</title></rect><text class="pm-w" x="150" y="106">pick A · play mode 1</text>
+        <rect x="400" y="88" width="38" height="26" rx="4" fill="url(#pm-hold)"><title>Holding after −1 until the next boundary</title></rect>
+        <rect x="442" y="88" width="196" height="26" rx="4" fill="var(--blue)"><title>Play mode 1: running place on 4</title></rect><text class="pm-w" x="452" y="106">place on 4 · 1</text>
+        <rect x="640" y="88" width="98" height="26" rx="4" fill="url(#pm-hold)"><title>Holding after −1 until the next boundary</title></rect>
+        <line x1="399" y1="82" x2="399" y2="120" stroke="var(--red)" stroke-width="2.5"/><text class="pm-c" x="388" y="134" style="fill:var(--red)">−1</text>
+        <line x1="639" y1="82" x2="639" y2="120" stroke="var(--red)" stroke-width="2.5"/><text class="pm-c" x="628" y="134" style="fill:var(--red)">−1</text>
+      </g>
+
+      <!-- asynchronous -->
+      <text class="pm-t" x="0" y="178">Asynchronous</text><text class="pm-s" x="108" y="178">Molmo 2 is queried at the start and after each −1: 3 calls</text>
+      <text class="pm-l" x="0" y="222">Molmo 2</text>
+      <g>
+        <circle cx="140" cy="218" r="6" fill="var(--pink)"><title>Query 1: pick A</title></circle><text class="pm-c" x="148" y="206">pick A</text>
+        <circle cx="240" cy="218" r="4.5" fill="#fff" stroke="#c4c8cf" stroke-width="1.5"><title>No query</title></circle>
+        <circle cx="340" cy="218" r="4.5" fill="#fff" stroke="#c4c8cf" stroke-width="1.5"><title>No query</title></circle>
+        <circle cx="440" cy="218" r="6" fill="var(--pink)"><title>Query 2: place on 4 (first boundary after −1)</title></circle><text class="pm-c" x="448" y="206">place on 4</text>
+        <circle cx="540" cy="218" r="4.5" fill="#fff" stroke="#c4c8cf" stroke-width="1.5"><title>No query</title></circle>
+        <circle cx="640" cy="218" r="4.5" fill="#fff" stroke="#c4c8cf" stroke-width="1.5"><title>No query</title></circle>
+        <circle cx="740" cy="218" r="6" fill="var(--pink)"><title>Query 3: done (first boundary after −1)</title></circle><text class="pm-c" x="748" y="206">done</text>
+      </g>
+      <text class="pm-l" x="0" y="264">ManiFlow</text>
+      <g>
+        <rect x="140" y="246" width="258" height="26" rx="4" fill="var(--blue)"><title>Play mode 1: running pick A</title></rect><text class="pm-w" x="150" y="264">pick A · play mode 1</text>
+        <rect x="400" y="246" width="38" height="26" rx="4" fill="url(#pm-hold)"><title>Holding after −1 until the next boundary</title></rect>
+        <rect x="442" y="246" width="196" height="26" rx="4" fill="var(--blue)"><title>Play mode 1: running place on 4</title></rect><text class="pm-w" x="452" y="264">place on 4 · 1</text>
+        <rect x="640" y="246" width="98" height="26" rx="4" fill="url(#pm-hold)"><title>Holding after −1 until the next boundary</title></rect>
+        <line x1="399" y1="240" x2="399" y2="278" stroke="var(--red)" stroke-width="2.5"/><text class="pm-c" x="388" y="292" style="fill:var(--red)">−1</text>
+        <line x1="639" y1="240" x2="639" y2="278" stroke="var(--red)" stroke-width="2.5"/><text class="pm-c" x="628" y="292" style="fill:var(--red)">−1</text>
+      </g>
+
+      <!-- axis -->
+      <g class="pm-h"><text x="140" y="324" text-anchor="middle">0</text><text x="240" y="324" text-anchor="middle">25</text><text x="340" y="324" text-anchor="middle">50</text><text x="440" y="324" text-anchor="middle">75</text><text x="540" y="324" text-anchor="middle">100</text><text x="640" y="324" text-anchor="middle">125</text><text x="740" y="324" text-anchor="middle">150</text></g>
+      <text class="pm-h" x="440" y="346" text-anchor="middle">control steps (one action chunk = 25 steps)</text>
+    </svg></div>
+    <div class="legend"><span><i style="background:var(--pink);border-radius:50%"></i>Molmo 2 queried</span><span><i style="background:#fff;border:1.5px solid #c4c8cf;border-radius:50%"></i>no query</span><span><i style="background:var(--blue)"></i>ManiFlow running (1)</span><span><i class="hatch"></i>holding after −1</span><span><i style="background:var(--red);width:3px"></i>−1 skill done</span></div>
+    <figcaption>The same rollout on both schedules. In both, ManiFlow's −1 ends the skill and the arm holds until the next chunk boundary. The synchronous run asks Molmo 2 again at every boundary, while the asynchronous run waits for −1.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#high-level-conditioning-modes">high-level conditioning modes</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/train_maniflow.html#action-chunk-labelling">pause labelling in training</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/metrics.html">play-mode metrics</a></p>
+</div></section>
+
+<section id="modes"><div class="col">
+  <h2>Evaluation Modes</h2>
+  <p>A mode is a choice of high level and low level. All of them run from the same launcher.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Mode</th><th>High level</th><th>Low level</th><th>What it tells you</th><th>Docs</th></tr>
+    <tr><td>Full system</td><td>Molmo 2, queried every action chunk</td><td>ManiFlow</td><td>End-to-end performance. This is the default.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#per-policy-defaults">defaults</a></td></tr>
+    <tr><td>Asynchronous high level</td><td>Molmo 2, queried at the start and whenever ManiFlow finishes a skill</td><td>ManiFlow (play-mode checkpoint)</td><td>The full system with fewer high-level calls.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a></td></tr>
+    <tr><td>High-level oracle</td><td>Symbolic planner using the episode's PDDL problem</td><td>ManiFlow</td><td>How good the low level is when it always gets the right command.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#high-level-conditioning-modes">modes</a></td></tr>
+    <tr><td>Low-level oracle</td><td>Molmo 2</td><td>The motion-planned skills used for data generation</td><td>How good the high level is when every command is carried out well. Each command acts on the block nearest its target pixel.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a></td></tr>
+    <tr><td>Replay</td><td>none</td><td>The dataset's recorded actions, open loop</td><td>Whether the simulation, the dataset and the eval setup agree. If replay fails, policy numbers on that data don't mean much.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/replay.html">replay</a></td></tr>
+  </table></div>
+  <p>There is no mode with both oracles: that is just data generation. The low-level oracle always queries Molmo 2 when a skill ends, so it has no every-chunk variant. ManiFlow can also run with no high level at all, given only the episode's goal sentence.</p>
+  <div class="pair">
+    <figure><video data-src="media/ev_lloracle.mp4" poster="media/ev_lloracle.jpg" muted loop playsinline></video><figcaption>Low-level oracle: Molmo 2 picks the skills, motion-planned skills execute them.</figcaption></figure>
+    <figure><video data-src="media/ev_dev.mp4" poster="media/ev_dev.jpg" muted loop playsinline></video><figcaption>The high-level overlay video shows each command and its target point.</figcaption></figure>
+  </div>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#high-level-conditioning-modes">high-level conditioning modes</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#per-policy-defaults">per-policy defaults</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/replay.html">dataset replay</a></p>
+  <a class="results-link" href="experiments.html#hl"><b>Results</b><span>How Molmo 2 does with the motion-planned skills or ManiFlow as its low level, on easy, medium and hard tasks with seen and held-out blocks.</span><em>Molmo 2 results →</em></a>
+</div></section>
+
+<section id="scenes"><div class="col">
+  <h2>Evaluation at Scale</h2>
+  <p>Every eval episode starts from an episode in a dataset. An episode queue reads the robot pose, block poses and sizes, table height and goal from the recording, and the policy has to reach the goal from there. Since the scene comes straight from the dataset, a difference in success rate between two models reflects the models and not a difference in setup.</p>
+  <p>The queue hands episodes out to GPU-parallel environments, so the same command works on a single workstation GPU or across a multi-GPU machine.</p>
+  <figure><video data-src="media/ev_mosaic.mp4" poster="media/ev_mosaic.jpg" muted loop playsinline></video><figcaption>50 eval environments running at once, shown at 8× speed.</figcaption></figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a></p>
+</div></section>
+
+<section id="compare"><div class="col side">
+  <div>
+    <h2>Oracle comparison</h2>
+    <p>In this view, Molmo 2's choice is on the left and the symbolic planner's choice for the same scene at the same moment is on the right, with the target heatmaps drawn on both. It makes it easy to spot the exact frame where the model's plan starts to drift from the planner's.</p>
+  </div>
+  <figure><video data-src="media/ev_compare.mp4" poster="media/ev_compare.jpg" muted loop playsinline></video><figcaption>Molmo 2 (left) and the planner (right) agreeing on the target.</figcaption></figure>
+</div></section>
+
+<section id="tamper"><div class="col">
+  <h2>TAMPER: training on your failures</h2>
+  <p>TAMPER (TAMP Expert Relabeling) is a DAgger-style loop with a planning expert. An eval run finds the states where the policy goes wrong; the expert then plans new demonstrations starting from those states. The next round of training data then covers situations the policy actually ends up in, not only the ones data generation happens to sample.</p>
+  <ol>
+    <li><b>Evaluate with capture on.</b> Turn on failure capture in an eval run. The final scene of every failed or timed-out episode is saved as a new environment package.</li>
+    <li><b>Look at what was captured.</b> A summary file lists each captured state with its episode, outcome and goal.</li>
+    <li><b>Relabel.</b> vecgen plans from the captured scene toward the recorded goal and executes it with the usual verified skills.</li>
+    <li><b>Retrain and evaluate again.</b> Annotate and merge the new episodes, add them to the training mix, and repeat.</li>
+  </ol>
+  <p>In a small test on one RTX 5090, a random-action eval on a 16-episode stacking set captured 16 states, and vecgen recovered 12–13 of them in about 72 seconds.</p>
+  <p class="docs">Docs: <a href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">TAMPER guide</a></p>
+</div></section>
+
+<section id="outputs"><div class="col">
+  <h2>Outputs</h2>
+  <p>Each run scores every episode against its goal and writes per-step metrics and run summaries. Full rollouts, videos included, are recorded as a LeRobot dataset by default, in the same format as the training data. Any policy that can be served over a WebSocket can be evaluated by implementing a small policy-server interface.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/metrics.html">eval metrics</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#episode-scoring-and-outputs">scoring and outputs</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning/new_policy_server.html">adding a policy server</a></p>
+</div></section>
+
+<section id="run"><div class="col">
+  <h2>Running it</h2>
+  <p>The quick start covers a small smoke-test run (10 episodes, one eval GPU, two environments) and a full run over a dataset, for each mode above.</p>
+  <p>Peak GPU memory we measured per process:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Process</th><th>Peak VRAM</th></tr>
+    <tr><td>ManiFlow policy server</td><td>2.9 GiB with 28 environments</td></tr>
+    <tr><td>Molmo 2 + ManiFlow policy server</td><td>12.5 GiB with 4 environments, growing with more</td></tr>
+    <tr><td>Isaac Sim eval worker</td><td>5.5 GiB with 4 environments, 10.2 GiB with 28</td></tr>
+  </table></div>
+  <p>ManiFlow-only evals fit on a 16 GB card. Molmo 2 evals need about 24 GB, or two GPUs: the launcher puts the policy server on GPU 0 and the eval worker on GPU 1.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#quick-start-with-launch-eval-py">quick start</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html">evaluation overview</a></p>
+</div></section>
+
+<section><div class="col pager"><a href="datagen.html">← Data generation</a><a href="sim2real.html">Sim-to-real Toolkit →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

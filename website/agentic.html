@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Agentic Framework</title>
+<meta name="description" content="agentic_robotics: frontier models control the ToyBlocks robot through MCP skill tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a><a class="ai2" href="https://allenai.org"><img src="assets/ai2-logo.svg" alt="Ai2" width="665" height="211"></a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Agentic Framework</div>
+  <h1>Letting a frontier model control the robot</h1>
+  <p class="sub"><code>agentic_robotics</code> connects a vision-language model to ToyBlocks. The model sees the front camera and can only act through MCP tools, one per skill. It gets no success signal; it has to decide from the images when it's done, or when the task can't be done.</p>
+  <div class="toc"><a href="#tools">Tools</a><a href="#backends">Backends</a><a href="#ui">Web UI</a><a href="#tasks">New tasks</a><a href="#run">Running it</a></div>
+</div></header>
+
+<section style="border-top:0;padding-top:8px"><div class="col">
+  <div class="pair">
+    <figure><video data-src="media/ag_spell.mp4" poster="media/ag_spell.jpg" muted loop playsinline></video><figcaption>A search-and-spell task, 3× speed.</figcaption></figure>
+    <figure><video data-src="media/ag_stack.mp4" poster="media/ag_stack.jpg" muted loop playsinline></video><figcaption>Building a stack, 3× speed.</figcaption></figure>
+  </div>
+  <a class="results-link" href="experiments.html#agents"><b>Results</b><span>What frontier models managed through these tools: classical planning, search and spell, and learning their own skill descriptions.</span><em>Agent results →</em></a>
+</div></section>
+
+<section id="tools"><div class="col">
+  <h2>Skills as tools</h2>
+  <p>The model works by pointing: most tools take a pixel in the camera image, and the skill acts on the block there. A small, robot-agnostic MCP host and an OpenAI-compatible model client (OpenRouter by default) run the loop, and ToyBlocks is connected through an adapter. The tools are:</p>
+  <p><code>Get Image Observation</code>, <code>Get Zoomed-In Image Observation</code>, <code>Pick Up Block</code>, <code>Stack on Block</code>, <code>Place on Table</code>, <code>Rotate Block</code>, <code>Flip Block</code>, <code>Return Arm to Home</code>, <code>Open Gripper</code>, <code>Close Gripper</code>.</p>
+  <p>Every run saves its video, the full transcript, the config, and a summary that scores the final scene against the task's PDDL goal and records the tool calls and model cost.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html">agentic robotics guide</a> · Code: <a href="https://github.com/allenai/agentic_robotics">allenai/agentic_robotics</a></p>
+</div></section>
+
+<section id="backends"><div class="col">
+  <h2>Backends</h2>
+  <p>The tools can be backed by two kinds of skills:</p>
+  <ul>
+    <li><b>Oracle</b> (the default) uses the scripted vecgen skills, the same ones that record our training data, planned with cuRobo on the simulator's ground-truth state. With these, failures come from the model's reasoning rather than from the skills. Needs the <code>vecgen</code> extra.</li>
+    <li><b>ManiFlow</b> sends each skill to a trained ManiFlow policy through its policy server, so the model also has to deal with a learned controller's mistakes. Needs the <code>maniflow</code> extra and a checkpoint. <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#maniflow-skills">ManiFlow skills</a></li>
+  </ul>
+</div></section>
+
+<section id="ui"><div class="col">
+  <h2>Web UI</h2>
+  <p>There are a few ways to run and watch episodes in the browser:</p>
+  <ul>
+    <li><code>menu</code>: pick tasks one after another and interject while the model works.</li>
+    <li><code>page</code>: a single model episode with a chat and interjection page.</li>
+    <li><code>human</code>: you call the skills yourself, the same way the model would. Useful for checking that a new task is solvable.</li>
+    <li><code>portal</code>: browse finished runs with their videos, transcripts and scores.</li>
+  </ul>
+  <figure>
+    <img src="media/ag_portal.jpg" alt="The run portal showing a search-and-spell run: the task, a strip of the agent's tool calls, and a rotate call with the camera view before and after" width="1400" height="890" style="height:auto;border-radius:8px">
+    <figcaption>The run portal, showing parts of one search-and-spell run: the task and its tool-call count, the strip of calls the agent made, and one of them (a clockwise rotate) with the camera view before and after. The pink marker is the pixel the agent pointed at.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#web-ui-the-episode-pages-and-the-portal">web UI and portal</a></p>
+</div></section>
+
+<section id="tasks"><div class="col">
+  <h2>Adding a task</h2>
+  <p>Tasks are the same PDDL problems the data generation pipeline uses, so any ToyBlocks task generator works here. Write or generate the PDDL, register a <code>TaskConfig</code> with the prompt and a tool-call budget, build it with <code>generate-env</code>, and try it yourself in <code>human</code> before handing it to a model.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#create-a-new-task">create a new task</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#build-a-task-s-environment-packages">build environment packages</a></p>
+</div></section>
+
+<section id="run"><div class="col">
+  <h2>Running it</h2>
+  <p>You need ToyBlocks installed with the <code>vecgen</code> and <code>agentic</code> extras and your own OpenRouter key. The guide covers setup, building a task's environments, and running an episode headless or in the web UI.</p>
+  <p>Experiments are TOML files that pin the backend, model, checkpoint, camera, seed and skill settings, so runs can be repeated. Results so far are on the <a href="experiments.html#agents">Experiments</a> page.</p>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#setup">setup</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#run-an-episode">run an episode</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/installation_and_setup_instructions.html#agentic-robotics-setup">install</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#experiments-and-further-reading">experiments</a></p>
+</div></section>
+
+<section><div class="col pager"><a href="sim2real.html">← Sim-to-real Toolkit</a><a href="experiments.html">Experiments →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
