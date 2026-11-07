@@ -224,3 +224,8 @@ figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .levels b { display: block; margin-top: 8px; font-size: 15px; color: var(--ink); text-align: center; }
 .levels span { display: block; font-size: 13.5px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
 @media (max-width: 640px) { .levels { grid-template-columns: 1fr; margin-left: 0; } }
+.levels svg { width: 100%; height: auto; display: block; background: var(--soft); border-radius: 8px; padding: 6px 4px 2px; }
+.levels em { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 8px; font-style: normal; }
+.levels em i { font-style: normal; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: var(--soft); border: 1px solid var(--line); color: var(--body); }
+.levels > div { display: flex; flex-direction: column; }
+.levels em { margin-top: auto; padding-top: 8px; }
