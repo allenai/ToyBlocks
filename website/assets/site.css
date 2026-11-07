@@ -240,3 +240,10 @@ figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .results-link span { font-size: 15px; line-height: 1.45; flex: 1; }
 .results-link em { font-style: normal; font-weight: 600; font-size: 15px; color: var(--link); white-space: nowrap; flex: none; }
 @media (max-width: 640px) { .results-link { flex-wrap: wrap; gap: 4px 10px; } .results-link span { flex-basis: 100%; order: 2; } .results-link em { order: 3; } }
+/* pause/play button on every video (added by site.js) */
+.vwrap { position: relative; display: block; }
+.vbtn { position: absolute; right: 10px; bottom: 10px; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: rgba(20, 22, 26, .62); color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s, background .15s; }
+.vbtn svg { width: 14px; height: 14px; fill: currentColor; }
+.vwrap:hover .vbtn, .vwrap.paused .vbtn, .vbtn:focus-visible { opacity: 1; }
+.vbtn:hover { background: rgba(20, 22, 26, .85); }
+@media (hover: none) { .vbtn { opacity: .85; } }
