@@ -185,3 +185,8 @@ h3 + .nums { margin-top: 12px; }
 .nav .col { max-width: 1180px; }  /* six section links + Docs/GitHub on one line */
 .chart .narrow { max-width: 620px; }
 figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+/* Ai2 wordmark: nav (right end) and above the home-page logo; GitHub Pages / local build only */
+.nav .ext a.ai2 { display: flex; align-items: center; margin-left: 6px; padding-left: 14px; border-left: 1px solid var(--line); }
+.nav .ext a.ai2 img { height: 20px; width: auto; display: block; }
+.ai2-home { display: inline-block; margin-bottom: 18px; }
+.ai2-home img { height: 40px; width: auto; display: block; }
