@@ -399,7 +399,7 @@
 
 <section id="hl"><div class="col">
   <h2>Molmo 2 on new blocks</h2>
-  <p>Molmo 2 runs as the high level, with either the motion-planned skills (the low-level oracle) or ManiFlow as the low level. <i>Seen</i> uses the training blocks in new arrangements, and <i>unseen</i> uses held-out blocks. Easy tasks are stacking only, medium tasks add re-orienting blocks, and hard tasks also need searching for hidden letters.</p>
+  <p>Molmo 2 runs as the high level, with either the motion-planned skills (the low-level oracle) or ManiFlow as the low level. <i>Seen</i> uses the training blocks in new arrangements, and <i>unseen</i> uses held-out blocks. The three difficulty levels differ in how the letters start out, as the starting scenes below the chart show.</p>
   <figure class="chart">
     <div class="legend"><span><i style="background:var(--g-mp)"></i>Motion planner, seen blocks</span><span><i style="background:var(--g-mp2)"></i>Motion planner, unseen blocks</span><span><i style="background:var(--g-mf)"></i>ManiFlow, seen blocks</span><span><i style="background:var(--g-mf2)"></i>ManiFlow, unseen blocks</span></div>
 <div class="hscroll wide">
@@ -439,6 +439,11 @@
 <text class="g-gx" x="732.3" y="274" text-anchor="middle">Hard</text>
 <text class="g-ax" x="12" y="137" text-anchor="middle" transform="rotate(-90 12 137)">success rate (%)</text></svg>
 </div>
+    <div class="levels">
+      <div><img src="media/diff_easy.jpg" alt="Easy starting scene: letters visible and upright" width="1080" height="408"><b>Easy</b><span>Letters on the blocks are already visible and upright, so only pick and place is needed to stack the word.</span></div>
+      <div><img src="media/diff_medium.jpg" alt="Medium starting scene: letters visible but not upright" width="1080" height="408"><b>Medium</b><span>Letters are visible but not upright, so flips are needed.</span></div>
+      <div><img src="media/diff_hard.jpg" alt="Hard starting scene: letters hidden and not upright" width="1080" height="408"><b>Hard</b><span>Letters are not visible and not upright. The model has to search for the right blocks, using rotates, flips and pick and place.</span></div>
+    </div>
     <figcaption>Three-letter block-spelling tasks, 200 episodes per bar. With the motion planner, failures are Molmo 2's. With ManiFlow, failures can come from either level.</figcaption>
   </figure>
   <p class="docs">The modes behind this: <a href="evals.html#modes">Evaluation Modes</a></p>
