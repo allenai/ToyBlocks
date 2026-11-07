@@ -41,15 +41,27 @@ b, strong { color: var(--ink); font-weight: 600; }
 
 /* nav */
 .nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: #ffffffee; backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-.nav .col { display: flex; align-items: center; gap: 16px; padding-block: 11px; flex-wrap: wrap; }
+.nav .col { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "home links ext"; align-items: center; column-gap: 16px; padding-block: 11px; }
+.nav .home { grid-area: home; }
+.nav .links { grid-area: links; }
+.nav .ext { grid-area: ext; }
 .nav .home { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .nav .home i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
-.nav .links { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14.5px; }
+.nav .links { display: flex; gap: 14px; font-size: 14.5px; white-space: nowrap; min-width: 0; }
 .nav .links a { color: var(--muted); }
 .nav .links a:hover, .nav .links a.on { color: var(--ink); text-decoration: none; }
 .nav .links a.on { font-weight: 600; }
-.nav .ext { margin-left: auto; display: flex; gap: 14px; font-size: 15px; }
-@media (max-width: 640px) { .nav .ext { margin-left: 0; } }
+.nav .ext { display: flex; align-items: center; gap: 14px; font-size: 15px; white-space: nowrap; }
+/* Narrower screens: logo and Docs/GitHub on the first row, section links on one sideways-scrolling row below */
+@media (max-width: 1200px) {
+  .nav .col { grid-template-columns: 1fr auto; grid-template-areas: "home ext" "links links"; row-gap: 8px; padding-block: 9px 0; }
+  .nav .links { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 9px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  .nav .links::-webkit-scrollbar { display: none; }
+  .nav .links a:last-child { padding-right: 28px; }
+  :target { scroll-margin-top: 100px; }
+}
+@media (max-width: 480px) { .nav .home img { height: 26px; } .nav .ext { gap: 12px; font-size: 14.5px; } .nav .ext a.ai2 { padding-left: 12px; margin-left: 2px; } .nav .ext a.ai2 img { height: 17px; } }
 
 /* page title block */
 .title { text-align: center; padding: 56px 0 28px; }

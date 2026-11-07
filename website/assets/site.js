@@ -31,4 +31,10 @@
   document.querySelectorAll(".nav .links a").forEach((a) => {
     if (a.getAttribute("href") === here) a.classList.add("on");
   });
+  // On narrow screens the section links scroll sideways; bring the current page's link into view.
+  const on = document.querySelector(".nav .links a.on");
+  if (on) {
+    const row = on.parentElement;
+    if (row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 20);
+  }
 })();
