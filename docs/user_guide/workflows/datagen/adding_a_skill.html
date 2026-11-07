@@ -1,0 +1,1280 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Adding a skill to vecgen &#8212; ToyBlocks  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/workflows/datagen/adding_a_skill';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Stage 4: Rendering" href="render.html" />
+    <link rel="prev" title="Stage 3: Execution (vecgen)" href="execution.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/ToyBlocksLogo_new.svg" class="logo__image only-light" alt="ToyBlocks  documentation - Home"/>
+    <img src="../../../_static/ToyBlocksLogo_new.svg" class="logo__image only-dark pst-js-only" alt="ToyBlocks  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Workflows
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/allenai/ToyBlocks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Workflows
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/allenai/ToyBlocks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../installation_and_setup_instructions.html">ToyBlocks Installation and Setup Instructions</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../data_generation.html">Automatic Data Generation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="execution.html">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Adding a skill to vecgen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render.html">Stage 4: Rendering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataset_fields.html">Recorded Dataset Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="local.html">Running Pipeline Locally</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../imitation_learning.html">Training ManiFlow Policies on Automatically Generated Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../imitation_learning/train_maniflow.html"><code class="docutils literal notranslate"><span class="pre">train_maniflow.py</span></code> Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imitation_learning/new_policy_server.html">Setting up a new policy server</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../evaluations.html">Policy Evaluation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../evals/replay.html">Replaying Actions from a Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evals/metrics.html">Eval Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evals/launch_eval.html"><code class="docutils literal notranslate"><span class="pre">launch_eval.py</span></code> Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evals/evaluate.html"><code class="docutils literal notranslate"><span class="pre">evaluate.py</span></code> Reference</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentic_robotics.html">Agentic Robotics</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Workflows</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../data_generation.html" class="nav-link">Automatic Data Generation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Adding a skill to vecgen</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="adding-a-skill-to-vecgen">
+<h1>Adding a skill to vecgen<a class="headerlink" href="#adding-a-skill-to-vecgen" title="Link to this heading">#</a></h1>
+<p><a class="reference internal" href="execution.html"><span class="std std-doc">Execution</span></a> can only demonstrate what it has a <strong>skill</strong> for. The FF planner plans
+over every action in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/domain.pddl</span></code>, but each planned action is carried
+out by a vecgen skill: a small Python class that turns “rotate <code class="docutils literal notranslate"><span class="pre">block_r</span></code> clockwise” into joint
+targets, runs them on every environment at once, and then checks the result against the
+simulation. When FF plans an action that has no skill, the environment gets no program and the
+episode is recorded as a failure with reason <code class="docutils literal notranslate"><span class="pre">&quot;no</span> <span class="pre">program&quot;</span></code>.</p>
+<p>The domain already contains actions that have no skill: <code class="docutils literal notranslate"><span class="pre">push_to_right</span></code> and <code class="docutils literal notranslate"><span class="pre">push_next_to</span></code>.
+That is why the pipeline excludes them by default (<code class="docutils literal notranslate"><span class="pre">--vecgen-exclude-actions</span></code>). This page walks
+through every place a new skill has to be wired in, from the PDDL action to the annotated
+dataset.</p>
+<p>The worked reference throughout is the <strong><code class="docutils literal notranslate"><span class="pre">rotate</span></code></strong> skill (<code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/rotate.py</span></code>).
+It maps one PDDL action to one skill, uses derived facts to keep FF away from rotates it cannot
+do, and checks its effect with its own tolerance. Its grasp-and-twist geometry comes from scripted
+helpers in <code class="docutils literal notranslate"><span class="pre">rotate_trajectory.py</span></code>, which a new skill does not need. <code class="docutils literal notranslate"><span class="pre">Pick</span></code>
+(<code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/pnp.py</span></code>, about 90 lines) is the smallest complete skill, and a good
+template for a new one.</p>
+<section id="where-it-fits">
+<h2>Where it fits<a class="headerlink" href="#where-it-fits" title="Link to this heading">#</a></h2>
+<p>A skill sits in the middle of a chain. Each link is a separate piece of code:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>domain.pddl action        FF plans it per environment
+  -&gt; symbolic/programs.py  skills_for_action(): PDDL action -&gt; SkillCall(s)
+  -&gt; run.py skills dict    SkillCall name -&gt; Skill instance
+  -&gt; Skill phases          begin / request / after_phase, resolved by the engine (IK, cuRobo, rows)
+  -&gt; Skill.verify()        effect check on the live sim: advance, retry, or re-plan
+  -&gt; recorder              action.high_level_* and action.low_level_* columns
+  -&gt; annotation            goal.action text and goal.position pixel
+</pre></div>
+</div>
+<p>These are the files you may have to touch, in the order this page covers them:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Step</p></th>
+<th class="head"><p>File</p></th>
+<th class="head"><p>When</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Skill class</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/&lt;name&gt;.py</span></code></p></td>
+<td><p>Always.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PDDL action</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/domain.pddl</span></code></p></td>
+<td><p>Unless the action already exists.</p></td>
+</tr>
+<tr class="row-even"><td><p>Predicates</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/derived.py</span></code>, <code class="docutils literal notranslate"><span class="pre">predicates.py</span></code>, <code class="docutils literal notranslate"><span class="pre">state.py</span></code>, and others</p></td>
+<td><p>Only for predicates whose truth value must come from the scene.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Action to skill</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/programs.py</span></code></p></td>
+<td><p>Always.</p></td>
+</tr>
+<tr class="row-even"><td><p>Registration</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code></p></td>
+<td><p>Always.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Annotation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">src/toyblocks/data_annotation/annotation_utils.py</span></code></p></td>
+<td><p>When the action should get <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> text and a target pixel.</p></td>
+</tr>
+<tr class="row-even"><td><p>Task generator</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scripts/task_gen/&lt;name&gt;.py</span></code></p></td>
+<td><p>When you want a family of problems, not one hand-written file.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>There is no plugin registry. Every link above is a hard-coded <code class="docutils literal notranslate"><span class="pre">if</span></code> branch, <code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">frozenset</span></code>,
+so the work is editing these files directly.</p>
+</section>
+<section id="the-skill-interface">
+<h2>The skill interface<a class="headerlink" href="#the-skill-interface" title="Link to this heading">#</a></h2>
+<p>A skill subclasses <code class="docutils literal notranslate"><span class="pre">Skill</span></code> from <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/base.py</span></code> and lives next to the
+existing ones in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/</span></code>. The whole base class is this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Skill</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Base class; subclasses set ``name`` and ``phases`` and implement the hooks."""</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">phases</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: retry from the live state (no snapshot restore), e.g. a flip that moved the block</span>
+    <span class="n">retry_from_live</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: phases whose request() is expensive per env (scripted searches): built on a worker</span>
+    <span class="c1">#: thread while the sim keeps stepping the other envs</span>
+    <span class="n">async_phases</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Sample per-env parameters for a fresh attempt; return ``ok [B]``."""</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">env_ids</span><span class="o">.</span><span class="n">numel</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PhaseRequest</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">skips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""True when ``phase`` is a no-op for env ``env`` this attempt (e.g. an optional</span>
+<span class="sd">        sub-step it does not need): the engine moves past it without a segment, so no tick</span>
+<span class="sd">        is spent or recorded and neither ``request`` nor ``after_phase`` runs for it."""</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Bookkeeping once the phase's segment finished (attach/detach, cached poses)."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Effect check on the live state after the last phase; ``ok [B]``."""</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">env_ids</span><span class="o">.</span><span class="n">numel</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">hl_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<p>The engine (<code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/engine.py</span></code>) calls the hooks in this order for each attempt of a
+skill:</p>
+<ol class="arabic simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">begin(ctx,</span> <span class="pre">env_ids,</span> <span class="pre">args)</span></code></strong> runs once, when an environment starts the skill’s first phase.
+<code class="docutils literal notranslate"><span class="pre">args</span></code> holds each environment’s <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code> arguments, for example <code class="docutils literal notranslate"><span class="pre">(&quot;block_r&quot;,</span> <span class="pre">&quot;cw&quot;,</span> <span class="pre">&quot;o1&quot;,</span> <span class="pre">&quot;o2&quot;)</span></code>
+for a rotate. Sample the attempt’s parameters here (grasp pose, start pose, place spot), check
+them with IK, and store them for the later phases. Return a <code class="docutils literal notranslate"><span class="pre">[B]</span></code> bool mask. An environment
+whose entry is <code class="docutils literal notranslate"><span class="pre">False</span></code> fails this attempt with reason <code class="docutils literal notranslate"><span class="pre">&quot;&lt;name&gt;</span> <span class="pre">begin:</span> <span class="pre">no</span> <span class="pre">feasible</span> <span class="pre">parameters&quot;</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">request(ctx,</span> <span class="pre">phase,</span> <span class="pre">env_ids)</span></code></strong> runs once per phase. It returns one <code class="docutils literal notranslate"><span class="pre">PhaseRequest</span></code> that says
+what that group of environments should do next. The engine resolves it into one
+<strong>segment</strong> per environment, a table of joint targets that is played back one row per tick.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">skips(ctx,</span> <span class="pre">phase,</span> <span class="pre">env)</span></code></strong> is asked before each phase after the first. Returning <code class="docutils literal notranslate"><span class="pre">True</span></code>
+skips the phase entirely: no segment, no recorded frame, and no <code class="docutils literal notranslate"><span class="pre">request</span></code> or <code class="docutils literal notranslate"><span class="pre">after_phase</span></code>
+call.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">after_phase(ctx,</span> <span class="pre">phase,</span> <span class="pre">env_ids)</span></code></strong> runs when a phase’s segments have finished playing. Use
+it for bookkeeping such as attaching a grasped block to the cuRobo robot model.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">verify(ctx,</span> <span class="pre">env_ids)</span></code></strong> runs after the last phase, on the live simulation state, and returns a
+<code class="docutils literal notranslate"><span class="pre">[B]</span></code> bool mask. This is the skill’s effect check; see
+<a class="reference internal" href="#effect-checks-retries-and-re-planning">Effect checks, retries and re-planning</a>.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">hl_name()</span></code> is only a fallback for the recorded high-level action name. Skills planned from a
+PDDL action always record that action’s name instead (see
+<a class="reference internal" href="#labels-recorded-for-the-dataset">Labels recorded for the dataset</a>).</p>
+<section id="the-batched-contract">
+<h3>The batched contract<a class="headerlink" href="#the-batched-contract" title="Link to this heading">#</a></h3>
+<p>Skills are written for a batch of environments, not for one:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">env_ids</span></code> is a <code class="docutils literal notranslate"><span class="pre">[B]</span></code> long tensor of environment indices: the group of environments that
+reached the same phase of the same skill on this tick. Every tensor a hook returns is <code class="docutils literal notranslate"><span class="pre">[B]</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">[B,</span> <span class="pre">...]</span></code>) in the same order as <code class="docutils literal notranslate"><span class="pre">env_ids</span></code>. <code class="docutils literal notranslate"><span class="pre">B</span></code> changes from call to call.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ctx</span></code> is the <code class="docutils literal notranslate"><span class="pre">EngineContext</span></code>. Its scene reads cover <strong>all</strong> <code class="docutils literal notranslate"><span class="pre">N</span></code> environments, so index them with
+<code class="docutils literal notranslate"><span class="pre">env_ids</span></code>: <code class="docutils literal notranslate"><span class="pre">ctx.block_poses()</span></code> is <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">K,</span> <span class="pre">7]</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx.sim.ee_pose()</span></code> is <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">7]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ctx.sim.joint_pos()</span></code> is <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">7]</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx.sizes</span></code> is <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">K,</span> <span class="pre">3]</span></code> (the measured collider edge
+lengths), and <code class="docutils literal notranslate"><span class="pre">ctx.held</span></code> is <code class="docutils literal notranslate"><span class="pre">[N]</span></code> (the index of the block in hand, <code class="docutils literal notranslate"><span class="pre">-1</span></code> for none). Poses are in
+the robot base frame as <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">qw,</span> <span class="pre">qx,</span> <span class="pre">qy,</span> <span class="pre">qz]</span></code>. <code class="docutils literal notranslate"><span class="pre">ctx.block_index</span></code> maps a PDDL block
+name to its index along the <code class="docutils literal notranslate"><span class="pre">K</span></code> axis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ctx.geo</span></code> is the batched cuRobo <code class="docutils literal notranslate"><span class="pre">Geometry</span></code>. <code class="docutils literal notranslate"><span class="pre">ctx.geo.ik(env_ids,</span> <span class="pre">goals,</span> <span class="pre">seeds=...)</span></code> returns
+<code class="docutils literal notranslate"><span class="pre">(ok,</span> <span class="pre">q,</span> <span class="pre">pos_err,</span> <span class="pre">rot_err)</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx.geo.update_worlds(...)</span></code> refreshes the collision worlds, and
+<code class="docutils literal notranslate"><span class="pre">ctx.geo.attach(...)</span></code> / <code class="docutils literal notranslate"><span class="pre">ctx.geo.detach(...)</span></code> add or remove a held block from the robot model.</p></li>
+<li><p>Per-environment state lives in <code class="docutils literal notranslate"><span class="pre">ctx.params[e]</span></code>, a plain dict. One skill instance serves every
+environment and episode, so keep nothing per-environment on <code class="docutils literal notranslate"><span class="pre">self</span></code>. The engine clears
+<code class="docutils literal notranslate"><span class="pre">ctx.params[e]</span></code> when an episode starts and when it re-plans, but <strong>not</strong> between the skills of
+one program, so <code class="docutils literal notranslate"><span class="pre">begin</span></code> should set every key that the later phases read. The keys <code class="docutils literal notranslate"><span class="pre">_special</span></code>,
+<code class="docutils literal notranslate"><span class="pre">_outcome</span></code> and <code class="docutils literal notranslate"><span class="pre">_attempt</span></code> belong to the engine; <code class="docutils literal notranslate"><span class="pre">_attempt</span></code> holds the current attempt number,
+which <code class="docutils literal notranslate"><span class="pre">flip</span></code> uses to escalate its retries.</p></li>
+<li><p>Skills never step the simulation or write joint targets themselves. They only read the scene,
+run IK and planning through <code class="docutils literal notranslate"><span class="pre">ctx.geo</span></code>, and return requests.</p></li>
+</ul>
+</section>
+<section id="phases-and-phaserequest">
+<h3>Phases and <code class="docutils literal notranslate"><span class="pre">PhaseRequest</span></code><a class="headerlink" href="#phases-and-phaserequest" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">phases</span></code> is the skill’s state machine: a fixed list of phase names that every attempt walks
+through in order. Each phase is one <code class="docutils literal notranslate"><span class="pre">PhaseRequest</span></code> (<code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/base.py</span></code>), and
+its <code class="docutils literal notranslate"><span class="pre">kind</span></code> says how the engine turns it into a segment:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></th>
+<th class="head"><p>What the engine does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;plan&quot;</span></code></p></td>
+<td><p>Plans a collision-free cuRobo trajectory to <code class="docutils literal notranslate"><span class="pre">goals</span></code> (<code class="docutils literal notranslate"><span class="pre">[B,</span> <span class="pre">7]</span></code> end-effector poses). Plan requests from every group are batched into one pool call, which runs on a planner thread while the simulation keeps stepping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;ik_interp&quot;</span></code></p></td>
+<td><p>Solves IK for <code class="docutils literal notranslate"><span class="pre">goals</span></code>, then interpolates <code class="docutils literal notranslate"><span class="pre">ticks</span></code> joint rows from the current joints. A goal is accepted when IK succeeds, or when it lands within 5 mm and 0.05 rad.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;rows&quot;</span></code></p></td>
+<td><p>Plays <code class="docutils literal notranslate"><span class="pre">rows[i]</span></code>, a <code class="docutils literal notranslate"><span class="pre">[T_i,</span> <span class="pre">7]</span></code> joint-target tensor per environment, as given. Use it for scripted motions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;gripper&quot;</span></code></p></td>
+<td><p>Holds the current arm target for <code class="docutils literal notranslate"><span class="pre">ticks</span></code> ticks while commanding the gripper <code class="docutils literal notranslate"><span class="pre">closed</span></code> (or to <code class="docutils literal notranslate"><span class="pre">gripper_target</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;hold&quot;</span></code></p></td>
+<td><p>Holds the current arm target for <code class="docutils literal notranslate"><span class="pre">ticks</span></code> ticks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;policy&quot;</span></code></p></td>
+<td><p>Hands the environments to a closed-loop runner in <code class="docutils literal notranslate"><span class="pre">extra[&quot;runner&quot;]</span></code> until it reports done. No shipped skill uses it.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The other fields apply to several kinds:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">label</span></code> is the low-level action name recorded on every frame of the segment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hold</span></code> adds ticks at the last row. On a <code class="docutils literal notranslate"><span class="pre">plan</span></code> or <code class="docutils literal notranslate"><span class="pre">rows</span></code> request, <code class="docutils literal notranslate"><span class="pre">settle_tol</span></code> ends the hold
+early once every joint is within <code class="docutils literal notranslate"><span class="pre">settle_tol</span></code> radians of the last row, so <code class="docutils literal notranslate"><span class="pre">hold</span></code> becomes a cap.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">closed</span></code> or <code class="docutils literal notranslate"><span class="pre">gripper_target</span></code> on a <code class="docutils literal notranslate"><span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">ik_interp</span></code> or <code class="docutils literal notranslate"><span class="pre">rows</span></code> request also commands the
+gripper when the segment starts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exclude</span></code> (<code class="docutils literal notranslate"><span class="pre">[B,</span> <span class="pre">K]</span></code> bool) removes blocks from the collision world for this phase, for example
+the block being grasped. <code class="docutils literal notranslate"><span class="pre">pad_fraction</span></code> and <code class="docutils literal notranslate"><span class="pre">no_pad</span></code> widen the remaining blocks in XY.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ok</span></code> (<code class="docutils literal notranslate"><span class="pre">[B]</span></code> bool) marks environments whose request could not be built. They fail the attempt
+with reason <code class="docutils literal notranslate"><span class="pre">&quot;&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">request</span> <span class="pre">not</span> <span class="pre">formed&quot;</span></code>, without touching the simulation.</p></li>
+</ul>
+<p>A segment holds at most <code class="docutils literal notranslate"><span class="pre">EngineConfig.segment_capacity</span></code> rows (1500 ticks, 60 s). Installing a
+longer one raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, so split long scripted motions over several phases.</p>
+<p>Here is how <code class="docutils literal notranslate"><span class="pre">rotate</span></code> declares its phases. A rotate may need two sub-steps (an alignment correction
+plus the 90° turn), so it lists the sub-step phases twice:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Rotate</span><span class="p">(</span><span class="n">Skill</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``rotate(block, direction, ori, ori2)``."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"rotate"</span>
+    <span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"open"</span><span class="p">,</span> <span class="s2">"start"</span><span class="p">,</span> <span class="o">*</span><span class="n">_substep_phases</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="n">_substep_phases</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">async_phases</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"descend_0"</span><span class="p">,</span> <span class="s2">"descend_1"</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Its <code class="docutils literal notranslate"><span class="pre">begin</span></code> looks for a start pose above the block that IK can reach, trying nine small XY
+offsets for every environment in the batch at once:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="n">ctx</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">update_worlds</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">block_poses</span><span class="p">(),</span> <span class="n">ctx</span><span class="o">.</span><span class="n">table_pose</span><span class="p">(),</span> <span class="n">env_ids</span><span class="o">=</span><span class="n">env_ids</span><span class="p">)</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">dev</span><span class="p">)</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">dev</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="ow">in</span> <span class="n">START_OFFSETS</span><span class="p">:</span>
+            <span class="n">todo</span> <span class="o">=</span> <span class="o">~</span><span class="n">ok</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">todo</span><span class="o">.</span><span class="n">any</span><span class="p">()):</span>
+                <span class="k">break</span>
+            <span class="n">sub</span> <span class="o">=</span> <span class="n">ar</span><span class="p">[</span><span class="n">todo</span><span class="p">]</span>
+            <span class="n">goal</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">numel</span><span class="p">()),</span> <span class="mi">7</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">dev</span><span class="p">)</span>
+            <span class="n">goal</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">blk</span><span class="p">[</span><span class="n">sub</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span>
+            <span class="n">goal</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">blk</span><span class="p">[</span><span class="n">sub</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span>
+            <span class="n">goal</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">blk</span><span class="p">[</span><span class="n">sub</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">START_HEIGHT</span>
+            <span class="n">goal</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_q</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span>
+            <span class="n">ok_c</span><span class="p">,</span> <span class="n">_q</span><span class="p">,</span> <span class="n">perr</span><span class="p">,</span> <span class="n">rerr</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">ik</span><span class="p">(</span><span class="n">env_ids</span><span class="p">[</span><span class="n">sub</span><span class="p">],</span> <span class="n">goal</span><span class="p">,</span> <span class="n">seeds</span><span class="o">=</span><span class="n">q_now</span><span class="p">[</span><span class="n">sub</span><span class="p">])</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">ok_c</span> <span class="o">|</span> <span class="p">((</span><span class="n">perr</span> <span class="o">&lt;=</span> <span class="mf">0.005</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rerr</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">))</span>
+            <span class="n">chosen</span><span class="p">[</span><span class="n">sub</span><span class="p">[</span><span class="n">acc</span><span class="p">]]</span> <span class="o">=</span> <span class="n">goal</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span>
+            <span class="n">ok</span><span class="p">[</span><span class="n">sub</span><span class="p">[</span><span class="n">acc</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">request</span></code> then reads the stored pose back from <code class="docutils literal notranslate"><span class="pre">ctx.params</span></code> and returns one request per phase.
+The first two phases open the gripper and plan to the start pose:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">"open"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PhaseRequest</span><span class="p">(</span><span class="s2">"gripper"</span><span class="p">,</span> <span class="s2">"init_gripper_open_traj"</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">"start"</span><span class="p">:</span>
+            <span class="c1"># The descend anchors take the gripper's yaw from the CURRENT pose: arriving with the</span>
+            <span class="c1"># wrist still lagging (~15-40 deg) grasps the block skewed and the fingers twist it.</span>
+            <span class="n">goals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="s2">"start_pose"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">envs</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">PhaseRequest</span><span class="p">(</span>
+                <span class="s2">"plan"</span><span class="p">,</span>
+                <span class="s2">"rotate_start_traj"</span><span class="p">,</span>
+                <span class="n">goals</span><span class="o">=</span><span class="n">goals</span><span class="p">,</span>
+                <span class="n">hold</span><span class="o">=</span><span class="n">WRIST_SETTLE_MAX_TICKS</span><span class="p">,</span>
+                <span class="n">settle_tol</span><span class="o">=</span><span class="n">WRIST_SETTLE_TOL</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<p>When a block is grasped or released, <code class="docutils literal notranslate"><span class="pre">after_phase</span></code> keeps the cuRobo model and <code class="docutils literal notranslate"><span class="pre">ctx.held</span></code> in step,
+so the next plan treats the block as part of the robot:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="nf">after_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"close"</span><span class="p">:</span>
+            <span class="n">envs</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">env_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"_twist_rows"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">envs</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">envs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="s2">"block"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">envs</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span>
+            <span class="p">)</span>
+            <span class="n">poses</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">block_poses</span><span class="p">()[</span><span class="n">ids</span><span class="p">]</span>
+            <span class="n">blk</span> <span class="o">=</span> <span class="n">poses</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">envs</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">ee_pose</span><span class="p">()[</span><span class="n">ids</span><span class="p">],</span> <span class="n">blk</span><span class="p">)</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">held</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"release"</span><span class="p">:</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">env_ids</span><span class="p">)</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">held</span><span class="p">[</span><span class="n">env_ids</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>A rotate that needs only one sub-step skips the second sub-step’s phases, so they record no idle
+frames:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="nf">skips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Sub-step 1's phases are no-ops for a rotate that was not split (one sub-target):</span>
+<span class="sd">        skipped, they record no idle frames after the retreat."""</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"open"</span><span class="p">,</span> <span class="s2">"start"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">env</span><span class="p">][</span><span class="s2">"subs"</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="expensive-phases-async-phases">
+<h3>Expensive phases: <code class="docutils literal notranslate"><span class="pre">async_phases</span></code><a class="headerlink" href="#expensive-phases-async-phases" title="Link to this heading">#</a></h3>
+<p>A phase whose <code class="docutils literal notranslate"><span class="pre">request</span></code> does slow per-environment work, such as a scripted IK search, can be listed
+in <code class="docutils literal notranslate"><span class="pre">async_phases</span></code>. The engine then calls <code class="docutils literal notranslate"><span class="pre">request</span></code> on a worker thread (<code class="docutils literal notranslate"><span class="pre">--async-workers</span></code>, default
+4) and keeps stepping the other environments meanwhile. IK called from a worker thread goes to a
+separate cuRobo build pool (<code class="docutils literal notranslate"><span class="pre">--build-slots</span></code>). Because several worker threads may run the same
+skill at once, <code class="docutils literal notranslate"><span class="pre">request</span></code> must not mutate shared state on <code class="docutils literal notranslate"><span class="pre">self</span></code>. <code class="docutils literal notranslate"><span class="pre">rotate</span></code> builds its descend rows
+this way. An exception raised on the worker fails those environments’ attempts with reason
+<code class="docutils literal notranslate"><span class="pre">&quot;&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">build</span> <span class="pre">error&quot;</span></code>.</p>
+</section>
+<section id="how-a-skill-finishes">
+<h3>How a skill finishes<a class="headerlink" href="#how-a-skill-finishes" title="Link to this heading">#</a></h3>
+<p>A skill succeeds for an environment when its last phase finishes, or is skipped, and <code class="docutils literal notranslate"><span class="pre">verify</span></code>
+returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. The environment then moves to the next <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code> of its program. An attempt
+fails in any of these ways, each with its own recorded reason:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Failure</p></th>
+<th class="head"><p>Reason string</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">begin</span></code> returned <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span> <span class="pre">begin:</span> <span class="pre">no</span> <span class="pre">feasible</span> <span class="pre">parameters</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PhaseRequest.ok</span></code> was <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">request</span> <span class="pre">not</span> <span class="pre">formed</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>IK failed on an <code class="docutils literal notranslate"><span class="pre">ik_interp</span></code> request</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">IK</span> <span class="pre">failed</span> <span class="pre">(&lt;err&gt;</span> <span class="pre">m)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>cuRobo found no plan</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">plan</span> <span class="pre">&lt;status&gt;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>A <code class="docutils literal notranslate"><span class="pre">rows</span></code> request had an empty row tensor</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">no</span> <span class="pre">rows</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>An async build raised</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;phase&gt;:</span> <span class="pre">build</span> <span class="pre">error</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify</span></code> returned <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span> <span class="pre">effect</span> <span class="pre">check</span> <span class="pre">failed</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A skill cannot abort halfway through a phase: once a segment is installed, it plays to the end.
+To fail early, return <code class="docutils literal notranslate"><span class="pre">False</span></code> from <code class="docutils literal notranslate"><span class="pre">begin</span></code> or mark the environment in a request’s <code class="docutils literal notranslate"><span class="pre">ok</span></code> mask.</p>
+</section>
+</section>
+<section id="effect-checks-retries-and-re-planning">
+<h2>Effect checks, retries and re-planning<a class="headerlink" href="#effect-checks-retries-and-re-planning" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">verify</span></code> is what makes the data <a class="reference internal" href="execution.html#correct-by-construction"><span class="std std-ref">correct by construction</span></a>.
+It reads the live simulation and checks that the PDDL effect of the action actually holds.
+<code class="docutils literal notranslate"><span class="pre">rotate</span></code> checks the block’s orientation against the target, with a tighter yaw tolerance (15°)
+than the 40° of the shared <code class="docutils literal notranslate"><span class="pre">ori_of</span></code> predicate:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">EngineContext</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">envs</span> <span class="o">=</span> <span class="n">env_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="s2">"block"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">envs</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span>
+        <span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">ori_index</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="s2">"ori2"</span><span class="p">])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">envs</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">poses</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">block_poses</span><span class="p">()[</span><span class="n">env_ids</span><span class="p">]</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">poses</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">envs</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">j</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">ORI_QUATERNIONS</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">check_quat</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">VERIFY_YAW_TOL_DEG</span><span class="p">,</span> <span class="n">AXIS_TOL_DEG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The batched predicate functions in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/predicates.py</span></code> (<code class="docutils literal notranslate"><span class="pre">on</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_table</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code>, <code class="docutils literal notranslate"><span class="pre">ori_of</span></code>, <code class="docutils literal notranslate"><span class="pre">next_to</span></code>, <code class="docutils literal notranslate"><span class="pre">on_right</span></code> and the others) are the usual building blocks
+for a check. Use them, or something stricter, so that a verified skill also satisfies the goal
+check at the end of the episode.</p>
+<p>Every failure from the table above goes through the engine’s <code class="docutils literal notranslate"><span class="pre">_retry_or_fail</span></code>:</p>
+<ol class="arabic simple">
+<li><p><strong>Retry.</strong> Up to <code class="docutils literal notranslate"><span class="pre">--max-attempts</span></code> attempts (default 3) per skill. Before each attempt the engine
+snapshots the environment: the simulation state, the held block, its cuRobo attachment, and the
+recorder’s frame position. A failed attempt restores that snapshot and <strong>drops the attempt’s
+frames from the dataset</strong>, then <code class="docutils literal notranslate"><span class="pre">begin</span></code> runs again with fresh samples.</p></li>
+<li><p><strong>Retry from the live state.</strong> A skill that sets <code class="docutils literal notranslate"><span class="pre">retry_from_live</span> <span class="pre">=</span> <span class="pre">True</span></code> (<code class="docutils literal notranslate"><span class="pre">flip</span></code> does, because
+the block has already moved) is retried without a restore, and its failed attempt’s frames are
+<strong>kept</strong>.</p></li>
+<li><p><strong>Re-plan.</strong> Once the attempts run out, the engine drops any held block, reads the symbolic state
+back from the scene, and runs FF again toward the original goal. This happens at most twice per
+episode (<code class="docutils literal notranslate"><span class="pre">EngineConfig.max_replans</span></code>, no CLI flag).</p></li>
+<li><p><strong>Fail.</strong> If re-planning is exhausted or FF finds no plan, the episode ends as a failure with the
+last reason, and goes to the <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> split.</p></li>
+</ol>
+<p>After the last skill of a program, the PDDL goal is checked once more against the scene. An episode
+is recorded as successful only if that check passes too; otherwise the reason is
+<code class="docutils literal notranslate"><span class="pre">goal</span> <span class="pre">not</span> <span class="pre">satisfied:</span> <span class="pre">[...]</span></code>.</p>
+<p>Re-planning reads back only a fixed set of facts (<code class="docutils literal notranslate"><span class="pre">derive_init_facts</span></code> in
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/state.py</span></code>): <code class="docutils literal notranslate"><span class="pre">on</span></code>, <code class="docutils literal notranslate"><span class="pre">on_table</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code>, <code class="docutils literal notranslate"><span class="pre">ori_of</span></code>, <code class="docutils literal notranslate"><span class="pre">handempty</span></code>,
+<code class="docutils literal notranslate"><span class="pre">gripper_at_init</span></code>, plus the derived facts (see <a class="reference internal" href="#the-pddl-side">The PDDL side</a>) and any
+<code class="docutils literal notranslate"><span class="pre">next_to</span></code> / <code class="docutils literal notranslate"><span class="pre">on_right</span></code> / <code class="docutils literal notranslate"><span class="pre">on_left</span></code> / <code class="docutils literal notranslate"><span class="pre">on_front</span></code> / <code class="docutils literal notranslate"><span class="pre">on_back</span></code> / <code class="docutils literal notranslate"><span class="pre">pick_obstructs</span></code> fact the problem
+declares and that still holds. If your action’s effect is some other predicate, a re-plan does not
+see it, and there is no hook for that: you have to extend <code class="docutils literal notranslate"><span class="pre">derive_init_facts</span></code> yourself.</p>
+</section>
+<section id="the-pddl-side">
+<h2>The PDDL side<a class="headerlink" href="#the-pddl-side" title="Link to this heading">#</a></h2>
+<section id="adding-the-action">
+<h3>Adding the action<a class="headerlink" href="#adding-the-action" title="Link to this heading">#</a></h3>
+<p>If the action is new, add an <code class="docutils literal notranslate"><span class="pre">(:action</span> <span class="pre">...)</span></code> block to <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/domain.pddl</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">rotate</span></code> action takes the gripper, the block, a direction and the two orientations:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>  (:action rotate
+    :parameters (?g - gripper ?b - block ?d - rot_dir ?o - ori ?o2 - ori ?table - table)
+    :precondition (and 
+      (initialized)
+      (at ?g ?b)
+      (handempty ?g)
+      (on_table ?b ?table)
+      (clear ?b)
+      (ori_of ?b ?o)
+      (yaw_next ?d ?o ?o2)
+      (not (cant_rotate ?b))
+      (not (on_table_side ?b ?table))
+      (forall (?b2 - block) (not (rotate_obstructs ?b2 ?b ?d)))
+</pre></div>
+</div>
+<p>The rest of its precondition rules out blocks that were pushed against a neighbour, and its effect
+swaps the orientation:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>    :effect (and 
+      (not (ori_of ?b ?o)) 
+      (ori_of ?b ?o2)
+    )
+</pre></div>
+</div>
+<p>Three conventions are worth keeping:</p>
+<ul class="simple">
+<li><p><strong>Put the gripper first and the manipulated block second.</strong> FF’s argument list is recorded
+verbatim (lowercased) as <code class="docutils literal notranslate"><span class="pre">action.high_level_args</span></code>, and the annotator reads <code class="docutils literal notranslate"><span class="pre">args[1]</span></code> as the target
+object and, for direction actions, <code class="docutils literal notranslate"><span class="pre">args[2]</span></code> as the direction.</p></li>
+<li><p><strong>Require <code class="docutils literal notranslate"><span class="pre">(initialized)</span></code> and <code class="docutils literal notranslate"><span class="pre">(at</span> <span class="pre">?g</span> <span class="pre">?b)</span></code>.</strong> Every manipulation action does. FF’s <code class="docutils literal notranslate"><span class="pre">init</span></code> and
+<code class="docutils literal notranslate"><span class="pre">move_to</span></code> actions establish these facts, and vecgen ignores both, so they cost nothing at run
+time.</p></li>
+<li><p><strong>Reuse existing constants and predicates</strong> (<code class="docutils literal notranslate"><span class="pre">ori_of</span></code>, <code class="docutils literal notranslate"><span class="pre">yaw_next</span></code>, <code class="docutils literal notranslate"><span class="pre">flip_next</span></code>, the <code class="docutils literal notranslate"><span class="pre">dir</span></code>
+types) where they fit, since every predicate you add may need Python code, as described next.</p></li>
+</ul>
+<p>To check the action, run FF on a problem whose goal needs it. The vendored FF binary is in the
+repository, so this needs no GPU:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.vecgen.symbolic.ff</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_ff</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.vecgen.symbolic.pddl</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_problem</span><span class="p">,</span> <span class="n">render_problem</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">parse_problem</span><span class="p">(</span><span class="s2">"src/toyblocks/tamp/blocks/problems/rotate.pddl"</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run_ff</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"src/toyblocks/tamp/blocks/domain.pddl"</span><span class="p">),</span> <span class="n">render_problem</span><span class="p">(</span><span class="n">problem</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">actions</span><span class="p">])</span>
+<span class="c1"># True ['(init)', '(move_to robot block_r block_r)', '(rotate robot block_r cw o1 o2 workspace_table)']</span>
+</pre></div>
+</div>
+</section>
+<section id="predicates">
+<h3>Predicates<a class="headerlink" href="#predicates" title="Link to this heading">#</a></h3>
+<p>A predicate that only appears in the domain and is set by action effects or by the <code class="docutils literal notranslate"><span class="pre">init</span></code> action
+(like <code class="docutils literal notranslate"><span class="pre">yaw_next</span></code>) needs nothing else. A predicate whose truth value comes from the scene needs
+Python code, and where that code goes depends on who reads it:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>The predicate is used in…</p></th>
+<th class="head"><p>Add it to</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A precondition, true or false depending on the scene before planning</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">derived_facts</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/derived.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>A goal</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GEOMETRIC_PREDICATES</span></code> and <code class="docutils literal notranslate"><span class="pre">goal_facts_satisfied</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/predicates.py</span></code> (checked by vecgen), <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">SUPPORTED_GOAL_PREDICATES</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/goal_predicates.py</span></code> with its tensor check in <code class="docutils literal notranslate"><span class="pre">TENSOR_GOAL_DISPATCH</span></code> in <code class="docutils literal notranslate"><span class="pre">pddl_goal_tensor_conversions.py</span></code> (compiled into the env package; the two are asserted equal at import)</p></td>
+</tr>
+<tr class="row-even"><td><p>A problem’s <code class="docutils literal notranslate"><span class="pre">:init</span></code>, for which env generation samples poses</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SAMPLERS</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/sampling/predicates.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>A state that must survive a re-plan</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">derive_init_facts</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/state.py</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>A goal written by a task generator</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Pred</span></code> subclass in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/task_gen/predicates.py</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run.py</span></code> calls <code class="docutils literal notranslate"><span class="pre">assert_goal_supported</span></code> on every problem before it starts, so a goal predicate
+missing from <code class="docutils literal notranslate"><span class="pre">GEOMETRIC_PREDICATES</span></code> fails immediately rather than at the first episode end.</p>
+</section>
+<section id="facts-derived-from-the-scene">
+<h3>Facts derived from the scene<a class="headerlink" href="#facts-derived-from-the-scene" title="Link to this heading">#</a></h3>
+<p>The most useful predicates for a new skill are usually <strong>derived facts</strong>: geometric conditions under
+which the skill would fail, computed from the live scene before FF runs, so that FF plans around
+them (for example, by moving an obstructing block first) instead of planning an action the skill
+cannot carry out. <code class="docutils literal notranslate"><span class="pre">rotate</span></code> has two, <code class="docutils literal notranslate"><span class="pre">cant_rotate</span></code> (the block is out of the rotate workspace or out
+of view) and <code class="docutils literal notranslate"><span class="pre">rotate_obstructs</span></code> (a neighbour is too close):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">cant_rot</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ROTATE_X_RANGE</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="o">|</span> <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ROTATE_X_RANGE</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="o">|</span> <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ROTATE_Y_RANGE</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="o">|</span> <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ROTATE_Y_RANGE</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="o">|</span> <span class="o">~</span><span class="n">in_view</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cant_rot</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">j</span><span class="p">]):</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Fact</span><span class="p">(</span><span class="s2">"cant_rotate"</span><span class="p">,</span> <span class="p">(</span><span class="n">blocks</span><span class="p">[</span><span class="n">j</span><span class="p">],)))</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">rot_obs</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">ROTATE_DIRS</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Fact</span><span class="p">(</span><span class="s2">"rotate_obstructs"</span><span class="p">,</span> <span class="p">(</span><span class="n">blocks</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">d</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">derived_facts</span></code> runs for every environment when its episode is assigned, and again on every
+re-plan, unless <code class="docutils literal notranslate"><span class="pre">--no-derived</span></code> is passed. Keep its limits and the skill’s <code class="docutils literal notranslate"><span class="pre">begin</span></code> in agreement:
+every fact that rules out an action here is one less attempt that fails at run time.</p>
+</section>
+</section>
+<section id="mapping-the-action-to-the-skill">
+<h2>Mapping the action to the skill<a class="headerlink" href="#mapping-the-action-to-the-skill" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">skills_for_action</span></code> in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/symbolic/programs.py</span></code> turns each action of an FF plan
+into one or more <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code>s. It unpacks the action’s positional arguments and keeps the ones the
+skill needs. <code class="docutils literal notranslate"><span class="pre">rotate</span></code> maps one-to-one:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"rotate"</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o2</span><span class="p">,</span> <span class="n">_t</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">SkillCall</span><span class="p">(</span><span class="s2">"rotate"</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o2</span><span class="p">))]</span>
+</pre></div>
+</div>
+<p>One action may also expand into several skills. <code class="docutils literal notranslate"><span class="pre">pnp_table_block</span></code>, for example, becomes
+<code class="docutils literal notranslate"><span class="pre">pick(b1)</span></code> followed by <code class="docutils literal notranslate"><span class="pre">place_on(b1</span> <span class="pre">b2</span> <span class="pre">o2)</span></code>. The module docstring lists every mapping. Two sets at
+the top of the file matter too:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">IGNORED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"init"</span><span class="p">,</span> <span class="s2">"move_to"</span><span class="p">,</span> <span class="s2">"done"</span><span class="p">,</span> <span class="s2">"reach-goal"</span><span class="p">,</span> <span class="s2">"stop"</span><span class="p">}</span>
+<span class="n">UNSUPPORTED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"push_to_right"</span><span class="p">,</span> <span class="s2">"push_next_to"</span><span class="p">,</span> <span class="s2">"isolate"</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>If you write a skill for an action in <code class="docutils literal notranslate"><span class="pre">UNSUPPORTED</span></code>, add its branch and remove it from the set.
+Play mode (<code class="docutils literal notranslate"><span class="pre">--play</span></code>) uses the set to strip actions from the domain before FF ever sees them.
+Datagen mode does not filter the domain with it: when FF plans an action that is in the set, or
+that has no branch, <code class="docutils literal notranslate"><span class="pre">skills_for_action</span></code> raises <code class="docutils literal notranslate"><span class="pre">UnsupportedAction</span></code> and the environment gets no
+program.</p>
+<p><code class="docutils literal notranslate"><span class="pre">program_from_plan</span></code> copies the PDDL action’s name, its full argument list and FF’s symbolic state
+before the action onto every <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code> the action produces (<code class="docutils literal notranslate"><span class="pre">hl_name</span></code>, <code class="docutils literal notranslate"><span class="pre">hl_args</span></code>, <code class="docutils literal notranslate"><span class="pre">hl_state</span></code>).
+These are what the recorder writes, so you do not set them yourself.</p>
+</section>
+<section id="registering-the-skill">
+<h2>Registering the skill<a class="headerlink" href="#registering-the-skill" title="Link to this heading">#</a></h2>
+<p>The engine looks a skill up by the <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code> name. The table is a plain dict in <code class="docutils literal notranslate"><span class="pre">main()</span></code> of
+<code class="docutils literal notranslate"><span class="pre">scripts/vecgen/run.py</span></code>, and the same dict is used for play data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">skills</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Skill</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"pick"</span><span class="p">:</span> <span class="n">Pick</span><span class="p">(),</span>
+        <span class="s2">"place_on"</span><span class="p">:</span> <span class="n">Place</span><span class="p">(</span><span class="s2">"on"</span><span class="p">),</span>
+        <span class="s2">"place_table"</span><span class="p">:</span> <span class="n">Place</span><span class="p">(</span><span class="s2">"table"</span><span class="p">),</span>
+        <span class="s2">"place_side"</span><span class="p">:</span> <span class="n">Place</span><span class="p">(</span><span class="s2">"side"</span><span class="p">),</span>
+        <span class="s2">"flip"</span><span class="p">:</span> <span class="n">Flip</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">profile</span><span class="p">),</span>
+        <span class="s2">"rotate"</span><span class="p">:</span> <span class="n">Rotate</span><span class="p">(),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Import your class at the top of <code class="docutils literal notranslate"><span class="pre">run.py</span></code> and add it under the name <code class="docutils literal notranslate"><span class="pre">skills_for_action</span></code> uses. Keep
+the dict key and the class’s <code class="docutils literal notranslate"><span class="pre">name</span></code> the same: some failure reasons are built from the key and
+others from <code class="docutils literal notranslate"><span class="pre">name</span></code>. A <code class="docutils literal notranslate"><span class="pre">SkillCall</span></code> whose name is not in the dict ends its episode with reason
+<code class="docutils literal notranslate"><span class="pre">unsupported</span> <span class="pre">skill</span> <span class="pre">&lt;name&gt;</span></code>.</p>
+<p>Evaluation’s low-level oracle, <code class="docutils literal notranslate"><span class="pre">src/toyblocks/eval/ll_oracle.py</span></code>, builds its own skill dict for the
+commands it parses. Add the skill there only if that oracle should be able to run it.</p>
+</section>
+<section id="labels-recorded-for-the-dataset">
+<h2>Labels recorded for the dataset<a class="headerlink" href="#labels-recorded-for-the-dataset" title="Link to this heading">#</a></h2>
+<p>Whenever a segment is installed, the engine tells the recorder which action is running:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>                <span class="bp">self</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span>
+                    <span class="n">e</span><span class="p">,</span> <span class="n">cur</span><span class="o">.</span><span class="n">hl_name</span> <span class="ow">or</span> <span class="n">skill</span><span class="o">.</span><span class="n">hl_name</span><span class="p">(),</span> <span class="n">cur</span><span class="o">.</span><span class="n">hl_args</span> <span class="ow">or</span> <span class="n">cur</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">cur</span><span class="o">.</span><span class="n">hl_state</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+<p>From then on, every frame of that segment carries these labels:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">action.high_level_action</span></code></p></td>
+<td><p>The PDDL action name, for example <code class="docutils literal notranslate"><span class="pre">rotate</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">action.high_level_args</span></code></p></td>
+<td><p>FF’s argument list as JSON, for example <code class="docutils literal notranslate"><span class="pre">[&quot;robot&quot;,</span> <span class="pre">&quot;block_r&quot;,</span> <span class="pre">&quot;cw&quot;,</span> <span class="pre">&quot;o1&quot;,</span> <span class="pre">&quot;o2&quot;,</span> <span class="pre">&quot;workspace_table&quot;]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">action.low_level_action</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">label</span></code> of the phase’s <code class="docutils literal notranslate"><span class="pre">PhaseRequest</span></code>, for example <code class="docutils literal notranslate"><span class="pre">rotate_start_traj</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">action.low_level_args</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{&quot;ll_action_name&quot;:</span> <span class="pre">&lt;label&gt;}</span></code> as JSON.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observation.state.high_level_state</span></code></p></td>
+<td><p>FF’s symbolic state before the action, one fact per line.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pddl_goal</span></code>, the episode’s goal text, is the problem’s <code class="docutils literal notranslate"><span class="pre">:goal</span></code> block as written in the PDDL file;
+it does not change from skill to skill. Every recorded episode ends with a 25-tick hold, which is
+labelled <code class="docutils literal notranslate"><span class="pre">done</span></code> when the episode succeeded. All columns are described in
+<a class="reference internal" href="dataset_fields.html"><span class="std std-doc">Dataset fields</span></a>.</p>
+<p>The skill only chooses the low-level labels. Reuse the existing ones where a phase means the same
+thing, for example <code class="docutils literal notranslate"><span class="pre">init_gripper_open_traj</span></code> for an opening gripper or <code class="docutils literal notranslate"><span class="pre">gripper_close_traj</span></code> for a
+grasp, because the annotator keys on them.</p>
+</section>
+<section id="annotation-goal-text-and-target-pixel">
+<h2>Annotation: goal text and target pixel<a class="headerlink" href="#annotation-goal-text-and-target-pixel" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="annotate.html"><span class="std std-doc">Annotation</span></a> turns the labels into the <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> text and the <code class="docutils literal notranslate"><span class="pre">goal.position</span></code>
+pixel. Both come from <code class="docutils literal notranslate"><span class="pre">build_action_goal_str</span></code> in
+<code class="docutils literal notranslate"><span class="pre">src/toyblocks/data_annotation/annotation_utils.py</span></code>, which looks at a frame’s high-level action,
+low-level action and high-level arguments, and returns the text and the object to project. For
+<code class="docutils literal notranslate"><span class="pre">rotate</span></code> and <code class="docutils literal notranslate"><span class="pre">reorient</span></code>, the verb comes from the action and the direction from <code class="docutils literal notranslate"><span class="pre">args[2]</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">elif</span> <span class="n">hl_action</span> <span class="ow">in</span> <span class="n">_DIRECTION_VOCABULARY</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">hl_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">_parse_reorient_direction</span><span class="p">(</span><span class="n">hl_action</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hl_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">verb</span><span class="p">,</span> <span class="n">direction</span> <span class="o">=</span> <span class="n">parsed</span>
+            <span class="n">primary_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2">"</span>
+            <span class="n">secondary_str</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">"gripper_open"</span> <span class="k">if</span> <span class="n">ll_action</span> <span class="ow">in</span> <span class="n">_GRIPPER_OPEN_LL_ACTIONS</span> <span class="k">else</span> <span class="s2">"move_robot"</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>so every frame of a clockwise rotate of <code class="docutils literal notranslate"><span class="pre">block_r</span></code> reads <code class="docutils literal notranslate"><span class="pre">rotate</span> <span class="pre">cw</span></code>, with <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> on
+<code class="docutils literal notranslate"><span class="pre">block_r</span></code>.</p>
+<p>The annotator knows only the actions it has a branch for. <strong>A frame of any other action gets an
+empty <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> and a NaN <code class="docutils literal notranslate"><span class="pre">goal.position</span></code>, and annotation still exits 0.</strong> For a new action,
+add:</p>
+<ul class="simple">
+<li><p>an entry in <code class="docutils literal notranslate"><span class="pre">_HL_ARG_COUNTS</span></code> with the action’s argument count, so that a frame whose arguments
+fell out of sync with its action name is left unlabelled instead of mislabelled;</p></li>
+<li><p>a branch in <code class="docutils literal notranslate"><span class="pre">build_action_goal_str</span></code> that names the action and picks the target object. By default
+the target is <code class="docutils literal notranslate"><span class="pre">args[1]</span></code>. Return a second object as <code class="docutils literal notranslate"><span class="pre">target_obj2</span></code> if the action has one, as the
+push actions do for <code class="docutils literal notranslate"><span class="pre">goal.position_target</span></code>;</p></li>
+<li><p>if the target pixel should be taken at the end of the action rather than on each frame (as for a
+place on the table), add the text to <code class="docutils literal notranslate"><span class="pre">SEGMENT_END_TARGET_LABELS</span></code>.</p></li>
+</ul>
+<p>The branches match low-level labels by name, so check every label your skill emits against them.</p>
+</section>
+<section id="a-problem-to-exercise-it">
+<h2>A problem to exercise it<a class="headerlink" href="#a-problem-to-exercise-it" title="Link to this heading">#</a></h2>
+<p>The quickest test case is one hand-written problem whose goal can only be reached through the new
+action. <code class="docutils literal notranslate"><span class="pre">src/toyblocks/tamp/blocks/problems/rotate.pddl</span></code> is the one for <code class="docutils literal notranslate"><span class="pre">rotate</span></code>: one block at <code class="docutils literal notranslate"><span class="pre">o1</span></code>,
+goal <code class="docutils literal notranslate"><span class="pre">(ori_of</span> <span class="pre">block_r</span> <span class="pre">o2)</span></code>. Build its env package with <a class="reference internal" href="env_generation.html"><span class="std std-doc">env generation</span></a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/generate_task_from_pddl.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain_path<span class="w"> </span>src/toyblocks/tamp/blocks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pddl<span class="w"> </span>src/toyblocks/tamp/blocks/problems/rotate.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output_dir<span class="w"> </span>outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--num_reset_states<span class="w"> </span><span class="m">32</span><span class="w"> </span>--num_envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span>--headless
+</pre></div>
+</div>
+<p>For a whole family of problems, write a generator in <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/</span></code> (see
+<a class="reference internal" href="task_generation.html"><span class="std std-doc">Task generation</span></a>). <code class="docutils literal notranslate"><span class="pre">scripts/task_gen/rotate.py</span></code> builds a <code class="docutils literal notranslate"><span class="pre">ProblemSpec</span></code> whose
+goal is computed from each sampled initial orientation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">def</span><span class="w"> </span><span class="nf">rotate_goal</span><span class="p">(</span><span class="n">init</span><span class="p">):</span>
+            <span class="n">init_ori</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="s2">"ori_of"</span><span class="p">,</span> <span class="n">target_block</span><span class="p">)</span>
+            <span class="n">goal_o</span> <span class="o">=</span> <span class="n">yaw</span><span class="p">(</span><span class="n">init_ori</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">directions</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">goal_o</span> <span class="o">!=</span> <span class="n">init_ori</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"yaw produced a no-op: </span><span class="si">{</span><span class="n">init_ori</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">goal_o</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">And</span><span class="p">(</span><span class="n">Clear</span><span class="p">(</span><span class="n">target_block</span><span class="p">),</span> <span class="n">OriOf</span><span class="p">(</span><span class="n">target_block</span><span class="p">,</span> <span class="n">goal_o</span><span class="p">))</span>
+
+        <span class="n">spec</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">rotate_goal</span>
+</pre></div>
+</div>
+<p>Run it with <code class="docutils literal notranslate"><span class="pre">--preview</span></code> to print one problem without writing anything. Through the pipeline, pass
+the script with <code class="docutils literal notranslate"><span class="pre">--task-gen-script</span></code>. If your skill implements <code class="docutils literal notranslate"><span class="pre">push_to_right</span></code> or <code class="docutils literal notranslate"><span class="pre">push_next_to</span></code>,
+also override <code class="docutils literal notranslate"><span class="pre">--vecgen-exclude-actions</span></code>, whose default excludes both.</p>
+<p>Play data does not pick up a new skill automatically: the balanced goal policy
+(<code class="docutils literal notranslate"><span class="pre">src/toyblocks/playdata/skill_balance.py</span></code>, the <code class="docutils literal notranslate"><span class="pre">--balanced-skills</span></code> default of the play pipeline)
+only proposes pick-and-place, flip and rotate goals.</p>
+</section>
+<section id="testing-it">
+<h2>Testing it<a class="headerlink" href="#testing-it" title="Link to this heading">#</a></h2>
+<section id="unit-tests-on-the-cpu">
+<h3>Unit tests, on the CPU<a class="headerlink" href="#unit-tests-on-the-cpu" title="Link to this heading">#</a></h3>
+<p>The symbolic layer runs without a GPU. <code class="docutils literal notranslate"><span class="pre">tests/vecgen/test_symbolic.py</span></code> plans a checked-in problem
+with FF and checks the resulting program, and the same pattern covers a new mapping:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.vecgen.symbolic.ff</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_ff</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.vecgen.symbolic.pddl</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_problem</span><span class="p">,</span> <span class="n">render_problem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">toyblocks.vecgen.symbolic.programs</span><span class="w"> </span><span class="kn">import</span> <span class="n">program_from_plan</span>
+
+<span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_rotate_problem_maps_to_one_rotate_skill</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">parse_problem</span><span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s2">"src/toyblocks/tamp/blocks/problems/rotate.pddl"</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">run_ff</span><span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s2">"src/toyblocks/tamp/blocks/domain.pddl"</span><span class="p">,</span> <span class="n">render_problem</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">error</span>
+    <span class="n">prog</span> <span class="o">=</span> <span class="n">program_from_plan</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">actions</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">states</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">prog</span><span class="o">.</span><span class="n">skills</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"rotate(block_r, cw, o1, o2)"</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tests/vecgen/test_predicates.py</span></code> shows how to test a geometric predicate on hand-built poses. Run
+the CPU tests with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/vecgen/test_symbolic.py<span class="w"> </span>tests/vecgen/test_predicates.py
+</pre></div>
+</div>
+<p>A skill class itself cannot be imported without cuRobo: every skill module imports
+<code class="docutils literal notranslate"><span class="pre">toyblocks.vecgen.engine</span></code>, which imports the cuRobo-backed <code class="docutils literal notranslate"><span class="pre">Geometry</span></code>. Test the skill in a short
+run instead.</p>
+</section>
+<section id="a-short-run">
+<h3>A short run<a class="headerlink" href="#a-short-run" title="Link to this heading">#</a></h3>
+<p>Run the new env package with a handful of environments, then look at the log and the
+<code class="docutils literal notranslate"><span class="pre">results.json</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/vecgen/run.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--env-path<span class="w"> </span>outputs/rotate<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pddl<span class="w"> </span>src/toyblocks/tamp/blocks/problems/rotate.pddl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--num-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--record<span class="w"> </span>outputs/rotate_rec<span class="w"> </span>--mark-complete<span class="w"> </span>--headless
+</pre></div>
+</div>
+<p>In the log:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">FF</span> <span class="pre">plan</span> <span class="pre">(...</span> <span class="pre">ms):</span> <span class="pre">rotate(block_r,</span> <span class="pre">cw,</span> <span class="pre">o1,</span> <span class="pre">o2)</span></code> is printed once at start-up, from the problem’s
+<code class="docutils literal notranslate"><span class="pre">:init</span></code>. If FF cannot plan the problem, the run stops right there with <code class="docutils literal notranslate"><span class="pre">FF</span> <span class="pre">failed</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">N:</span> <span class="pre">retry</span> <span class="pre">K</span> <span class="pre">of</span> <span class="pre">&lt;skill</span> <span class="pre">call&gt;</span> <span class="pre">(&lt;reason&gt;)</span></code> and <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">N:</span> <span class="pre">re-planned</span> <span class="pre">from</span> <span class="pre">live</span> <span class="pre">state</span> <span class="pre">after</span> <span class="pre">&lt;reason&gt;</span></code>
+show the retries and re-plans as they happen.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">N</span> <span class="pre">episode</span> <span class="pre">M:</span> <span class="pre">SUCCESS</span></code> or <code class="docutils literal notranslate"><span class="pre">FAILURE</span> <span class="pre">&lt;reason&gt;</span></code> closes each episode, and the
+<code class="docutils literal notranslate"><span class="pre">RESULT</span> <span class="pre">episodes=...</span> <span class="pre">success=...</span></code> line and <code class="docutils literal notranslate"><span class="pre">failure</span> <span class="pre">reasons:</span> <span class="pre">{...}</span></code> sum them up.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">results.json</span></code> holds the same failure reasons per episode. A high share of <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span> <span class="pre">effect</span> <span class="pre">check</span> <span class="pre">failed</span></code> points at the skill’s motion or at a too-strict <code class="docutils literal notranslate"><span class="pre">verify</span></code>. <code class="docutils literal notranslate"><span class="pre">begin:</span> <span class="pre">no</span> <span class="pre">feasible</span> <span class="pre">parameters</span></code>
+points at the start-pose search, or at derived facts that let FF plan actions the skill cannot
+reach. <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">program</span></code> means FF planned an action with no skill, or found no plan at all.</p>
+<p>To watch the skill, add <code class="docutils literal notranslate"><span class="pre">--record-videos</span> <span class="pre">--enable_cameras</span></code>, which records the scene cameras as well
+(see <a class="reference internal" href="execution.html#what-a-recorded-episode-contains"><span class="std std-ref">What a recorded episode contains</span></a>).</p>
+</section>
+<section id="checking-the-recorded-data">
+<h3>Checking the recorded data<a class="headerlink" href="#checking-the-recorded-data" title="Link to this heading">#</a></h3>
+<p>Check that every frame of the new action carries the labels you expect:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"action.high_level_action"</span><span class="p">,</span> <span class="s2">"action.low_level_action"</span><span class="p">]</span>
+<span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"outputs/rotate_rec/blocks_success/data/chunk-*/file-*.parquet"</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"action.high_level_action"</span><span class="p">,</span> <span class="s2">"action.low_level_action"</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Each of your phases’ labels should appear under your action. Expect a few <code class="docutils literal notranslate"><span class="pre">init</span></code> frames at the
+start of each episode, the <code class="docutils literal notranslate"><span class="pre">done</span></code> hold at the end, and an empty label on each episode’s terminal
+row. For a whole episode at a glance, <code class="docutils literal notranslate"><span class="pre">scripts/datagen/plot_episode.py</span></code> plots every signal of one
+episode. Finally, annotate a
+copy of a dataset that has camera data (one recorded with <code class="docutils literal notranslate"><span class="pre">--record-videos</span></code>, or rendered) and check
+that <code class="docutils literal notranslate"><span class="pre">goal.action</span></code> is non-empty and <code class="docutils literal notranslate"><span class="pre">goal.position</span></code> is not NaN on the new action’s frames, as
+described under <a class="reference internal" href="annotate.html#output"><span class="std std-ref">Annotation’s output</span></a>.</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="execution.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Stage 3: Execution (vecgen)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="render.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Stage 4: Rendering</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-it-fits">Where it fits</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-skill-interface">The skill interface</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-batched-contract">The batched contract</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phases-and-phaserequest">Phases and <code class="docutils literal notranslate"><span class="pre">PhaseRequest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#expensive-phases-async-phases">Expensive phases: <code class="docutils literal notranslate"><span class="pre">async_phases</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-a-skill-finishes">How a skill finishes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#effect-checks-retries-and-re-planning">Effect checks, retries and re-planning</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-pddl-side">The PDDL side</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-the-action">Adding the action</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#predicates">Predicates</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#facts-derived-from-the-scene">Facts derived from the scene</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mapping-the-action-to-the-skill">Mapping the action to the skill</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-the-skill">Registering the skill</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#labels-recorded-for-the-dataset">Labels recorded for the dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#annotation-goal-text-and-target-pixel">Annotation: goal text and target pixel</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-problem-to-exercise-it">A problem to exercise it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-it">Testing it</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-tests-on-the-cpu">Unit tests, on the CPU</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-short-run">A short run</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-recorded-data">Checking the recorded data</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/workflows/datagen/adding_a_skill.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Allen AI.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

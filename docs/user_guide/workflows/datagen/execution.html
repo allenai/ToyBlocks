@@ -50,7 +50,7 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Stage 4: Rendering" href="render.html" />
+    <link rel="next" title="Adding a skill to vecgen" href="adding_a_skill.html" />
     <link rel="prev" title="Stage 2: Environment generation" href="env_generation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../../../_static/ToyBlocksLogo_latest.svg" class="logo__image only-light" alt="ToyBlocks  documentation - Home"/>
-    <img src="../../../_static/ToyBlocksLogo_latest.svg" class="logo__image only-dark pst-js-only" alt="ToyBlocks  documentation - Home"/>
+    <img src="../../../_static/ToyBlocksLogo_new.svg" class="logo__image only-light" alt="ToyBlocks  documentation - Home"/>
+    <img src="../../../_static/ToyBlocksLogo_new.svg" class="logo__image only-dark pst-js-only" alt="ToyBlocks  documentation - Home"/>
   
   
 </a></div>
@@ -311,6 +311,7 @@
 <li class="toctree-l2"><a class="reference internal" href="task_generation.html">Stage 1: Task generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="env_generation.html">Stage 2: Environment generation</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Stage 3: Execution (vecgen)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="adding_a_skill.html">Adding a skill to vecgen</a></li>
 <li class="toctree-l2"><a class="reference internal" href="render.html">Stage 4: Rendering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge.html">Stage 5: Merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotate.html">Stage 6: Annotation</a></li>
@@ -432,6 +433,8 @@ successful <strong>only if the goal actually holds</strong>.</p></li>
 </ol>
 <p>Failed episodes go to a separate <code class="docutils literal notranslate"><span class="pre">blocks_failure</span></code> split rather than being mixed in or discarded,
 so you can study them later.</p>
+<p>Each skill and its <code class="docutils literal notranslate"><span class="pre">verify()</span></code> live in <code class="docutils literal notranslate"><span class="pre">src/toyblocks/vecgen/skills/</span></code>. To teach vecgen a new PDDL
+action, see <a class="reference internal" href="adding_a_skill.html"><span class="std std-doc">Adding a skill to vecgen</span></a>.</p>
 </section>
 <section id="running-it">
 <h2>Running it<a class="headerlink" href="#running-it" title="Link to this heading">#</a></h2>
@@ -805,11 +808,11 @@ one training dataset.</p>
       </div>
     </a>
     <a class="right-next"
-       href="render.html"
+       href="adding_a_skill.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Stage 4: Rendering</p>
+        <p class="prev-next-title">Adding a skill to vecgen</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

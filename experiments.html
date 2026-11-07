@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Experiments</title>
+<meta name="description" content="First results with ToyBlocks: low-level generalization, Molmo 2 on new blocks, frontier-model agents and sim-to-real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a><a class="ai2" href="https://allenai.org"><img src="assets/ai2-logo.svg" alt="Ai2" width="665" height="211"></a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Experiments</div>
+  <h1>What we experimented so far</h1>
+  <p class="sub">A first set of experiments run with ToyBlocks: how well learned policies generalize, how a high-level model copes with new blocks, how frontier models plan when they act through skill tools, and how well world models can stand in for a simulator.</p>
+  <nav class="toc-cards" aria-label="Experiments on this page">
+    <a href="#ll"><i>1</i><b>VLA spatial generalization</b><span>What happens when the test region moves, and five ways to recover</span></a>
+    <a href="#hl"><i>2</i><b>Molmo 2 on new blocks</b><span>High-level planning on seen and held-out blocks, easy to hard</span></a>
+    <a href="#real"><i>3</i><b>On a real robot</b><span>How simulation results carry over to a Franka FR3</span></a>
+    <a href="#agents"><i>4</i><b>Frontier-model agents</b><span>Planning, searching and spelling through skill tools</span></a>
+    <a href="#wm"><i>5</i><b>World model as a simulator</b><span>How well video, agentic and latent world models predict block motion and outcomes</span></a>
+  </nav>
+</div></header>
+
+<section id="ll" style="border-top:0;padding-top:8px"><div class="col">
+  <h2>VLA Spatial Generalization</h2>
+  <p>Vision-language-action models (VLAs) use pretraining on large robot datasets. The purpose is that a VLA adapts to a new workspace with a small number of demonstrations. With ToyBlocks, we evaluate the spatial generalization of these action models in a simple setting. Each change in task space is meaningful and easy to reproduce. We change only the block positions or the stack height, and we keep all other conditions the same.</p>
+  <figure style="max-width:640px;margin-inline:auto">
+    <video data-src="media/ll_concept.mp4" poster="media/ll_concept.jpg" width="1280" height="720" style="height:auto;aspect-ratio:1280 / 720" muted loop playsinline></video>
+    <figcaption>The video shows the two shifts in the results below. <b>Left to right</b> (extrapolation): we train with blocks only on the left half of the table and test on the right half. <b>Stack height</b> (interpolation): we train on stacks of 2 and 5 blocks and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <h3>Setup</h3>
+  <p>We use four tasks: Stack, Unstack, Flip and Rotate. Flip has four directions: forward, backward, left and right. Rotate has two directions: clockwise and counterclockwise. The instruction gives the direction.</p>
+  <p>We fine-tune three architectures: <a href="https://arxiv.org/abs/2509.01819">ManiFlow</a>, <a href="https://arxiv.org/abs/2504.16054">π0.5</a> and <a href="https://allenai.org/blog/molmoact2">MolmoAct 2</a>. Each model gets 1,000 demonstrations for each task. The ToyBlocks TAMP planner makes these demonstrations at random positions in the training region. When the test region is the same as the training region, the mean success rate is 72% to 90%.</p>
+  <p>Then we move the test region. We also use three more splits. We train on the inner region and test on the outer region. We train on the outer region and test on the inner region. We train on stacks of 2 and 3 blocks and test on stacks of 4 and 5 blocks.</p>
+  <p>Surprisingly, <b style="color:var(--pink)">these small changes cause large decreases in VLA performance</b>. The models perform well in the training region. However, in the test region, their success rate is low, or they fail. This occurs although the test conditions are very similar to the training conditions. It also occurs although some of these models have pretraining on large datasets.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 366" role="img" aria-label="π0.5">
+<text class="g-t" x="0" y="16">π0.5</text><text class="g-s" x="0" y="34">full fine-tuning, train → test</text>
+<line x1="118.0" y1="62" x2="118.0" y2="322" class="g-grid"/><text class="g-ax" x="118.0" y="340" text-anchor="middle">0</text>
+<line x1="168.0" y1="62" x2="168.0" y2="322" class="g-grid"/><text class="g-ax" x="168.0" y="340" text-anchor="middle">25</text>
+<line x1="218.0" y1="62" x2="218.0" y2="322" class="g-grid"/><text class="g-ax" x="218.0" y="340" text-anchor="middle">50</text>
+<line x1="268.0" y1="62" x2="268.0" y2="322" class="g-grid"/><text class="g-ax" x="268.0" y="340" text-anchor="middle">75</text>
+<line x1="318.0" y1="62" x2="318.0" y2="322" class="g-grid"/><text class="g-ax" x="318.0" y="340" text-anchor="middle">100</text>
+<text class="g-ax" x="364" y="58" text-anchor="end">in-domain</text><text class="g-ax" x="420" y="58" text-anchor="end">shifted</text>
+<text class="g-s" x="0" y="80">Interpolation: the test is between the training cases</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="281.5" y1="106" x2="269.5" y2="106" class="g-l"/>
+<polygon points="262.5,106 269.5,102 269.5,110" style="fill:var(--ink)"/>
+<circle cx="286.0" cy="106" r="4.5" class="g-o"><title>Outer → inner, in-domain success rate: 84%</title></circle>
+<circle cx="256.0" cy="106" r="5" class="g-f"><title>Outer → inner, success in shifted test region: 69%</title></circle>
+<text class="g-ax" x="364" y="110" text-anchor="end">84%</text><text class="g-ax" x="376" y="110" text-anchor="middle">→</text><text class="g-v b" x="420" y="110" text-anchor="end">69%</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="303.5" y1="138" x2="221.5" y2="138" class="g-l"/>
+<polygon points="214.5,138 221.5,134 221.5,142" style="fill:var(--ink)"/>
+<circle cx="308.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4, in-domain success rate: 95%</title></circle>
+<circle cx="208.0" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4, success in shifted test region: 45%</title></circle>
+<text class="g-ax" x="364" y="142" text-anchor="end">95%</text><text class="g-ax" x="376" y="142" text-anchor="middle">→</text><text class="g-v b" x="420" y="142" text-anchor="end">45%</text>
+<text class="g-s" x="0" y="182">Extrapolation: the test is outside the training cases</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="267.5" y1="208" x2="189.5" y2="208" class="g-l"/>
+<polygon points="182.5,208 189.5,204 189.5,212" style="fill:var(--ink)"/>
+<circle cx="272.0" cy="208" r="4.5" class="g-o"><title>Inner → outer, in-domain success rate: 77%</title></circle>
+<circle cx="176.0" cy="208" r="5" class="g-f"><title>Inner → outer, success in shifted test region: 29%</title></circle>
+<text class="g-ax" x="364" y="212" text-anchor="end">77%</text><text class="g-ax" x="376" y="212" text-anchor="middle">→</text><text class="g-v b" x="420" y="212" text-anchor="end">29%</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="273.5" y1="240" x2="151.5" y2="240" class="g-l"/>
+<polygon points="144.5,240 151.5,236 151.5,244" style="fill:var(--ink)"/>
+<circle cx="278.0" cy="240" r="4.5" class="g-o"><title>Left → right, in-domain success rate: 80%</title></circle>
+<circle cx="138.0" cy="240" r="5" class="g-f"><title>Left → right, success in shifted test region: 10%</title></circle>
+<text class="g-ax" x="364" y="244" text-anchor="end">80%</text><text class="g-ax" x="376" y="244" text-anchor="middle">→</text><text class="g-v b" x="420" y="244" text-anchor="end">10%</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="293.5" y1="272" x2="133.5" y2="272" class="g-l"/>
+<polygon points="126.5,272 133.5,268 133.5,276" style="fill:var(--ink)"/>
+<circle cx="298.0" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5, in-domain success rate: 90%</title></circle>
+<circle cx="120.0" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5, success in shifted test region: 1%</title></circle>
+<text class="g-ax" x="364" y="276" text-anchor="end">90%</text><text class="g-ax" x="376" y="276" text-anchor="middle">→</text><text class="g-v b" x="420" y="276" text-anchor="end">1%</text>
+<text class="g-r" x="106" y="308" text-anchor="end">Stack 4,5 → 2,3</text>
+<line x1="295.5" y1="304" x2="163.5" y2="304" class="g-l"/>
+<polygon points="156.5,304 163.5,300 163.5,308" style="fill:var(--ink)"/>
+<circle cx="300.0" cy="304" r="4.5" class="g-o"><title>Stack 4,5 → 2,3, in-domain success rate: 91%</title></circle>
+<circle cx="150.0" cy="304" r="5" class="g-f"><title>Stack 4,5 → 2,3, success in shifted test region: 16%</title></circle>
+<text class="g-ax" x="364" y="308" text-anchor="end">91%</text><text class="g-ax" x="376" y="308" text-anchor="middle">→</text><text class="g-v b" x="420" y="308" text-anchor="end">16%</text>
+<text class="g-ax" x="218.0" y="360" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 366" role="img" aria-label="MolmoAct 2">
+<text class="g-t" x="0" y="16">MolmoAct 2</text><text class="g-s" x="0" y="34">full fine-tuning, train → test</text>
+<line x1="118.0" y1="62" x2="118.0" y2="322" class="g-grid"/><text class="g-ax" x="118.0" y="340" text-anchor="middle">0</text>
+<line x1="168.0" y1="62" x2="168.0" y2="322" class="g-grid"/><text class="g-ax" x="168.0" y="340" text-anchor="middle">25</text>
+<line x1="218.0" y1="62" x2="218.0" y2="322" class="g-grid"/><text class="g-ax" x="218.0" y="340" text-anchor="middle">50</text>
+<line x1="268.0" y1="62" x2="268.0" y2="322" class="g-grid"/><text class="g-ax" x="268.0" y="340" text-anchor="middle">75</text>
+<line x1="318.0" y1="62" x2="318.0" y2="322" class="g-grid"/><text class="g-ax" x="318.0" y="340" text-anchor="middle">100</text>
+<text class="g-ax" x="364" y="58" text-anchor="end">in-domain</text><text class="g-ax" x="420" y="58" text-anchor="end">shifted</text>
+<text class="g-s" x="0" y="80">Interpolation: the test is between the training cases</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<circle cx="294.0" cy="106" r="4.5" class="g-o"><title>Outer → inner, in-domain success rate: 88%</title></circle>
+<circle cx="282.0" cy="106" r="5" class="g-f"><title>Outer → inner, success in shifted test region: 82%</title></circle>
+<text class="g-ax" x="364" y="110" text-anchor="end">88%</text><text class="g-ax" x="376" y="110" text-anchor="middle">→</text><text class="g-v b" x="420" y="110" text-anchor="end">82%</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="283.5" y1="138" x2="145.5" y2="138" class="g-l"/>
+<polygon points="138.5,138 145.5,134 145.5,142" style="fill:var(--ink)"/>
+<circle cx="288.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4, in-domain success rate: 85%</title></circle>
+<circle cx="132.0" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4, success in shifted test region: 7%</title></circle>
+<text class="g-ax" x="364" y="142" text-anchor="end">85%</text><text class="g-ax" x="376" y="142" text-anchor="middle">→</text><text class="g-v b" x="420" y="142" text-anchor="end">7%</text>
+<text class="g-s" x="0" y="182">Extrapolation: the test is outside the training cases</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="281.5" y1="208" x2="209.5" y2="208" class="g-l"/>
+<polygon points="202.5,208 209.5,204 209.5,212" style="fill:var(--ink)"/>
+<circle cx="286.0" cy="208" r="4.5" class="g-o"><title>Inner → outer, in-domain success rate: 84%</title></circle>
+<circle cx="196.0" cy="208" r="5" class="g-f"><title>Inner → outer, success in shifted test region: 39%</title></circle>
+<text class="g-ax" x="364" y="212" text-anchor="end">84%</text><text class="g-ax" x="376" y="212" text-anchor="middle">→</text><text class="g-v b" x="420" y="212" text-anchor="end">39%</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="261.5" y1="240" x2="155.5" y2="240" class="g-l"/>
+<polygon points="148.5,240 155.5,236 155.5,244" style="fill:var(--ink)"/>
+<circle cx="266.0" cy="240" r="4.5" class="g-o"><title>Left → right, in-domain success rate: 74%</title></circle>
+<circle cx="142.0" cy="240" r="5" class="g-f"><title>Left → right, success in shifted test region: 12%</title></circle>
+<text class="g-ax" x="364" y="244" text-anchor="end">74%</text><text class="g-ax" x="376" y="244" text-anchor="middle">→</text><text class="g-v b" x="420" y="244" text-anchor="end">12%</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="285.5" y1="272" x2="133.5" y2="272" class="g-l"/>
+<polygon points="126.5,272 133.5,268 133.5,276" style="fill:var(--ink)"/>
+<circle cx="290.0" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5, in-domain success rate: 86%</title></circle>
+<circle cx="120.0" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5, success in shifted test region: 1%</title></circle>
+<text class="g-ax" x="364" y="276" text-anchor="end">86%</text><text class="g-ax" x="376" y="276" text-anchor="middle">→</text><text class="g-v b" x="420" y="276" text-anchor="end">1%</text>
+<text class="g-r" x="106" y="308" text-anchor="end">Stack 4,5 → 2,3</text>
+<line x1="295.5" y1="304" x2="151.5" y2="304" class="g-l"/>
+<polygon points="144.5,304 151.5,300 151.5,308" style="fill:var(--ink)"/>
+<circle cx="300.0" cy="304" r="4.5" class="g-o"><title>Stack 4,5 → 2,3, in-domain success rate: 91%</title></circle>
+<circle cx="138.0" cy="304" r="5" class="g-f"><title>Stack 4,5 → 2,3, success in shifted test region: 10%</title></circle>
+<text class="g-ax" x="364" y="308" text-anchor="end">91%</text><text class="g-ax" x="376" y="308" text-anchor="middle">→</text><text class="g-v b" x="420" y="308" text-anchor="end">10%</text>
+<text class="g-ax" x="218.0" y="360" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>in-domain success rate</span><span><i style="background:var(--ink);border-radius:50%"></i>success in shifted test region</span></div>
+    <figcaption>Success rate on each shifted split, with full fine-tuning. Each arrow starts at the in-domain success rate and points to the success in the shifted test region. The right column gives the two values. “Stack 2,5 → 3,4” means: train on stacks of 2 and 5 blocks, and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <h3>Five techniques</h3>
+  <p>We tested five changes to the training. We added each change by itself.</p>
+  <ul>
+    <li><b>Co-training.</b> Half of each fine-tuning batch comes from the other three tasks. The demonstrations for these tasks cover the full workspace.</li>
+    <li><b>Mid-training.</b> Before fine-tuning, we train the model on a larger dataset. This dataset covers the full workspace, but it does not include the target task.</li>
+    <li><b>Delta actions.</b> The model predicts each action chunk as changes from the current joint positions. It does not predict absolute joint targets.</li>
+    <li><b>World action model (WAM).</b> Videos are available for the full workspace, but action labels are available only for the training region. For example, we give videos of the right half without actions. A video-prediction head (<a href="https://arxiv.org/abs/2603.16666">Fast-WAM</a> style) trains together with the action expert. The rollout does not use this head.</li>
+    <li><b>LoRA.</b> We freeze the model and train only <a href="https://arxiv.org/abs/2106.09685">low-rank adapter</a> weights.</li>
+  </ul>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 346" role="img" aria-label="Workspace: initial 5%, combined 81%, in-domain 83%">
+<text class="g-t" x="0" y="16">Workspace</text><text class="g-s" x="0" y="34">train with blocks on the left half, test on the right</text>
+<line x1="118.0" y1="62" x2="118.0" y2="302" class="g-grid"/><text class="g-ax" x="118.0" y="320" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="302" class="g-grid"/><text class="g-ax" x="188.5" y="320" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="302" class="g-grid"/><text class="g-ax" x="259.0" y="320" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="302" class="g-grid"/><text class="g-ax" x="329.5" y="320" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="302" class="g-grid"/><text class="g-ax" x="400.0" y="320" text-anchor="middle">100</text>
+<line x1="352.1" y1="58" x2="352.1" y2="302" class="g-dom"/><text class="g-ax" x="348.1" y="58" text-anchor="end">in-domain 83%</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">Before</text><circle cx="132.1" cy="76" r="5.5" class="g-o"><title>Before: 5%</title></circle><text class="g-v" x="143.1" y="80">5%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">Co-training</text>
+<line x1="132.1" y1="112" x2="259.0" y2="112" class="g-l"/>
+<circle cx="132.1" cy="112" r="4.5" class="g-o"/>
+<circle cx="259.0" cy="112" r="5" class="g-f"><title>Co-training: 50% (+45 points)</title></circle>
+<text class="g-v" x="269.0" y="116">+45</text>
+<text class="g-r" x="106" y="148" text-anchor="end">Mid-training</text>
+<line x1="132.1" y1="144" x2="171.6" y2="144" class="g-l"/>
+<circle cx="132.1" cy="144" r="4.5" class="g-o"/>
+<circle cx="171.6" cy="144" r="5" class="g-f"><title>Mid-training: 19% (+14 points)</title></circle>
+<text class="g-v" x="181.6" y="148">+14</text>
+<text class="g-r" x="106" y="180" text-anchor="end">Delta actions</text>
+<line x1="132.1" y1="176" x2="157.5" y2="176" class="g-l"/>
+<circle cx="132.1" cy="176" r="4.5" class="g-o"/>
+<circle cx="157.5" cy="176" r="5" class="g-f"><title>Delta actions: 14% (+9 points)</title></circle>
+<text class="g-v" x="167.5" y="180">+9</text>
+<text class="g-r" x="106" y="212" text-anchor="end">WAM</text>
+<line x1="132.1" y1="208" x2="140.6" y2="208" class="g-l"/>
+<circle cx="132.1" cy="208" r="4.5" class="g-o"/>
+<circle cx="140.6" cy="208" r="5" class="g-f"><title>WAM: 8% (+3 points)</title></circle>
+<text class="g-v" x="150.6" y="212">+3</text>
+<text class="g-r" x="106" y="244" text-anchor="end">LoRA</text>
+<line x1="132.1" y1="240" x2="129.3" y2="240" class="g-l"/>
+<circle cx="132.1" cy="240" r="4.5" class="g-o"/>
+<circle cx="129.3" cy="240" r="5" class="g-f"><title>LoRA: 4% (-1 points)</title></circle>
+<text class="g-v" x="142.1" y="244">−1</text>
+<text class="g-r b p" x="106" y="288" text-anchor="end">Combined</text><line x1="132.1" y1="284" x2="346.4" y2="284" class="g-l p"/><circle cx="132.1" cy="284" r="5" class="g-o p"/><circle cx="346.4" cy="284" r="6" class="g-f p"><title>Combined: 81%</title></circle><text class="g-v b" x="357.4" y="288">81%</text>
+<text class="g-ax" x="259" y="340" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 346" role="img" aria-label="Stack height: initial 29%, combined 89%, in-domain 90%">
+<text class="g-t" x="0" y="16">Stack height</text><text class="g-s" x="0" y="34">train on stacks of 2 and 5, test on 3 and 4</text>
+<line x1="118.0" y1="62" x2="118.0" y2="302" class="g-grid"/><text class="g-ax" x="118.0" y="320" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="302" class="g-grid"/><text class="g-ax" x="188.5" y="320" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="302" class="g-grid"/><text class="g-ax" x="259.0" y="320" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="302" class="g-grid"/><text class="g-ax" x="329.5" y="320" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="302" class="g-grid"/><text class="g-ax" x="400.0" y="320" text-anchor="middle">100</text>
+<line x1="371.8" y1="58" x2="371.8" y2="302" class="g-dom"/><text class="g-ax" x="367.8" y="58" text-anchor="end">in-domain 90%</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">Before</text><circle cx="199.8" cy="76" r="5.5" class="g-o"><title>Before: 29%</title></circle><text class="g-v" x="210.8" y="80">29%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">Co-training</text>
+<line x1="199.8" y1="112" x2="250.5" y2="112" class="g-l"/>
+<circle cx="199.8" cy="112" r="4.5" class="g-o"/>
+<circle cx="250.5" cy="112" r="5" class="g-f"><title>Co-training: 47% (+18 points)</title></circle>
+<text class="g-v" x="260.5" y="116">+18</text>
+<text class="g-r" x="106" y="148" text-anchor="end">Mid-training</text>
+<line x1="199.8" y1="144" x2="230.8" y2="144" class="g-l"/>
+<circle cx="199.8" cy="144" r="4.5" class="g-o"/>
+<circle cx="230.8" cy="144" r="5" class="g-f"><title>Mid-training: 40% (+11 points)</title></circle>
+<text class="g-v" x="240.8" y="148">+11</text>
+<text class="g-r" x="106" y="180" text-anchor="end">Delta actions</text>
+<line x1="199.8" y1="176" x2="273.1" y2="176" class="g-l"/>
+<circle cx="199.8" cy="176" r="4.5" class="g-o"/>
+<circle cx="273.1" cy="176" r="5" class="g-f"><title>Delta actions: 55% (+26 points)</title></circle>
+<text class="g-v" x="283.1" y="180">+26</text>
+<text class="g-r" x="106" y="212" text-anchor="end">WAM</text>
+<line x1="199.8" y1="208" x2="264.6" y2="208" class="g-l"/>
+<circle cx="199.8" cy="208" r="4.5" class="g-o"/>
+<circle cx="264.6" cy="208" r="5" class="g-f"><title>WAM: 52% (+23 points)</title></circle>
+<text class="g-v" x="274.6" y="212">+23</text>
+<text class="g-r" x="106" y="244" text-anchor="end">LoRA</text>
+<line x1="199.8" y1="240" x2="211.1" y2="240" class="g-l"/>
+<circle cx="199.8" cy="240" r="4.5" class="g-o"/>
+<circle cx="211.1" cy="240" r="5" class="g-f"><title>LoRA: 33% (+4 points)</title></circle>
+<text class="g-v" x="221.1" y="244">+4</text>
+<text class="g-r b p" x="106" y="288" text-anchor="end">Combined</text><line x1="199.8" y1="284" x2="369.0" y2="284" class="g-l p"/><circle cx="199.8" cy="284" r="5" class="g-o p"/><circle cx="369.0" cy="284" r="6" class="g-f p"><title>Combined: 89%</title></circle><text class="g-v b" x="380.0" y="288">89%</text>
+<text class="g-ax" x="259" y="340" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>before</span><span><i style="background:var(--ink);border-radius:50%"></i>with the technique</span><span><i style="background:var(--pink);border-radius:50%"></i>all techniques combined</span><span><i class="dash"></i>in-domain success</span></div>
+    <figcaption>The gain from each technique by itself, in percentage points above the initial result. Each value is an average over tasks and architectures. “Combined” uses co-training, mid-training, delta actions and WAM together. The estimates come from more than 200 training runs and 100,000 evaluation episodes.</figcaption>
+  </figure>
+  <h3>What matters</h3>
+  <p><b>Keep some of the initial data.</b> Co-training gives the largest single gain on the right half of the table (+45 points). Mid-training uses the same type of data only one time, before fine-tuning, and gives +14 points. Fine-tuning on one task also causes the model to forget the other tasks. Co-training with the data from these tasks prevents most of this loss. Thus, <b style="color:var(--pink)">open robot data is important</b>. A fine-tuned VLA gets its full generalization only when it continues to train on some of its initial data.</p>
+  <p><b>Predict delta actions.</b> Delta actions give better results than absolute joint targets for π0.5 and for MolmoAct 2. On new stack heights, delta actions give +26 points. This gain does not come from a match with the pretraining action format. MolmoAct 2 used absolute joint actions in pretraining, and π0.5 used velocity actions.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 334" role="img" aria-label="π0.5">
+<text class="g-t" x="0" y="16">π0.5</text><text class="g-s" x="0" y="34">without WAM</text>
+<line x1="118.0" y1="62" x2="118.0" y2="290" class="g-grid"/><text class="g-ax" x="118.0" y="308" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="290" class="g-grid"/><text class="g-ax" x="188.5" y="308" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="290" class="g-grid"/><text class="g-ax" x="259.0" y="308" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="290" class="g-grid"/><text class="g-ax" x="329.5" y="308" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="290" class="g-grid"/><text class="g-ax" x="400.0" y="308" text-anchor="middle">100</text>
+<text class="g-s" x="0" y="80">Interpolation</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="309.8" y1="106" x2="369.0" y2="106" class="g-l"/>
+<circle cx="309.8" cy="106" r="4.5" class="g-o"><title>Outer → inner: 68%</title></circle>
+<circle cx="369.0" cy="106" r="5" class="g-f"><title>Outer → inner: 89% (+21 points)</title></circle>
+<text class="g-v" x="379.0" y="110">+21</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="197.0" y1="138" x2="287.2" y2="138" class="g-l"/>
+<circle cx="197.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4: 28%</title></circle>
+<circle cx="287.2" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4: 60% (+32 points)</title></circle>
+<text class="g-v" x="297.2" y="142">+32</text>
+<text class="g-s" x="0" y="182">Extrapolation</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="222.3" y1="208" x2="275.9" y2="208" class="g-l"/>
+<circle cx="222.3" cy="208" r="4.5" class="g-o"><title>Inner → outer: 37%</title></circle>
+<circle cx="275.9" cy="208" r="5" class="g-f"><title>Inner → outer: 56% (+19 points)</title></circle>
+<text class="g-v" x="285.9" y="212">+19</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="143.4" y1="240" x2="180.0" y2="240" class="g-l"/>
+<circle cx="143.4" cy="240" r="4.5" class="g-o"><title>Left → right: 9%</title></circle>
+<circle cx="180.0" cy="240" r="5" class="g-f"><title>Left → right: 22% (+13 points)</title></circle>
+<text class="g-v" x="190.0" y="244">+13</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="151.8" y1="272" x2="199.8" y2="272" class="g-l"/>
+<circle cx="151.8" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5: 12%</title></circle>
+<circle cx="199.8" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5: 29% (+17 points)</title></circle>
+<text class="g-v" x="209.8" y="276">+17</text>
+<text class="g-ax" x="259.0" y="328" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 334" role="img" aria-label="MolmoAct 2">
+<text class="g-t" x="0" y="16">MolmoAct 2</text><text class="g-s" x="0" y="34">without WAM</text>
+<line x1="118.0" y1="62" x2="118.0" y2="290" class="g-grid"/><text class="g-ax" x="118.0" y="308" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="290" class="g-grid"/><text class="g-ax" x="188.5" y="308" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="290" class="g-grid"/><text class="g-ax" x="259.0" y="308" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="290" class="g-grid"/><text class="g-ax" x="329.5" y="308" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="290" class="g-grid"/><text class="g-ax" x="400.0" y="308" text-anchor="middle">100</text>
+<text class="g-s" x="0" y="80">Interpolation</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="278.7" y1="106" x2="321.0" y2="106" class="g-l"/>
+<circle cx="278.7" cy="106" r="4.5" class="g-o"><title>Outer → inner: 57%</title></circle>
+<circle cx="321.0" cy="106" r="5" class="g-f"><title>Outer → inner: 72% (+15 points)</title></circle>
+<text class="g-v" x="331.0" y="110">+15</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="199.8" y1="138" x2="312.6" y2="138" class="g-l"/>
+<circle cx="199.8" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4: 29%</title></circle>
+<circle cx="312.6" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4: 69% (+40 points)</title></circle>
+<text class="g-v" x="322.6" y="142">+40</text>
+<text class="g-s" x="0" y="182">Extrapolation</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="213.9" y1="208" x2="222.3" y2="208" class="g-l"/>
+<circle cx="213.9" cy="208" r="4.5" class="g-o"><title>Inner → outer: 34%</title></circle>
+<circle cx="222.3" cy="208" r="5" class="g-f"><title>Inner → outer: 37% (+3 points)</title></circle>
+<text class="g-v" x="232.3" y="212">+3</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="146.2" y1="240" x2="151.8" y2="240" class="g-l"/>
+<circle cx="146.2" cy="240" r="4.5" class="g-o"><title>Left → right: 10%</title></circle>
+<circle cx="151.8" cy="240" r="5" class="g-f"><title>Left → right: 12% (+2 points)</title></circle>
+<text class="g-v" x="161.8" y="244">+2</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="154.7" y1="272" x2="219.5" y2="272" class="g-l"/>
+<circle cx="154.7" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5: 13%</title></circle>
+<circle cx="219.5" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5: 36% (+23 points)</title></circle>
+<text class="g-v" x="229.5" y="276">+23</text>
+<text class="g-ax" x="259.0" y="328" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>absolute joint actions</span><span><i style="background:var(--ink);border-radius:50%"></i>delta joint actions</span></div>
+    <figcaption>Success rate on the shifted splits, without WAM. The ring shows absolute joint actions. The dot shows delta joint actions. “Stack 2,5 → 3,4” means: train on stacks of 2 and 5 blocks, and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <p><b>Add video prediction when the scenes look new.</b> By itself, WAM gives +3 points on the right half of the table and +23 points on new stack heights. WAM gives the best results together with co-training. We trained MolmoAct 2 on stacks of 2 and 3 blocks and tested it on stacks of 4 and 5 blocks. With WAM and co-training, its success rate increases from 29% to 80%. We think that the video head removes a visual limit, because the training images do not show stacks of 4 or 5 blocks.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 406" role="img" aria-label="Left → right">
+<text class="g-t" x="0" y="16">Left → right</text><text class="g-s" x="0" y="34">average of Stack, Flip and Rotate</text>
+<line x1="118.0" y1="62" x2="118.0" y2="362" class="g-grid"/><text class="g-ax" x="118.0" y="380" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="362" class="g-grid"/><text class="g-ax" x="188.5" y="380" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="362" class="g-grid"/><text class="g-ax" x="259.0" y="380" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="362" class="g-grid"/><text class="g-ax" x="329.5" y="380" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="362" class="g-grid"/><text class="g-ax" x="400.0" y="380" text-anchor="middle">100</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">π0.5</text><circle cx="131.3" cy="76" r="5.5" class="g-o"><title>π0.5: 4.7%</title></circle><text class="g-v" x="142.3" y="80">4.7%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">+ WAM</text>
+<line x1="131.3" y1="112" x2="146.2" y2="112" class="g-l"/>
+<circle cx="131.3" cy="112" r="4.5" class="g-o"><title>+ WAM: 4.7%</title></circle>
+<circle cx="146.2" cy="112" r="5" class="g-f"><title>+ WAM: 10% (+5.3 points)</title></circle>
+<text class="g-v" x="156.2" y="116">+5.3</text>
+<text class="g-r" x="106" y="148" text-anchor="end">+ Co-training</text>
+<line x1="131.3" y1="144" x2="228.0" y2="144" class="g-l"/>
+<circle cx="131.3" cy="144" r="4.5" class="g-o"><title>+ Co-training: 4.7%</title></circle>
+<circle cx="228.0" cy="144" r="5" class="g-f"><title>+ Co-training: 39% (+34.3 points)</title></circle>
+<text class="g-v" x="238.0" y="148">+34.3</text>
+<text class="g-r b p" x="106" y="192" text-anchor="end">+ Both</text>
+<line x1="131.3" y1="188" x2="335.1" y2="188" class="g-l p"/>
+<circle cx="131.3" cy="188" r="5" class="g-o p"><title>+ Both: 4.7%</title></circle>
+<circle cx="335.1" cy="188" r="6" class="g-f p"><title>+ Both: 77% (+72.3 points)</title></circle>
+<text class="g-v b" x="346.1" y="192">77%</text>
+<text class="g-r b" x="106" y="236" text-anchor="end">MolmoAct 2</text><circle cx="145.9" cy="232" r="5.5" class="g-o"><title>MolmoAct 2: 9.9%</title></circle><text class="g-v" x="156.9" y="236">9.9%</text>
+<text class="g-r" x="106" y="272" text-anchor="end">+ WAM</text>
+<line x1="145.9" y1="268" x2="135.2" y2="268" class="g-l"/>
+<circle cx="145.9" cy="268" r="4.5" class="g-o"><title>+ WAM: 9.9%</title></circle>
+<circle cx="135.2" cy="268" r="5" class="g-f"><title>+ WAM: 6.1% (-3.8 points)</title></circle>
+<text class="g-v" x="155.9" y="272">−3.8</text>
+<text class="g-r" x="106" y="304" text-anchor="end">+ Co-training</text>
+<line x1="145.9" y1="300" x2="250.5" y2="300" class="g-l"/>
+<circle cx="145.9" cy="300" r="4.5" class="g-o"><title>+ Co-training: 9.9%</title></circle>
+<circle cx="250.5" cy="300" r="5" class="g-f"><title>+ Co-training: 47% (+37.1 points)</title></circle>
+<text class="g-v" x="260.5" y="304">+37.1</text>
+<text class="g-r b p" x="106" y="348" text-anchor="end">+ Both</text>
+<line x1="145.9" y1="344" x2="301.3" y2="344" class="g-l p"/>
+<circle cx="145.9" cy="344" r="5" class="g-o p"><title>+ Both: 9.9%</title></circle>
+<circle cx="301.3" cy="344" r="6" class="g-f p"><title>+ Both: 65% (+55.1 points)</title></circle>
+<text class="g-v b" x="312.3" y="348">65%</text>
+<text class="g-ax" x="259.0" y="400" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 406" role="img" aria-label="Stacks 2, 3 → 4, 5">
+<text class="g-t" x="0" y="16">Stacks 2, 3 → 4, 5</text><text class="g-s" x="0" y="34">average of Stack and Unstack</text>
+<line x1="118.0" y1="62" x2="118.0" y2="362" class="g-grid"/><text class="g-ax" x="118.0" y="380" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="362" class="g-grid"/><text class="g-ax" x="188.5" y="380" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="362" class="g-grid"/><text class="g-ax" x="259.0" y="380" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="362" class="g-grid"/><text class="g-ax" x="329.5" y="380" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="362" class="g-grid"/><text class="g-ax" x="400.0" y="380" text-anchor="middle">100</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">π0.5</text><circle cx="197.0" cy="76" r="5.5" class="g-o"><title>π0.5: 28%</title></circle><text class="g-v" x="208.0" y="80">28%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">+ WAM</text>
+<line x1="197.0" y1="112" x2="281.6" y2="112" class="g-l"/>
+<circle cx="197.0" cy="112" r="4.5" class="g-o"><title>+ WAM: 28%</title></circle>
+<circle cx="281.6" cy="112" r="5" class="g-f"><title>+ WAM: 58% (+30 points)</title></circle>
+<text class="g-v" x="291.6" y="116">+30</text>
+<text class="g-r" x="106" y="148" text-anchor="end">+ Co-training</text>
+<line x1="197.0" y1="144" x2="216.7" y2="144" class="g-l"/>
+<circle cx="197.0" cy="144" r="4.5" class="g-o"><title>+ Co-training: 28%</title></circle>
+<circle cx="216.7" cy="144" r="5" class="g-f"><title>+ Co-training: 35% (+7 points)</title></circle>
+<text class="g-v" x="226.7" y="148">+7</text>
+<text class="g-r b p" x="106" y="192" text-anchor="end">+ Both</text>
+<line x1="197.0" y1="188" x2="335.1" y2="188" class="g-l p"/>
+<circle cx="197.0" cy="188" r="5" class="g-o p"><title>+ Both: 28%</title></circle>
+<circle cx="335.1" cy="188" r="6" class="g-f p"><title>+ Both: 77% (+49 points)</title></circle>
+<text class="g-v b" x="346.1" y="192">77%</text>
+<text class="g-r b" x="106" y="236" text-anchor="end">MolmoAct 2</text><circle cx="199.8" cy="232" r="5.5" class="g-o"><title>MolmoAct 2: 29%</title></circle><text class="g-v" x="210.8" y="236">29%</text>
+<text class="g-r" x="106" y="272" text-anchor="end">+ WAM</text>
+<line x1="199.8" y1="268" x2="261.8" y2="268" class="g-l"/>
+<circle cx="199.8" cy="268" r="4.5" class="g-o"><title>+ WAM: 29%</title></circle>
+<circle cx="261.8" cy="268" r="5" class="g-f"><title>+ WAM: 51% (+22 points)</title></circle>
+<text class="g-v" x="271.8" y="272">+22</text>
+<text class="g-r" x="106" y="304" text-anchor="end">+ Co-training</text>
+<line x1="199.8" y1="300" x2="278.7" y2="300" class="g-l"/>
+<circle cx="199.8" cy="300" r="4.5" class="g-o"><title>+ Co-training: 29%</title></circle>
+<circle cx="278.7" cy="300" r="5" class="g-f"><title>+ Co-training: 57% (+28 points)</title></circle>
+<text class="g-v" x="288.7" y="304">+28</text>
+<text class="g-r b p" x="106" y="348" text-anchor="end">+ Both</text>
+<line x1="199.8" y1="344" x2="343.6" y2="344" class="g-l p"/>
+<circle cx="199.8" cy="344" r="5" class="g-o p"><title>+ Both: 29%</title></circle>
+<circle cx="343.6" cy="344" r="6" class="g-f p"><title>+ Both: 80% (+51 points)</title></circle>
+<text class="g-v b" x="354.6" y="348">80%</text>
+<text class="g-ax" x="259.0" y="400" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>fine-tuning only</span><span><i style="background:var(--ink);border-radius:50%"></i>with the addition</span><span><i style="background:var(--pink);border-radius:50%"></i>WAM and co-training</span></div>
+    <figcaption>Fine-tuning only, with WAM, with co-training, and with WAM and co-training. The labels show the change in percentage points. The pink values show the success rate with both additions.</figcaption>
+  </figure>
+  <h3>Summary</h3>
+  <p>Fine-tuned VLAs perform well in the training region, but small shifts in task space cause large decreases in success. We explored and evaluated many techniques in detail, and these techniques improve generalization in our simple settings. Nevertheless, <b style="color:var(--pink)">VLA generalization is far from solved</b>. ToyBlocks gives researchers a flexible and reproducible way to study new generalization techniques and more difficult settings.</p>
+  <p class="docs"><b>Details.</b> We use 1,000 training demonstrations for each task. Co-training and mid-training use 20,000 more demonstrations (5,000 for each task). We fine-tune for 30,000 steps. We evaluate each 10,000 steps and report the best checkpoint. Each run has 500 evaluation episodes. We normalize the joint actions to [−1, 1] with statistics from the full workspace, so that the robot can reach all regions.</p>
+  <p class="docs">For the setup of the evaluation episodes, refer to <a href="evals.html#scenes">Evaluation at Scale</a>.</p>
+</div></section>
+
+<section id="hl"><div class="col">
+  <h2>Molmo 2 on new blocks</h2>
+  <p>Molmo 2 runs as the high level, with either the motion-planned skills (the low-level oracle) or ManiFlow as the low level. <i>Seen</i> uses the training blocks in new arrangements, and <i>unseen</i> uses held-out blocks. The three difficulty levels differ in how the letters start out, as the starting scenes below the chart show.</p>
+  <figure class="chart">
+    <div class="legend"><span><i style="background:var(--g-mp)"></i>Motion planner, seen blocks</span><span><i style="background:var(--g-mp2)"></i>Motion planner, unseen blocks</span><span><i style="background:var(--g-mf)"></i>ManiFlow, seen blocks</span><span><i style="background:var(--g-mf2)"></i>ManiFlow, unseen blocks</span></div>
+<div class="hscroll wide">
+<svg viewBox="0 0 880 300" role="img" aria-label="Molmo 2 success rates by difficulty with a motion planner or ManiFlow low level, seen and unseen blocks">
+<line x1="44" y1="250.0" x2="870" y2="250.0" class="g-base"/><text class="g-ax" x="36" y="254.0" text-anchor="end">0</text>
+<line x1="44" y1="204.8" x2="870" y2="204.8" class="g-grid"/><text class="g-ax" x="36" y="208.8" text-anchor="end">20</text>
+<line x1="44" y1="159.6" x2="870" y2="159.6" class="g-grid"/><text class="g-ax" x="36" y="163.6" text-anchor="end">40</text>
+<line x1="44" y1="114.4" x2="870" y2="114.4" class="g-grid"/><text class="g-ax" x="36" y="118.4" text-anchor="end">60</text>
+<line x1="44" y1="69.2" x2="870" y2="69.2" class="g-grid"/><text class="g-ax" x="36" y="73.2" text-anchor="end">80</text>
+<line x1="44" y1="24.0" x2="870" y2="24.0" class="g-grid"/><text class="g-ax" x="36" y="28.0" text-anchor="end">100</text>
+<path d="M80.7,250 V33.7 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp)"><title>Easy, Motion planner, seen blocks: 97.5%</title></path>
+<text class="g-bv" x="103.7" y="23.7" text-anchor="middle">97.5</text>
+<path d="M132.7,250 V70.9 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp2)"><title>Easy, Motion planner, unseen blocks: 81.0%</title></path>
+<text class="g-bv" x="155.7" y="60.9" text-anchor="middle">81.0</text>
+<path d="M184.7,250 V128.6 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf)"><title>Easy, ManiFlow, seen blocks: 55.5%</title></path>
+<text class="g-bv" x="207.7" y="118.6" text-anchor="middle">55.5</text>
+<path d="M236.7,250 V153.4 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf2)"><title>Easy, ManiFlow, unseen blocks: 44.5%</title></path>
+<text class="g-bv" x="259.7" y="143.4" text-anchor="middle">44.5</text>
+<text class="g-gx" x="181.7" y="274" text-anchor="middle">Easy</text>
+<path d="M356.0,250 V133.1 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp)"><title>Medium, Motion planner, seen blocks: 53.5%</title></path>
+<text class="g-bv" x="379.0" y="123.1" text-anchor="middle">53.5</text>
+<path d="M408.0,250 V171.5 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp2)"><title>Medium, Motion planner, unseen blocks: 36.5%</title></path>
+<text class="g-bv" x="431.0" y="161.5" text-anchor="middle">36.5</text>
+<path d="M460.0,250 V173.8 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf)"><title>Medium, ManiFlow, seen blocks: 35.5%</title></path>
+<text class="g-bv" x="483.0" y="163.8" text-anchor="middle">35.5</text>
+<path d="M512.0,250 V225.8 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf2)"><title>Medium, ManiFlow, unseen blocks: 12.5%</title></path>
+<text class="g-bv" x="535.0" y="215.8" text-anchor="middle">12.5</text>
+<text class="g-gx" x="457.0" y="274" text-anchor="middle">Medium</text>
+<path d="M631.3,250 V182.8 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp)"><title>Hard, Motion planner, seen blocks: 31.5%</title></path>
+<text class="g-bv" x="654.3" y="172.8" text-anchor="middle">31.5</text>
+<path d="M683.3,250 V221.2 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mp2)"><title>Hard, Motion planner, unseen blocks: 14.5%</title></path>
+<text class="g-bv" x="706.3" y="211.2" text-anchor="middle">14.5</text>
+<path d="M735.3,250 V215.6 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf)"><title>Hard, ManiFlow, seen blocks: 17.0%</title></path>
+<text class="g-bv" x="758.3" y="205.6" text-anchor="middle">17.0</text>
+<path d="M787.3,250 V231.4 q0,-4 4,-4 h38 q4,0 4,4 V250 Z" fill="var(--g-mf2)"><title>Hard, ManiFlow, unseen blocks: 10.0%</title></path>
+<text class="g-bv" x="810.3" y="221.4" text-anchor="middle">10.0</text>
+<text class="g-gx" x="732.3" y="274" text-anchor="middle">Hard</text>
+<text class="g-ax" x="12" y="137" text-anchor="middle" transform="rotate(-90 12 137)">success rate (%)</text></svg>
+</div>
+    <div class="levels">
+      <div><svg viewBox="0 0 260 112" role="img" aria-label="Easy starting scene: the letters B, A and G face the camera, upright"><text x="10" y="14" font-family="var(--font)" font-size="11.5" fill="var(--muted)">goal: spell <tspan font-weight="600" fill="var(--ink)">BAG</tspan></text><rect x="6" y="90" width="248" height="9" rx="3" fill="#ead9bb"/><g><polygon points="26,44 40.72,32.04 86.72,32.04 72,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="72,44 86.72,32.04 86.72,78.03999999999999 72,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="26" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="31" y="49" width="36" height="36" rx="2" fill="none" stroke="#d6453d" stroke-width="1.6"/><text x="49.0" y="67.0" transform="rotate(0 49.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#d6453d">B</text></g><g><polygon points="104,44 118.72,32.04 164.72,32.04 150,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="150,44 164.72,32.04 164.72,78.03999999999999 150,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="104" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="109" y="49" width="36" height="36" rx="2" fill="none" stroke="#2f6fd6" stroke-width="1.6"/><text x="127.0" y="67.0" transform="rotate(0 127.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#2f6fd6">A</text></g><g><polygon points="182,44 196.72,32.04 242.72,32.04 228,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="228,44 242.72,32.04 242.72,78.03999999999999 228,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="182" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="187" y="49" width="36" height="36" rx="2" fill="none" stroke="#2c9a5a" stroke-width="1.6"/><text x="205.0" y="67.0" transform="rotate(0 205.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#2c9a5a">G</text></g></svg><b>Easy</b><span>Letters on the blocks are already visible and upright, so only pick and place is needed to stack the word.</span><em><i>pick &amp; place</i></em></div>
+      <div><svg viewBox="0 0 260 112" role="img" aria-label="Medium starting scene: B, A and G face the camera but are upside down or sideways"><text x="10" y="14" font-family="var(--font)" font-size="11.5" fill="var(--muted)">goal: spell <tspan font-weight="600" fill="var(--ink)">BAG</tspan></text><rect x="6" y="90" width="248" height="9" rx="3" fill="#ead9bb"/><g><polygon points="26,44 40.72,32.04 86.72,32.04 72,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="72,44 86.72,32.04 86.72,78.03999999999999 72,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="26" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="31" y="49" width="36" height="36" rx="2" fill="none" stroke="#d6453d" stroke-width="1.6"/><text x="49.0" y="67.0" transform="rotate(180 49.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#d6453d">B</text></g><g><polygon points="104,44 118.72,32.04 164.72,32.04 150,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="150,44 164.72,32.04 164.72,78.03999999999999 150,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="104" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="109" y="49" width="36" height="36" rx="2" fill="none" stroke="#2f6fd6" stroke-width="1.6"/><text x="127.0" y="67.0" transform="rotate(90 127.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#2f6fd6">A</text></g><g><polygon points="182,44 196.72,32.04 242.72,32.04 228,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="228,44 242.72,32.04 242.72,78.03999999999999 228,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="182" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><rect x="187" y="49" width="36" height="36" rx="2" fill="none" stroke="#2c9a5a" stroke-width="1.6"/><text x="205.0" y="67.0" transform="rotate(-90 205.0 67.0)" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#2c9a5a">G</text></g></svg><b>Medium</b><span>Letters are visible but not upright, so flips are needed.</span><em><i>flip</i><i>pick &amp; place</i></em></div>
+      <div><svg viewBox="0 0 260 112" role="img" aria-label="Hard starting scene: picture faces point at the camera and the letters are hidden"><text x="10" y="14" font-family="var(--font)" font-size="11.5" fill="var(--muted)">goal: spell <tspan font-weight="600" fill="var(--ink)">BAG</tspan></text><rect x="6" y="90" width="248" height="9" rx="3" fill="#ead9bb"/><g><polygon points="26,44 40.72,32.04 86.72,32.04 72,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="72,44 86.72,32.04 86.72,78.03999999999999 72,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="26" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><circle cx="49.0" cy="69.0" r="10.1" fill="#d6453d"/><path d="M49.0,58.72 q3,-7 8,-8" stroke="#2c9a5a" stroke-width="2.4" fill="none"/></g><g><polygon points="104,44 118.72,32.04 164.72,32.04 150,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="150,44 164.72,32.04 164.72,78.03999999999999 150,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="104" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><polygon points="127.0,54.6 130.0,62.9 138.8,63.2 131.8,68.6 134.3,77.0 127.0,72.1 119.7,77.0 122.2,68.6 115.2,63.2 124.0,62.9" fill="#e9a515"/></g><g><polygon points="182,44 196.72,32.04 242.72,32.04 228,44" fill="#f7e8c8" stroke="#b99a63" stroke-width="1"/><polygon points="228,44 242.72,32.04 242.72,78.03999999999999 228,90" fill="#ddc08c" stroke="#b99a63" stroke-width="1"/><rect x="182" y="44" width="46" height="46" rx="3" fill="#efd9ae" stroke="#b99a63" stroke-width="1"/><polygon points="205.0,54.0 194.0,74.0 216.0,74.0" fill="#2c9a5a"/><rect x="202.5" y="74.0" width="5" height="6" fill="#8a5a2b"/></g><g stroke="var(--ink)" stroke-width="2.4" fill="none"><circle cx="236" cy="28" r="9" fill="#ffffffcc"/><line x1="242.5" y1="34.5" x2="250" y2="42" stroke-linecap="round"/></g></svg><b>Hard</b><span>Letters are not visible and not upright. The model has to search for the right blocks, using rotates, flips and pick and place.</span><em><i>search</i><i>rotate</i><i>flip</i><i>pick &amp; place</i></em></div>
+    </div>
+    <figcaption>Three-letter block-spelling tasks, 200 episodes per bar. With the motion planner, failures are Molmo 2's. With ManiFlow, failures can come from either level.</figcaption>
+  </figure>
+  <p class="docs">The modes behind this: <a href="evals.html#modes">Evaluation Modes</a></p>
+</div></section>
+
+<section id="real"><div class="col">
+  <h2>On a real robot</h2>
+  <p>We trained Molmo 2 and ManiFlow only on ToyBlocks data, with no real-world demonstrations, and ran them on a Franka FR3 with a Robotiq gripper. We tested two things: single skills with ManiFlow (pick, place, flip and rotate), and full three-letter spelling tasks with Molmo 2 + ManiFlow. Real-world runs used thirty scene configurations with 4–10 blocks that appear in the training data.</p>
+  <figure class="chart">
+    <div class="legend"><span><i style="background:var(--g-mp)"></i>simulation</span><span><i style="background:var(--g-mf)"></i>real robot</span></div>
+<div class="hscroll wide narrow">
+<svg viewBox="0 0 560 300" role="img" aria-label="Sim-to-real success on seen blocks: ManiFlow single skills 80.0% in simulation (990 of 1237) and 81.1% on the real robot (43 of 53); Molmo 2 plus ManiFlow easy spelling tasks 55.5% in simulation (111 of 200) and 50.0% on the real robot (15 of 30)">
+<line x1="48" y1="244.0" x2="550" y2="244.0" class="g-base"/><text class="g-ax" x="40" y="248.0" text-anchor="end">0</text>
+<line x1="48" y1="200.8" x2="550" y2="200.8" class="g-grid"/><text class="g-ax" x="40" y="204.8" text-anchor="end">20</text>
+<line x1="48" y1="157.6" x2="550" y2="157.6" class="g-grid"/><text class="g-ax" x="40" y="161.6" text-anchor="end">40</text>
+<line x1="48" y1="114.4" x2="550" y2="114.4" class="g-grid"/><text class="g-ax" x="40" y="118.4" text-anchor="end">60</text>
+<line x1="48" y1="71.2" x2="550" y2="71.2" class="g-grid"/><text class="g-ax" x="40" y="75.2" text-anchor="end">80</text>
+<line x1="48" y1="28.0" x2="550" y2="28.0" class="g-grid"/><text class="g-ax" x="40" y="32.0" text-anchor="end">100</text>
+<path d="M76.5,244 V75.2 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>ManiFlow, Simulation: 80.0% (990/1237)</title></path>
+<text class="g-gx" x="122.5" y="63.2" text-anchor="middle">80.0%</text>
+<text x="122.5" y="91.2" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">990/1237</text>
+<path d="M178.5,244 V72.8 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>ManiFlow, Real robot: 81.1% (43/53)</title></path>
+<text class="g-gx" x="224.5" y="60.8" text-anchor="middle">81.1%</text>
+<text x="224.5" y="88.8" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">43/53</text>
+<text class="g-gx" x="173.5" y="266" text-anchor="middle">ManiFlow</text><text class="g-ax" x="173.5" y="282" text-anchor="middle">single skills, per command</text>
+<path d="M327.5,244 V128.1 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>Molmo 2 + ManiFlow, Simulation: 55.5% (111/200)</title></path>
+<text class="g-gx" x="373.5" y="116.1" text-anchor="middle">55.5%</text>
+<text x="373.5" y="144.1" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">111/200</text>
+<path d="M429.5,244 V140.0 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>Molmo 2 + ManiFlow, Real robot: 50.0% (15/30)</title></path>
+<text class="g-gx" x="475.5" y="128.0" text-anchor="middle">50.0%</text>
+<text x="475.5" y="156.0" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">15/30</text>
+<text class="g-gx" x="424.5" y="266" text-anchor="middle">Molmo 2 + ManiFlow</text><text class="g-ax" x="424.5" y="282" text-anchor="middle">easy spelling tasks, per episode</text>
+<text class="g-ax" x="12" y="136" text-anchor="middle" transform="rotate(-90 12 136)">success rate (%)</text></svg>
+</div>
+    <figcaption>Success on seen blocks. ManiFlow is scored per command and Molmo 2 + ManiFlow per episode, so the two groups use different denominators; the counts are shown on the bars.</figcaption>
+  </figure>
+  <p>For both, the real-robot results are consistent with simulation. Both also need more trials before they can support any substantial claim. The spelling runs used the easiest setting, with every letter visible and upright.</p>
+  <p class="docs">How the transfer works: <a href="sim2real.html">Sim-to-real Toolkit</a></p>
+</div></section>
+
+<section id="agents"><div class="col">
+  <h2>Frontier-model agents</h2>
+  <p>With the <a href="agentic.html">Agentic Framework</a>, a frontier model (Claude Opus 5.5 in these runs) sees the camera images and calls ToyBlocks skills as MCP tools, pointing at the block it wants. It gets no success signal, so it has to decide for itself when the task is done, or when it can't be done.</p>
+  <figure>
+    <video data-src="media/ag_blog.mp4" poster="media/ag_blog.jpg" muted loop playsinline></video>
+    <figcaption>Claude Fable 5.1 searching for and stacking the blocks that spell "AI2". Partway through, it stops to test a hypothesis about how the gripper's yaw changes a block's orientation, confirms it, and then builds the tower, but the A ends up sideways. Mistakes like this are common even for models that plan and search well.</figcaption>
+  </figure>
+  <div class="nums">
+    <div><b>30 / 30</b><span>classical block-stacking planning tasks solved from text descriptions</span></div>
+    <div><b>30 / 30</b><span>of the same tasks solved closed loop, choosing each action from camera images</span></div>
+    <div><b>63%</b><span>of search-and-spell tasks solved, or correctly declared impossible</span></div>
+    <div><b>13%, 15%</b><span>of search-and-spell tasks lost to look-alike letters, and to a letter stacked in the wrong orientation</span></div>
+  </div>
+  <h3>Search and spell</h3>
+  <p>The agent has to stack a three-letter word, finding the letters among up to eight blocks. In half of the scenes a letter is missing, and then the right answer is to say the task is impossible. On patterned blocks, each block carries one letter in several forms (upper and lower case, plus pictures that start with it), so the agent can work out what a hidden face must show. On unpatterned blocks the faces are unrelated. With patterns the agent finishes having turned over fewer faces, and on infeasible scenes it declares the task impossible much sooner.</p>
+  <figure class="chart">
+<div class="narrow">
+<svg viewBox="0 0 560 96" role="img" aria-label="Unfolded faces of a patterned block (letter A: apple, ant, airplane, A, a and 1) and of an unpatterned block (unrelated faces)"><rect x="110" y="3" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><rect x="116.0" y="15.4" width="16" height="3.2" rx="1.6" fill="#3b78e7"/><polygon points="125.0,17.0 121.0,9.0 118.5,9.0 121.5,17.0 118.5,25.0 121.0,25.0" fill="#3b78e7"/><polygon points="118.0,17.0 116.0,12.5 114.5,12.5 115.5,17.0 114.5,21.5 116.0,21.5" fill="#3b78e7"/><rect x="80" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><circle cx="94.0" cy="48.5" r="5.5" fill="#d9478a"/><path d="M94.0,43.0 q2,-4 5,-4" stroke="#2c9a5a" stroke-width="1.6" fill="none"/><rect x="110" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="124.0" y="47.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d9478a">A</text><rect x="140" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><circle cx="149.0" cy="47.0" r="2.6" fill="#149c9c"/><circle cx="154.0" cy="47.0" r="2.2" fill="#149c9c"/><circle cx="159.0" cy="47.0" r="3" fill="#149c9c"/><rect x="170" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="184.0" y="47.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d9478a">a</text><rect x="110" y="63" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="124.0" y="77.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d9478a">1</text><rect x="390" y="3" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><ellipse cx="404.0" cy="17.0" rx="7" ry="4" transform="rotate(-30 404.0 17.0)" fill="#149c9c"/><rect x="360" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="374.0" y="47.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d9478a">r</text><rect x="390" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><circle cx="399.0" cy="47.0" r="2.6" fill="#3b78e7"/><circle cx="404.0" cy="47.0" r="2.2" fill="#3b78e7"/><circle cx="409.0" cy="47.0" r="3" fill="#3b78e7"/><rect x="420" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="434.0" y="47.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d9478a">a</text><rect x="450" y="33" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="464.0" y="47.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#149c9c">4</text><rect x="390" y="63" width="28" height="28" rx="3" fill="#fbf3e2" stroke="#c9b08a"/><text x="404.0" y="77.5" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-weight="700" font-size="17" fill="#d79a0f">1</text></svg>
+<div class="legend nets-legend"><span><i style="background:var(--g-mf)"></i>patterned blocks</span><span><i class="hatch"></i>unpatterned blocks</span></div>
+<div class="legend"><span><i class="dot" style="background:#fff"></i>correct</span><span><i class="dot" style="background:#f2b51d"></i>letter rotated or look-alike</span><span><i class="dot" style="background:#33bcd6"></i>block out of reach; reported</span><span><i class="x">×</i>no report (budget used up)</span></div>
+</div>
+<div class="hscroll wide narrow">
+<svg viewBox="0 0 560 290" role="img" aria-label="Letter-block faces exposed by the end of each search-and-spell episode, with one marker per episode: feasible tasks 70% patterned, 77% unpatterned; infeasible tasks 78% patterned, 95% unpatterned">
+<defs><pattern id="g-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#e6e9ee"/><line x1="0" y1="0" x2="0" y2="7" stroke="#8d95a1" stroke-width="2"/></pattern></defs>
+<line x1="48" y1="240.0" x2="550" y2="240.0" class="g-base"/><text class="g-ax" x="40" y="244.0" text-anchor="end">0</text>
+<line x1="48" y1="185.0" x2="550" y2="185.0" class="g-grid"/><text class="g-ax" x="40" y="189.0" text-anchor="end">25</text>
+<line x1="48" y1="130.0" x2="550" y2="130.0" class="g-grid"/><text class="g-ax" x="40" y="134.0" text-anchor="end">50</text>
+<line x1="48" y1="75.0" x2="550" y2="75.0" class="g-grid"/><text class="g-ax" x="40" y="79.0" text-anchor="end">75</text>
+<line x1="48" y1="20.0" x2="550" y2="20.0" class="g-grid"/><text class="g-ax" x="40" y="24.0" text-anchor="end">100</text>
+<path d="M76.5,240 V90.0 q0,-4 4,-4 h84 q4,0 4,4 V240 Z" fill="var(--g-mf)"><title>Feasible tasks, patterned blocks: 70% of faces exposed on average</title></path>
+<rect x="103.5" y="216" width="38" height="17" rx="3" fill="#ffffffd9"/><text class="g-bv" x="122.5" y="228.5" text-anchor="middle">70%</text>
+<circle cx="106.3" cy="102.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 62% of faces, correct</title></circle>
+<circle cx="112.9" cy="107.4" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 60% of faces, letter rotated or look-alike</title></circle>
+<circle cx="116.2" cy="63.2" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 80% of faces, letter rotated or look-alike</title></circle>
+<circle cx="116.4" cy="93.7" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 66% of faces, correct</title></circle>
+<circle cx="119.7" cy="80.1" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 73% of faces, block out of reach; reported</title></circle>
+<circle cx="122.7" cy="32.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 94% of faces, correct</title></circle>
+<circle cx="122.7" cy="69.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 78% of faces, correct</title></circle>
+<circle cx="123.0" cy="87.9" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 69% of faces, correct</title></circle>
+<circle cx="123.0" cy="98.4" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 64% of faces, letter rotated or look-alike</title></circle>
+<circle cx="123.0" cy="121.3" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 54% of faces, letter rotated or look-alike</title></circle>
+<circle cx="123.0" cy="43.5" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 89% of faces, block out of reach; reported</title></circle>
+<circle cx="123.0" cy="57.1" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 83% of faces, block out of reach; reported</title></circle>
+<circle cx="123.0" cy="107.4" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 60% of faces, block out of reach; reported</title></circle>
+<circle cx="129.6" cy="118.1" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 55% of faces, correct</title></circle>
+<circle cx="129.6" cy="84.7" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 71% of faces, block out of reach; reported</title></circle>
+<circle cx="129.6" cy="93.7" r="4.3" fill="#33bcd6" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 66% of faces, block out of reach; reported</title></circle>
+<g stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round"><title>Feasible tasks, patterned blocks: one episode, 78% of faces, no report (budget used up)</title><line x1="128.84" y1="65.40226171243944" x2="136.84" y2="73.40226171243944"/><line x1="128.84" y1="73.40226171243944" x2="136.84" y2="65.40226171243944"/></g>
+<circle cx="132.8" cy="107.4" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 60% of faces, letter rotated or look-alike</title></circle>
+<circle cx="139.7" cy="106.0" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 61% of faces, letter rotated or look-alike</title></circle>
+<circle cx="146.2" cy="103.0" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, patterned blocks: one episode, 62% of faces, letter rotated or look-alike</title></circle>
+<path d="M178.5,240 V74.6 q0,-4 4,-4 h84 q4,0 4,4 V240 Z" fill="url(#g-hatch)" stroke="#8d95a1" stroke-width="1"><title>Feasible tasks, unpatterned blocks: 77% of faces exposed on average</title></path>
+<rect x="205.5" y="216" width="38" height="17" rx="3" fill="#ffffffd9"/><text class="g-bv" x="224.5" y="228.5" text-anchor="middle">77%</text>
+<circle cx="205.0" cy="57.1" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 83% of faces, letter rotated or look-alike</title></circle>
+<circle cx="214.9" cy="57.0" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 83% of faces, correct</title></circle>
+<circle cx="218.2" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="218.4" cy="84.5" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 71% of faces, letter rotated or look-alike</title></circle>
+<circle cx="221.9" cy="63.2" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 80% of faces, correct</title></circle>
+<circle cx="225.0" cy="47.9" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 87% of faces, letter rotated or look-alike</title></circle>
+<circle cx="225.0" cy="87.7" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 69% of faces, letter rotated or look-alike</title></circle>
+<circle cx="225.0" cy="106.0" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 61% of faces, letter rotated or look-alike</title></circle>
+<circle cx="225.2" cy="26.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 97% of faces, correct</title></circle>
+<circle cx="225.2" cy="70.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 77% of faces, correct</title></circle>
+<circle cx="225.2" cy="118.1" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 55% of faces, correct</title></circle>
+<circle cx="228.5" cy="61.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 81% of faces, correct</title></circle>
+<circle cx="228.5" cy="98.4" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 64% of faces, letter rotated or look-alike</title></circle>
+<circle cx="231.8" cy="69.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 78% of faces, correct</title></circle>
+<circle cx="231.8" cy="116.7" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 56% of faces, correct</title></circle>
+<circle cx="231.8" cy="25.2" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 98% of faces, letter rotated or look-alike</title></circle>
+<circle cx="235.1" cy="87.7" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 69% of faces, letter rotated or look-alike</title></circle>
+<circle cx="238.4" cy="63.2" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 80% of faces, letter rotated or look-alike</title></circle>
+<circle cx="241.7" cy="84.5" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 71% of faces, letter rotated or look-alike</title></circle>
+<circle cx="244.9" cy="57.0" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Feasible tasks, unpatterned blocks: one episode, 83% of faces, correct</title></circle>
+<path d="M327.5,240 V72.4 q0,-4 4,-4 h84 q4,0 4,4 V240 Z" fill="var(--g-mf)"><title>Infeasible tasks, patterned blocks: 78% of faces exposed on average</title></path>
+<rect x="354.5" y="216" width="38" height="17" rx="3" fill="#ffffffd9"/><text class="g-bv" x="373.5" y="228.5" text-anchor="middle">78%</text>
+<circle cx="360.6" cy="98.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 64% of faces, correct</title></circle>
+<circle cx="367.2" cy="25.0" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 98% of faces, correct</title></circle>
+<circle cx="367.2" cy="69.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 78% of faces, correct</title></circle>
+<circle cx="367.2" cy="102.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 62% of faces, correct</title></circle>
+<circle cx="373.7" cy="26.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 97% of faces, correct</title></circle>
+<circle cx="373.7" cy="38.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 91% of faces, correct</title></circle>
+<circle cx="373.7" cy="51.1" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 86% of faces, correct</title></circle>
+<circle cx="373.7" cy="63.2" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 80% of faces, correct</title></circle>
+<circle cx="373.7" cy="87.9" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 69% of faces, correct</title></circle>
+<circle cx="373.7" cy="102.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 62% of faces, correct</title></circle>
+<circle cx="373.7" cy="112.1" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 58% of faces, correct</title></circle>
+<circle cx="374.0" cy="75.4" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 75% of faces, letter rotated or look-alike</title></circle>
+<circle cx="380.6" cy="25.0" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 98% of faces, correct</title></circle>
+<circle cx="380.6" cy="48.1" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 87% of faces, correct</title></circle>
+<circle cx="380.6" cy="57.0" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 83% of faces, correct</title></circle>
+<circle cx="380.6" cy="69.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 78% of faces, correct</title></circle>
+<circle cx="380.6" cy="81.5" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 72% of faces, correct</title></circle>
+<circle cx="380.6" cy="107.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 60% of faces, correct</title></circle>
+<circle cx="383.8" cy="99.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 64% of faces, correct</title></circle>
+<circle cx="387.1" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, patterned blocks: one episode, 100% of faces, correct</title></circle>
+<path d="M429.5,240 V35.0 q0,-4 4,-4 h84 q4,0 4,4 V240 Z" fill="url(#g-hatch)" stroke="#8d95a1" stroke-width="1"><title>Infeasible tasks, unpatterned blocks: 95% of faces exposed on average</title></path>
+<rect x="456.5" y="216" width="38" height="17" rx="3" fill="#ffffffd9"/><text class="g-bv" x="475.5" y="228.5" text-anchor="middle">95%</text>
+<circle cx="425.9" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<g stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, no report (budget used up)</title><line x1="431.785" y1="16.533117932148627" x2="439.785" y2="24.533117932148627"/><line x1="431.785" y1="24.533117932148627" x2="439.785" y2="16.533117932148627"/></g>
+<circle cx="442.4" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="452.2" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="459.3" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="465.9" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="469.2" cy="32.8" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 94% of faces, correct</title></circle>
+<circle cx="472.4" cy="25.2" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 98% of faces, correct</title></circle>
+<circle cx="475.7" cy="34.2" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 94% of faces, correct</title></circle>
+<circle cx="475.7" cy="61.8" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 81% of faces, letter rotated or look-alike</title></circle>
+<circle cx="475.7" cy="70.8" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 77% of faces, letter rotated or look-alike</title></circle>
+<circle cx="475.7" cy="81.5" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 72% of faces, letter rotated or look-alike</title></circle>
+<circle cx="479.0" cy="26.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 97% of faces, correct</title></circle>
+<circle cx="482.3" cy="34.2" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 94% of faces, correct</title></circle>
+<circle cx="489.4" cy="26.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 97% of faces, correct</title></circle>
+<circle cx="495.9" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="505.8" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="512.4" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="522.7" cy="20.4" r="4.3" fill="#ffffff" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, correct</title></circle>
+<circle cx="529.3" cy="20.5" r="4.3" fill="#f2b51d" stroke="var(--ink)" stroke-width="1.4"><title>Infeasible tasks, unpatterned blocks: one episode, 100% of faces, letter rotated or look-alike</title></circle>
+<text class="g-gx" x="173.5" y="264" text-anchor="middle">Feasible tasks</text><text class="g-gx" x="424.5" y="264" text-anchor="middle">Infeasible tasks</text>
+<text class="g-ax" x="12" y="130" text-anchor="middle" transform="rotate(-90 12 130)">faces exposed (%)</text></svg>
+</div>
+    <figcaption>Share of letter-block faces the agent had exposed by the end of each search-and-spell episode. Bars average 20 episodes; each marker is one episode, styled by outcome. A patterned block carries one letter in several forms (for the A block: A, a, an apple, an ant, an airplane and a 1), while an unpatterned block's six faces are unrelated. <i>Correct</i>: the tower spelled the word, or the agent correctly declared an infeasible task impossible. <i>Letter rotated or look-alike</i>: the tower was built but a letter was turned or a look-alike was used. <i>Block out of reach; reported</i>: a needed block was pushed out of the arm's reach and the agent reported it. <i>No report</i>: the agent used up its skill budget without claiming either outcome. With patterned blocks the agent finishes having seen fewer faces, because it can infer what hidden faces show. Per-episode values are read off the blog post's chart.</figcaption>
+  </figure>
+  <h3>Learning its own skill descriptions</h3>
+  <p>When a skill behaves unexpectedly, the agent forms a hypothesis, runs a small test and revises its understanding, then writes its own descriptions of the skills. Those learned descriptions work better than the ones an expert wrote.</p>
+  <figure class="chart">
+<div class="narrow">
+<svg viewBox="0 0 560 214" role="img" aria-label="Search-and-spell success with different skill descriptions: default 24%, expert-written 36%, learned by the agent 63%">
+<text class="g-r" x="0" y="22">Default skill descriptions</text>
+<rect x="0" y="30" width="470.0" height="22" rx="4" fill="var(--soft)"/>
+<rect x="0" y="30" width="112.8" height="22" rx="4" fill="var(--g-mp2)"><title>Default skill descriptions: 24%</title></rect>
+<text class="g-v b" x="120.8" y="46">24%</text>
+<text class="g-r" x="0" y="84">Written by a human expert</text>
+<rect x="0" y="92" width="470.0" height="22" rx="4" fill="var(--soft)"/>
+<rect x="0" y="92" width="169.2" height="22" rx="4" fill="var(--g-mp2)"><title>Written by a human expert: 36%</title></rect>
+<text class="g-v b" x="177.2" y="108">36%</text>
+<text class="g-r b" x="0" y="146">Learned by the agent from its own experiments</text>
+<rect x="0" y="154" width="470.0" height="22" rx="4" fill="var(--soft)"/>
+<rect x="0" y="154" width="296.1" height="22" rx="4" fill="var(--g-mp)"><title>Learned by the agent from its own experiments: 63%</title></rect>
+<text class="g-v b" x="304.1" y="170">63%</text>
+</svg>
+</div>
+    <figcaption>Search-and-spell success rate with each set of skill descriptions.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#experiments-and-further-reading">agentic experiments</a></p>
+</div></section>
+
+<section id="wm"><div class="col">
+  <h2>World model as a simulator</h2>
+  <p>Action-conditioned world models predict how a scene changes in response to a robot's actions, and using them in place of model-based simulators is an active area of research. Because ToyBlocks knows the true state of every block, we can test how accurately they predict physical interactions.</p>
+  <p><b>Setup.</b> We trained or fit three types of models on four tasks (pick-and-place, flip, rotate, and a mixed task): a video prediction model (Wan 2.2), an agentic model that created its own physics simulator (Astra), and a latent world model (LeWM). Each task has 900 trajectories. Half succeed and half fail because the trajectory was changed slightly, so always predicting success is right only half the time. Each model gets an initial image and the actions. On full trajectories this is the first image of the episode; on short interaction segments (a single pick, place, flip, or rotate) it is the real image immediately before that interaction. Small probes trained on simulator labels read block pose, gripper pose and success from each prediction.</p>
+  <figure class="chart">
+    <div class="legend"><span><i style="background:var(--g-mf)"></i>full trajectory</span><span><i style="background:#aab3bf"></i>interaction segment</span><span><i class="dash"></i>random guess (50% outcome accuracy)</span></div>
+<div class="hscroll">
+<svg viewBox="0 0 900 320" role="img" aria-label="World models as simulators: object pose error, end-effector pose error and outcome prediction accuracy for Wan 2.2, Astra and LeWM, on full trajectories and on interaction segments">
+<text class="g-t" x="10" y="18">Object pose error (cm)</text><text class="g-s" x="10" y="36">↓ lower is better</text>
+<line x1="40" y1="262.0" x2="298" y2="262.0" class="g-base"/><text class="g-ax" x="34" y="266.0" text-anchor="end">0</text>
+<line x1="40" y1="194.0" x2="298" y2="194.0" class="g-grid"/><text class="g-ax" x="34" y="198.0" text-anchor="end">10</text>
+<line x1="40" y1="126.0" x2="298" y2="126.0" class="g-grid"/><text class="g-ax" x="34" y="130.0" text-anchor="end">20</text>
+<line x1="40" y1="58.0" x2="298" y2="58.0" class="g-grid"/><text class="g-ax" x="34" y="62.0" text-anchor="end">30</text>
+<path d="M51.0,262 V258.6 q0,-3.4 3.4,-3.4 h23.2 q3.4,0 3.4,3.4 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.0 cm</title></path>
+<text class="g-bv" x="66.0" y="250.2" text-anchor="middle">1.0</text>
+<path d="M85.0,262 V259.6 q0,-2.4 2.4,-2.4 h25.2 q2.4,0 2.4,2.4 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.7 cm</title></path>
+<text class="g-bv" x="100.0" y="252.2" text-anchor="middle">0.7</text>
+<text class="g-gx" x="83.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="83.0" y="298" text-anchor="middle">Wan 2.2</text>
+<path d="M137.0,262 V223.8 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 6.2 cm</title></path>
+<text class="g-bv" x="152.0" y="214.8" text-anchor="middle">6.2</text>
+<path d="M171.0,262 V222.5 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 6.4 cm</title></path>
+<text class="g-bv" x="186.0" y="213.5" text-anchor="middle">6.4</text>
+<text class="g-gx" x="169.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="169.0" y="298" text-anchor="middle">Astra</text>
+<path d="M223.0,262 V102.8 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 24 cm</title></path>
+<text class="g-bv" x="238.0" y="93.8" text-anchor="middle">24</text>
+<path d="M257.0,262 V191.2 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 11 cm</title></path>
+<text class="g-bv" x="272.0" y="182.2" text-anchor="middle">11</text>
+<text class="g-gx" x="255.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="255.0" y="298" text-anchor="middle">LeWM</text>
+<text class="g-t" x="306" y="18">End-effector pose error (cm)</text><text class="g-s" x="306" y="36">↓ lower is better</text>
+<line x1="336" y1="262.0" x2="594" y2="262.0" class="g-base"/><text class="g-ax" x="330" y="266.0" text-anchor="end">0</text>
+<line x1="336" y1="194.0" x2="594" y2="194.0" class="g-grid"/><text class="g-ax" x="330" y="198.0" text-anchor="end">10</text>
+<line x1="336" y1="126.0" x2="594" y2="126.0" class="g-grid"/><text class="g-ax" x="330" y="130.0" text-anchor="end">20</text>
+<line x1="336" y1="58.0" x2="594" y2="58.0" class="g-grid"/><text class="g-ax" x="330" y="62.0" text-anchor="end">30</text>
+<path d="M347.0,262 V255.1 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.6 cm</title></path>
+<text class="g-bv" x="362.0" y="246.1" text-anchor="middle">1.6</text>
+<path d="M381.0,262 V259.3 q0,-2.7 2.7,-2.7 h24.6 q2.7,0 2.7,2.7 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.8 cm</title></path>
+<text class="g-bv" x="396.0" y="251.6" text-anchor="middle">0.8</text>
+<text class="g-gx" x="379.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="379.0" y="298" text-anchor="middle">Wan 2.2</text>
+<path d="M433.0,262 V258.3 q0,-3.7 3.7,-3.7 h22.5 q3.7,0 3.7,3.7 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 1.1 cm</title></path>
+<text class="g-bv" x="448.0" y="249.5" text-anchor="middle">1.1</text>
+<path d="M467.0,262 V256.5 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 1.4 cm</title></path>
+<text class="g-bv" x="482.0" y="247.5" text-anchor="middle">1.4</text>
+<text class="g-gx" x="465.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="465.0" y="298" text-anchor="middle">Astra</text>
+<path d="M519.0,262 V150.4 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 17 cm</title></path>
+<text class="g-bv" x="534.0" y="141.4" text-anchor="middle">17</text>
+<path d="M553.0,262 V208.9 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 8.4 cm</title></path>
+<text class="g-bv" x="568.0" y="199.9" text-anchor="middle">8.4</text>
+<text class="g-gx" x="551.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="551.0" y="298" text-anchor="middle">LeWM</text>
+<text class="g-t" x="602" y="18">Outcome prediction accuracy (%)</text><text class="g-s" x="602" y="36">↑ higher is better</text>
+<line x1="632" y1="262.0" x2="890" y2="262.0" class="g-base"/><text class="g-ax" x="626" y="266.0" text-anchor="end">0</text>
+<line x1="632" y1="221.2" x2="890" y2="221.2" class="g-grid"/><text class="g-ax" x="626" y="225.2" text-anchor="end">20</text>
+<line x1="632" y1="180.4" x2="890" y2="180.4" class="g-grid"/><text class="g-ax" x="626" y="184.4" text-anchor="end">40</text>
+<line x1="632" y1="139.6" x2="890" y2="139.6" class="g-grid"/><text class="g-ax" x="626" y="143.6" text-anchor="end">60</text>
+<line x1="632" y1="98.8" x2="890" y2="98.8" class="g-grid"/><text class="g-ax" x="626" y="102.8" text-anchor="end">80</text>
+<line x1="632" y1="58.0" x2="890" y2="58.0" class="g-grid"/><text class="g-ax" x="626" y="62.0" text-anchor="end">100</text>
+<line x1="632" y1="160.0" x2="890" y2="160.0" class="g-dom"/>
+<path d="M643.0,262 V64.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 99 %</title></path>
+<text class="g-bv" x="658.0" y="55.0" text-anchor="middle">99</text>
+<path d="M677.0,262 V64.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 99 %</title></path>
+<text class="g-bv" x="692.0" y="55.0" text-anchor="middle">99</text>
+<text class="g-gx" x="675.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="675.0" y="298" text-anchor="middle">Wan 2.2</text>
+<path d="M729.0,262 V129.3 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 67 %</title></path>
+<text class="g-bv" x="744.0" y="120.3" text-anchor="middle">67</text>
+<path d="M763.0,262 V129.3 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 67 %</title></path>
+<text class="g-bv" x="778.0" y="120.3" text-anchor="middle">67</text>
+<text class="g-gx" x="761.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="761.0" y="298" text-anchor="middle">Astra</text>
+<path d="M815.0,262 V162.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 51 %</title></path>
+<text class="g-bv" x="830.0" y="153.0" text-anchor="middle">51</text>
+<path d="M849.0,262 V133.4 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 65 %</title></path>
+<text class="g-bv" x="864.0" y="124.4" text-anchor="middle">65</text>
+<text class="g-gx" x="847.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="847.0" y="298" text-anchor="middle">LeWM</text>
+</svg>
+</div>
+    <figcaption>Averages over the four tasks or the four interaction-segment types; the dashed line marks a random guess. Astra starts from the true initial object poses.</figcaption>
+  </figure>
+  <p><b>Video models predict interactions best.</b> Wan 2.2 tracks the blocks to about a centimeter and predicts 99% of outcomes correctly.</p>
+  <p><b>Tracking the robot is not the same as simulating contact.</b> Astra follows the gripper closely (1.1 cm) but predicts only 67% of outcomes.</p>
+  <p><b>Latent models capture short interactions but drift over long ones.</b> LeWM predicts 65% of outcomes on short interaction segments, but its block error grows to 24 cm over full trajectories.</p>
+  <p><b>Better world models produce better training data.</b> Adding 100 Wan 2.2 rollouts from a part of the table with no real demonstrations raises ManiFlow's success there from 19% to 78%.</p>
+</div></section>
+
+<section><div class="col pager"><a href="agentic.html">← Agentic Framework</a><a href="index.html">Overview →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

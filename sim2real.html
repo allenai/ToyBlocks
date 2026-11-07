@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ToyBlocks Sim-to-real Toolkit</title>
+<meta name="description" content="Policies trained only on ToyBlocks data, run on a real Franka FR3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="nav"><div class="col">
+  <a class="home" href="index.html"><img src="assets/toyblocks-logo.svg" alt="ToyBlocks" width="1313" height="329"></a>
+  <div class="links"><a href="index.html">Overview</a><a href="datagen.html">Data generation</a><a href="evals.html">Training and evaluation</a><a href="sim2real.html">Sim-to-real Toolkit</a><a href="agentic.html">Agentic Framework</a><a href="experiments.html">Experiments</a></div>
+  <div class="ext"><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a><a href="https://github.com/allenai/ToyBlocks">GitHub</a><a class="ai2" href="https://allenai.org"><img src="assets/ai2-logo.svg" alt="Ai2" width="665" height="211"></a></div>
+</div></nav>
+<header class="ptitle"><div class="col">
+  <div class="label">Sim-to-real Toolkit</div>
+  <h1>Trained in simulation, tested on a real arm</h1>
+  <p class="sub">We trained Molmo 2 (high level) and ManiFlow (low level) only on ToyBlocks data, with no real-world demonstrations, and ran them on a Franka FR3 with a Robotiq gripper.</p>
+</div></header>
+
+<section style="border-top:0;padding-top:8px"><div class="col">
+  <figure>
+    <video data-src="media/s2r_side.mp4" poster="media/s2r_side.jpg" muted loop playsinline></video>
+    <figcaption>The same task on the real robot (left) and in simulation (right), with the same high-level model. We re-timed the simulation clip so grasps and releases line up. Pink rings mark the high-level model's target point for the current skill.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="col">
+  <h2>Results</h2>
+  <a class="results-link" href="experiments.html#real"><b>Results</b><span>Single skills and full spelling tasks succeeded about as often on the real robot as in simulation. See the numbers and the chart.</span><em>Real-robot results →</em></a>
+</div></section>
+
+<section><div class="col side">
+  <div>
+    <h2>How the policy runs</h2>
+    <p>Molmo 2 looks at the front camera and decides what to do next: which skill, and a point in the image that marks the block. ManiFlow takes that command and controls the arm. Both were trained on renders with heavy domain randomization (lighting, backgrounds, table materials, camera poses and intrinsics), which is a big part of why the real lab doesn't look out of place to them.</p>
+    <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html">rendering</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a></p>
+  </div>
+  <figure><video data-src="media/s2r_real.mp4" poster="media/s2r_real.jpg" muted loop playsinline></video><figcaption>The real robot stacking green on N on X.</figcaption></figure>
+</div></section>
+
+<section><div class="col">
+  <h2>What's in the repo</h2>
+  <p>The simulation side is in the repo today: generated environments start from a calibrated copy of our real workcell.</p>
+  <p class="note"><b>Coming soon:</b> a toolkit for sim-to-real transfer, including the code that runs policies on the real robot and a guide to performing system identification.</p>
+  <figure>
+    <div class="pair">
+      <img src="media/s2r_scene_real.jpg" alt="The real workcell from the front camera" width="960" height="540">
+      <img src="media/s2r_scene_sim.jpg" alt="The sim2real scene from the front camera" width="640" height="368">
+    </div>
+    <figcaption>The real workcell (left) and the <code>sim2real</code> scene in simulation (right), both seen from the front camera.</figcaption>
+  </figure>
+  <ul>
+    <li><b>The <code>sim2real</code> scene</b> is the default scene for every generated environment. It reproduces the real cell, including calibrated front-camera extrinsics and intrinsics, and datasets record it as their <code>scene_id</code>. <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/env_generation.html#flags">Scene and robot flags</a></li>
+    <li><b><code>fr3_robotiq_gripper_sysid</code></b> is an FR3 with a Robotiq gripper and system-identified joint armature and friction values. <a href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/robots/configs/fr3_sysid_isaac_rcs.py">Robot config</a></li>
+    <li><b><code>--use-calibrated-cameras</code></b> is on by default in evals and gives every environment the real cameras' intrinsics. <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#evaluating-on-rendered-datasets">Cameras in evaluation</a></li>
+  </ul>
+  <div class="thumbs">
+    <img src="media/ri_front_camera_0_0.jpg" alt="Randomized render of the tabletop"><img src="media/ri_front_camera_1_0.jpg" alt="Randomized render of the tabletop">
+    <img src="media/ri_front_camera_2_1.jpg" alt="Randomized render of the tabletop"><img src="media/ri_front_camera_3_1.jpg" alt="Randomized render of the tabletop">
+    <img src="media/rg_front_camera_0_2.jpg" alt="Randomized render of the tabletop"><img src="media/rg_front_camera_1_3.jpg" alt="Randomized render of the tabletop">
+    <img src="media/rg_front_camera_2_2.jpg" alt="Randomized render of the tabletop"><img src="media/rg_front_camera_3_3.jpg" alt="Randomized render of the tabletop">
+  </div>
+  <p class="docs" style="margin-top:8px">Frames from two randomized render passes of the training data.</p>
+</div></section>
+
+<section><div class="col pager"><a href="evals.html">← Training and evaluation</a><a href="agentic.html">Agentic Framework →</a></div></section>
+<footer><div class="col">
+  <div>ToyBlocks is open source under Apache-2.0 · <a href="https://github.com/allenai/ToyBlocks">github.com/allenai/ToyBlocks</a></div>
+  <div><a href="https://allenai.github.io/ToyBlocks/docs/">Docs</a> · <a href="https://allenai.org/blog/toyblocks">Blog</a> · <a href="https://huggingface.co/collections/allenai/toyblocks">Models and data</a></div>
+</div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
