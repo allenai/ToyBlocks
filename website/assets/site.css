@@ -233,3 +233,10 @@ figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .nets-legend { justify-content: space-around; margin-top: 2px; }
 .legend i.dot { width: 11px; height: 11px; border-radius: 50%; border: 1.4px solid var(--ink); }
 .legend i.x { width: auto; height: auto; font-style: normal; font-weight: 700; font-size: 16px; line-height: 1; color: var(--ink); }
+/* pointer from a component page to its results on the Experiments page */
+.results-link { display: flex; align-items: center; gap: 14px; margin-top: 18px; padding: 13px 16px; border: 1px solid var(--line); border-left: 3px solid var(--pink); border-radius: 8px; color: var(--body); background: var(--bg); }
+.results-link:hover { text-decoration: none; border-color: var(--pink); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.results-link b { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--pink); flex: none; }
+.results-link span { font-size: 15px; line-height: 1.45; flex: 1; }
+.results-link em { font-style: normal; font-weight: 600; font-size: 15px; color: var(--link); white-space: nowrap; flex: none; }
+@media (max-width: 640px) { .results-link { flex-wrap: wrap; gap: 4px 10px; } .results-link span { flex-basis: 100%; order: 2; } .results-link em { order: 3; } }
