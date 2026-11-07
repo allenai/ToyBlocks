@@ -23,8 +23,8 @@
   <nav class="toc-cards" aria-label="Experiments on this page">
     <a href="#ll"><i>1</i><b>VLA spatial generalization</b><span>What happens when the test region moves, and five ways to recover</span></a>
     <a href="#hl"><i>2</i><b>Molmo 2 on new blocks</b><span>High-level planning on seen and held-out blocks, easy to hard</span></a>
-    <a href="#agents"><i>3</i><b>Frontier-model agents</b><span>Planning, searching and spelling through skill tools</span></a>
-    <a href="#real"><i>4</i><b>On a real robot</b><span>How simulation results carry over to a Franka FR3</span></a>
+    <a href="#real"><i>3</i><b>On a real robot</b><span>How simulation results carry over to a Franka FR3</span></a>
+    <a href="#agents"><i>4</i><b>Frontier-model agents</b><span>Planning, searching and spelling through skill tools</span></a>
   </nav>
 </div></header>
 
@@ -449,6 +449,41 @@
   <p class="docs">The modes behind this: <a href="evals.html#modes">Evaluation Modes</a></p>
 </div></section>
 
+<section id="real"><div class="col">
+  <h2>On a real robot</h2>
+  <p>We trained Molmo 2 and ManiFlow only on ToyBlocks data, with no real-world demonstrations, and ran them on a Franka FR3 with a Robotiq gripper. We tested two things: single skills with ManiFlow (pick, place, flip and rotate), and full three-letter spelling tasks with Molmo 2 + ManiFlow. Real-world runs used thirty scene configurations with 4–10 blocks that appear in the training data.</p>
+  <figure class="chart">
+    <div class="legend"><span><i style="background:var(--g-mp)"></i>simulation</span><span><i style="background:var(--g-mf)"></i>real robot</span></div>
+<div class="hscroll wide narrow">
+<svg viewBox="0 0 560 300" role="img" aria-label="Sim-to-real success on seen blocks: ManiFlow single skills 80.0% in simulation (990 of 1237) and 81.1% on the real robot (43 of 53); Molmo 2 plus ManiFlow easy spelling tasks 55.5% in simulation (111 of 200) and 50.0% on the real robot (15 of 30)">
+<line x1="48" y1="244.0" x2="550" y2="244.0" class="g-base"/><text class="g-ax" x="40" y="248.0" text-anchor="end">0</text>
+<line x1="48" y1="200.8" x2="550" y2="200.8" class="g-grid"/><text class="g-ax" x="40" y="204.8" text-anchor="end">20</text>
+<line x1="48" y1="157.6" x2="550" y2="157.6" class="g-grid"/><text class="g-ax" x="40" y="161.6" text-anchor="end">40</text>
+<line x1="48" y1="114.4" x2="550" y2="114.4" class="g-grid"/><text class="g-ax" x="40" y="118.4" text-anchor="end">60</text>
+<line x1="48" y1="71.2" x2="550" y2="71.2" class="g-grid"/><text class="g-ax" x="40" y="75.2" text-anchor="end">80</text>
+<line x1="48" y1="28.0" x2="550" y2="28.0" class="g-grid"/><text class="g-ax" x="40" y="32.0" text-anchor="end">100</text>
+<path d="M76.5,244 V75.2 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>ManiFlow, Simulation: 80.0% (990/1237)</title></path>
+<text class="g-gx" x="122.5" y="63.2" text-anchor="middle">80.0%</text>
+<text x="122.5" y="91.2" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">990/1237</text>
+<path d="M178.5,244 V72.8 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>ManiFlow, Real robot: 81.1% (43/53)</title></path>
+<text class="g-gx" x="224.5" y="60.8" text-anchor="middle">81.1%</text>
+<text x="224.5" y="88.8" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">43/53</text>
+<text class="g-gx" x="173.5" y="266" text-anchor="middle">ManiFlow</text><text class="g-ax" x="173.5" y="282" text-anchor="middle">single skills, per command</text>
+<path d="M327.5,244 V128.1 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>Molmo 2 + ManiFlow, Simulation: 55.5% (111/200)</title></path>
+<text class="g-gx" x="373.5" y="116.1" text-anchor="middle">55.5%</text>
+<text x="373.5" y="144.1" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">111/200</text>
+<path d="M429.5,244 V140.0 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>Molmo 2 + ManiFlow, Real robot: 50.0% (15/30)</title></path>
+<text class="g-gx" x="475.5" y="128.0" text-anchor="middle">50.0%</text>
+<text x="475.5" y="156.0" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">15/30</text>
+<text class="g-gx" x="424.5" y="266" text-anchor="middle">Molmo 2 + ManiFlow</text><text class="g-ax" x="424.5" y="282" text-anchor="middle">easy spelling tasks, per episode</text>
+<text class="g-ax" x="12" y="136" text-anchor="middle" transform="rotate(-90 12 136)">success rate (%)</text></svg>
+</div>
+    <figcaption>Success on seen blocks. ManiFlow is scored per command and Molmo 2 + ManiFlow per episode, so the two groups use different denominators; the counts are shown on the bars.</figcaption>
+  </figure>
+  <p>For both, the real-robot results are consistent with simulation. Both also need more trials before they can support any substantial claim. The spelling runs used the easiest setting, with every letter visible and upright.</p>
+  <p class="docs">How the transfer works: <a href="sim2real.html">Sim-to-real Toolkit</a></p>
+</div></section>
+
 <section id="agents"><div class="col">
   <h2>Frontier-model agents</h2>
   <p>With the <a href="agentic.html">Agentic Framework</a>, a frontier model (Claude Opus 5.5 in these runs) sees the camera images and calls ToyBlocks skills as MCP tools, pointing at the block it wants. It gets no success signal, so it has to decide for itself when the task is done, or when it can't be done.</p>
@@ -593,41 +628,6 @@
     <figcaption>Search-and-spell success rate with each set of skill descriptions.</figcaption>
   </figure>
   <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/agentic_robotics.html#experiments-and-further-reading">agentic experiments</a></p>
-</div></section>
-
-<section id="real"><div class="col">
-  <h2>On a real robot</h2>
-  <p>We trained Molmo 2 and ManiFlow only on ToyBlocks data, with no real-world demonstrations, and ran them on a Franka FR3 with a Robotiq gripper. We tested two things: single skills with ManiFlow (pick, place, flip and rotate), and full three-letter spelling tasks with Molmo 2 + ManiFlow. Real-world runs used thirty scene configurations with 4–10 blocks that appear in the training data.</p>
-  <figure class="chart">
-    <div class="legend"><span><i style="background:var(--g-mp)"></i>simulation</span><span><i style="background:var(--g-mf)"></i>real robot</span></div>
-<div class="hscroll wide narrow">
-<svg viewBox="0 0 560 300" role="img" aria-label="Sim-to-real success on seen blocks: ManiFlow single skills 80.0% in simulation (990 of 1237) and 81.1% on the real robot (43 of 53); Molmo 2 plus ManiFlow easy spelling tasks 55.5% in simulation (111 of 200) and 50.0% on the real robot (15 of 30)">
-<line x1="48" y1="244.0" x2="550" y2="244.0" class="g-base"/><text class="g-ax" x="40" y="248.0" text-anchor="end">0</text>
-<line x1="48" y1="200.8" x2="550" y2="200.8" class="g-grid"/><text class="g-ax" x="40" y="204.8" text-anchor="end">20</text>
-<line x1="48" y1="157.6" x2="550" y2="157.6" class="g-grid"/><text class="g-ax" x="40" y="161.6" text-anchor="end">40</text>
-<line x1="48" y1="114.4" x2="550" y2="114.4" class="g-grid"/><text class="g-ax" x="40" y="118.4" text-anchor="end">60</text>
-<line x1="48" y1="71.2" x2="550" y2="71.2" class="g-grid"/><text class="g-ax" x="40" y="75.2" text-anchor="end">80</text>
-<line x1="48" y1="28.0" x2="550" y2="28.0" class="g-grid"/><text class="g-ax" x="40" y="32.0" text-anchor="end">100</text>
-<path d="M76.5,244 V75.2 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>ManiFlow, Simulation: 80.0% (990/1237)</title></path>
-<text class="g-gx" x="122.5" y="63.2" text-anchor="middle">80.0%</text>
-<text x="122.5" y="91.2" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">990/1237</text>
-<path d="M178.5,244 V72.8 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>ManiFlow, Real robot: 81.1% (43/53)</title></path>
-<text class="g-gx" x="224.5" y="60.8" text-anchor="middle">81.1%</text>
-<text x="224.5" y="88.8" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">43/53</text>
-<text class="g-gx" x="173.5" y="266" text-anchor="middle">ManiFlow</text><text class="g-ax" x="173.5" y="282" text-anchor="middle">single skills, per command</text>
-<path d="M327.5,244 V128.1 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mp)"><title>Molmo 2 + ManiFlow, Simulation: 55.5% (111/200)</title></path>
-<text class="g-gx" x="373.5" y="116.1" text-anchor="middle">55.5%</text>
-<text x="373.5" y="144.1" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">111/200</text>
-<path d="M429.5,244 V140.0 q0,-4 4,-4 h84 q4,0 4,4 V244 Z" fill="var(--g-mf)"><title>Molmo 2 + ManiFlow, Real robot: 50.0% (15/30)</title></path>
-<text class="g-gx" x="475.5" y="128.0" text-anchor="middle">50.0%</text>
-<text x="475.5" y="156.0" text-anchor="middle" font-family="var(--font)" font-size="12.5" font-weight="600" fill="#fff">15/30</text>
-<text class="g-gx" x="424.5" y="266" text-anchor="middle">Molmo 2 + ManiFlow</text><text class="g-ax" x="424.5" y="282" text-anchor="middle">easy spelling tasks, per episode</text>
-<text class="g-ax" x="12" y="136" text-anchor="middle" transform="rotate(-90 12 136)">success rate (%)</text></svg>
-</div>
-    <figcaption>Success on seen blocks. ManiFlow is scored per command and Molmo 2 + ManiFlow per episode, so the two groups use different denominators; the counts are shown on the bars.</figcaption>
-  </figure>
-  <p>For both, the real-robot results are consistent with simulation. Both also need more trials before they can support any substantial claim. The spelling runs used the easiest setting, with every letter visible and upright.</p>
-  <p class="docs">How the transfer works: <a href="sim2real.html">Sim-to-real Toolkit</a></p>
 </div></section>
 
 <section><div class="col pager"><a href="agentic.html">← Agentic Framework</a><a href="index.html">Overview →</a></div></section>
