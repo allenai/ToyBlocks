@@ -34,17 +34,17 @@
   <p>We tested two things: single skills with ManiFlow (pick, place, flip and rotate), and full three-letter spelling tasks with Molmo 2 + ManiFlow. Real-world runs used thirty scene configurations with 4–10 blocks that appear in the training data.</p>
   <div class="tbl-wrap"><table>
     <tr><th></th><th>Simulation</th><th>Real robot</th></tr>
-    <tr><td>ManiFlow, single skills</td><td>80.0%</td><td>81.1%</td></tr>
+    <tr><td>ManiFlow, single skills</td><td>80.0% (990/1237)</td><td>81.1% (43/53)</td></tr>
     <tr><td>Molmo 2 + ManiFlow, three-letter spelling</td><td>55.5% (111/200)</td><td>50.0% (15/30)</td></tr>
   </table></div>
-  <p>Single-skill success is about the same in simulation and on the real robot. The spelling runs used the easiest setting, with every letter visible and upright, and 30 real trials is not many, so we need more trials before reading much into the gap.</p>
+  <p>For both, the real-robot results are consistent with simulation. Both also need more trials before they can support any substantial claim. The spelling runs used the easiest setting, with every letter visible and upright.</p>
   <p class="docs">More detail in the <a href="https://allenai.org/blog/toyblocks">blog post</a>.</p>
 </div></section>
 
 <section><div class="col side">
   <div>
     <h2>How the policy runs</h2>
-    <p>Molmo 2 looks at the front camera and decides what to do next: which skill, and a point in the image that marks the block. ManiFlow takes that command and controls the arm. Both were trained on renders with heavy domain randomization (lighting, backgrounds, table materials, camera poses), which is a big part of why the real lab doesn't look out of place to them.</p>
+    <p>Molmo 2 looks at the front camera and decides what to do next: which skill, and a point in the image that marks the block. ManiFlow takes that command and controls the arm. Both were trained on renders with heavy domain randomization (lighting, backgrounds, table materials, camera poses and intrinsics), which is a big part of why the real lab doesn't look out of place to them.</p>
     <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/render.html">rendering</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/imitation_learning.html">training ManiFlow</a></p>
   </div>
   <figure><video data-src="media/s2r_real.mp4" poster="media/s2r_real.jpg" muted loop playsinline></video><figcaption>The real robot stacking green on N on X.</figcaption></figure>
@@ -52,7 +52,15 @@
 
 <section><div class="col">
   <h2>What's in the repo</h2>
-  <p>The code that drives the physical robot isn't part of this release. The simulation side is: generated environments start from a calibrated copy of our real workcell.</p>
+  <p>The simulation side is in the repo today: generated environments start from a calibrated copy of our real workcell.</p>
+  <p class="note"><b>Coming soon:</b> a toolkit for sim-to-real transfer, including the code that runs policies on the real robot and a guide to performing system identification.</p>
+  <figure>
+    <div class="pair">
+      <img src="media/s2r_scene_real.jpg" alt="The real workcell from the front camera" width="960" height="540">
+      <img src="media/s2r_scene_sim.jpg" alt="The sim2real scene from the front camera" width="640" height="368">
+    </div>
+    <figcaption>The real workcell (left) and the <code>sim2real</code> scene in simulation (right), both seen from the front camera.</figcaption>
+  </figure>
   <ul>
     <li><b>The <code>sim2real</code> scene</b> is the default scene for every generated environment. It reproduces the real cell, including calibrated front-camera extrinsics and intrinsics, and datasets record it as their <code>scene_id</code>. <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/datagen/env_generation.html#flags">Scene and robot flags</a></li>
     <li><b><code>fr3_robotiq_gripper_sysid</code></b> is an FR3 with a Robotiq gripper and system-identified joint armature and friction values. <a href="https://github.com/allenai/ToyBlocks/blob/main/src/toyblocks/robots/configs/fr3_sysid_isaac_rcs.py">Robot config</a></li>

@@ -86,7 +86,7 @@
 
 <section id="render"><div class="col">
   <h2>Rendering</h2>
-  <p>Physics and pixels are separate stages. Execution records what happened; rendering replays each episode and shoots it again with randomized lighting, HDRI backgrounds, table materials, exposure and camera poses. The robot's motion doesn't change, so one simulated episode can be rendered several different ways. Each render pass is a YAML file of flags, and a pass can produce several looks per episode.</p>
+  <p>Physics and pixels are separate stages. Execution records what happened; rendering replays each episode and shoots it again with randomized lighting, HDRI backgrounds, table materials, exposure, and camera poses and intrinsics. The robot's motion doesn't change, so one simulated episode can be rendered several different ways. Each render pass is a YAML file of flags, and a pass can produce several looks per episode.</p>
   <figure>
     <video data-src="media/dg_render.mp4" poster="media/dg_render.jpg" muted loop playsinline></video>
     <figcaption>Episodes from a randomized render pass.</figcaption>
