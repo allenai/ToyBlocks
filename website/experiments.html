@@ -20,12 +20,128 @@
   <div class="label">Experiments</div>
   <h1>What we've found so far</h1>
   <p class="sub">A first set of experiments run with ToyBlocks: how well learned policies generalize, how a high-level model copes with new blocks, and how frontier models plan when they act through skill tools. All numbers here come from the <a href="https://allenai.org/blog/toyblocks">blog post</a>.</p>
-  <div class="toc"><a href="#ll">Low-level generalization</a><a href="#hl">Molmo 2 on new blocks</a><a href="#agents">Frontier-model agents</a><a href="#real">On a real robot</a></div>
+  <div class="toc"><a href="#ll">VLA spatial generalization</a><a href="#hl">Molmo 2 on new blocks</a><a href="#agents">Frontier-model agents</a><a href="#real">On a real robot</a></div>
 </div></header>
 
 <section id="ll" style="border-top:0;padding-top:8px"><div class="col">
-  <h2>Low-level models in new places</h2>
-  <p>We trained low-level action models in one part of the task space and tested them in another: blocks only on the left half of the table during training and on the right half at test time, or stacks of 2 and 5 blocks in training and stacks of 3 and 4 at test time. Despite large-scale pretraining, they generalized poorly at first: 5% on the unseen half of the table, and 29% on unseen stack heights. Each row shows one technique added on its own. With all of them combined, success reaches 81% and 89%, close to the in-domain numbers.</p>
+  <h2>VLA Spatial Generalization</h2>
+  <p>Vision-language-action models (VLAs) use pretraining on large robot datasets. The purpose is that a VLA adapts to a new workspace with a small number of demonstrations. With ToyBlocks, we evaluate the spatial generalization of these action models in a simple setting. Each change in task space is meaningful and easy to reproduce. We change only the block positions or the stack height, and we keep all other conditions the same.</p>
+  <figure style="max-width:640px;margin-inline:auto">
+    <video data-src="media/ll_concept.mp4" poster="media/ll_concept.jpg" width="1280" height="720" style="height:auto;aspect-ratio:1280 / 720" muted loop playsinline></video>
+    <figcaption>The video shows the two shifts in the results below. <b>Left to right</b> (extrapolation): we train with blocks only on the left half of the table and test on the right half. <b>Stack height</b> (interpolation): we train on stacks of 2 and 5 blocks and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <h3>Setup</h3>
+  <p>We use four tasks: Stack, Unstack, Flip and Rotate. Flip has four directions: forward, backward, left and right. Rotate has two directions: clockwise and counterclockwise. The instruction gives the direction.</p>
+  <p>We fine-tune three architectures: <a href="https://arxiv.org/abs/2509.01819">ManiFlow</a>, <a href="https://arxiv.org/abs/2504.16054">π0.5</a> and <a href="https://allenai.org/blog/molmoact2">MolmoAct 2</a>. Each model gets 1,000 demonstrations for each task. The ToyBlocks TAMP planner makes these demonstrations at random positions in the training region. When the test region is the same as the training region, the mean success rate is 72% to 90%.</p>
+  <p>Then we move the test region. We also use three more splits. We train on the inner region and test on the outer region. We train on the outer region and test on the inner region. We train on stacks of 2 and 3 blocks and test on stacks of 4 and 5 blocks.</p>
+  <p>Surprisingly, <b style="color:var(--pink)">these small changes cause large decreases in VLA performance</b>. The models perform well in the training region. However, in the test region, their success rate is low, or they fail. This occurs although the test conditions are very similar to the training conditions. It also occurs although some of these models have pretraining on large datasets.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 366" role="img" aria-label="π0.5">
+<text class="g-t" x="0" y="16">π0.5</text><text class="g-s" x="0" y="34">full fine-tuning, train → test</text>
+<line x1="118.0" y1="62" x2="118.0" y2="322" class="g-grid"/><text class="g-ax" x="118.0" y="340" text-anchor="middle">0</text>
+<line x1="168.0" y1="62" x2="168.0" y2="322" class="g-grid"/><text class="g-ax" x="168.0" y="340" text-anchor="middle">25</text>
+<line x1="218.0" y1="62" x2="218.0" y2="322" class="g-grid"/><text class="g-ax" x="218.0" y="340" text-anchor="middle">50</text>
+<line x1="268.0" y1="62" x2="268.0" y2="322" class="g-grid"/><text class="g-ax" x="268.0" y="340" text-anchor="middle">75</text>
+<line x1="318.0" y1="62" x2="318.0" y2="322" class="g-grid"/><text class="g-ax" x="318.0" y="340" text-anchor="middle">100</text>
+<text class="g-ax" x="364" y="58" text-anchor="end">in-domain</text><text class="g-ax" x="420" y="58" text-anchor="end">shifted</text>
+<text class="g-s" x="0" y="80">Interpolation: the test is between the training cases</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="281.5" y1="106" x2="269.5" y2="106" class="g-l"/>
+<polygon points="262.5,106 269.5,102 269.5,110" style="fill:var(--ink)"/>
+<circle cx="286.0" cy="106" r="4.5" class="g-o"><title>Outer → inner, in-domain success rate: 84%</title></circle>
+<circle cx="256.0" cy="106" r="5" class="g-f"><title>Outer → inner, success in shifted test region: 69%</title></circle>
+<text class="g-ax" x="364" y="110" text-anchor="end">84%</text><text class="g-ax" x="376" y="110" text-anchor="middle">→</text><text class="g-v b" x="420" y="110" text-anchor="end">69%</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="303.5" y1="138" x2="221.5" y2="138" class="g-l"/>
+<polygon points="214.5,138 221.5,134 221.5,142" style="fill:var(--ink)"/>
+<circle cx="308.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4, in-domain success rate: 95%</title></circle>
+<circle cx="208.0" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4, success in shifted test region: 45%</title></circle>
+<text class="g-ax" x="364" y="142" text-anchor="end">95%</text><text class="g-ax" x="376" y="142" text-anchor="middle">→</text><text class="g-v b" x="420" y="142" text-anchor="end">45%</text>
+<text class="g-s" x="0" y="182">Extrapolation: the test is outside the training cases</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="267.5" y1="208" x2="189.5" y2="208" class="g-l"/>
+<polygon points="182.5,208 189.5,204 189.5,212" style="fill:var(--ink)"/>
+<circle cx="272.0" cy="208" r="4.5" class="g-o"><title>Inner → outer, in-domain success rate: 77%</title></circle>
+<circle cx="176.0" cy="208" r="5" class="g-f"><title>Inner → outer, success in shifted test region: 29%</title></circle>
+<text class="g-ax" x="364" y="212" text-anchor="end">77%</text><text class="g-ax" x="376" y="212" text-anchor="middle">→</text><text class="g-v b" x="420" y="212" text-anchor="end">29%</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="273.5" y1="240" x2="151.5" y2="240" class="g-l"/>
+<polygon points="144.5,240 151.5,236 151.5,244" style="fill:var(--ink)"/>
+<circle cx="278.0" cy="240" r="4.5" class="g-o"><title>Left → right, in-domain success rate: 80%</title></circle>
+<circle cx="138.0" cy="240" r="5" class="g-f"><title>Left → right, success in shifted test region: 10%</title></circle>
+<text class="g-ax" x="364" y="244" text-anchor="end">80%</text><text class="g-ax" x="376" y="244" text-anchor="middle">→</text><text class="g-v b" x="420" y="244" text-anchor="end">10%</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="293.5" y1="272" x2="133.5" y2="272" class="g-l"/>
+<polygon points="126.5,272 133.5,268 133.5,276" style="fill:var(--ink)"/>
+<circle cx="298.0" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5, in-domain success rate: 90%</title></circle>
+<circle cx="120.0" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5, success in shifted test region: 1%</title></circle>
+<text class="g-ax" x="364" y="276" text-anchor="end">90%</text><text class="g-ax" x="376" y="276" text-anchor="middle">→</text><text class="g-v b" x="420" y="276" text-anchor="end">1%</text>
+<text class="g-r" x="106" y="308" text-anchor="end">Stack 4,5 → 2,3</text>
+<line x1="295.5" y1="304" x2="163.5" y2="304" class="g-l"/>
+<polygon points="156.5,304 163.5,300 163.5,308" style="fill:var(--ink)"/>
+<circle cx="300.0" cy="304" r="4.5" class="g-o"><title>Stack 4,5 → 2,3, in-domain success rate: 91%</title></circle>
+<circle cx="150.0" cy="304" r="5" class="g-f"><title>Stack 4,5 → 2,3, success in shifted test region: 16%</title></circle>
+<text class="g-ax" x="364" y="308" text-anchor="end">91%</text><text class="g-ax" x="376" y="308" text-anchor="middle">→</text><text class="g-v b" x="420" y="308" text-anchor="end">16%</text>
+<text class="g-ax" x="218.0" y="360" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 366" role="img" aria-label="MolmoAct 2">
+<text class="g-t" x="0" y="16">MolmoAct 2</text><text class="g-s" x="0" y="34">full fine-tuning, train → test</text>
+<line x1="118.0" y1="62" x2="118.0" y2="322" class="g-grid"/><text class="g-ax" x="118.0" y="340" text-anchor="middle">0</text>
+<line x1="168.0" y1="62" x2="168.0" y2="322" class="g-grid"/><text class="g-ax" x="168.0" y="340" text-anchor="middle">25</text>
+<line x1="218.0" y1="62" x2="218.0" y2="322" class="g-grid"/><text class="g-ax" x="218.0" y="340" text-anchor="middle">50</text>
+<line x1="268.0" y1="62" x2="268.0" y2="322" class="g-grid"/><text class="g-ax" x="268.0" y="340" text-anchor="middle">75</text>
+<line x1="318.0" y1="62" x2="318.0" y2="322" class="g-grid"/><text class="g-ax" x="318.0" y="340" text-anchor="middle">100</text>
+<text class="g-ax" x="364" y="58" text-anchor="end">in-domain</text><text class="g-ax" x="420" y="58" text-anchor="end">shifted</text>
+<text class="g-s" x="0" y="80">Interpolation: the test is between the training cases</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<circle cx="294.0" cy="106" r="4.5" class="g-o"><title>Outer → inner, in-domain success rate: 88%</title></circle>
+<circle cx="282.0" cy="106" r="5" class="g-f"><title>Outer → inner, success in shifted test region: 82%</title></circle>
+<text class="g-ax" x="364" y="110" text-anchor="end">88%</text><text class="g-ax" x="376" y="110" text-anchor="middle">→</text><text class="g-v b" x="420" y="110" text-anchor="end">82%</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="283.5" y1="138" x2="145.5" y2="138" class="g-l"/>
+<polygon points="138.5,138 145.5,134 145.5,142" style="fill:var(--ink)"/>
+<circle cx="288.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4, in-domain success rate: 85%</title></circle>
+<circle cx="132.0" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4, success in shifted test region: 7%</title></circle>
+<text class="g-ax" x="364" y="142" text-anchor="end">85%</text><text class="g-ax" x="376" y="142" text-anchor="middle">→</text><text class="g-v b" x="420" y="142" text-anchor="end">7%</text>
+<text class="g-s" x="0" y="182">Extrapolation: the test is outside the training cases</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="281.5" y1="208" x2="209.5" y2="208" class="g-l"/>
+<polygon points="202.5,208 209.5,204 209.5,212" style="fill:var(--ink)"/>
+<circle cx="286.0" cy="208" r="4.5" class="g-o"><title>Inner → outer, in-domain success rate: 84%</title></circle>
+<circle cx="196.0" cy="208" r="5" class="g-f"><title>Inner → outer, success in shifted test region: 39%</title></circle>
+<text class="g-ax" x="364" y="212" text-anchor="end">84%</text><text class="g-ax" x="376" y="212" text-anchor="middle">→</text><text class="g-v b" x="420" y="212" text-anchor="end">39%</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="261.5" y1="240" x2="155.5" y2="240" class="g-l"/>
+<polygon points="148.5,240 155.5,236 155.5,244" style="fill:var(--ink)"/>
+<circle cx="266.0" cy="240" r="4.5" class="g-o"><title>Left → right, in-domain success rate: 74%</title></circle>
+<circle cx="142.0" cy="240" r="5" class="g-f"><title>Left → right, success in shifted test region: 12%</title></circle>
+<text class="g-ax" x="364" y="244" text-anchor="end">74%</text><text class="g-ax" x="376" y="244" text-anchor="middle">→</text><text class="g-v b" x="420" y="244" text-anchor="end">12%</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="285.5" y1="272" x2="133.5" y2="272" class="g-l"/>
+<polygon points="126.5,272 133.5,268 133.5,276" style="fill:var(--ink)"/>
+<circle cx="290.0" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5, in-domain success rate: 86%</title></circle>
+<circle cx="120.0" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5, success in shifted test region: 1%</title></circle>
+<text class="g-ax" x="364" y="276" text-anchor="end">86%</text><text class="g-ax" x="376" y="276" text-anchor="middle">→</text><text class="g-v b" x="420" y="276" text-anchor="end">1%</text>
+<text class="g-r" x="106" y="308" text-anchor="end">Stack 4,5 → 2,3</text>
+<line x1="295.5" y1="304" x2="151.5" y2="304" class="g-l"/>
+<polygon points="144.5,304 151.5,300 151.5,308" style="fill:var(--ink)"/>
+<circle cx="300.0" cy="304" r="4.5" class="g-o"><title>Stack 4,5 → 2,3, in-domain success rate: 91%</title></circle>
+<circle cx="138.0" cy="304" r="5" class="g-f"><title>Stack 4,5 → 2,3, success in shifted test region: 10%</title></circle>
+<text class="g-ax" x="364" y="308" text-anchor="end">91%</text><text class="g-ax" x="376" y="308" text-anchor="middle">→</text><text class="g-v b" x="420" y="308" text-anchor="end">10%</text>
+<text class="g-ax" x="218.0" y="360" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>in-domain success rate</span><span><i style="background:var(--ink);border-radius:50%"></i>success in shifted test region</span></div>
+    <figcaption>Success rate on each shifted split, with full fine-tuning. Each arrow starts at the in-domain success rate and points to the success in the shifted test region. The right column gives the two values. “Stack 2,5 → 3,4” means: train on stacks of 2 and 5 blocks, and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <h3>Five techniques</h3>
+  <p>We tested five changes to the training. We added each change by itself.</p>
+  <ul>
+    <li><b>Co-training.</b> Half of each fine-tuning batch comes from the other three tasks. The demonstrations for these tasks cover the full workspace.</li>
+    <li><b>Mid-training.</b> Before fine-tuning, we train the model on a larger dataset. This dataset covers the full workspace, but it does not include the target task.</li>
+    <li><b>Delta actions.</b> The model predicts each action chunk as changes from the current joint positions. It does not predict absolute joint targets.</li>
+    <li><b>World action model (WAM).</b> Videos are available for the full workspace, but action labels are available only for the training region. For example, we give videos of the right half without actions. A video-prediction head (<a href="https://arxiv.org/abs/2603.16666">Fast-WAM</a> style) trains together with the action expert. The rollout does not use this head.</li>
+    <li><b>LoRA.</b> We freeze the model and train only <a href="https://arxiv.org/abs/2106.09685">low-rank adapter</a> weights.</li>
+  </ul>
   <figure class="chart">
     <div class="pair">
 <svg viewBox="0 0 430 346" role="img" aria-label="Workspace: initial 5%, combined 81%, in-domain 83%">
@@ -102,9 +218,178 @@
 <text class="g-ax" x="259" y="340" text-anchor="middle">success rate (%)</text></svg>
     </div>
     <div class="legend"><span><i class="ring"></i>before</span><span><i style="background:var(--ink);border-radius:50%"></i>with the technique</span><span><i style="background:var(--pink);border-radius:50%"></i>all techniques combined</span><span><i class="dash"></i>in-domain success</span></div>
-    <figcaption>Changes are in percentage points over the starting result, each technique tested separately; the combined result was evaluated separately. LoRA is low-rank adaptation. Results are from ManiFlow, π0.5 and MolmoAct 2 experiments reported in the blog post.</figcaption>
+    <figcaption>The gain from each technique by itself, in percentage points above the initial result. Each value is an average over tasks and architectures. “Combined” uses co-training, mid-training, delta actions and WAM together. The estimates come from more than 200 training runs and 100,000 evaluation episodes.</figcaption>
   </figure>
-  <p class="docs">How eval episodes are set up: <a href="evals.html#scenes">Evaluation at Scale</a></p>
+  <h3>What matters</h3>
+  <p><b>Keep some of the initial data.</b> Co-training gives the largest single gain on the right half of the table (+45 points). Mid-training uses the same type of data only one time, before fine-tuning, and gives +14 points. Fine-tuning on one task also causes the model to forget the other tasks. Co-training with the data from these tasks prevents most of this loss. Thus, <b style="color:var(--pink)">open robot data is important</b>. A fine-tuned VLA gets its full generalization only when it continues to train on some of its initial data.</p>
+  <p><b>Predict delta actions.</b> Delta actions give better results than absolute joint targets for π0.5 and for MolmoAct 2. On new stack heights, delta actions give +26 points. This gain does not come from a match with the pretraining action format. MolmoAct 2 used absolute joint actions in pretraining, and π0.5 used velocity actions.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 334" role="img" aria-label="π0.5">
+<text class="g-t" x="0" y="16">π0.5</text><text class="g-s" x="0" y="34">without WAM</text>
+<line x1="118.0" y1="62" x2="118.0" y2="290" class="g-grid"/><text class="g-ax" x="118.0" y="308" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="290" class="g-grid"/><text class="g-ax" x="188.5" y="308" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="290" class="g-grid"/><text class="g-ax" x="259.0" y="308" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="290" class="g-grid"/><text class="g-ax" x="329.5" y="308" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="290" class="g-grid"/><text class="g-ax" x="400.0" y="308" text-anchor="middle">100</text>
+<text class="g-s" x="0" y="80">Interpolation</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="309.8" y1="106" x2="369.0" y2="106" class="g-l"/>
+<circle cx="309.8" cy="106" r="4.5" class="g-o"><title>Outer → inner: 68%</title></circle>
+<circle cx="369.0" cy="106" r="5" class="g-f"><title>Outer → inner: 89% (+21 points)</title></circle>
+<text class="g-v" x="379.0" y="110">+21</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="197.0" y1="138" x2="287.2" y2="138" class="g-l"/>
+<circle cx="197.0" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4: 28%</title></circle>
+<circle cx="287.2" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4: 60% (+32 points)</title></circle>
+<text class="g-v" x="297.2" y="142">+32</text>
+<text class="g-s" x="0" y="182">Extrapolation</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="222.3" y1="208" x2="275.9" y2="208" class="g-l"/>
+<circle cx="222.3" cy="208" r="4.5" class="g-o"><title>Inner → outer: 37%</title></circle>
+<circle cx="275.9" cy="208" r="5" class="g-f"><title>Inner → outer: 56% (+19 points)</title></circle>
+<text class="g-v" x="285.9" y="212">+19</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="143.4" y1="240" x2="180.0" y2="240" class="g-l"/>
+<circle cx="143.4" cy="240" r="4.5" class="g-o"><title>Left → right: 9%</title></circle>
+<circle cx="180.0" cy="240" r="5" class="g-f"><title>Left → right: 22% (+13 points)</title></circle>
+<text class="g-v" x="190.0" y="244">+13</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="151.8" y1="272" x2="199.8" y2="272" class="g-l"/>
+<circle cx="151.8" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5: 12%</title></circle>
+<circle cx="199.8" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5: 29% (+17 points)</title></circle>
+<text class="g-v" x="209.8" y="276">+17</text>
+<text class="g-ax" x="259.0" y="328" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 334" role="img" aria-label="MolmoAct 2">
+<text class="g-t" x="0" y="16">MolmoAct 2</text><text class="g-s" x="0" y="34">without WAM</text>
+<line x1="118.0" y1="62" x2="118.0" y2="290" class="g-grid"/><text class="g-ax" x="118.0" y="308" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="290" class="g-grid"/><text class="g-ax" x="188.5" y="308" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="290" class="g-grid"/><text class="g-ax" x="259.0" y="308" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="290" class="g-grid"/><text class="g-ax" x="329.5" y="308" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="290" class="g-grid"/><text class="g-ax" x="400.0" y="308" text-anchor="middle">100</text>
+<text class="g-s" x="0" y="80">Interpolation</text>
+<text class="g-r" x="106" y="110" text-anchor="end">Outer → inner</text>
+<line x1="278.7" y1="106" x2="321.0" y2="106" class="g-l"/>
+<circle cx="278.7" cy="106" r="4.5" class="g-o"><title>Outer → inner: 57%</title></circle>
+<circle cx="321.0" cy="106" r="5" class="g-f"><title>Outer → inner: 72% (+15 points)</title></circle>
+<text class="g-v" x="331.0" y="110">+15</text>
+<text class="g-r" x="106" y="142" text-anchor="end">Stack 2,5 → 3,4</text>
+<line x1="199.8" y1="138" x2="312.6" y2="138" class="g-l"/>
+<circle cx="199.8" cy="138" r="4.5" class="g-o"><title>Stack 2,5 → 3,4: 29%</title></circle>
+<circle cx="312.6" cy="138" r="5" class="g-f"><title>Stack 2,5 → 3,4: 69% (+40 points)</title></circle>
+<text class="g-v" x="322.6" y="142">+40</text>
+<text class="g-s" x="0" y="182">Extrapolation</text>
+<text class="g-r" x="106" y="212" text-anchor="end">Inner → outer</text>
+<line x1="213.9" y1="208" x2="222.3" y2="208" class="g-l"/>
+<circle cx="213.9" cy="208" r="4.5" class="g-o"><title>Inner → outer: 34%</title></circle>
+<circle cx="222.3" cy="208" r="5" class="g-f"><title>Inner → outer: 37% (+3 points)</title></circle>
+<text class="g-v" x="232.3" y="212">+3</text>
+<text class="g-r" x="106" y="244" text-anchor="end">Left → right</text>
+<line x1="146.2" y1="240" x2="151.8" y2="240" class="g-l"/>
+<circle cx="146.2" cy="240" r="4.5" class="g-o"><title>Left → right: 10%</title></circle>
+<circle cx="151.8" cy="240" r="5" class="g-f"><title>Left → right: 12% (+2 points)</title></circle>
+<text class="g-v" x="161.8" y="244">+2</text>
+<text class="g-r" x="106" y="276" text-anchor="end">Stack 2,3 → 4,5</text>
+<line x1="154.7" y1="272" x2="219.5" y2="272" class="g-l"/>
+<circle cx="154.7" cy="272" r="4.5" class="g-o"><title>Stack 2,3 → 4,5: 13%</title></circle>
+<circle cx="219.5" cy="272" r="5" class="g-f"><title>Stack 2,3 → 4,5: 36% (+23 points)</title></circle>
+<text class="g-v" x="229.5" y="276">+23</text>
+<text class="g-ax" x="259.0" y="328" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>absolute joint actions</span><span><i style="background:var(--ink);border-radius:50%"></i>delta joint actions</span></div>
+    <figcaption>Success rate on the shifted splits, without WAM. The ring shows absolute joint actions. The dot shows delta joint actions. “Stack 2,5 → 3,4” means: train on stacks of 2 and 5 blocks, and test on stacks of 3 and 4 blocks.</figcaption>
+  </figure>
+  <p><b>Add video prediction when the scenes look new.</b> By itself, WAM gives +3 points on the right half of the table and +23 points on new stack heights. WAM gives the best results together with co-training. We trained MolmoAct 2 on stacks of 2 and 3 blocks and tested it on stacks of 4 and 5 blocks. With WAM and co-training, its success rate increases from 29% to 80%. We think that the video head removes a visual limit, because the training images do not show stacks of 4 or 5 blocks.</p>
+  <figure class="chart">
+    <div class="pair">
+<svg viewBox="0 0 430 406" role="img" aria-label="Left → right">
+<text class="g-t" x="0" y="16">Left → right</text><text class="g-s" x="0" y="34">average of Stack, Flip and Rotate</text>
+<line x1="118.0" y1="62" x2="118.0" y2="362" class="g-grid"/><text class="g-ax" x="118.0" y="380" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="362" class="g-grid"/><text class="g-ax" x="188.5" y="380" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="362" class="g-grid"/><text class="g-ax" x="259.0" y="380" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="362" class="g-grid"/><text class="g-ax" x="329.5" y="380" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="362" class="g-grid"/><text class="g-ax" x="400.0" y="380" text-anchor="middle">100</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">π0.5</text><circle cx="131.3" cy="76" r="5.5" class="g-o"><title>π0.5: 4.7%</title></circle><text class="g-v" x="142.3" y="80">4.7%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">+ WAM</text>
+<line x1="131.3" y1="112" x2="146.2" y2="112" class="g-l"/>
+<circle cx="131.3" cy="112" r="4.5" class="g-o"><title>+ WAM: 4.7%</title></circle>
+<circle cx="146.2" cy="112" r="5" class="g-f"><title>+ WAM: 10% (+5.3 points)</title></circle>
+<text class="g-v" x="156.2" y="116">+5.3</text>
+<text class="g-r" x="106" y="148" text-anchor="end">+ Co-training</text>
+<line x1="131.3" y1="144" x2="228.0" y2="144" class="g-l"/>
+<circle cx="131.3" cy="144" r="4.5" class="g-o"><title>+ Co-training: 4.7%</title></circle>
+<circle cx="228.0" cy="144" r="5" class="g-f"><title>+ Co-training: 39% (+34.3 points)</title></circle>
+<text class="g-v" x="238.0" y="148">+34.3</text>
+<text class="g-r b p" x="106" y="192" text-anchor="end">+ Both</text>
+<line x1="131.3" y1="188" x2="335.1" y2="188" class="g-l p"/>
+<circle cx="131.3" cy="188" r="5" class="g-o p"><title>+ Both: 4.7%</title></circle>
+<circle cx="335.1" cy="188" r="6" class="g-f p"><title>+ Both: 77% (+72.3 points)</title></circle>
+<text class="g-v b" x="346.1" y="192">77%</text>
+<text class="g-r b" x="106" y="236" text-anchor="end">MolmoAct 2</text><circle cx="145.9" cy="232" r="5.5" class="g-o"><title>MolmoAct 2: 9.9%</title></circle><text class="g-v" x="156.9" y="236">9.9%</text>
+<text class="g-r" x="106" y="272" text-anchor="end">+ WAM</text>
+<line x1="145.9" y1="268" x2="135.2" y2="268" class="g-l"/>
+<circle cx="145.9" cy="268" r="4.5" class="g-o"><title>+ WAM: 9.9%</title></circle>
+<circle cx="135.2" cy="268" r="5" class="g-f"><title>+ WAM: 6.1% (-3.8 points)</title></circle>
+<text class="g-v" x="155.9" y="272">−3.8</text>
+<text class="g-r" x="106" y="304" text-anchor="end">+ Co-training</text>
+<line x1="145.9" y1="300" x2="250.5" y2="300" class="g-l"/>
+<circle cx="145.9" cy="300" r="4.5" class="g-o"><title>+ Co-training: 9.9%</title></circle>
+<circle cx="250.5" cy="300" r="5" class="g-f"><title>+ Co-training: 47% (+37.1 points)</title></circle>
+<text class="g-v" x="260.5" y="304">+37.1</text>
+<text class="g-r b p" x="106" y="348" text-anchor="end">+ Both</text>
+<line x1="145.9" y1="344" x2="301.3" y2="344" class="g-l p"/>
+<circle cx="145.9" cy="344" r="5" class="g-o p"><title>+ Both: 9.9%</title></circle>
+<circle cx="301.3" cy="344" r="6" class="g-f p"><title>+ Both: 65% (+55.1 points)</title></circle>
+<text class="g-v b" x="312.3" y="348">65%</text>
+<text class="g-ax" x="259.0" y="400" text-anchor="middle">success rate (%)</text></svg>
+<svg viewBox="0 0 430 406" role="img" aria-label="Stacks 2, 3 → 4, 5">
+<text class="g-t" x="0" y="16">Stacks 2, 3 → 4, 5</text><text class="g-s" x="0" y="34">average of Stack and Unstack</text>
+<line x1="118.0" y1="62" x2="118.0" y2="362" class="g-grid"/><text class="g-ax" x="118.0" y="380" text-anchor="middle">0</text>
+<line x1="188.5" y1="62" x2="188.5" y2="362" class="g-grid"/><text class="g-ax" x="188.5" y="380" text-anchor="middle">25</text>
+<line x1="259.0" y1="62" x2="259.0" y2="362" class="g-grid"/><text class="g-ax" x="259.0" y="380" text-anchor="middle">50</text>
+<line x1="329.5" y1="62" x2="329.5" y2="362" class="g-grid"/><text class="g-ax" x="329.5" y="380" text-anchor="middle">75</text>
+<line x1="400.0" y1="62" x2="400.0" y2="362" class="g-grid"/><text class="g-ax" x="400.0" y="380" text-anchor="middle">100</text>
+<text class="g-r b" x="106" y="80" text-anchor="end">π0.5</text><circle cx="197.0" cy="76" r="5.5" class="g-o"><title>π0.5: 28%</title></circle><text class="g-v" x="208.0" y="80">28%</text>
+<text class="g-r" x="106" y="116" text-anchor="end">+ WAM</text>
+<line x1="197.0" y1="112" x2="281.6" y2="112" class="g-l"/>
+<circle cx="197.0" cy="112" r="4.5" class="g-o"><title>+ WAM: 28%</title></circle>
+<circle cx="281.6" cy="112" r="5" class="g-f"><title>+ WAM: 58% (+30 points)</title></circle>
+<text class="g-v" x="291.6" y="116">+30</text>
+<text class="g-r" x="106" y="148" text-anchor="end">+ Co-training</text>
+<line x1="197.0" y1="144" x2="216.7" y2="144" class="g-l"/>
+<circle cx="197.0" cy="144" r="4.5" class="g-o"><title>+ Co-training: 28%</title></circle>
+<circle cx="216.7" cy="144" r="5" class="g-f"><title>+ Co-training: 35% (+7 points)</title></circle>
+<text class="g-v" x="226.7" y="148">+7</text>
+<text class="g-r b p" x="106" y="192" text-anchor="end">+ Both</text>
+<line x1="197.0" y1="188" x2="335.1" y2="188" class="g-l p"/>
+<circle cx="197.0" cy="188" r="5" class="g-o p"><title>+ Both: 28%</title></circle>
+<circle cx="335.1" cy="188" r="6" class="g-f p"><title>+ Both: 77% (+49 points)</title></circle>
+<text class="g-v b" x="346.1" y="192">77%</text>
+<text class="g-r b" x="106" y="236" text-anchor="end">MolmoAct 2</text><circle cx="199.8" cy="232" r="5.5" class="g-o"><title>MolmoAct 2: 29%</title></circle><text class="g-v" x="210.8" y="236">29%</text>
+<text class="g-r" x="106" y="272" text-anchor="end">+ WAM</text>
+<line x1="199.8" y1="268" x2="261.8" y2="268" class="g-l"/>
+<circle cx="199.8" cy="268" r="4.5" class="g-o"><title>+ WAM: 29%</title></circle>
+<circle cx="261.8" cy="268" r="5" class="g-f"><title>+ WAM: 51% (+22 points)</title></circle>
+<text class="g-v" x="271.8" y="272">+22</text>
+<text class="g-r" x="106" y="304" text-anchor="end">+ Co-training</text>
+<line x1="199.8" y1="300" x2="278.7" y2="300" class="g-l"/>
+<circle cx="199.8" cy="300" r="4.5" class="g-o"><title>+ Co-training: 29%</title></circle>
+<circle cx="278.7" cy="300" r="5" class="g-f"><title>+ Co-training: 57% (+28 points)</title></circle>
+<text class="g-v" x="288.7" y="304">+28</text>
+<text class="g-r b p" x="106" y="348" text-anchor="end">+ Both</text>
+<line x1="199.8" y1="344" x2="343.6" y2="344" class="g-l p"/>
+<circle cx="199.8" cy="344" r="5" class="g-o p"><title>+ Both: 29%</title></circle>
+<circle cx="343.6" cy="344" r="6" class="g-f p"><title>+ Both: 80% (+51 points)</title></circle>
+<text class="g-v b" x="354.6" y="348">80%</text>
+<text class="g-ax" x="259.0" y="400" text-anchor="middle">success rate (%)</text></svg>
+    </div>
+    <div class="legend"><span><i class="ring"></i>fine-tuning only</span><span><i style="background:var(--ink);border-radius:50%"></i>with the addition</span><span><i style="background:var(--pink);border-radius:50%"></i>WAM and co-training</span></div>
+    <figcaption>Fine-tuning only, with WAM, with co-training, and with WAM and co-training. The labels show the change in percentage points. The pink values show the success rate with both additions.</figcaption>
+  </figure>
+  <h3>Summary</h3>
+  <p>Fine-tuned VLAs perform well in the training region, but small shifts in task space cause large decreases in success. We explored and evaluated many techniques in detail, and these techniques improve generalization in our simple settings. Nevertheless, <b style="color:var(--pink)">VLA generalization is far from solved</b>. ToyBlocks gives researchers a flexible and reproducible way to study new generalization techniques and more difficult settings.</p>
+  <p class="docs"><b>Details.</b> We use 1,000 training demonstrations for each task. Co-training and mid-training use 20,000 more demonstrations (5,000 for each task). We fine-tune for 30,000 steps. We evaluate each 10,000 steps and report the best checkpoint. Each run has 500 evaluation episodes. We normalize the joint actions to [−1, 1] with statistics from the full workspace, so that the robot can reach all regions.</p>
+  <p class="docs">For the setup of the evaluation episodes, refer to <a href="evals.html#scenes">Evaluation at Scale</a>.</p>
 </div></section>
 
 <section id="hl"><div class="col">
