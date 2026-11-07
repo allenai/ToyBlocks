@@ -69,7 +69,7 @@
 
 <section id="play"><div class="col">
   <h2>Pausing and play mode</h2>
-  <p>ManiFlow's ninth action dimension is the <b>play mode</b>: <b>1</b> keeps going, <b>0</b> holds still without ending the skill, and <b>−1</b> says the skill is done. ManiFlow learns it from the training labels: when a pick, place, flip or rotate finishes partway through a chunk, the rest of that chunk repeats the final pose and is marked as done. At eval time, 1 and 0 are fed back as part of the next state. A −1 ends the skill, and the arm holds where it stopped until the next query.</p>
+  <p>ManiFlow doesn't just move the arm. It also learns to say <b>"I'm done."</b> Its ninth action dimension is the <b>play mode</b>: <b>1</b> means "still working", <b>0</b> means "holding still for a moment, but not finished", and <b>−1</b> means "this skill is done". It learns this from the training labels: when a pick, place, flip or rotate finishes partway through an action chunk, the rest of that chunk repeats the final pose and is labelled done. At eval time, the 1s and 0s are fed back as part of the next state. A −1 ends the skill: the arm holds where it stopped, and that is the cue to ask the high level for the next instruction.</p>
   <figure>
     <video data-src="media/ev_phase.mp4" poster="media/ev_phase.jpg" muted loop playsinline></video>
     <figcaption>A training episode with its play-mode labels. <i>Input</i> is the play mode fed back to ManiFlow, which is only ever 1 or 0. <i>Phase target</i> is the 25-step chunk it learns to predict: green is 1 (play), yellow is 0 (pause), and red is −1, which fills the rest of a chunk once a skill ends inside it. The bar along the bottom covers the whole episode.</figcaption>
