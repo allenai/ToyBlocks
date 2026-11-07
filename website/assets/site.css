@@ -202,3 +202,9 @@ figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .nav .ext a.ai2 img { height: 20px; width: auto; display: block; }
 .ai2-home { display: inline-block; margin-bottom: 18px; }
 .ai2-home img { height: 40px; width: auto; display: block; }
+/* datagen: labelled-frames feature row */
+.feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+.feats > div { border: 1px solid var(--line); border-left: 3px solid var(--pink); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.feats h3 { margin-top: 0; font-size: 16.5px; }
+.feats p { font-size: 15px; margin-top: 8px; }
+@media (max-width: 800px) { .feats { grid-template-columns: 1fr; } }
