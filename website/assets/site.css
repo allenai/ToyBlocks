@@ -229,3 +229,7 @@ figure .pair img { height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .levels em i { font-style: normal; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: var(--soft); border: 1px solid var(--line); color: var(--body); }
 .levels > div { display: flex; flex-direction: column; }
 .levels em { margin-top: auto; padding-top: 8px; }
+/* search-and-spell figure: block-face nets and outcome markers */
+.nets-legend { justify-content: space-around; margin-top: 2px; }
+.legend i.dot { width: 11px; height: 11px; border-radius: 50%; border: 1.4px solid var(--ink); }
+.legend i.x { width: auto; height: auto; font-style: normal; font-weight: 700; font-size: 16px; line-height: 1; color: var(--ink); }
