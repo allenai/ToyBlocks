@@ -70,6 +70,10 @@
 <section id="play"><div class="col">
   <h2>Pausing and play mode</h2>
   <p>ManiFlow's ninth action dimension is the <b>play mode</b>: <b>1</b> keeps going, <b>0</b> holds still without ending the skill, and <b>−1</b> says the skill is done. ManiFlow learns it from the training labels: when a pick, place, flip or rotate finishes partway through a chunk, the rest of that chunk repeats the final pose and is marked as done. At eval time, 1 and 0 are fed back as part of the next state. A −1 ends the skill, and the arm holds where it stopped until the next query.</p>
+  <figure>
+    <video data-src="media/ev_phase.mp4" poster="media/ev_phase.jpg" muted loop playsinline></video>
+    <figcaption>A training episode with its play-mode labels. <i>Input</i> is the play mode fed back to ManiFlow, which is only ever 1 or 0. <i>Phase target</i> is the 25-step chunk it learns to predict: green is 1 (play), yellow is 0 (pause), and red is −1, which fills the rest of a chunk once a skill ends inside it. The bar along the bottom covers the whole episode.</figcaption>
+  </figure>
   <p>Molmo 2 can be queried on two schedules:</p>
   <ul>
     <li><b>Synchronous</b> (the default): Molmo 2 is queried at every action-chunk boundary, together with ManiFlow, so it can change its command in the middle of a skill.</li>
