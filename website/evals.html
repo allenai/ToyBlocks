@@ -63,7 +63,7 @@
     <div><span>Answer</span><code>now: A not on 4, 4 on B. next: move A to 4. Do: block A &lt;points coords="1 1 367 623"&gt;block A&lt;/points&gt; pick</code></div>
     <div><span>With history</span><code>previous action: block A &lt;points coords="1 1 367 623"&gt;block A&lt;/points&gt; pick. stack A 4 B. plan. point to target. predict action.</code></div>
   </div>
-  <p>The prompt can start with the previous step, written the same way as an answer. Point coordinates run from 0 to 1000 across the image width and height. Each target sits 5 px (in a 640×360 frame) below the block's center, on the face that points at the camera. ManiFlow then receives the action word (<code>pick</code>) and a heatmap drawn around that point.</p>
+  <p>The prompt can start with the previous step, written the same way as an answer. Point coordinates run from 0 to 1000 across the image width and height. Each target sits 5 px (in a 640×360 frame) below the block's center, on the face that points at the camera. ManiFlow then receives the action word ("pick") and a heatmap drawn around that point.</p>
   <p class="docs">Data: <a href="https://huggingface.co/datasets/allenai/toyblocks-data">toyblocks-data</a></p>
 </div></section>
 
@@ -77,7 +77,7 @@
   <p>Molmo 2 can be queried on two schedules:</p>
   <ul>
     <li><b>Synchronous</b> (the default): Molmo 2 is queried at every action-chunk boundary, together with ManiFlow, so it can change its command in the middle of a skill.</li>
-    <li><b>Asynchronous</b> (<code>--async-hl</code>): Molmo 2 is queried at the start of the episode and again only after ManiFlow reports −1. That needs far fewer high-level calls, and the command stays fixed for the whole skill. This mode needs a play-mode checkpoint.</li>
+    <li><b>Asynchronous</b>: Molmo 2 is queried at the start of the episode and again only after ManiFlow reports −1. That needs far fewer high-level calls, and the command stays fixed for the whole skill. This mode needs a play-mode checkpoint.</li>
   </ul>
   <figure class="diagram">
     <div class="hscroll"><svg viewBox="0 0 880 352" role="img" aria-labelledby="pm-t pm-d">
@@ -122,7 +122,7 @@
       </g>
 
       <!-- asynchronous -->
-      <text class="pm-t" x="0" y="178">Asynchronous</text><text class="pm-s" x="108" y="178">--async-hl: queried at the start and after each −1: 3 calls</text>
+      <text class="pm-t" x="0" y="178">Asynchronous</text><text class="pm-s" x="108" y="178">Molmo 2 is queried at the start and after each −1: 3 calls</text>
       <text class="pm-l" x="0" y="222">Molmo 2</text>
       <g>
         <circle cx="140" cy="218" r="6" fill="var(--pink)"><title>Query 1: pick A</title></circle><text class="pm-c" x="148" y="206">pick A</text>
@@ -155,7 +155,7 @@
 
 <section id="modes"><div class="col">
   <h2>Evaluation Modes</h2>
-  <p>A mode is a choice of high level and low level. All of them are started with <code>scripts/launch_eval.py</code>.</p>
+  <p>A mode is a choice of high level and low level. All of them run from the same launcher.</p>
   <div class="tbl-wrap"><table>
     <tr><th>Mode</th><th>High level</th><th>Low level</th><th>What it tells you</th><th>Docs</th></tr>
     <tr><td>Full system</td><td>Molmo 2, queried every action chunk</td><td>ManiFlow</td><td>End-to-end performance. This is the default.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#per-policy-defaults">defaults</a></td></tr>
@@ -164,7 +164,7 @@
     <tr><td>Low-level oracle</td><td>Molmo 2</td><td>The motion-planned skills used for data generation</td><td>How good the high level is when every command is carried out well. Each command acts on the block nearest its target pixel.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#high-level-conditioning">HL options</a></td></tr>
     <tr><td>Replay</td><td>none</td><td>The dataset's recorded actions, open loop</td><td>Whether the simulation, the dataset and the eval setup agree. If replay fails, policy numbers on that data don't mean much.</td><td><a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/replay.html">replay</a></td></tr>
   </table></div>
-  <p>There is no mode with both oracles: that is just data generation. The low-level oracle always queries Molmo 2 when a skill ends, so it has no every-chunk variant. Running <code>--policy maniflow --no-use-oracle</code> gives ManiFlow only the episode's goal sentence, with no high level at all.</p>
+  <p>There is no mode with both oracles: that is just data generation. The low-level oracle always queries Molmo 2 when a skill ends, so it has no every-chunk variant. ManiFlow can also run with no high level at all, given only the episode's goal sentence.</p>
   <div class="pair">
     <figure><video data-src="media/ev_lloracle.mp4" poster="media/ev_lloracle.jpg" muted loop playsinline></video><figcaption>Low-level oracle: Molmo 2 picks the skills, motion-planned skills execute them.</figcaption></figure>
     <figure><video data-src="media/ev_dev.mp4" poster="media/ev_dev.jpg" muted loop playsinline></video><figcaption>The high-level overlay video shows each command and its target point.</figcaption></figure>
@@ -192,13 +192,13 @@
   <h2>TAMPER: training on your failures</h2>
   <p>TAMPER (TAMP Expert Relabeling) is a DAgger-style loop with a planning expert. An eval run finds the states where the policy goes wrong; the expert then plans new demonstrations starting from those states. The next round of training data then covers situations the policy actually ends up in, not only the ones data generation happens to sample.</p>
   <ol>
-    <li><b>Evaluate with capture on.</b> Add <code>--tamper_output_dir</code> to an <code>evaluate.py</code> run. The final scene of every failed or timed-out episode is saved as a new environment package.</li>
-    <li><b>Look at what was captured.</b> <code>tamper_failures.json</code> lists each state with its episode, outcome and goal.</li>
+    <li><b>Evaluate with capture on.</b> Turn on failure capture in an eval run. The final scene of every failed or timed-out episode is saved as a new environment package.</li>
+    <li><b>Look at what was captured.</b> A summary file lists each captured state with its episode, outcome and goal.</li>
     <li><b>Relabel.</b> vecgen plans from the captured scene toward the recorded goal and executes it with the usual verified skills.</li>
     <li><b>Retrain and evaluate again.</b> Annotate and merge the new episodes, add them to the training mix, and repeat.</li>
   </ol>
   <p>In a small test on one RTX 5090, a random-action eval on a 16-episode stacking set captured 16 states, and vecgen recovered 12–13 of them in about 72 seconds.</p>
-  <p class="docs">Guide: <a href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">docs/tamper.md</a></p>
+  <p class="docs">Docs: <a href="https://github.com/allenai/ToyBlocks/blob/main/docs/tamper.md">TAMPER guide</a></p>
 </div></section>
 
 <section id="outputs"><div class="col">
