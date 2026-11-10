@@ -633,83 +633,182 @@
 
 <section id="wm"><div class="col">
   <h2>World model as a simulator</h2>
-  <p>Action-conditioned world models predict how a scene changes in response to a robot's actions, and using them in place of model-based simulators is an active area of research. Because ToyBlocks knows the true state of every block, we can test how accurately they predict physical interactions.</p>
-  <p><b>Setup.</b> We trained or fit three types of models on four tasks (pick-and-place, flip, rotate, and a mixed task): a video prediction model (Wan 2.2), an agentic model that created its own physics simulator (Astra), and a latent world model (LeWM). Each task has 900 trajectories. Half succeed and half fail because the trajectory was changed slightly, so always predicting success is right only half the time. Each model gets an initial image and the actions. On full trajectories this is the first image of the episode; on short interaction segments (a single pick, place, flip, or rotate) it is the real image immediately before that interaction. Small probes trained on simulator labels read block pose, gripper pose and success from each prediction.</p>
+  <p>Action-conditioned world models predict how a scene changes in response to a robot's actions, and using them in place of model-based simulators is an active area of research. To replace these simulators, world models need accurate dynamics and spatial generalization. Because ToyBlocks knows the true state of every block, we can measure both.</p>
+  <p><b>Setup.</b> We trained or fit three types of world models on four tasks (pick-and-place, flip, rotate, and a mixed task): video world models (Wan 2.2, Ctrl-World, WEAVER and IWS), an agentic model that created its own physics simulator (Astra), and latent world models that predict future latent states (LeWM and V-JEPA 2.1). Each task has 900 trajectories. Half succeed and half fail because the trajectory was changed slightly, so always predicting success is right only half the time. Each model gets an initial image and the actions. On full trajectories this is the first image of the episode; on short interaction segments (a single pick, place, flip, or rotate) it is the real image immediately before that interaction. To measure specific aspects of prediction accuracy, small probes trained on simulator labels read block pose, gripper pose and success from each prediction.</p>
   <figure class="chart">
     <div class="legend"><span><i style="background:var(--g-mf)"></i>full trajectory</span><span><i style="background:#aab3bf"></i>interaction segment</span><span><i class="dash"></i>random guess (50% outcome accuracy)</span></div>
 <div class="hscroll">
-<svg viewBox="0 0 900 320" role="img" aria-label="World models as simulators: object pose error, end-effector pose error and outcome prediction accuracy for Wan 2.2, Astra and LeWM, on full trajectories and on interaction segments">
+<svg viewBox="0 0 900 472" role="img" aria-label="World models as simulators: object pose error, end-effector pose error and outcome prediction accuracy for Wan 2.2, Ctrl-World, WEAVER, IWS, Astra, Astra*, LeWM and V-JEPA 2.1, on full trajectories and on interaction segments">
 <text class="g-t" x="10" y="18">Object pose error (cm)</text><text class="g-s" x="10" y="36">↓ lower is better</text>
-<line x1="40" y1="262.0" x2="298" y2="262.0" class="g-base"/><text class="g-ax" x="34" y="266.0" text-anchor="end">0</text>
-<line x1="40" y1="194.0" x2="298" y2="194.0" class="g-grid"/><text class="g-ax" x="34" y="198.0" text-anchor="end">10</text>
-<line x1="40" y1="126.0" x2="298" y2="126.0" class="g-grid"/><text class="g-ax" x="34" y="130.0" text-anchor="end">20</text>
-<line x1="40" y1="58.0" x2="298" y2="58.0" class="g-grid"/><text class="g-ax" x="34" y="62.0" text-anchor="end">30</text>
-<path d="M51.0,262 V258.6 q0,-3.4 3.4,-3.4 h23.2 q3.4,0 3.4,3.4 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.0 cm</title></path>
-<text class="g-bv" x="66.0" y="250.2" text-anchor="middle">1.0</text>
-<path d="M85.0,262 V259.6 q0,-2.4 2.4,-2.4 h25.2 q2.4,0 2.4,2.4 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.7 cm</title></path>
-<text class="g-bv" x="100.0" y="252.2" text-anchor="middle">0.7</text>
-<text class="g-gx" x="83.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="83.0" y="298" text-anchor="middle">Wan 2.2</text>
-<path d="M137.0,262 V223.8 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 6.2 cm</title></path>
-<text class="g-bv" x="152.0" y="214.8" text-anchor="middle">6.2</text>
-<path d="M171.0,262 V222.5 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 6.4 cm</title></path>
-<text class="g-bv" x="186.0" y="213.5" text-anchor="middle">6.4</text>
-<text class="g-gx" x="169.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="169.0" y="298" text-anchor="middle">Astra</text>
-<path d="M223.0,262 V102.8 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 24 cm</title></path>
-<text class="g-bv" x="238.0" y="93.8" text-anchor="middle">24</text>
-<path d="M257.0,262 V191.2 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 11 cm</title></path>
-<text class="g-bv" x="272.0" y="182.2" text-anchor="middle">11</text>
-<text class="g-gx" x="255.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="255.0" y="298" text-anchor="middle">LeWM</text>
+<line x1="40" y1="208.0" x2="298" y2="208.0" class="g-base"/><text class="g-ax" x="34" y="212.0" text-anchor="end">0</text>
+<line x1="40" y1="165.1" x2="298" y2="165.1" class="g-grid"/><text class="g-ax" x="34" y="169.1" text-anchor="end">10</text>
+<line x1="40" y1="122.3" x2="298" y2="122.3" class="g-grid"/><text class="g-ax" x="34" y="126.3" text-anchor="end">20</text>
+<line x1="40" y1="79.4" x2="298" y2="79.4" class="g-grid"/><text class="g-ax" x="34" y="83.4" text-anchor="end">30</text>
+<path d="M46.2,208 V205.8 q0,-2.2 2.2,-2.2 h19.6 q2.2,0 2.2,2.2 V208 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.0 cm</title></path>
+<text class="g-bv" x="58.2" y="198.6" text-anchor="middle">1.0</text>
+<path d="M74.2,208 V206.6 q0,-1.4 1.4,-1.4 h21.2 q1.4,0 1.4,1.4 V208 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.7 cm</title></path>
+<text class="g-bv" x="86.2" y="200.2" text-anchor="middle">0.7</text>
+<text class="g-ax" x="72.2" y="244" text-anchor="middle">Wan 2.2</text>
+<path d="M110.8,208 V192.3 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>Ctrl-World, full trajectory: 4.6 cm</title></path>
+<text class="g-bv" x="122.8" y="183.3" text-anchor="middle">4.6</text>
+<path d="M138.8,208 V204.3 q0,-3.7 3.7,-3.7 h16.5 q3.7,0 3.7,3.7 V208 Z" fill="#aab3bf"><title>Ctrl-World, interaction segment: 1.7 cm</title></path>
+<text class="g-bv" x="150.8" y="195.5" text-anchor="middle">1.7</text>
+<text class="g-ax" x="136.8" y="244" text-anchor="middle">Ctrl-World</text>
+<path d="M175.2,208 V177.3 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>WEAVER, full trajectory: 8.1 cm</title></path>
+<text class="g-bv" x="187.2" y="168.3" text-anchor="middle">8.1</text>
+<path d="M203.2,208 V202.8 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>WEAVER, interaction segment: 2.1 cm</title></path>
+<text class="g-bv" x="215.2" y="193.8" text-anchor="middle">2.1</text>
+<text class="g-ax" x="201.2" y="244" text-anchor="middle">WEAVER</text>
+<path d="M239.8,208 V117.1 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>IWS, full trajectory: 22 cm</title></path>
+<text class="g-bv" x="251.8" y="108.1" text-anchor="middle">22</text>
+<path d="M267.8,208 V167.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>IWS, interaction segment: 10 cm</title></path>
+<text class="g-bv" x="279.8" y="158.5" text-anchor="middle">10</text>
+<text class="g-ax" x="265.8" y="244" text-anchor="middle">IWS</text>
+<text class="g-gx" x="169.0" y="228" text-anchor="middle" style="font-size:13px">Video</text>
+<line x1="40" y1="428.0" x2="298" y2="428.0" class="g-base"/><text class="g-ax" x="34" y="432.0" text-anchor="end">0</text>
+<line x1="40" y1="385.1" x2="298" y2="385.1" class="g-grid"/><text class="g-ax" x="34" y="389.1" text-anchor="end">10</text>
+<line x1="40" y1="342.3" x2="298" y2="342.3" class="g-grid"/><text class="g-ax" x="34" y="346.3" text-anchor="end">20</text>
+<line x1="40" y1="299.4" x2="298" y2="299.4" class="g-grid"/><text class="g-ax" x="34" y="303.4" text-anchor="end">30</text>
+<path d="M43.7,428 V396.2 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 8.4 cm</title></path>
+<text class="g-bv" x="55.7" y="387.2" text-anchor="middle">8.4</text>
+<path d="M71.7,428 V376.0 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>Astra, interaction segment: 13 cm</title></path>
+<text class="g-bv" x="83.7" y="367.0" text-anchor="middle">13</text>
+<text class="g-ax" x="69.7" y="464" text-anchor="middle">Astra</text>
+<path d="M105.6,428 V405.3 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>Astra*, full trajectory: 6.2 cm</title></path>
+<text class="g-bv" x="117.6" y="396.3" text-anchor="middle">6.2</text>
+<path d="M133.6,428 V404.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>Astra*, interaction segment: 6.4 cm</title></path>
+<text class="g-bv" x="145.6" y="395.5" text-anchor="middle">6.4</text>
+<text class="g-ax" x="131.6" y="464" text-anchor="middle">Astra*</text>
+<text class="g-gx" x="100.6" y="448" text-anchor="middle" style="font-size:13px">Agentic</text>
+<path d="M180.4,428 V330.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 24 cm</title></path>
+<text class="g-bv" x="192.4" y="321.5" text-anchor="middle">24</text>
+<path d="M208.4,428 V382.9 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>LeWM, interaction segment: 11 cm</title></path>
+<text class="g-bv" x="220.4" y="373.9" text-anchor="middle">11</text>
+<text class="g-ax" x="206.4" y="464" text-anchor="middle">LeWM</text>
+<path d="M242.3,428 V324.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>V-JEPA 2.1, full trajectory: 25 cm</title></path>
+<text class="g-bv" x="254.3" y="315.5" text-anchor="middle">25</text>
+<path d="M270.3,428 V383.4 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>V-JEPA 2.1, interaction segment: 11 cm</title></path>
+<text class="g-bv" x="282.3" y="374.4" text-anchor="middle">11</text>
+<text class="g-ax" x="268.3" y="464" text-anchor="middle">V-JEPA 2.1</text>
+<text class="g-gx" x="237.4" y="448" text-anchor="middle" style="font-size:13px">Latent</text>
 <text class="g-t" x="306" y="18">End-effector pose error (cm)</text><text class="g-s" x="306" y="36">↓ lower is better</text>
-<line x1="336" y1="262.0" x2="594" y2="262.0" class="g-base"/><text class="g-ax" x="330" y="266.0" text-anchor="end">0</text>
-<line x1="336" y1="194.0" x2="594" y2="194.0" class="g-grid"/><text class="g-ax" x="330" y="198.0" text-anchor="end">10</text>
-<line x1="336" y1="126.0" x2="594" y2="126.0" class="g-grid"/><text class="g-ax" x="330" y="130.0" text-anchor="end">20</text>
-<line x1="336" y1="58.0" x2="594" y2="58.0" class="g-grid"/><text class="g-ax" x="330" y="62.0" text-anchor="end">30</text>
-<path d="M347.0,262 V255.1 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.6 cm</title></path>
-<text class="g-bv" x="362.0" y="246.1" text-anchor="middle">1.6</text>
-<path d="M381.0,262 V259.3 q0,-2.7 2.7,-2.7 h24.6 q2.7,0 2.7,2.7 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.8 cm</title></path>
-<text class="g-bv" x="396.0" y="251.6" text-anchor="middle">0.8</text>
-<text class="g-gx" x="379.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="379.0" y="298" text-anchor="middle">Wan 2.2</text>
-<path d="M433.0,262 V258.3 q0,-3.7 3.7,-3.7 h22.5 q3.7,0 3.7,3.7 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 1.1 cm</title></path>
-<text class="g-bv" x="448.0" y="249.5" text-anchor="middle">1.1</text>
-<path d="M467.0,262 V256.5 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 1.4 cm</title></path>
-<text class="g-bv" x="482.0" y="247.5" text-anchor="middle">1.4</text>
-<text class="g-gx" x="465.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="465.0" y="298" text-anchor="middle">Astra</text>
-<path d="M519.0,262 V150.4 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 17 cm</title></path>
-<text class="g-bv" x="534.0" y="141.4" text-anchor="middle">17</text>
-<path d="M553.0,262 V208.9 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 8.4 cm</title></path>
-<text class="g-bv" x="568.0" y="199.9" text-anchor="middle">8.4</text>
-<text class="g-gx" x="551.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="551.0" y="298" text-anchor="middle">LeWM</text>
+<line x1="336" y1="208.0" x2="594" y2="208.0" class="g-base"/><text class="g-ax" x="330" y="212.0" text-anchor="end">0</text>
+<line x1="336" y1="165.1" x2="594" y2="165.1" class="g-grid"/><text class="g-ax" x="330" y="169.1" text-anchor="end">10</text>
+<line x1="336" y1="122.3" x2="594" y2="122.3" class="g-grid"/><text class="g-ax" x="330" y="126.3" text-anchor="end">20</text>
+<line x1="336" y1="79.4" x2="594" y2="79.4" class="g-grid"/><text class="g-ax" x="330" y="83.4" text-anchor="end">30</text>
+<path d="M342.2,208 V204.5 q0,-3.5 3.5,-3.5 h17.1 q3.5,0 3.5,3.5 V208 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 1.6 cm</title></path>
+<text class="g-bv" x="354.2" y="196.1" text-anchor="middle">1.6</text>
+<path d="M370.2,208 V206.2 q0,-1.8 1.8,-1.8 h20.4 q1.8,0 1.8,1.8 V208 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 0.8 cm</title></path>
+<text class="g-bv" x="382.2" y="199.4" text-anchor="middle">0.8</text>
+<text class="g-ax" x="368.2" y="244" text-anchor="middle">Wan 2.2</text>
+<path d="M406.8,208 V196.4 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>Ctrl-World, full trajectory: 3.6 cm</title></path>
+<text class="g-bv" x="418.8" y="187.4" text-anchor="middle">3.6</text>
+<path d="M434.8,208 V205.3 q0,-2.7 2.7,-2.7 h18.7 q2.7,0 2.7,2.7 V208 Z" fill="#aab3bf"><title>Ctrl-World, interaction segment: 1.2 cm</title></path>
+<text class="g-bv" x="446.8" y="197.7" text-anchor="middle">1.2</text>
+<text class="g-ax" x="432.8" y="244" text-anchor="middle">Ctrl-World</text>
+<path d="M471.2,208 V197.1 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>WEAVER, full trajectory: 3.5 cm</title></path>
+<text class="g-bv" x="483.2" y="188.1" text-anchor="middle">3.5</text>
+<path d="M499.2,208 V205.2 q0,-2.8 2.8,-2.8 h18.3 q2.8,0 2.8,2.8 V208 Z" fill="#aab3bf"><title>WEAVER, interaction segment: 1.3 cm</title></path>
+<text class="g-bv" x="511.2" y="197.3" text-anchor="middle">1.3</text>
+<text class="g-ax" x="497.2" y="244" text-anchor="middle">WEAVER</text>
+<path d="M535.8,208 V145.9 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>IWS, full trajectory: 15 cm</title></path>
+<text class="g-bv" x="547.8" y="136.9" text-anchor="middle">15</text>
+<path d="M563.8,208 V178.9 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>IWS, interaction segment: 7.7 cm</title></path>
+<text class="g-bv" x="575.8" y="169.9" text-anchor="middle">7.7</text>
+<text class="g-ax" x="561.8" y="244" text-anchor="middle">IWS</text>
+<text class="g-gx" x="465.0" y="228" text-anchor="middle" style="font-size:13px">Video</text>
+<line x1="336" y1="428.0" x2="594" y2="428.0" class="g-base"/><text class="g-ax" x="330" y="432.0" text-anchor="end">0</text>
+<line x1="336" y1="385.1" x2="594" y2="385.1" class="g-grid"/><text class="g-ax" x="330" y="389.1" text-anchor="end">10</text>
+<line x1="336" y1="342.3" x2="594" y2="342.3" class="g-grid"/><text class="g-ax" x="330" y="346.3" text-anchor="end">20</text>
+<line x1="336" y1="299.4" x2="594" y2="299.4" class="g-grid"/><text class="g-ax" x="330" y="303.4" text-anchor="end">30</text>
+<path d="M339.7,428 V425.5 q0,-2.5 2.5,-2.5 h19.1 q2.5,0 2.5,2.5 V428 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 1.2 cm</title></path>
+<text class="g-bv" x="351.7" y="418.1" text-anchor="middle">1.2</text>
+<path d="M367.7,428 V424.9 q0,-3.1 3.1,-3.1 h17.7 q3.1,0 3.1,3.1 V428 Z" fill="#aab3bf"><title>Astra, interaction segment: 1.5 cm</title></path>
+<text class="g-bv" x="379.7" y="416.7" text-anchor="middle">1.5</text>
+<text class="g-ax" x="365.7" y="464" text-anchor="middle">Astra</text>
+<path d="M401.6,428 V425.6 q0,-2.4 2.4,-2.4 h19.3 q2.4,0 2.4,2.4 V428 Z" fill="var(--g-mf)"><title>Astra*, full trajectory: 1.1 cm</title></path>
+<text class="g-bv" x="413.6" y="418.3" text-anchor="middle">1.1</text>
+<path d="M429.6,428 V425.1 q0,-2.9 2.9,-2.9 h18.1 q2.9,0 2.9,2.9 V428 Z" fill="#aab3bf"><title>Astra*, interaction segment: 1.4 cm</title></path>
+<text class="g-bv" x="441.6" y="417.1" text-anchor="middle">1.4</text>
+<text class="g-ax" x="427.6" y="464" text-anchor="middle">Astra*</text>
+<text class="g-gx" x="396.6" y="448" text-anchor="middle" style="font-size:13px">Agentic</text>
+<path d="M476.4,428 V358.1 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 17 cm</title></path>
+<text class="g-bv" x="488.4" y="349.1" text-anchor="middle">17</text>
+<path d="M504.4,428 V396.0 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>LeWM, interaction segment: 8.4 cm</title></path>
+<text class="g-bv" x="516.4" y="387.0" text-anchor="middle">8.4</text>
+<text class="g-ax" x="502.4" y="464" text-anchor="middle">LeWM</text>
+<path d="M538.3,428 V297.9 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>V-JEPA 2.1, full trajectory: 31 cm</title></path>
+<text class="g-bv" x="550.3" y="288.9" text-anchor="middle">31</text>
+<path d="M566.3,428 V400.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>V-JEPA 2.1, interaction segment: 7.4 cm</title></path>
+<text class="g-bv" x="578.3" y="391.5" text-anchor="middle">7.4</text>
+<text class="g-ax" x="564.3" y="464" text-anchor="middle">V-JEPA 2.1</text>
+<text class="g-gx" x="533.4" y="448" text-anchor="middle" style="font-size:13px">Latent</text>
 <text class="g-t" x="602" y="18">Outcome prediction accuracy (%)</text><text class="g-s" x="602" y="36">↑ higher is better</text>
-<line x1="632" y1="262.0" x2="890" y2="262.0" class="g-base"/><text class="g-ax" x="626" y="266.0" text-anchor="end">0</text>
-<line x1="632" y1="221.2" x2="890" y2="221.2" class="g-grid"/><text class="g-ax" x="626" y="225.2" text-anchor="end">20</text>
-<line x1="632" y1="180.4" x2="890" y2="180.4" class="g-grid"/><text class="g-ax" x="626" y="184.4" text-anchor="end">40</text>
-<line x1="632" y1="139.6" x2="890" y2="139.6" class="g-grid"/><text class="g-ax" x="626" y="143.6" text-anchor="end">60</text>
-<line x1="632" y1="98.8" x2="890" y2="98.8" class="g-grid"/><text class="g-ax" x="626" y="102.8" text-anchor="end">80</text>
+<line x1="632" y1="208.0" x2="890" y2="208.0" class="g-base"/><text class="g-ax" x="626" y="212.0" text-anchor="end">0</text>
+<line x1="632" y1="178.0" x2="890" y2="178.0" class="g-grid"/><text class="g-ax" x="626" y="182.0" text-anchor="end">20</text>
+<line x1="632" y1="148.0" x2="890" y2="148.0" class="g-grid"/><text class="g-ax" x="626" y="152.0" text-anchor="end">40</text>
+<line x1="632" y1="118.0" x2="890" y2="118.0" class="g-grid"/><text class="g-ax" x="626" y="122.0" text-anchor="end">60</text>
+<line x1="632" y1="88.0" x2="890" y2="88.0" class="g-grid"/><text class="g-ax" x="626" y="92.0" text-anchor="end">80</text>
 <line x1="632" y1="58.0" x2="890" y2="58.0" class="g-grid"/><text class="g-ax" x="626" y="62.0" text-anchor="end">100</text>
-<line x1="632" y1="160.0" x2="890" y2="160.0" class="g-dom"/>
-<path d="M643.0,262 V64.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 99 %</title></path>
-<text class="g-bv" x="658.0" y="55.0" text-anchor="middle">99</text>
-<path d="M677.0,262 V64.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 99 %</title></path>
-<text class="g-bv" x="692.0" y="55.0" text-anchor="middle">99</text>
-<text class="g-gx" x="675.0" y="282" text-anchor="middle" style="font-size:13px">Video</text><text class="g-ax" x="675.0" y="298" text-anchor="middle">Wan 2.2</text>
-<path d="M729.0,262 V129.3 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 67 %</title></path>
-<text class="g-bv" x="744.0" y="120.3" text-anchor="middle">67</text>
-<path d="M763.0,262 V129.3 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>Astra, interaction segment: 67 %</title></path>
-<text class="g-bv" x="778.0" y="120.3" text-anchor="middle">67</text>
-<text class="g-gx" x="761.0" y="282" text-anchor="middle" style="font-size:13px">Agentic</text><text class="g-ax" x="761.0" y="298" text-anchor="middle">Astra</text>
-<path d="M815.0,262 V162.0 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 51 %</title></path>
-<text class="g-bv" x="830.0" y="153.0" text-anchor="middle">51</text>
-<path d="M849.0,262 V133.4 q0,-4.0 4.0,-4.0 h22.0 q4.0,0 4.0,4.0 V262 Z" fill="#aab3bf"><title>LeWM, interaction segment: 65 %</title></path>
-<text class="g-bv" x="864.0" y="124.4" text-anchor="middle">65</text>
-<text class="g-gx" x="847.0" y="282" text-anchor="middle" style="font-size:13px">Latent</text><text class="g-ax" x="847.0" y="298" text-anchor="middle">LeWM</text>
+<line x1="632" y1="133.0" x2="890" y2="133.0" class="g-dom"/>
+<path d="M638.2,208 V64.1 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>Wan 2.2, full trajectory: 99 %</title></path>
+<text class="g-bv" x="650.2" y="55.1" text-anchor="middle">99</text>
+<path d="M666.2,208 V63.2 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>Wan 2.2, interaction segment: 99 %</title></path>
+<text class="g-bv" x="678.2" y="54.2" text-anchor="middle">99</text>
+<text class="g-ax" x="664.2" y="244" text-anchor="middle">Wan 2.2</text>
+<path d="M702.8,208 V108.6 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>Ctrl-World, full trajectory: 69 %</title></path>
+<text class="g-bv" x="714.8" y="99.6" text-anchor="middle">69</text>
+<path d="M730.8,208 V73.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>Ctrl-World, interaction segment: 92 %</title></path>
+<text class="g-bv" x="742.8" y="64.5" text-anchor="middle">92</text>
+<text class="g-ax" x="728.8" y="244" text-anchor="middle">Ctrl-World</text>
+<path d="M767.2,208 V134.0 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>WEAVER, full trajectory: 52 %</title></path>
+<text class="g-bv" x="779.2" y="125.0" text-anchor="middle">52</text>
+<path d="M795.2,208 V78.4 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>WEAVER, interaction segment: 89 %</title></path>
+<text class="g-bv" x="807.2" y="69.4" text-anchor="middle">89</text>
+<text class="g-ax" x="793.2" y="244" text-anchor="middle">WEAVER</text>
+<path d="M831.8,208 V138.8 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="var(--g-mf)"><title>IWS, full trajectory: 49 %</title></path>
+<text class="g-bv" x="843.8" y="129.8" text-anchor="middle">49</text>
+<path d="M859.8,208 V118.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V208 Z" fill="#aab3bf"><title>IWS, interaction segment: 62 %</title></path>
+<text class="g-bv" x="871.8" y="109.5" text-anchor="middle">62</text>
+<text class="g-ax" x="857.8" y="244" text-anchor="middle">IWS</text>
+<text class="g-gx" x="761.0" y="228" text-anchor="middle" style="font-size:13px">Video</text>
+<line x1="632" y1="428.0" x2="890" y2="428.0" class="g-base"/><text class="g-ax" x="626" y="432.0" text-anchor="end">0</text>
+<line x1="632" y1="398.0" x2="890" y2="398.0" class="g-grid"/><text class="g-ax" x="626" y="402.0" text-anchor="end">20</text>
+<line x1="632" y1="368.0" x2="890" y2="368.0" class="g-grid"/><text class="g-ax" x="626" y="372.0" text-anchor="end">40</text>
+<line x1="632" y1="338.0" x2="890" y2="338.0" class="g-grid"/><text class="g-ax" x="626" y="342.0" text-anchor="end">60</text>
+<line x1="632" y1="308.0" x2="890" y2="308.0" class="g-grid"/><text class="g-ax" x="626" y="312.0" text-anchor="end">80</text>
+<line x1="632" y1="278.0" x2="890" y2="278.0" class="g-grid"/><text class="g-ax" x="626" y="282.0" text-anchor="end">100</text>
+<line x1="632" y1="353.0" x2="890" y2="353.0" class="g-dom"/>
+<path d="M635.7,428 V340.3 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>Astra, full trajectory: 61 %</title></path>
+<text class="g-bv" x="647.7" y="331.3" text-anchor="middle">61</text>
+<path d="M663.7,428 V340.1 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>Astra, interaction segment: 61 %</title></path>
+<text class="g-bv" x="675.7" y="331.1" text-anchor="middle">61</text>
+<text class="g-ax" x="661.7" y="464" text-anchor="middle">Astra</text>
+<path d="M697.6,428 V331.4 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>Astra*, full trajectory: 67 %</title></path>
+<text class="g-bv" x="709.6" y="322.4" text-anchor="middle">67</text>
+<path d="M725.6,428 V331.3 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>Astra*, interaction segment: 67 %</title></path>
+<text class="g-bv" x="737.6" y="322.3" text-anchor="middle">67</text>
+<text class="g-ax" x="723.6" y="464" text-anchor="middle">Astra*</text>
+<text class="g-gx" x="692.6" y="448" text-anchor="middle" style="font-size:13px">Agentic</text>
+<path d="M772.4,428 V355.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>LeWM, full trajectory: 51 %</title></path>
+<text class="g-bv" x="784.4" y="346.5" text-anchor="middle">51</text>
+<path d="M800.4,428 V334.4 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>LeWM, interaction segment: 65 %</title></path>
+<text class="g-bv" x="812.4" y="325.4" text-anchor="middle">65</text>
+<text class="g-ax" x="798.4" y="464" text-anchor="middle">LeWM</text>
+<path d="M834.3,428 V356.2 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="var(--g-mf)"><title>V-JEPA 2.1, full trajectory: 51 %</title></path>
+<text class="g-bv" x="846.3" y="347.2" text-anchor="middle">51</text>
+<path d="M862.3,428 V358.5 q0,-4.0 4.0,-4.0 h16.0 q4.0,0 4.0,4.0 V428 Z" fill="#aab3bf"><title>V-JEPA 2.1, interaction segment: 49 %</title></path>
+<text class="g-bv" x="874.3" y="349.5" text-anchor="middle">49</text>
+<text class="g-ax" x="860.3" y="464" text-anchor="middle">V-JEPA 2.1</text>
+<text class="g-gx" x="829.4" y="448" text-anchor="middle" style="font-size:13px">Latent</text>
 </svg>
 </div>
-    <figcaption>Averages over the four tasks or the four interaction-segment types; the dashed line marks a random guess. Astra starts from the true initial object poses.</figcaption>
+    <figcaption>Full trajectories are averaged over the four tasks, interaction segments over the four segment types. Astra* is given the true initial block poses; Astra estimates them from the image.</figcaption>
   </figure>
-  <p><b>Video models predict interactions best.</b> Wan 2.2 tracks the blocks to about a centimeter and predicts 99% of outcomes correctly.</p>
-  <p><b>Tracking the robot is not the same as simulating contact.</b> Astra follows the gripper closely (1.1 cm) but predicts only 67% of outcomes.</p>
-  <p><b>Latent models capture short interactions but drift over long ones.</b> LeWM predicts 65% of outcomes on short interaction segments, but its block error grows to 24 cm over full trajectories.</p>
-  <p><b>Better world models produce better training data.</b> Adding 100 Wan 2.2 rollouts from a part of the table with no real demonstrations raises ManiFlow's success there from 19% to 78%.</p>
+  <p><b>The best video world model has the best prediction accuracy.</b> Wan 2.2 tracks the blocks to about a centimeter and predicts 99% of outcomes correctly. Ctrl-World and WEAVER are also accurate on short interaction segments (92% and 89%) but fall behind over full trajectories (69% and 52%).</p>
+  <p><b>The agentic approach tracks the robot well but struggles with contact dynamics.</b> Astra follows the gripper closely (1.1 cm), but even with the true initial block poses its block error is about 6 cm and it predicts only 67% of outcomes.</p>
+  <p><b>Latent models capture short interactions but drift over long ones.</b> LeWM predicts 65% of outcomes on short interaction segments, but over full trajectories the block error of both latent models grows to 24–25 cm.</p>
+  <p><b>World models help with extrapolation.</b> Adding 100 Wan 2.2 rollouts from a part of the table with no real demonstrations raises a ManiFlow policy's success there from 19% to 78%.</p>
 </div></section>
 
 <section><div class="col pager"><a href="agentic.html">← Agentic Framework</a><a href="index.html">Overview →</a></div></section>
