@@ -142,7 +142,7 @@
   <h3>Five techniques</h3>
   <p>We tested five changes to the training. We added each change by itself.</p>
   <ul>
-    <li><b>Co-training.</b> Half of each fine-tuning batch comes from the other three tasks. The demonstrations for these tasks cover the full workspace.</li>
+    <li><b>Co-training.</b> Half of each fine-tuning batch comes from background tasks. For each target task, the background tasks are the remaining three tasks. For example, for target task Stack (height 2 and 5), the background tasks are Rotate, Flip and Unstack (all heights). Background task demonstrations cover the full workspace, without table region or height limit.</li>
     <li><b>Mid-training.</b> Before fine-tuning, we train the model on a larger dataset. This dataset covers the full workspace, but it does not include the target task.</li>
     <li><b>Delta actions.</b> The model predicts each action chunk as changes from the current joint positions. It does not predict absolute joint targets.</li>
     <li><b>World action model (WAM).</b> Videos are available for the full workspace, but action labels are available only for the training region. For example, we give videos of the right half without actions. A video-prediction head (<a href="https://arxiv.org/abs/2603.16666">Fast-WAM</a> style) trains together with the action expert. The rollout does not use this head.</li>
@@ -394,7 +394,7 @@
   </figure>
   <h3>Summary</h3>
   <p>Fine-tuned VLAs perform well in the training region, but small shifts in task space cause large decreases in success. We explored and evaluated many techniques in detail, and these techniques improve generalization in our simple settings. Nevertheless, <b style="color:var(--pink)">VLA generalization is far from solved</b>. ToyBlocks gives researchers a flexible and reproducible way to study new generalization techniques and more difficult settings.</p>
-  <p class="docs"><b>Details.</b> We use 1,000 training demonstrations for each task. Co-training and mid-training use 20,000 more demonstrations (5,000 for each task). We fine-tune for 30,000 steps. We evaluate each 10,000 steps and report the best checkpoint. Each run has 500 evaluation episodes. We normalize the joint actions to [−1, 1] with statistics from the full workspace, so that the robot can reach all regions.</p>
+  <p class="docs"><b>Details.</b> We use 1,000 training demonstrations for each task. Co-training and mid-training use 5,000 demonstrations for each background task, while keeping the 1,000 demonstrations for target task. We fine-tune for 30,000 steps. We evaluate each 10,000 steps and report the best checkpoint. Each run has 500 evaluation episodes. We normalize the joint actions to [−1, 1] with statistics from the full workspace, so that the robot can reach all regions.</p>
   <p class="docs">For the setup of the evaluation episodes, refer to <a href="evals.html#scenes">Evaluation at Scale</a>.</p>
 </div></section>
 
