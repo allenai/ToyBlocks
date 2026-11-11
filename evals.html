@@ -20,7 +20,7 @@
   <div class="label">Training and evaluation</div>
   <h1>Training a two-level policy, then finding out which level failed</h1>
   <p class="sub">The policies we train have two levels. A high-level model (Molmo 2) looks at the camera and picks the next skill and a target point; a low-level model (ManiFlow) moves the arm. Both are trained only on ToyBlocks data. When an episode fails, we want to know which of the two was responsible, so the eval system lets you swap either one for an oracle.</p>
-  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
+  <div class="toc"><a href="#training">Training</a><a href="#play">Play mode</a><a href="#modes">Evaluation Modes</a><a href="#scenes">Evaluation at Scale</a><a href="#tracking">Subtasks and predicates</a><a href="#compare">Oracle comparison</a><a href="#tamper">TAMPER</a><a href="#outputs">Outputs</a><a href="#run">Running it</a></div>
 </div></header>
 
 <section style="border-top:0;padding-top:8px"><div class="col">
@@ -179,6 +179,88 @@
   <p>The queue hands episodes out to GPU-parallel environments, so the same command works on a single workstation GPU or across a multi-GPU machine.</p>
   <figure><video data-src="media/ev_mosaic.mp4" poster="media/ev_mosaic.jpg" muted loop playsinline></video><figcaption>50 eval environments running at once, shown at 8× speed.</figcaption></figure>
   <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evaluations.html#design-goals-for-our-evaluation-system">design goals</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/launch_eval.html#the-episode-queue">the episode queue</a></p>
+</div></section>
+
+<section id="tracking"><div class="col">
+  <h2>Every subtask and every predicate, not just success</h2>
+  <p>A long-horizon task can fail at its second step or at its twelfth, and a single success number can't tell those apart. So every long-horizon eval tracks the task's goal as its PDDL predicates, each checked at every control step: whether it held at the start, when it first became true, whether something later undid it, and whether it holds at the end. Runs with a high level (Molmo 2 or the oracle) also score every subtask it issues, each pick, place, flip and rotate, so a run reports a success rate per skill next to the overall one.</p>
+  <p>Each episode then reports its partial progress (how much of the goal that was missing at the start got done), along with how many predicates held at the start, at the end and at any point. Everything lands in one record per episode, with every predicate's step-by-step trace, in <code>eval_episodes.json</code> and the W&amp;B episodes table.</p>
+  <figure class="diagram">
+    <div class="hscroll"><svg viewBox="0 0 880 370" role="img" aria-labelledby="gp-t gp-d">
+<title id="gp-t">Goal predicates and subtasks tracked through one eval episode</title>
+<desc id="gp-d">Seven goal predicates of the task stack 3 on H on 5, checked at every control step of an 801-step Molmo 2 + ManiFlow episode. Four held at the start. All seven held at some point, five at the end: the 3 block left its goal orientation at step 680, and it landed on H at step 785 but fell off at step 797. Below, the eight subtasks Molmo 2 issued, in order, four of them failed.</desc>
+<style>
+.gp-t { font: 600 14px var(--font); fill: var(--ink); }
+.gp-s { font: 400 12.5px var(--font); fill: var(--muted); }
+.gp-p { font: 500 12px var(--mono); fill: var(--ink); }
+.gp-h { font: 500 11.5px var(--font); fill: var(--muted); }
+.gp-n { font: 500 11.5px var(--font); fill: var(--red); }
+.gp-c { font: 500 11.5px var(--mono); }
+.gp-g { stroke: var(--line); stroke-dasharray: 3 4; }
+</style>
+<text class="gp-t" x="0" y="20">Goal predicates</text><text class="gp-s" x="124" y="20">each checked at every control step</text>
+<text class="gp-h" x="836" y="20" text-anchor="middle">at end</text>
+<line class="gp-g" x1="196.0" y1="30" x2="196.0" y2="246"/>
+<line class="gp-g" x1="343.8" y1="30" x2="343.8" y2="246"/>
+<line class="gp-g" x1="492.3" y1="30" x2="492.3" y2="246"/>
+<line class="gp-g" x1="640.8" y1="30" x2="640.8" y2="246"/>
+<line class="gp-g" x1="789.3" y1="30" x2="789.3" y2="246"/>
+<text class="gp-p" x="0" y="56">(on_table 5)</text>
+<rect x="196" y="44" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="377.9" y="44" width="412.1" height="16" rx="3" fill="var(--green)"><title>(on_table 5): true from step 246 to 801</title></rect>
+<text class="gp-c" x="836" y="57" text-anchor="middle" style="fill:var(--green);font-size:14px">✓</text>
+<text class="gp-p" x="0" y="86">(on H 5)</text>
+<rect x="196" y="74" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="583.6" y="74" width="206.4" height="16" rx="3" fill="var(--green)"><title>(on H 5): true from step 523 to 801</title></rect>
+<text class="gp-c" x="836" y="87" text-anchor="middle" style="fill:var(--green);font-size:14px">✓</text>
+<text class="gp-p" x="0" y="116">(on 3 H)</text>
+<rect x="196" y="104" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="778.1" y="104" width="8.9" height="16" rx="3" fill="var(--green)"><title>(on 3 H): true from step 785 to 796</title></rect>
+<line x1="787.0" y1="101" x2="787.0" y2="123" stroke="var(--red)" stroke-width="2.5"/>
+<text class="gp-n" x="770.1" y="116" text-anchor="end">on H at 785, fell off at 797</text>
+<text class="gp-c" x="836" y="117" text-anchor="middle" style="fill:var(--red);font-size:14px">✗</text>
+<text class="gp-p" x="0" y="146">(clear 3)</text>
+<rect x="196" y="134" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="196.0" y="134" width="594.0" height="16" rx="3" fill="var(--green)"><title>(clear 3): true from step 1 to 801</title></rect>
+<text class="gp-c" x="836" y="147" text-anchor="middle" style="fill:var(--green);font-size:14px">✓</text>
+<text class="gp-p" x="0" y="176">(ori_of 5 o2)</text>
+<rect x="196" y="164" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="196.0" y="164" width="412.1" height="16" rx="3" fill="var(--green)"><title>(ori_of 5 o2): true from step 1 to 555</title></rect>
+<rect x="617.0" y="164" width="173.0" height="16" rx="3" fill="var(--green)"><title>(ori_of 5 o2): true from step 568 to 801</title></rect>
+<line x1="608.1" y1="161" x2="608.1" y2="183" stroke="var(--red)" stroke-width="2.5"/>
+<text class="gp-c" x="836" y="177" text-anchor="middle" style="fill:var(--green);font-size:14px">✓</text>
+<text class="gp-p" x="0" y="206">(ori_of H o2|o10)</text>
+<rect x="196" y="194" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="196.0" y="194" width="411.3" height="16" rx="3" fill="var(--green)"><title>(ori_of H o2|o10): true from step 1 to 554</title></rect>
+<rect x="617.0" y="194" width="173.0" height="16" rx="3" fill="var(--green)"><title>(ori_of H o2|o10): true from step 568 to 801</title></rect>
+<line x1="607.3" y1="191" x2="607.3" y2="213" stroke="var(--red)" stroke-width="2.5"/>
+<text class="gp-c" x="836" y="207" text-anchor="middle" style="fill:var(--green);font-size:14px">✓</text>
+<text class="gp-p" x="0" y="236">(ori_of 3 o2)</text>
+<rect x="196" y="224" width="594" height="16" rx="3" fill="#eef0f3"/>
+<rect x="196.0" y="224" width="504.2" height="16" rx="3" fill="var(--green)"><title>(ori_of 3 o2): true from step 1 to 679</title></rect>
+<line x1="700.2" y1="221" x2="700.2" y2="243" stroke="var(--red)" stroke-width="2.5"/>
+<text class="gp-n" x="708.2" y="236" text-anchor="start">turned away at 680</text>
+<text class="gp-c" x="836" y="237" text-anchor="middle" style="fill:var(--red);font-size:14px">✗</text>
+<text class="gp-h" x="196.0" y="264" text-anchor="middle">0</text>
+<text class="gp-h" x="343.8" y="264" text-anchor="middle">200</text>
+<text class="gp-h" x="492.3" y="264" text-anchor="middle">400</text>
+<text class="gp-h" x="640.8" y="264" text-anchor="middle">600</text>
+<text class="gp-h" x="789.3" y="264" text-anchor="middle">800</text>
+<text class="gp-h" x="493.0" y="282" text-anchor="middle">control steps (25 per second)</text>
+<text class="gp-t" x="0" y="320">Subtasks</text><text class="gp-s" x="72" y="320">issued by Molmo 2, in order, each scored</text>
+<g><title>pick block_5: failed</title><rect x="0" y="336" width="78" height="26" rx="13" fill="#fdecea" stroke="var(--red)" stroke-width="1.2"/><text class="gp-c" x="13" y="353" style="fill:var(--ink)">pick 5</text><text class="gp-c" x="63" y="353" text-anchor="middle" style="fill:var(--red)">✗</text></g>
+<g><title>place block_5 on block_j: succeeded</title><rect x="86" y="336" width="120" height="26" rx="13" fill="#e8f6ee" stroke="var(--green)" stroke-width="1.2"/><text class="gp-c" x="99" y="353" style="fill:var(--ink)">place 5 on J</text><text class="gp-c" x="191" y="353" text-anchor="middle" style="fill:var(--green)">✓</text></g>
+<g><title>pick block_5: succeeded</title><rect x="214" y="336" width="78" height="26" rx="13" fill="#e8f6ee" stroke="var(--green)" stroke-width="1.2"/><text class="gp-c" x="227" y="353" style="fill:var(--ink)">pick 5</text><text class="gp-c" x="277" y="353" text-anchor="middle" style="fill:var(--green)">✓</text></g>
+<g><title>place block_5 on workspace_table: succeeded</title><rect x="300" y="336" width="148" height="26" rx="13" fill="#e8f6ee" stroke="var(--green)" stroke-width="1.2"/><text class="gp-c" x="313" y="353" style="fill:var(--ink)">place 5 on table</text><text class="gp-c" x="433" y="353" text-anchor="middle" style="fill:var(--green)">✓</text></g>
+<g><title>pick block_h: failed</title><rect x="456" y="336" width="78" height="26" rx="13" fill="#fdecea" stroke="var(--red)" stroke-width="1.2"/><text class="gp-c" x="469" y="353" style="fill:var(--ink)">pick H</text><text class="gp-c" x="519" y="353" text-anchor="middle" style="fill:var(--red)">✗</text></g>
+<g><title>place block_h on block_5: succeeded</title><rect x="542" y="336" width="120" height="26" rx="13" fill="#e8f6ee" stroke="var(--green)" stroke-width="1.2"/><text class="gp-c" x="555" y="353" style="fill:var(--ink)">place H on 5</text><text class="gp-c" x="647" y="353" text-anchor="middle" style="fill:var(--green)">✓</text></g>
+<g><title>pick block_3: failed</title><rect x="670" y="336" width="78" height="26" rx="13" fill="#fdecea" stroke="var(--red)" stroke-width="1.2"/><text class="gp-c" x="683" y="353" style="fill:var(--ink)">pick 3</text><text class="gp-c" x="733" y="353" text-anchor="middle" style="fill:var(--red)">✗</text></g>
+<g><title>place block_3 on block_h: failed</title><rect x="756" y="336" width="120" height="26" rx="13" fill="#fdecea" stroke="var(--red)" stroke-width="1.2"/><text class="gp-c" x="769" y="353" style="fill:var(--ink)">place 3 on H</text><text class="gp-c" x="861" y="353" text-anchor="middle" style="fill:var(--red)">✗</text></g>
+</svg></div>
+    <div class="legend"><span><i style="background:var(--green)"></i>predicate true</span><span><i style="background:#eef0f3"></i>false</span><span><i style="background:var(--red);width:3px;border-radius:0"></i>undone</span><span><i style="background:#e8f6ee;border:1.2px solid var(--green);border-radius:6px"></i>subtask succeeded</span><span><i style="background:#fdecea;border:1.2px solid var(--red);border-radius:6px"></i>subtask failed</span></div>
+    <figcaption>One Molmo 2 + ManiFlow eval episode that a success rate scores as a plain failure: "stack 3 on H on 5", with an orientation goal for each block. Molmo 2 said done after 801 steps, with 5 of the 7 goal predicates holding. The tracking shows what went wrong: the 3 block was turned out of its goal orientation at step 680, and it landed on H at step 785 but fell off 12 steps later. The subtask row shows the failed picks of H and 3 behind it.</figcaption>
+  </figure>
+  <p class="docs">Docs: <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/metrics.html#goal-progress-metrics">goal-progress metrics</a> · <a href="https://allenai.github.io/ToyBlocks/docs/user_guide/workflows/evals/metrics.html#eval-loop-metrics">subtask metrics</a></p>
 </div></section>
 
 <section id="compare"><div class="col side">
